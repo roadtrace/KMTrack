@@ -802,7 +802,11 @@ function renderLog(){
   list.querySelectorAll('.del').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      entries.splice(+e.target.dataset.idx, 1);
+      const idx = +e.target.dataset.idx;
+      const entry = entries[idx];
+      if(!entry) return;
+      if(!confirm(`Delete this entry?\n\n${entry.type}${entry.lane ? ' · Lane: '+entry.lane : ''}\n${entry.timestamp}`)) return;
+      entries.splice(idx, 1);
       saveEntries();
       renderLog();
     });
