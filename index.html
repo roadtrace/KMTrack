@@ -426,12 +426,29 @@ window.addEventListener('DOMContentLoaded', () => {
     el.textContent = entries.length
       ? `${entries.length} entries saved on this device`
       : 'on-device storage ready — entries will be saved automatically';
+    const isIOS = /iP(hone|od|ad)/.test(navigator.userAgent);
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+    if(isIOS && !isStandalone){
+      el.textContent += ' — for more reliable storage across days, add this to your Home Screen instead of using it as a Safari tab.';
+    }
   } else {
     el.textContent = '⚠ On-device storage is blocked in this tab (likely Private Browsing) — entries will NOT be saved. Use a normal Safari tab, or export after every session.';
   }
 });
 
 // ---------- Network calibration dataset (NLEX chainage-to-coordinates) ----------
+// Guards against a structurally-valid-but-incomplete dataset (e.g. a point
+// missing lat/lon/k) silently producing NaN km values with no visible error.
+function sanitizeCalibData(raw){
+  if(!Array.isArray(raw)) return [];
+  const clean = raw.filter(p => p && typeof p.e === 'string' && typeof p.b === 'string'
+    && Number.isFinite(p.k) && Number.isFinite(p.lat) && Number.isFinite(p.lon));
+  if(clean.length !== raw.length){
+    console.warn(`Calibration dataset: dropped ${raw.length - clean.length} malformed point(s).`);
+  }
+  return clean;
+}
+
 function buildExpresswayBoundsMap(){
   expresswayBounds = {};
   for(const p of calibData){
@@ -449,7 +466,7 @@ async function loadCalibrationDataset(forceNetwork){
     if(!forceNetwork){
       const cached = localStorage.getItem(STORAGE_KEY_DATASET);
       if(cached){
-        calibData = JSON.parse(cached);
+        calibData = sanitizeCalibData(JSON.parse(cached));
         buildExpresswayBoundsMap();
         buildSpatialIndex();
         statusEl.textContent = `Loaded ${calibData.length.toLocaleString()} points from on-device cache (works offline).`;
@@ -460,7 +477,7 @@ async function loadCalibrationDataset(forceNetwork){
     const res = await fetch('calibration.json', { cache: 'no-store' });
     if(!res.ok) throw new Error('HTTP ' + res.status);
     const text = await res.text();
-    calibData = JSON.parse(text);
+    calibData = sanitizeCalibData(JSON.parse(text));
     buildExpresswayBoundsMap();
     buildSpatialIndex();
     try{ localStorage.setItem(STORAGE_KEY_DATASET, text); }catch(e){ /* dataset too big for storage quota; still usable this session */ }
@@ -473,6 +490,13 @@ async function loadCalibrationDataset(forceNetwork){
 }
 document.getElementById('calib-reload').addEventListener('click', () => loadCalibrationDataset(true));
 loadCalibrationDataset(false);
+
+// If the app opened with no signal and the dataset never loaded, retry
+// automatically the moment the device comes back online, instead of
+// requiring the user to notice and tap "Reload dataset" themselves.
+window.addEventListener('online', () => {
+  if(!calibData.length) loadCalibrationDataset(true);
+});
 
 // ---------- Clock ----------
 function tickClock(){
@@ -499,6 +523,16 @@ function haversineKm(lat1, lon1, lat2, lon2){
 // Threshold beyond which we flag the reading as "off the mapped network"
 // (e.g. GPS drift, a service road, or a stretch not covered by the dataset).
 const OFF_NETWORK_KM = 0.15;
+
+// Widens that threshold when the current GPS fix has poor accuracy (common
+// under overpasses/flyovers or between tall structures), so a genuinely
+// on-network position isn't misflagged just because of a large accuracy
+// circle. Capped so a very poor fix can't mask a real off-network event.
+function offNetworkThresholdKm(accuracyMeters){
+  if(!accuracyMeters || !Number.isFinite(accuracyMeters)) return OFF_NETWORK_KM;
+  const bufferKm = Math.min(accuracyMeters, 200) / 1000;
+  return Math.min(OFF_NETWORK_KM + bufferKm, 0.35);
+}
 
 const GRID_SIZE = 0.0025; // ~250 m latitude cells
 let spatialGrid = new Map();
@@ -586,7 +620,7 @@ function updateReadout(){
     return;
   }
 
-  const isOffMappedNetwork = result.distance > OFF_NETWORK_KM;
+  const isOffMappedNetwork = result.distance > offNetworkThresholdKm(currentPos.acc);
   kmEl.textContent = isOffMappedNetwork ? '--.---' : formatKmStation(result.km);
   const displayBound = userBound || '?';
   if(isOffMappedNetwork){
@@ -622,6 +656,13 @@ function renderBoundToggle(expressway){
     return;
   }
   currentExpressway = expressway;
+  // The direction picked on the previous corridor may not be a valid
+  // option here (e.g. it was "NB" on NLEX and the vehicle just entered a
+  // ramp with only EB/WB) — don't let it silently attach to this corridor.
+  if(userBound && !options.includes(userBound)){
+    userBound = null;
+    saveBound();
+  }
   wrap.innerHTML = '';
   options.forEach(opt => {
     const btn = document.createElement('button');
@@ -676,7 +717,7 @@ function logDefect(type, lane){
   // Use the exact same off-network rule as the live KM display.
   // If the vehicle is off the mapped network, do NOT save the nearest
   // calibration point's KM, expressway, or bound into the defect entry.
-  const isOffMappedNetwork = !result || result.distance > OFF_NETWORK_KM;
+  const isOffMappedNetwork = !result || result.distance > offNetworkThresholdKm(currentPos.acc);
 
   entries.push({
     type,
@@ -791,23 +832,12 @@ document.querySelectorAll('.lane-log-trigger').forEach(cb => {
   });
 });
 
-let pendingQuickDefectType = null;
 document.querySelectorAll('.others-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    pendingQuickDefectType = btn.dataset.defect;
-    document.getElementById('quick-lane-modal-title').textContent = `Lane — ${pendingQuickDefectType}`;
-    const input = document.getElementById('quick-lane-modal-input');
-    input.value = '';
-    const modal = document.getElementById('quick-lane-modal');
-    modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
-    setTimeout(() => { input.focus(); }, 50);
+    playConfirmSound();
+    logDefect(btn.dataset.defect, 'Others');
   });
 });
-function closeQuickLaneModal(){
-  const modal = document.getElementById('quick-lane-modal');
-  modal.classList.remove('open'); modal.setAttribute('aria-hidden','true');
-  pendingQuickDefectType = null;
-}
 
 // ---------- Combined Defect + Lane edit modal (opens when tapping any log entry) ----------
 const DEFECT_OPTIONS = [
@@ -908,18 +938,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('edit-modal').addEventListener('click', e => {
     if(e.target.id === 'edit-modal') closeEditModal();
   });
-
-  document.getElementById('quick-lane-cancel').addEventListener('click', closeQuickLaneModal);
-  document.getElementById('quick-lane-save').addEventListener('click', () => {
-    if(!pendingQuickDefectType) return;
-    const val = document.getElementById('quick-lane-modal-input').value.trim();
-    playConfirmSound();
-    logDefect(pendingQuickDefectType, val);
-    closeQuickLaneModal();
-  });
-  document.getElementById('quick-lane-modal').addEventListener('click', e => {
-    if(e.target.id === 'quick-lane-modal') closeQuickLaneModal();
-  });
 });
 
 // ---------- CSV export ----------
@@ -1005,12 +1023,5 @@ if('serviceWorker' in navigator){
   </div>
 </div>
 
-<div id="quick-lane-modal" class="modal-backdrop" aria-hidden="true">
-  <div class="lane-modal" role="dialog" aria-modal="true" aria-labelledby="quick-lane-modal-title">
-    <h3 id="quick-lane-modal-title">Lane</h3>
-    <input id="quick-lane-modal-input" type="text" inputmode="text" autocomplete="off" placeholder="e.g. Shoulder, Acce, Dece">
-    <div class="modal-actions"><button type="button" class="lane-cancel" id="quick-lane-cancel">Cancel</button><button type="button" class="lane-save" id="quick-lane-save">Save</button></div>
-  </div>
-</div>
 </body>
 </html>
