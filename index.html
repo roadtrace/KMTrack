@@ -53,14 +53,20 @@
     border:1px solid #3a4046;
     border-radius:10px;
     padding:14px 16px;
+    display:flex;
+    align-items:stretch;
+    gap:14px;
+  }
+  .readout-main{
+    flex:1 1 auto; min-width:0;
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:10px 16px;
   }
-  .readout .field{display:flex; flex-direction:column;}
-  .readout .field .label{font-size:10px; text-transform:uppercase; letter-spacing:1px; color:#9aa0a6;}
-  .readout .field .value{font-family:var(--mono); font-size:16px; margin-top:2px; word-break:break-all;}
-  .readout .status{grid-column:1/-1; font-size:11px; font-family:var(--mono); margin-top:2px;}
+  .readout-main .field{display:flex; flex-direction:column;}
+  .readout-main .field .label{font-size:10px; text-transform:uppercase; letter-spacing:1px; color:#9aa0a6;}
+  .readout-main .field .value{font-family:var(--mono); font-size:16px; margin-top:2px; word-break:break-all;}
+  .readout-main .status{grid-column:1/-1; font-size:11px; font-family:var(--mono); margin-top:2px;}
   .status.ok{color:var(--safety-green);}
   .status.warn{color:var(--line-yellow);}
   .status.err{color:var(--safety-red);}
@@ -85,13 +91,22 @@
   }
   .kmpost .segment-tag.faroff{background:rgba(193,57,43,0.5);}
 
-  /* Bound (direction) toggle */
-  .bound-block{margin-top:12px; background:var(--panel); border:1px solid #3a4046; border-radius:10px; padding:10px 14px;}
-  .bound-label{font-size:11px; color:#9aa0a6; margin-bottom:8px; line-height:1.4;}
-  .bound-toggle{display:flex; gap:8px;}
-  .bound-hint{font-size:12px; color:#565c62; font-style:italic;}
+  /* Bound (direction) toggle — now a compact side panel inside .readout,
+     next to the lat/lon/accuracy fields, rather than its own full-width block. */
+  .bound-panel{
+    flex:0 0 132px;
+    background:var(--asphalt-2);
+    border:1px solid #3a4046;
+    border-radius:10px;
+    padding:10px 12px;
+    display:flex;
+    flex-direction:column;
+  }
+  .bound-panel-label{font-size:12px; color:#c7ccd1; font-weight:600; margin-bottom:8px;}
+  .bound-toggle{display:flex; flex-direction:column; gap:8px;}
+  .bound-hint{font-size:11px; color:#565c62; font-style:italic; line-height:1.4;}
   button.bound-btn{
-    flex:1; padding:12px 10px; border-radius:8px; border:2px solid #3a4046;
+    width:100%; padding:12px 8px; border-radius:8px; border:2px solid #3a4046;
     background:var(--asphalt-2); color:var(--line-white); font-weight:700; font-size:14px;
     cursor:pointer; -webkit-tap-highlight-color:transparent;
   }
@@ -148,12 +163,10 @@
   }
 
   /* Checkbox-backed labels: a real native checkbox sits invisibly over the
-     whole button so tapping it triggers iOS's built-in switch-toggle haptic.
-     Requires the `switch` attribute on the <input> (WebKit's native switch
-     control, Safari 17.4+) — a plain checkbox does NOT get the haptic tick.
-     Safari has no navigator.vibrate support, so this is the only way to get
-     a tactile tick from a web page on iOS 18+. Harmless on other platforms —
-     unsupported browsers just render it as a normal (invisible) checkbox. */
+     whole button so tapping it triggers iOS's built-in switch-toggle haptic
+     (Safari has no navigator.vibrate support, but this native control does
+     produce a tactile tick on iOS 18+). Harmless on other platforms — it
+     just behaves like a normal button there. */
   .haptic-label{position:relative;}
   .haptic-label input.haptic-trigger{
     position:absolute; inset:0; opacity:0; margin:0; padding:0; cursor:pointer;
@@ -265,23 +278,31 @@ button {
 <main>
 
   <div class="readout">
-    <div class="field">
-      <div class="label">Latitude</div>
-      <div class="value" id="lat">--</div>
+    <div class="readout-main">
+      <div class="field">
+        <div class="label">Latitude</div>
+        <div class="value" id="lat">--</div>
+      </div>
+      <div class="field">
+        <div class="label">Longitude</div>
+        <div class="value" id="lon">--</div>
+      </div>
+      <div class="field">
+        <div class="label">Accuracy</div>
+        <div class="value" id="acc">--</div>
+      </div>
+      <div class="field">
+        <div class="label">Points logged</div>
+        <div class="value" id="count-mini">0</div>
+      </div>
+      <div class="status warn" id="gps-status">Requesting GPS permission...</div>
     </div>
-    <div class="field">
-      <div class="label">Longitude</div>
-      <div class="value" id="lon">--</div>
+    <div class="bound-panel">
+      <div class="bound-panel-label">Set Bound Manually</div>
+      <div class="bound-toggle" id="bound-toggle">
+        <span class="bound-hint" id="bound-hint">detecting segment...</span>
+      </div>
     </div>
-    <div class="field">
-      <div class="label">Accuracy</div>
-      <div class="value" id="acc">--</div>
-    </div>
-    <div class="field">
-      <div class="label">Points logged</div>
-      <div class="value" id="count-mini">0</div>
-    </div>
-    <div class="status warn" id="gps-status">Requesting GPS permission...</div>
   </div>
 
   <div class="kmpost">
@@ -289,13 +310,6 @@ button {
     <div class="kmvalue" id="km-value">--.---</div>
     <div class="kmunit">kilometers (interpolated)</div>
     <div class="segment-tag" id="segment-tag">--</div>
-  </div>
-
-  <div class="bound-block">
-    <div class="bound-label">Direction you're traveling (set manually — can't be auto-detected from this data)</div>
-    <div class="bound-toggle" id="bound-toggle">
-      <span class="bound-hint" id="bound-hint">detecting segment...</span>
-    </div>
   </div>
 
   <section class="block">
@@ -312,44 +326,44 @@ button {
     <div class="defect-category">
       <div class="category-label">Potholes</div>
       <div class="lane-btn-row">
-        <label class="lane-btn pothole haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Potholes" data-lane="1">1</label>
-        <label class="lane-btn pothole haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Potholes" data-lane="2">2</label>
-        <label class="lane-btn pothole haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Potholes" data-lane="3">3</label>
-        <label class="lane-btn pothole haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Potholes" data-lane="4">4</label>
-        <label class="lane-btn pothole others-btn haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Potholes" data-lane="Others">Others<span class="others-sub">(i.e., Shoulder/acce/dece/etc.)</span></label>
+        <label class="lane-btn pothole haptic-label"><input type="checkbox" class="lane-log-trigger" data-defect="Potholes" data-lane="1">1</label>
+        <label class="lane-btn pothole haptic-label"><input type="checkbox" class="lane-log-trigger" data-defect="Potholes" data-lane="2">2</label>
+        <label class="lane-btn pothole haptic-label"><input type="checkbox" class="lane-log-trigger" data-defect="Potholes" data-lane="3">3</label>
+        <label class="lane-btn pothole haptic-label"><input type="checkbox" class="lane-log-trigger" data-defect="Potholes" data-lane="4">4</label>
+        <button type="button" class="lane-btn pothole others-btn" data-defect="Potholes">Others<span class="others-sub">(i.e., Shoulder/acce/dece/etc.)</span></button>
       </div>
     </div>
 
     <div class="defect-category">
       <div class="category-label">Shoving</div>
       <div class="lane-btn-row">
-        <label class="lane-btn shoving haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Shoving" data-lane="1">1</label>
-        <label class="lane-btn shoving haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Shoving" data-lane="2">2</label>
-        <label class="lane-btn shoving haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Shoving" data-lane="3">3</label>
-        <label class="lane-btn shoving haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Shoving" data-lane="4">4</label>
-        <label class="lane-btn shoving others-btn haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Shoving" data-lane="Others">Others<span class="others-sub">(i.e., Shoulder/acce/dece/etc.)</span></label>
+        <label class="lane-btn shoving haptic-label"><input type="checkbox" class="lane-log-trigger" data-defect="Shoving" data-lane="1">1</label>
+        <label class="lane-btn shoving haptic-label"><input type="checkbox" class="lane-log-trigger" data-defect="Shoving" data-lane="2">2</label>
+        <label class="lane-btn shoving haptic-label"><input type="checkbox" class="lane-log-trigger" data-defect="Shoving" data-lane="3">3</label>
+        <label class="lane-btn shoving haptic-label"><input type="checkbox" class="lane-log-trigger" data-defect="Shoving" data-lane="4">4</label>
+        <button type="button" class="lane-btn shoving others-btn" data-defect="Shoving">Others<span class="others-sub">(i.e., Shoulder/acce/dece/etc.)</span></button>
       </div>
     </div>
 
     <div class="defect-category">
       <div class="category-label">Cracks</div>
       <div class="lane-btn-row">
-        <label class="lane-btn cracks haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Cracks (width>25 mm)" data-lane="1">1</label>
-        <label class="lane-btn cracks haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Cracks (width>25 mm)" data-lane="2">2</label>
-        <label class="lane-btn cracks haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Cracks (width>25 mm)" data-lane="3">3</label>
-        <label class="lane-btn cracks haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Cracks (width>25 mm)" data-lane="4">4</label>
-        <label class="lane-btn cracks others-btn haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Cracks (width>25 mm)" data-lane="Others">Others<span class="others-sub">(i.e., Shoulder/acce/dece/etc.)</span></label>
+        <label class="lane-btn cracks haptic-label"><input type="checkbox" class="lane-log-trigger" data-defect="Cracks (width>25 mm)" data-lane="1">1</label>
+        <label class="lane-btn cracks haptic-label"><input type="checkbox" class="lane-log-trigger" data-defect="Cracks (width>25 mm)" data-lane="2">2</label>
+        <label class="lane-btn cracks haptic-label"><input type="checkbox" class="lane-log-trigger" data-defect="Cracks (width>25 mm)" data-lane="3">3</label>
+        <label class="lane-btn cracks haptic-label"><input type="checkbox" class="lane-log-trigger" data-defect="Cracks (width>25 mm)" data-lane="4">4</label>
+        <button type="button" class="lane-btn cracks others-btn" data-defect="Cracks (width>25 mm)">Others<span class="others-sub">(i.e., Shoulder/acce/dece/etc.)</span></button>
       </div>
     </div>
 
     <div class="defect-category">
       <div class="category-label">Others <span class="category-sub">(i.e., Damaged markings, Ravelling, Debris)</span></div>
       <div class="lane-btn-row">
-        <label class="lane-btn other haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Others" data-lane="1">1</label>
-        <label class="lane-btn other haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Others" data-lane="2">2</label>
-        <label class="lane-btn other haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Others" data-lane="3">3</label>
-        <label class="lane-btn other haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Others" data-lane="4">4</label>
-        <label class="lane-btn other others-btn haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Others" data-lane="Others">Others<span class="others-sub">(i.e., Shoulder/acce/dece/etc.)</span></label>
+        <label class="lane-btn other haptic-label"><input type="checkbox" class="lane-log-trigger" data-defect="Others" data-lane="1">1</label>
+        <label class="lane-btn other haptic-label"><input type="checkbox" class="lane-log-trigger" data-defect="Others" data-lane="2">2</label>
+        <label class="lane-btn other haptic-label"><input type="checkbox" class="lane-log-trigger" data-defect="Others" data-lane="3">3</label>
+        <label class="lane-btn other haptic-label"><input type="checkbox" class="lane-log-trigger" data-defect="Others" data-lane="4">4</label>
+        <button type="button" class="lane-btn other others-btn" data-defect="Others">Others<span class="others-sub">(i.e., Shoulder/acce/dece/etc.)</span></button>
       </div>
     </div>
 
@@ -428,28 +442,15 @@ window.addEventListener('DOMContentLoaded', () => {
     el.textContent = entries.length
       ? `${entries.length} entries saved on this device`
       : 'on-device storage ready — entries will be saved automatically';
-    const isIOS = /iP(hone|od|ad)/.test(navigator.userAgent);
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
-    if(isIOS && !isStandalone){
-      el.textContent += ' — for more reliable storage across days, add this to your Home Screen instead of using it as a Safari tab.';
-    }
   } else {
     el.textContent = '⚠ On-device storage is blocked in this tab (likely Private Browsing) — entries will NOT be saved. Use a normal Safari tab, or export after every session.';
   }
 });
 
 // ---------- Network calibration dataset (NLEX chainage-to-coordinates) ----------
-// Guards against a structurally-valid-but-incomplete dataset (e.g. a point
-// missing lat/lon/k) silently producing NaN km values with no visible error.
-function sanitizeCalibData(raw){
-  if(!Array.isArray(raw)) return [];
-  const clean = raw.filter(p => p && typeof p.e === 'string' && typeof p.b === 'string'
-    && Number.isFinite(p.k) && Number.isFinite(p.lat) && Number.isFinite(p.lon));
-  if(clean.length !== raw.length){
-    console.warn(`Calibration dataset: dropped ${raw.length - clean.length} malformed point(s).`);
-  }
-  return clean;
-}
+const GRID_SIZE = 0.0025; // ~250 m latitude cells
+let spatialGrid = new Map();
+let corridorIndex = new Map();
 
 function buildExpresswayBoundsMap(){
   expresswayBounds = {};
@@ -468,7 +469,7 @@ async function loadCalibrationDataset(forceNetwork){
     if(!forceNetwork){
       const cached = localStorage.getItem(STORAGE_KEY_DATASET);
       if(cached){
-        calibData = sanitizeCalibData(JSON.parse(cached));
+        calibData = JSON.parse(cached);
         buildExpresswayBoundsMap();
         buildSpatialIndex();
         statusEl.textContent = `Loaded ${calibData.length.toLocaleString()} points from on-device cache (works offline).`;
@@ -479,7 +480,7 @@ async function loadCalibrationDataset(forceNetwork){
     const res = await fetch('calibration.json', { cache: 'no-store' });
     if(!res.ok) throw new Error('HTTP ' + res.status);
     const text = await res.text();
-    calibData = sanitizeCalibData(JSON.parse(text));
+    calibData = JSON.parse(text);
     buildExpresswayBoundsMap();
     buildSpatialIndex();
     try{ localStorage.setItem(STORAGE_KEY_DATASET, text); }catch(e){ /* dataset too big for storage quota; still usable this session */ }
@@ -492,13 +493,6 @@ async function loadCalibrationDataset(forceNetwork){
 }
 document.getElementById('calib-reload').addEventListener('click', () => loadCalibrationDataset(true));
 loadCalibrationDataset(false);
-
-// If the app opened with no signal and the dataset never loaded, retry
-// automatically the moment the device comes back online, instead of
-// requiring the user to notice and tap "Reload dataset" themselves.
-window.addEventListener('online', () => {
-  if(!calibData.length) loadCalibrationDataset(true);
-});
 
 // ---------- Clock ----------
 function tickClock(){
@@ -525,20 +519,6 @@ function haversineKm(lat1, lon1, lat2, lon2){
 // Threshold beyond which we flag the reading as "off the mapped network"
 // (e.g. GPS drift, a service road, or a stretch not covered by the dataset).
 const OFF_NETWORK_KM = 0.15;
-
-// Widens that threshold when the current GPS fix has poor accuracy (common
-// under overpasses/flyovers or between tall structures), so a genuinely
-// on-network position isn't misflagged just because of a large accuracy
-// circle. Capped so a very poor fix can't mask a real off-network event.
-function offNetworkThresholdKm(accuracyMeters){
-  if(!accuracyMeters || !Number.isFinite(accuracyMeters)) return OFF_NETWORK_KM;
-  const bufferKm = Math.min(accuracyMeters, 200) / 1000;
-  return Math.min(OFF_NETWORK_KM + bufferKm, 0.35);
-}
-
-const GRID_SIZE = 0.0025; // ~250 m latitude cells
-let spatialGrid = new Map();
-let corridorIndex = new Map();
 
 function gridKey(lat, lon){ return `${Math.floor(lat/GRID_SIZE)},${Math.floor(lon/GRID_SIZE)}`; }
 function corridorKey(e,b){ return `${e}|||${b}`; }
@@ -622,7 +602,7 @@ function updateReadout(){
     return;
   }
 
-  const isOffMappedNetwork = result.distance > offNetworkThresholdKm(currentPos.acc);
+  const isOffMappedNetwork = result.distance > OFF_NETWORK_KM;
   kmEl.textContent = isOffMappedNetwork ? '--.---' : formatKmStation(result.km);
   const displayBound = userBound || '?';
   if(isOffMappedNetwork){
@@ -658,13 +638,6 @@ function renderBoundToggle(expressway){
     return;
   }
   currentExpressway = expressway;
-  // The direction picked on the previous corridor may not be a valid
-  // option here (e.g. it was "NB" on NLEX and the vehicle just entered a
-  // ramp with only EB/WB) — don't let it silently attach to this corridor.
-  if(userBound && !options.includes(userBound)){
-    userBound = null;
-    saveBound();
-  }
   wrap.innerHTML = '';
   options.forEach(opt => {
     const btn = document.createElement('button');
@@ -719,7 +692,7 @@ function logDefect(type, lane){
   // Use the exact same off-network rule as the live KM display.
   // If the vehicle is off the mapped network, do NOT save the nearest
   // calibration point's KM, expressway, or bound into the defect entry.
-  const isOffMappedNetwork = !result || result.distance > offNetworkThresholdKm(currentPos.acc);
+  const isOffMappedNetwork = !result || result.distance > OFF_NETWORK_KM;
 
   entries.push({
     type,
@@ -802,11 +775,7 @@ function renderLog(){
   list.querySelectorAll('.del').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const idx = +e.target.dataset.idx;
-      const entry = entries[idx];
-      if(!entry) return;
-      if(!confirm(`Delete this entry?\n\n${entry.type}${entry.lane ? ' · Lane: '+entry.lane : ''}\n${entry.timestamp}`)) return;
-      entries.splice(idx, 1);
+      entries.splice(+e.target.dataset.idx, 1);
       saveEntries();
       renderLog();
     });
@@ -830,13 +799,31 @@ document.getElementById('clear-btn').addEventListener('click', () => {
 });
 
 
-// ---------- Quick lane-log buttons (the 16 number buttons + 4 "Others", all haptic-backed checkboxes) ----------
+// ---------- Quick lane-log buttons (the 16 number buttons + 4 "Others") ----------
 document.querySelectorAll('.lane-log-trigger').forEach(cb => {
   cb.addEventListener('change', () => {
     playConfirmSound();
     logDefect(cb.dataset.defect, cb.dataset.lane);
   });
 });
+
+let pendingQuickDefectType = null;
+document.querySelectorAll('.others-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    pendingQuickDefectType = btn.dataset.defect;
+    document.getElementById('quick-lane-modal-title').textContent = `Lane — ${pendingQuickDefectType}`;
+    const input = document.getElementById('quick-lane-modal-input');
+    input.value = '';
+    const modal = document.getElementById('quick-lane-modal');
+    modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
+    setTimeout(() => { input.focus(); }, 50);
+  });
+});
+function closeQuickLaneModal(){
+  const modal = document.getElementById('quick-lane-modal');
+  modal.classList.remove('open'); modal.setAttribute('aria-hidden','true');
+  pendingQuickDefectType = null;
+}
 
 // ---------- Combined Defect + Lane edit modal (opens when tapping any log entry) ----------
 const DEFECT_OPTIONS = [
@@ -937,6 +924,18 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('edit-modal').addEventListener('click', e => {
     if(e.target.id === 'edit-modal') closeEditModal();
   });
+
+  document.getElementById('quick-lane-cancel').addEventListener('click', closeQuickLaneModal);
+  document.getElementById('quick-lane-save').addEventListener('click', () => {
+    if(!pendingQuickDefectType) return;
+    const val = document.getElementById('quick-lane-modal-input').value.trim();
+    playConfirmSound();
+    logDefect(pendingQuickDefectType, val);
+    closeQuickLaneModal();
+  });
+  document.getElementById('quick-lane-modal').addEventListener('click', e => {
+    if(e.target.id === 'quick-lane-modal') closeQuickLaneModal();
+  });
 });
 
 // ---------- CSV export ----------
@@ -1003,7 +1002,29 @@ document.addEventListener('pointercancel', (e) => {
 // ---------- Service worker: makes the app shell load with zero network ----------
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(err => console.error('Service worker registration failed', err));
+    navigator.serviceWorker.register('./sw.js').then(reg => {
+      // Don't wait for the browser's own update-check schedule (can be as
+      // infrequent as once/day, especially for an installed iOS PWA) —
+      // check the server for a newer sw.js every time the app opens.
+      reg.update().catch(() => {});
+    }).catch(err => console.error('Service worker registration failed', err));
+
+    // skipWaiting()+clients.claim() in sw.js mean a new version takes over
+    // automatically without needing the tab closed — but the page that's
+    // already open doesn't know that happened. This gives a clear signal
+    // instead of leaving you guessing whether a reload actually updated it.
+    let hadController = !!navigator.serviceWorker.controller;
+    let shown = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if(!hadController){ hadController = true; return; } // first-ever install, not an update
+      if(shown) return;
+      shown = true;
+      const banner = document.createElement('div');
+      banner.textContent = '🔄 App updated — tap to reload';
+      banner.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:999;background:#148bd8;color:#fff;text-align:center;padding:12px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;';
+      banner.addEventListener('click', () => location.reload());
+      document.body.appendChild(banner);
+    });
   });
 }
 
@@ -1022,5 +1043,12 @@ if('serviceWorker' in navigator){
   </div>
 </div>
 
+<div id="quick-lane-modal" class="modal-backdrop" aria-hidden="true">
+  <div class="lane-modal" role="dialog" aria-modal="true" aria-labelledby="quick-lane-modal-title">
+    <h3 id="quick-lane-modal-title">Lane</h3>
+    <input id="quick-lane-modal-input" type="text" inputmode="text" autocomplete="off" placeholder="e.g. Shoulder, Acce, Dece">
+    <div class="modal-actions"><button type="button" class="lane-cancel" id="quick-lane-cancel">Cancel</button><button type="button" class="lane-save" id="quick-lane-save">Save</button></div>
+  </div>
+</div>
 </body>
 </html>
