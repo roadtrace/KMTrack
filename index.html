@@ -204,29 +204,33 @@
   .log-entry .info .meta{font-family:var(--mono); font-size:11px; color:#9aa0a6; margin-top:3px; line-height:1.5;}
   .log-entry .del{background:none; border:none; color:#c1392b; font-size:18px; cursor:pointer; padding:4px 8px;}
 
-  /* Multi-select for bulk deletion */
-  .log-header-row{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;}
-  .log-header-row h2{margin:0;}
+  .count-bar{font-size:12px; color:#9aa0a6; margin-bottom:10px; display:flex; justify-content:space-between;}
+
+  /* Inspection log header + multi-select delete */
+  .log-header{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;}
+  .log-header h2{margin:0;}
   .select-toggle-btn{
-    background:transparent; border:1px solid #3a4046; color:#c7ccd1; font-size:11px; font-weight:700;
-    text-transform:none; letter-spacing:normal;
-    padding:5px 11px; border-radius:14px; cursor:pointer; -webkit-tap-highlight-color:transparent;
+    flex:0 0 auto; background:transparent; border:1px solid #565c62; color:#c7ccd1;
+    font-size:11px; font-weight:700; letter-spacing:0.3px; padding:7px 12px; border-radius:20px;
+    cursor:pointer; -webkit-tap-highlight-color:transparent;
   }
   .select-toggle-btn.active{background:var(--line-yellow); color:#191c1f; border-color:var(--line-yellow);}
-  .bulk-actions{display:flex; gap:8px; margin-bottom:10px;}
-  .bulk-actions button{
-    flex:1; padding:9px; border-radius:8px; border:1px solid #3a4046; background:var(--panel); color:var(--line-white);
-    font-weight:700; font-size:12px; cursor:pointer; -webkit-tap-highlight-color:transparent;
+  .log-entry.select-mode{cursor:pointer;}
+  .log-entry.selected{outline:2px solid var(--line-yellow); outline-offset:-2px; background:#33383d;}
+  .entry-checkbox{
+    flex:0 0 auto; width:22px; height:22px; border-radius:6px; border:2px solid #6b7176;
+    display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;
+    color:#191c1f; background:transparent;
   }
-  #delete-selected-btn{background:var(--safety-red); border-color:var(--safety-red); color:#fff;}
-  #delete-selected-btn:disabled{background:#3a4046; border-color:#3a4046; color:#6b7176; cursor:not-allowed;}
-  .entry-select-check{display:none; align-items:center; margin-right:2px;}
-  .entry-select-check input{width:20px; height:20px; accent-color:var(--line-yellow); cursor:pointer;}
-  #log-list.select-mode .entry-select-check{display:flex;}
-  #log-list.select-mode .del{display:none;}
-  .log-entry.selected{outline:2px solid var(--line-yellow); background:#333a41;}
-
-  .count-bar{font-size:12px; color:#9aa0a6; margin-bottom:10px; display:flex; justify-content:space-between;}
+  .entry-checkbox.checked{background:var(--line-yellow); border-color:var(--line-yellow);}
+  .bulk-actions-bar{display:flex; gap:8px; margin-bottom:10px;}
+  .bulk-actions-bar button{
+    flex:1; padding:12px; border-radius:8px; border:none; font-weight:700; font-size:13px;
+    cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+  .bulk-select-all-btn{background:#565c62; color:var(--line-white);}
+  .bulk-delete-btn{background:var(--safety-red); color:var(--line-white);}
+  .bulk-delete-btn:disabled{background:#3a4046; color:#6b7176; cursor:not-allowed;}
 
   .export-btn{
     width:100%; padding:16px; margin-top:18px; border-radius:10px; border:none;
@@ -564,17 +568,17 @@ button {
   <div class="lane-divider"></div>
 
   <section class="block">
-    <div class="log-header-row">
+    <div class="log-header">
       <h2>Inspection log</h2>
-      <button type="button" id="select-toggle-btn" class="select-toggle-btn">Select</button>
+      <button type="button" class="select-toggle-btn" id="select-toggle-btn">Select</button>
     </div>
     <div class="count-bar">
       <span id="count-label">0 entries</span>
       <span id="last-time">--</span>
     </div>
-    <div class="bulk-actions" id="bulk-actions" style="display:none;">
-      <button type="button" id="select-all-btn">Select all</button>
-      <button type="button" id="delete-selected-btn" disabled>Delete (0)</button>
+    <div class="bulk-actions-bar" id="bulk-actions-bar" style="display:none;">
+      <button type="button" class="bulk-select-all-btn" id="bulk-select-all-btn">Select all</button>
+      <button type="button" class="bulk-delete-btn" id="bulk-delete-btn" disabled>Delete selected (0)</button>
     </div>
     <div id="log-list"><div class="log-empty">No defects logged yet</div></div>
   </section>
@@ -838,7 +842,7 @@ async function loadCalibrationDataset(forceNetwork){
       : `Could not load network dataset (${err.message}). Km station will show as unavailable.`;
   }
 }
-document.getElementById('calib-reload').addEventListener('click', () => { vibrateTap(); loadCalibrationDataset(true); });
+document.getElementById('calib-reload').addEventListener('click', () => loadCalibrationDataset(true));
 loadCalibrationDataset(false);
 
 // If the app opened with no signal and the dataset never loaded, retry
@@ -986,7 +990,6 @@ function renderBoundToggle(expressway){
     btn.textContent = opt;
     btn.dataset.bound = opt;
     btn.addEventListener('click', () => {
-      vibrateTap();
       userBound = opt;
       saveBound();
       wrap.querySelectorAll('.bound-btn').forEach(b => b.classList.toggle('active', b.dataset.bound === userBound));
@@ -1085,15 +1088,33 @@ function playConfirmSound(){
   }catch(e){ /* Web Audio unavailable — fail silently, logging still works */ }
 }
 
-// ---------- Haptic feedback ----------
-// navigator.vibrate() only exists on Android (Chrome/Firefox) — iOS Safari
-// has no vibration API at all, which is why the 16 lane-log tiles use the
-// native <input switch> trick above for their haptic tick instead. Calling
-// this on iOS/desktop is simply a silent no-op, so it's safe to call from
-// every button in the app without needing to branch on platform.
-function vibrateTap(pattern = 15){
-  try{ if(navigator.vibrate) navigator.vibrate(pattern); }catch(e){ /* unsupported — ignore */ }
+// ---------- Haptic feedback (vibration) ----------
+// Fires navigator.vibrate() for every button-like tap across the app.
+// Sound (playConfirmSound above) is untouched/unrelated — this is purely
+// the tactile layer, and it's additive so it works alongside the native
+// iOS "switch" haptic already used by the checkbox-backed lane buttons.
+// navigator.vibrate is unsupported on iOS Safari, so this silently no-ops
+// there (the native switch-toggle haptic still covers those specific
+// buttons on iOS) while providing real vibration on Android/Chrome.
+let lastHapticAt = 0;
+function triggerHaptic(duration){
+  try{
+    if(!('vibrate' in navigator)) return;
+    const now = Date.now();
+    // Dedupe: tapping a <label> dispatches a click on the label AND a
+    // second, bubbling click on the checkbox/input it wraps for the same
+    // physical tap — without this guard that would fire two vibrations.
+    if(now - lastHapticAt < 60) return;
+    lastHapticAt = now;
+    navigator.vibrate(duration || 12);
+  }catch(e){ /* vibration unavailable — fail silently */ }
 }
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('button, .lane-btn, .logo-upload-label, .select-toggle-btn, [role="button"]');
+  if(!el) return;
+  if(el.tagName === 'BUTTON' && el.disabled) return;
+  triggerHaptic();
+}, true);
 
 // ---------- Optional inspection camera ----------
 // A camera capture is its own separate inspection entry (a photo entry),
@@ -1577,17 +1598,17 @@ document.addEventListener('DOMContentLoaded', () => {
   cameraErrorEl = document.getElementById('camera-error');
   cameraShutterBtn = document.getElementById('camera-shutter');
 
-  document.getElementById('camera-close').addEventListener('click', () => { vibrateTap(); closeCamera(); });
-  cameraShutterBtn.addEventListener('click', () => { vibrateTap(); captureInspectionPhoto(); });
+  document.getElementById('camera-close').addEventListener('click', closeCamera);
+  cameraShutterBtn.addEventListener('click', captureInspectionPhoto);
   cameraVideo.addEventListener('click', (e) => {
     const review = document.getElementById('camera-review');
     if(review && review.classList.contains('show')) return; // ignore taps while reviewing a captured shot
     applyTapFocus(e.clientX, e.clientY);
   });
-  document.getElementById('camera-retake-btn').addEventListener('click', () => { vibrateTap(); retakeCapturedPhoto(); });
-  document.getElementById('camera-save-btn').addEventListener('click', () => { vibrateTap(); saveCapturedPhoto(); });
+  document.getElementById('camera-retake-btn').addEventListener('click', retakeCapturedPhoto);
+  document.getElementById('camera-save-btn').addEventListener('click', saveCapturedPhoto);
   document.querySelectorAll('.category-camera-btn').forEach(btn => {
-    btn.addEventListener('click', () => { vibrateTap(); openCameraForNewEntry(btn.dataset.cameraType); });
+    btn.addEventListener('click', () => openCameraForNewEntry(btn.dataset.cameraType));
   });
 
   // ---- In-camera lane picker ----
@@ -1602,17 +1623,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const logoModal = document.getElementById('logo-modal');
   const logoFileInput = document.getElementById('logo-file-input');
   document.getElementById('camera-logo-btn').addEventListener('click', () => {
-    vibrateTap();
     refreshLogoModalPreview();
     logoModal.classList.add('open');
     logoModal.setAttribute('aria-hidden','false');
   });
-  document.getElementById('logo-upload-label').addEventListener('click', () => vibrateTap());
   const closeLogoModal = () => {
     logoModal.classList.remove('open');
     logoModal.setAttribute('aria-hidden','true');
   };
-  document.getElementById('logo-done-btn').addEventListener('click', () => { vibrateTap(); closeLogoModal(); });
+  document.getElementById('logo-done-btn').addEventListener('click', closeLogoModal);
   logoModal.addEventListener('click', e => { if(e.target.id === 'logo-modal') closeLogoModal(); });
   logoFileInput.addEventListener('change', async (e) => {
     const file = e.target.files && e.target.files[0];
@@ -1627,13 +1646,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   document.getElementById('logo-remove-btn').addEventListener('click', () => {
-    vibrateTap();
     removeCustomLogo();
     refreshLogoModalPreview();
   });
 
   document.getElementById('photo-close').addEventListener('click', () => {
-    vibrateTap();
     const modal = document.getElementById('photo-modal');
     modal.classList.remove('show');
     modal.setAttribute('aria-hidden','true');
@@ -1656,14 +1673,31 @@ function typeClass(type){
 // ---------- Delete-entry confirmation (native confirm() — confirmed
 // working once the app is installed to the Home Screen) ----------
 
-// ---------- Multi-select (bulk deletion) ----------
+// ---------- Multi-select delete mode ----------
 let selectMode = false;
-const selectedIndices = new Set();
+let selectedIndices = new Set();
+
+function updateBulkBar(){
+  const bar = document.getElementById('bulk-actions-bar');
+  const delBtn = document.getElementById('bulk-delete-btn');
+  const allBtn = document.getElementById('bulk-select-all-btn');
+  bar.style.display = selectMode ? 'flex' : 'none';
+  delBtn.textContent = `Delete selected (${selectedIndices.size})`;
+  delBtn.disabled = selectedIndices.size === 0;
+  allBtn.textContent = (selectedIndices.size > 0 && selectedIndices.size === entries.length) ? 'Deselect all' : 'Select all';
+}
+
+function exitSelectMode(){
+  selectMode = false;
+  selectedIndices.clear();
+  document.getElementById('select-toggle-btn').classList.remove('active');
+  document.getElementById('select-toggle-btn').textContent = 'Select';
+  updateBulkBar();
+}
 
 function renderLog(){
   const list = document.getElementById('log-list');
   const exportBtn = document.getElementById('export-btn');
-  const selectToggleBtn = document.getElementById('select-toggle-btn');
   document.getElementById('count-mini').textContent = entries.length;
   document.getElementById('count-label').textContent = `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}`;
   document.getElementById('last-time').textContent = entries.length ? `last: ${entries[entries.length-1].timestamp.split(' ')[1]}` : '--';
@@ -1671,19 +1705,17 @@ function renderLog(){
   if(entries.length === 0){
     list.innerHTML = '<div class="log-empty">No defects logged yet</div>';
     exportBtn.disabled = true;
-    selectToggleBtn.style.display = 'none';
-    if(selectMode) setSelectMode(false);
+    if(selectMode) exitSelectMode();
     return;
   }
   exportBtn.disabled = false;
-  selectToggleBtn.style.display = 'inline-block';
 
-  list.classList.toggle('select-mode', selectMode);
   list.innerHTML = '';
   entries.slice().reverse().forEach((e) => {
     const realIdx = entries.indexOf(e);
     const div = document.createElement('div');
-    div.className = 'log-entry ' + typeClass(e.type);
+    const isSelected = selectedIndices.has(realIdx);
+    div.className = 'log-entry ' + typeClass(e.type) + (selectMode ? ' select-mode' : '') + (isSelected ? ' selected' : '');
     div.dataset.idx = realIdx;
 
     const photoActionsHtml = e.photoId ? `
@@ -1694,25 +1726,23 @@ function renderLog(){
       <div class="photo-status">Photo entry${e.photoTimestamp ? ' · '+e.photoTimestamp : ''}</div>
     ` : '';
 
+    const checkboxHtml = selectMode
+      ? `<div class="entry-checkbox${isSelected ? ' checked' : ''}" data-idx="${realIdx}">${isSelected ? '✓' : ''}</div>`
+      : `<button class="del" data-idx="${realIdx}">✕</button>`;
+
     div.innerHTML = `
-      <div class="entry-select-check"><input type="checkbox" class="entry-check" data-idx="${realIdx}" tabindex="-1"></div>
       <div class="info">
         <div class="type">${e.type}</div>
         <div class="meta">${e.timestamp}<br>${e.lat.toFixed(6)}, ${e.lon.toFixed(6)} · km ${e.km !== null && e.km !== undefined ? formatKmStation(e.km) : 'n/a'}${e.expressway ? ` · ${e.expressway}${e.bound ? ' '+e.bound : ''}` : ''}${e.lane ? ` · Lane: ${e.lane}` : ' · Lane: —'}</div>
         ${photoActionsHtml}
       </div>
-      <button class="del" data-idx="${realIdx}">✕</button>
+      ${checkboxHtml}
     `;
-    if(selectedIndices.has(realIdx)) div.classList.add('selected');
     list.appendChild(div);
-  });
-  list.querySelectorAll('.entry-check').forEach(cb => {
-    cb.checked = selectedIndices.has(+cb.dataset.idx);
   });
   list.querySelectorAll('.del').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      vibrateTap();
       const idx = +e.currentTarget.dataset.idx;
       const entry = entries[idx];
       if(!entry) return;
@@ -1727,14 +1757,12 @@ function renderLog(){
   list.querySelectorAll('.photo-view-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      vibrateTap();
       viewPhotoForEntry(+e.currentTarget.dataset.idx);
     });
   });
   list.querySelectorAll('.photo-remove-btn').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       e.stopPropagation();
-      vibrateTap();
       const idx = +e.currentTarget.dataset.idx;
       const entry = entries[idx];
       if(!entry || !entry.photoId) return;
@@ -1748,70 +1776,45 @@ function renderLog(){
       await deletePhoto(photoId);
     });
   });
+  if(selectMode) updateBulkBar();
 }
 renderLog();
 
-// ---------- Multi-select (bulk deletion): setSelectMode/toggle helpers ----------
-function updateBulkActionsUI(){
-  const btn = document.getElementById('delete-selected-btn');
-  btn.textContent = `Delete (${selectedIndices.size})`;
-  btn.disabled = selectedIndices.size === 0;
-}
-
-function setSelectMode(on){
-  selectMode = on;
+document.getElementById('select-toggle-btn').addEventListener('click', () => {
+  selectMode = !selectMode;
   selectedIndices.clear();
   const toggleBtn = document.getElementById('select-toggle-btn');
-  toggleBtn.textContent = selectMode ? 'Cancel' : 'Select';
   toggleBtn.classList.toggle('active', selectMode);
-  document.getElementById('bulk-actions').style.display = selectMode ? 'flex' : 'none';
-  updateBulkActionsUI();
+  toggleBtn.textContent = selectMode ? 'Cancel' : 'Select';
+  updateBulkBar();
   renderLog();
-}
-
-function toggleEntrySelection(idx, card){
-  const willSelect = !selectedIndices.has(idx);
-  if(willSelect) selectedIndices.add(idx); else selectedIndices.delete(idx);
-  card.classList.toggle('selected', willSelect);
-  const cb = card.querySelector('.entry-check');
-  if(cb) cb.checked = willSelect;
-  updateBulkActionsUI();
-}
-
-document.getElementById('select-toggle-btn').addEventListener('click', () => {
-  vibrateTap();
-  setSelectMode(!selectMode);
 });
 
-document.getElementById('select-all-btn').addEventListener('click', () => {
-  vibrateTap();
-  const cards = document.querySelectorAll('#log-list .log-entry');
-  const allSelected = selectedIndices.size === cards.length && cards.length > 0;
-  cards.forEach(card => {
-    const idx = +card.dataset.idx;
-    if(allSelected) selectedIndices.delete(idx); else selectedIndices.add(idx);
-    card.classList.toggle('selected', !allSelected);
-    const cb = card.querySelector('.entry-check');
-    if(cb) cb.checked = !allSelected;
-  });
-  updateBulkActionsUI();
+document.getElementById('bulk-select-all-btn').addEventListener('click', () => {
+  if(selectedIndices.size === entries.length){
+    selectedIndices.clear();
+  } else {
+    entries.forEach((_, i) => selectedIndices.add(i));
+  }
+  updateBulkBar();
+  renderLog();
 });
 
-document.getElementById('delete-selected-btn').addEventListener('click', () => {
+document.getElementById('bulk-delete-btn').addEventListener('click', async () => {
   if(selectedIndices.size === 0) return;
-  vibrateTap();
-  const count = selectedIndices.size;
-  if(!confirm(`Delete ${count} selected ${count === 1 ? 'entry' : 'entries'}? This cannot be undone.`)) return;
-  const idxs = Array.from(selectedIndices).sort((a,b) => b-a); // highest index first so earlier indices stay valid while splicing
-  const photoIds = [];
+  if(!confirm(`Delete ${selectedIndices.size} selected ${selectedIndices.size === 1 ? 'entry' : 'entries'}? This cannot be undone.`)) return;
+  const idxs = Array.from(selectedIndices).sort((a, b) => b - a); // descending so splicing doesn't shift earlier indices
+  const photoIdsToDelete = [];
   idxs.forEach(idx => {
     const entry = entries[idx];
-    if(entry && entry.photoId) photoIds.push(entry.photoId);
+    if(!entry) return;
+    if(entry.photoId) photoIdsToDelete.push(entry.photoId);
     entries.splice(idx, 1);
   });
   saveEntries();
-  setSelectMode(false);
-  photoIds.forEach(pid => deletePhoto(pid));
+  exitSelectMode();
+  renderLog();
+  for(const photoId of photoIdsToDelete){ await deletePhoto(photoId); }
 });
 
 document.addEventListener('click', (e) => {
@@ -1820,17 +1823,15 @@ document.addEventListener('click', (e) => {
   if(!card || card.dataset.idx === undefined) return;
   const idx = Number(card.dataset.idx);
   if(selectMode){
-    e.preventDefault(); // keep our own toggle in sync (avoids double-toggling when the tap lands on the checkbox itself)
-    vibrateTap();
-    toggleEntrySelection(idx, card);
+    if(selectedIndices.has(idx)) selectedIndices.delete(idx); else selectedIndices.add(idx);
+    updateBulkBar();
+    renderLog();
     return;
   }
-  vibrateTap();
   openEditModal(idx);
 });
 
 document.getElementById('clear-btn').addEventListener('click', () => {
-  vibrateTap();
   if(entries.length === 0) return;
   if(confirm(`Delete all ${entries.length} logged entries? This cannot be undone.`)){
     entries = [];
@@ -1844,7 +1845,6 @@ document.getElementById('clear-btn').addEventListener('click', () => {
 // ---------- Quick lane-log buttons (the 16 number buttons + 4 "Others", all haptic-backed checkboxes) ----------
 document.querySelectorAll('.lane-log-trigger').forEach(cb => {
   cb.addEventListener('change', () => {
-    vibrateTap(); // iOS gets its native switch-toggle haptic from the <input switch> markup itself; this covers Android, which gets none otherwise
     playConfirmSound();
     logDefect(cb.dataset.defect, cb.dataset.lane);
   });
