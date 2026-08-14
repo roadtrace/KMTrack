@@ -1095,7 +1095,11 @@ function formatPhotoDate(date){
 function currentEntryCameraData(entry){
   const kmText = entry.km !== null && entry.km !== undefined ? formatKmStation(entry.km) : '';
   const direction = entry.bound || '—';
-  const lane = entry.lane || '—';
+  // Numbered lanes (1-4) get an "L" prefix (L1, L2…) to read unambiguously
+  // next to the KM/direction text; named lanes (Acce, Shoulder, a custom
+  // "Others" value, etc.) are shown as-is.
+  const rawLane = entry.lane || '';
+  const lane = /^[1-4]$/.test(rawLane) ? `L${rawLane}` : (rawLane || '—');
   const location = entry.expressway ? `${entry.expressway}${entry.bound ? ' · '+entry.bound : ''}` : 'North Luzon Expressway';
   return { kmText, direction, lane, location };
 }
@@ -1383,13 +1387,15 @@ async function captureInspectionPhoto(){
     logoW = Math.round(logo.width * logoH / logo.height);
   }
 
-  // Bold, high-contrast lines sized well above the old stamp so they read
-  // clearly at a glance, the way the Timemark reference stamp does.
+  // The location line stays as a bolder "headline"; the other three lines
+  // (date/time, KM+direction+lane, coordinates) share one consistent
+  // font/size so they read as a uniform block underneath it.
+  const bodyFont = (w) => `500 ${Math.round(w*scale)}px -apple-system, BlinkMacSystemFont, Arial, sans-serif`;
   const textStyles = [
     { text: data.location, font: `800 ${Math.round(27*scale)}px -apple-system, BlinkMacSystemFont, Arial, sans-serif`, lineH: Math.round(32*scale), gapAfter: Math.round(6*scale) },
-    { text: formatPhotoDate(captureDate), font: `700 ${Math.round(23*scale)}px -apple-system, BlinkMacSystemFont, Arial, sans-serif`, lineH: Math.round(28*scale), gapAfter: Math.round(9*scale) },
-    { text: `${kmText} · ${data.direction} · ${data.lane}`, font: `700 ${Math.round(21*scale)}px monospace`, lineH: Math.round(26*scale), gapAfter: Math.round(5*scale) },
-    { text: `${formatCoordinate(entry.lat,'N','S')}, ${formatCoordinate(entry.lon,'E','W')}`, font: `600 ${Math.round(19*scale)}px monospace`, lineH: Math.round(24*scale), gapAfter: 0 }
+    { text: formatPhotoDate(captureDate), font: bodyFont(26), lineH: Math.round(34*scale), gapAfter: Math.round(9*scale) },
+    { text: `${kmText} · ${data.direction} · ${data.lane}`, font: bodyFont(26), lineH: Math.round(34*scale), gapAfter: Math.round(5*scale) },
+    { text: `${formatCoordinate(entry.lat,'N','S')}, ${formatCoordinate(entry.lon,'E','W')}`, font: bodyFont(26), lineH: Math.round(34*scale), gapAfter: 0 }
   ];
   let textBlockH = 0;
   textStyles.forEach(style => {
