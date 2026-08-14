@@ -204,6 +204,28 @@
   .log-entry .info .meta{font-family:var(--mono); font-size:11px; color:#9aa0a6; margin-top:3px; line-height:1.5;}
   .log-entry .del{background:none; border:none; color:#c1392b; font-size:18px; cursor:pointer; padding:4px 8px;}
 
+  /* Multi-select for bulk deletion */
+  .log-header-row{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;}
+  .log-header-row h2{margin:0;}
+  .select-toggle-btn{
+    background:transparent; border:1px solid #3a4046; color:#c7ccd1; font-size:11px; font-weight:700;
+    text-transform:none; letter-spacing:normal;
+    padding:5px 11px; border-radius:14px; cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+  .select-toggle-btn.active{background:var(--line-yellow); color:#191c1f; border-color:var(--line-yellow);}
+  .bulk-actions{display:flex; gap:8px; margin-bottom:10px;}
+  .bulk-actions button{
+    flex:1; padding:9px; border-radius:8px; border:1px solid #3a4046; background:var(--panel); color:var(--line-white);
+    font-weight:700; font-size:12px; cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+  #delete-selected-btn{background:var(--safety-red); border-color:var(--safety-red); color:#fff;}
+  #delete-selected-btn:disabled{background:#3a4046; border-color:#3a4046; color:#6b7176; cursor:not-allowed;}
+  .entry-select-check{display:none; align-items:center; margin-right:2px;}
+  .entry-select-check input{width:20px; height:20px; accent-color:var(--line-yellow); cursor:pointer;}
+  #log-list.select-mode .entry-select-check{display:flex;}
+  #log-list.select-mode .del{display:none;}
+  .log-entry.selected{outline:2px solid var(--line-yellow); background:#333a41;}
+
   .count-bar{font-size:12px; color:#9aa0a6; margin-bottom:10px; display:flex; justify-content:space-between;}
 
   .export-btn{
@@ -542,10 +564,17 @@ button {
   <div class="lane-divider"></div>
 
   <section class="block">
-    <h2>Inspection log</h2>
+    <div class="log-header-row">
+      <h2>Inspection log</h2>
+      <button type="button" id="select-toggle-btn" class="select-toggle-btn">Select</button>
+    </div>
     <div class="count-bar">
       <span id="count-label">0 entries</span>
       <span id="last-time">--</span>
+    </div>
+    <div class="bulk-actions" id="bulk-actions" style="display:none;">
+      <button type="button" id="select-all-btn">Select all</button>
+      <button type="button" id="delete-selected-btn" disabled>Delete (0)</button>
     </div>
     <div id="log-list"><div class="log-empty">No defects logged yet</div></div>
   </section>
@@ -809,7 +838,7 @@ async function loadCalibrationDataset(forceNetwork){
       : `Could not load network dataset (${err.message}). Km station will show as unavailable.`;
   }
 }
-document.getElementById('calib-reload').addEventListener('click', () => loadCalibrationDataset(true));
+document.getElementById('calib-reload').addEventListener('click', () => { vibrateTap(); loadCalibrationDataset(true); });
 loadCalibrationDataset(false);
 
 // If the app opened with no signal and the dataset never loaded, retry
@@ -957,6 +986,7 @@ function renderBoundToggle(expressway){
     btn.textContent = opt;
     btn.dataset.bound = opt;
     btn.addEventListener('click', () => {
+      vibrateTap();
       userBound = opt;
       saveBound();
       wrap.querySelectorAll('.bound-btn').forEach(b => b.classList.toggle('active', b.dataset.bound === userBound));
@@ -1053,6 +1083,16 @@ function playConfirmSound(){
     osc.start();
     osc.stop(audioCtx.currentTime + 0.15);
   }catch(e){ /* Web Audio unavailable — fail silently, logging still works */ }
+}
+
+// ---------- Haptic feedback ----------
+// navigator.vibrate() only exists on Android (Chrome/Firefox) — iOS Safari
+// has no vibration API at all, which is why the 16 lane-log tiles use the
+// native <input switch> trick above for their haptic tick instead. Calling
+// this on iOS/desktop is simply a silent no-op, so it's safe to call from
+// every button in the app without needing to branch on platform.
+function vibrateTap(pattern = 15){
+  try{ if(navigator.vibrate) navigator.vibrate(pattern); }catch(e){ /* unsupported — ignore */ }
 }
 
 // ---------- Optional inspection camera ----------
@@ -1537,17 +1577,17 @@ document.addEventListener('DOMContentLoaded', () => {
   cameraErrorEl = document.getElementById('camera-error');
   cameraShutterBtn = document.getElementById('camera-shutter');
 
-  document.getElementById('camera-close').addEventListener('click', closeCamera);
-  cameraShutterBtn.addEventListener('click', captureInspectionPhoto);
+  document.getElementById('camera-close').addEventListener('click', () => { vibrateTap(); closeCamera(); });
+  cameraShutterBtn.addEventListener('click', () => { vibrateTap(); captureInspectionPhoto(); });
   cameraVideo.addEventListener('click', (e) => {
     const review = document.getElementById('camera-review');
     if(review && review.classList.contains('show')) return; // ignore taps while reviewing a captured shot
     applyTapFocus(e.clientX, e.clientY);
   });
-  document.getElementById('camera-retake-btn').addEventListener('click', retakeCapturedPhoto);
-  document.getElementById('camera-save-btn').addEventListener('click', saveCapturedPhoto);
+  document.getElementById('camera-retake-btn').addEventListener('click', () => { vibrateTap(); retakeCapturedPhoto(); });
+  document.getElementById('camera-save-btn').addEventListener('click', () => { vibrateTap(); saveCapturedPhoto(); });
   document.querySelectorAll('.category-camera-btn').forEach(btn => {
-    btn.addEventListener('click', () => openCameraForNewEntry(btn.dataset.cameraType));
+    btn.addEventListener('click', () => { vibrateTap(); openCameraForNewEntry(btn.dataset.cameraType); });
   });
 
   // ---- In-camera lane picker ----
@@ -1562,15 +1602,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const logoModal = document.getElementById('logo-modal');
   const logoFileInput = document.getElementById('logo-file-input');
   document.getElementById('camera-logo-btn').addEventListener('click', () => {
+    vibrateTap();
     refreshLogoModalPreview();
     logoModal.classList.add('open');
     logoModal.setAttribute('aria-hidden','false');
   });
+  document.getElementById('logo-upload-label').addEventListener('click', () => vibrateTap());
   const closeLogoModal = () => {
     logoModal.classList.remove('open');
     logoModal.setAttribute('aria-hidden','true');
   };
-  document.getElementById('logo-done-btn').addEventListener('click', closeLogoModal);
+  document.getElementById('logo-done-btn').addEventListener('click', () => { vibrateTap(); closeLogoModal(); });
   logoModal.addEventListener('click', e => { if(e.target.id === 'logo-modal') closeLogoModal(); });
   logoFileInput.addEventListener('change', async (e) => {
     const file = e.target.files && e.target.files[0];
@@ -1585,11 +1627,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   document.getElementById('logo-remove-btn').addEventListener('click', () => {
+    vibrateTap();
     removeCustomLogo();
     refreshLogoModalPreview();
   });
 
   document.getElementById('photo-close').addEventListener('click', () => {
+    vibrateTap();
     const modal = document.getElementById('photo-modal');
     modal.classList.remove('show');
     modal.setAttribute('aria-hidden','true');
@@ -1612,9 +1656,14 @@ function typeClass(type){
 // ---------- Delete-entry confirmation (native confirm() — confirmed
 // working once the app is installed to the Home Screen) ----------
 
+// ---------- Multi-select (bulk deletion) ----------
+let selectMode = false;
+const selectedIndices = new Set();
+
 function renderLog(){
   const list = document.getElementById('log-list');
   const exportBtn = document.getElementById('export-btn');
+  const selectToggleBtn = document.getElementById('select-toggle-btn');
   document.getElementById('count-mini').textContent = entries.length;
   document.getElementById('count-label').textContent = `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}`;
   document.getElementById('last-time').textContent = entries.length ? `last: ${entries[entries.length-1].timestamp.split(' ')[1]}` : '--';
@@ -1622,10 +1671,14 @@ function renderLog(){
   if(entries.length === 0){
     list.innerHTML = '<div class="log-empty">No defects logged yet</div>';
     exportBtn.disabled = true;
+    selectToggleBtn.style.display = 'none';
+    if(selectMode) setSelectMode(false);
     return;
   }
   exportBtn.disabled = false;
+  selectToggleBtn.style.display = 'inline-block';
 
+  list.classList.toggle('select-mode', selectMode);
   list.innerHTML = '';
   entries.slice().reverse().forEach((e) => {
     const realIdx = entries.indexOf(e);
@@ -1642,6 +1695,7 @@ function renderLog(){
     ` : '';
 
     div.innerHTML = `
+      <div class="entry-select-check"><input type="checkbox" class="entry-check" data-idx="${realIdx}" tabindex="-1"></div>
       <div class="info">
         <div class="type">${e.type}</div>
         <div class="meta">${e.timestamp}<br>${e.lat.toFixed(6)}, ${e.lon.toFixed(6)} · km ${e.km !== null && e.km !== undefined ? formatKmStation(e.km) : 'n/a'}${e.expressway ? ` · ${e.expressway}${e.bound ? ' '+e.bound : ''}` : ''}${e.lane ? ` · Lane: ${e.lane}` : ' · Lane: —'}</div>
@@ -1649,11 +1703,16 @@ function renderLog(){
       </div>
       <button class="del" data-idx="${realIdx}">✕</button>
     `;
+    if(selectedIndices.has(realIdx)) div.classList.add('selected');
     list.appendChild(div);
+  });
+  list.querySelectorAll('.entry-check').forEach(cb => {
+    cb.checked = selectedIndices.has(+cb.dataset.idx);
   });
   list.querySelectorAll('.del').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
+      vibrateTap();
       const idx = +e.currentTarget.dataset.idx;
       const entry = entries[idx];
       if(!entry) return;
@@ -1668,12 +1727,14 @@ function renderLog(){
   list.querySelectorAll('.photo-view-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
+      vibrateTap();
       viewPhotoForEntry(+e.currentTarget.dataset.idx);
     });
   });
   list.querySelectorAll('.photo-remove-btn').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       e.stopPropagation();
+      vibrateTap();
       const idx = +e.currentTarget.dataset.idx;
       const entry = entries[idx];
       if(!entry || !entry.photoId) return;
@@ -1690,13 +1751,86 @@ function renderLog(){
 }
 renderLog();
 
+// ---------- Multi-select (bulk deletion): setSelectMode/toggle helpers ----------
+function updateBulkActionsUI(){
+  const btn = document.getElementById('delete-selected-btn');
+  btn.textContent = `Delete (${selectedIndices.size})`;
+  btn.disabled = selectedIndices.size === 0;
+}
+
+function setSelectMode(on){
+  selectMode = on;
+  selectedIndices.clear();
+  const toggleBtn = document.getElementById('select-toggle-btn');
+  toggleBtn.textContent = selectMode ? 'Cancel' : 'Select';
+  toggleBtn.classList.toggle('active', selectMode);
+  document.getElementById('bulk-actions').style.display = selectMode ? 'flex' : 'none';
+  updateBulkActionsUI();
+  renderLog();
+}
+
+function toggleEntrySelection(idx, card){
+  const willSelect = !selectedIndices.has(idx);
+  if(willSelect) selectedIndices.add(idx); else selectedIndices.delete(idx);
+  card.classList.toggle('selected', willSelect);
+  const cb = card.querySelector('.entry-check');
+  if(cb) cb.checked = willSelect;
+  updateBulkActionsUI();
+}
+
+document.getElementById('select-toggle-btn').addEventListener('click', () => {
+  vibrateTap();
+  setSelectMode(!selectMode);
+});
+
+document.getElementById('select-all-btn').addEventListener('click', () => {
+  vibrateTap();
+  const cards = document.querySelectorAll('#log-list .log-entry');
+  const allSelected = selectedIndices.size === cards.length && cards.length > 0;
+  cards.forEach(card => {
+    const idx = +card.dataset.idx;
+    if(allSelected) selectedIndices.delete(idx); else selectedIndices.add(idx);
+    card.classList.toggle('selected', !allSelected);
+    const cb = card.querySelector('.entry-check');
+    if(cb) cb.checked = !allSelected;
+  });
+  updateBulkActionsUI();
+});
+
+document.getElementById('delete-selected-btn').addEventListener('click', () => {
+  if(selectedIndices.size === 0) return;
+  vibrateTap();
+  const count = selectedIndices.size;
+  if(!confirm(`Delete ${count} selected ${count === 1 ? 'entry' : 'entries'}? This cannot be undone.`)) return;
+  const idxs = Array.from(selectedIndices).sort((a,b) => b-a); // highest index first so earlier indices stay valid while splicing
+  const photoIds = [];
+  idxs.forEach(idx => {
+    const entry = entries[idx];
+    if(entry && entry.photoId) photoIds.push(entry.photoId);
+    entries.splice(idx, 1);
+  });
+  saveEntries();
+  setSelectMode(false);
+  photoIds.forEach(pid => deletePhoto(pid));
+});
+
 document.addEventListener('click', (e) => {
   if(e.target.closest('.del') || e.target.closest('.photo-view-btn') || e.target.closest('.photo-remove-btn')) return;
   const card = e.target.closest('.log-entry');
-  if(card && card.dataset.idx !== undefined) openEditModal(Number(card.dataset.idx));
+  if(!card || card.dataset.idx === undefined) return;
+  const idx = Number(card.dataset.idx);
+  if(selectMode){
+    e.preventDefault(); // keep our own toggle in sync (avoids double-toggling when the tap lands on the checkbox itself)
+    vibrateTap();
+    toggleEntrySelection(idx, card);
+    return;
+  }
+  vibrateTap();
+  openEditModal(idx);
 });
 
 document.getElementById('clear-btn').addEventListener('click', () => {
+  vibrateTap();
   if(entries.length === 0) return;
   if(confirm(`Delete all ${entries.length} logged entries? This cannot be undone.`)){
     entries = [];
@@ -1710,6 +1844,7 @@ document.getElementById('clear-btn').addEventListener('click', () => {
 // ---------- Quick lane-log buttons (the 16 number buttons + 4 "Others", all haptic-backed checkboxes) ----------
 document.querySelectorAll('.lane-log-trigger').forEach(cb => {
   cb.addEventListener('change', () => {
+    vibrateTap(); // iOS gets its native switch-toggle haptic from the <input switch> markup itself; this covers Android, which gets none otherwise
     playConfirmSound();
     logDefect(cb.dataset.defect, cb.dataset.lane);
   });
