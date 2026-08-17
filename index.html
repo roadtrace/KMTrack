@@ -90,6 +90,12 @@
     letter-spacing:0.5px; color:#f4f4f2;
   }
   .kmpost .segment-tag.faroff{background:rgba(193,57,43,0.5);}
+  .kmpost .ramp-tag{
+    display:none; margin-top:8px; background:rgba(47,143,224,0.22); border:1px solid #2f8fe0;
+    color:#e3f2ff; padding:6px 12px; border-radius:20px; font-size:12px; font-weight:700;
+    letter-spacing:0.3px; line-height:1.4;
+  }
+  .kmpost .ramp-tag.show{display:inline-block;}
 
   /* Bound (direction) toggle — now a compact side panel inside .readout,
      next to the lat/lon/accuracy fields, rather than its own full-width block. */
@@ -274,6 +280,22 @@ header{display:flex;align-items:center;gap:12px;}
 }
 .edit-others-input{margin-top:8px;}
 .modal-actions{display:flex;gap:8px;margin-top:12px}.modal-actions button{flex:1;padding:10px;border-radius:8px;border:0;font-weight:700}.lane-save{background:#1d78b5;color:#fff}.lane-cancel{background:#263541;color:#d9e1e8}
+.edit-photo-row{display:flex; gap:10px; align-items:stretch;}
+.edit-photo-thumb-wrap{
+  flex:0 0 84px; width:84px; height:84px; border-radius:10px; border:1px dashed #3a566a;
+  background:#08131d; display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.edit-photo-thumb-wrap img{width:100%; height:100%; object-fit:cover; display:block;}
+.edit-photo-empty{color:#5c6b76; font-size:10px; text-align:center; line-height:1.4; padding:0 6px;}
+.edit-photo-actions{flex:1; display:flex; flex-direction:column; gap:6px; justify-content:center;}
+.edit-photo-add-btn{
+  padding:10px; border-radius:8px; border:1px solid #3a566a; background:#1d78b5; color:#fff;
+  font-weight:700; font-size:12px; cursor:pointer; -webkit-tap-highlight-color:transparent;
+}
+.edit-photo-remove-btn{
+  padding:9px; border-radius:8px; border:1px solid var(--safety-red); background:transparent;
+  color:#ef8d83; font-weight:700; font-size:12px; cursor:pointer; -webkit-tap-highlight-color:transparent;
+}
 .lane-edit{border:0;background:transparent;color:#65b8ee;padding:0;font:inherit;text-decoration:underline;cursor:pointer;}
 .lane-save.danger{background:var(--safety-red);}
 
@@ -505,6 +527,7 @@ button {
     <div class="kmvalue" id="km-value">--.---</div>
     <div class="kmunit">kilometers (interpolated)</div>
     <div class="segment-tag" id="segment-tag">--</div>
+    <div class="ramp-tag" id="ramp-tag"></div>
   </div>
 
   <section class="block">
@@ -512,6 +535,11 @@ button {
       <summary>▸ Network calibration data</summary>
       <div class="calib-hint" id="calib-status">Loading NLEX network alignment...</div>
       <button class="calib-add" id="calib-reload">↻ Reload dataset</button>
+    </details>
+    <details class="calib">
+      <summary>▸ Interchange / ramp data</summary>
+      <div class="calib-hint" id="ramp-status">Loading interchange/ramp dataset...</div>
+      <button class="calib-add" id="ramp-reload">↻ Reload dataset</button>
     </details>
   </section>
 
@@ -852,6 +880,116 @@ window.addEventListener('online', () => {
   if(!calibData.length) loadCalibrationDataset(true);
 });
 
+// ---------- Interchange / ramp name lookup (additive layer) ----------
+// Deliberately kept separate from calibData/corridorIndex above: those
+// exist to interpolate a continuous km-station along the mainline, and
+// ramp points are not part of that continuous line (they fork off it).
+// Mixing them in would corrupt the km interpolation. This is a second,
+// independent dataset that only ever answers "am I near a named ramp?" —
+// it never feeds km-station math, defect logging, or CSV export.
+const STORAGE_KEY_RAMPS = 'nlex_ramp_dataset_v1';
+let rampData = [];           // [{name, interchange, points:[{lat,lon}]}]
+let rampPointIndex = [];     // flattened: [{lat,lon,rampIdx}] — one entry per point, across all ramps
+let rampGrid = new Map();    // same grid-bucket trick as spatialGrid, over rampPointIndex
+let rampMatchRadiusKm = 0.05; // default 50 m; a loaded dataset's matchRadiusMeters can override this
+
+function sanitizeRampData(raw){
+  if(!Array.isArray(raw)){
+    // Support either a bare array or {matchRadiusMeters, ramps:[...]}
+    if(raw && Array.isArray(raw.ramps)){
+      if(Number.isFinite(raw.matchRadiusMeters) && raw.matchRadiusMeters > 0){
+        rampMatchRadiusKm = raw.matchRadiusMeters / 1000;
+      }
+      raw = raw.ramps;
+    } else {
+      return [];
+    }
+  }
+  const clean = raw.filter(r => r && typeof r.name === 'string' && r.name.trim()
+    && Array.isArray(r.points) && r.points.length > 0
+  ).map(r => ({
+    name: r.name.trim(),
+    interchange: typeof r.interchange === 'string' ? r.interchange.trim() : '',
+    points: r.points.filter(p => p && Number.isFinite(p.lat) && Number.isFinite(p.lon))
+  })).filter(r => r.points.length > 0);
+  if(clean.length !== raw.length){
+    console.warn(`Ramp dataset: dropped ${raw.length - clean.length} malformed ramp(s).`);
+  }
+  return clean;
+}
+
+function buildRampIndex(){
+  rampPointIndex = [];
+  rampGrid = new Map();
+  rampData.forEach((ramp, rampIdx) => {
+    ramp.points.forEach(p => {
+      rampPointIndex.push({ lat: p.lat, lon: p.lon, rampIdx });
+    });
+  });
+  rampPointIndex.forEach((p, i) => {
+    const g = gridKey(p.lat, p.lon);
+    let bucket = rampGrid.get(g); if(!bucket){ bucket = []; rampGrid.set(g, bucket); } bucket.push(i);
+  });
+}
+
+function nearbyRampIndices(lat, lon, rings){
+  const out = []; const gx = Math.floor(lat/GRID_SIZE), gy = Math.floor(lon/GRID_SIZE);
+  for(let dx=-rings; dx<=rings; dx++) for(let dy=-rings; dy<=rings; dy++){
+    const b = rampGrid.get(`${gx+dx},${gy+dy}`); if(b) out.push(...b);
+  }
+  return out;
+}
+
+// Returns the nearest ramp within rampMatchRadiusKm, or null if nothing's close enough.
+function nearestRamp(lat, lon){
+  if(!rampPointIndex.length) return null;
+  let candidates = [];
+  for(const r of [1,2,4,8]){ candidates = nearbyRampIndices(lat,lon,r); if(candidates.length) break; }
+  if(!candidates.length) return null;
+  let bestIdx=-1, bestDist=Infinity;
+  for(const i of candidates){
+    const p = rampPointIndex[i];
+    const d = haversineKm(lat, lon, p.lat, p.lon);
+    if(d < bestDist){ bestDist = d; bestIdx = i; }
+  }
+  if(bestIdx < 0 || bestDist > rampMatchRadiusKm) return null;
+  const ramp = rampData[rampPointIndex[bestIdx].rampIdx];
+  return { ramp, distanceKm: bestDist };
+}
+
+async function loadRampDataset(forceNetwork){
+  const statusEl = document.getElementById('ramp-status');
+  try{
+    if(!forceNetwork){
+      const cached = localStorage.getItem(STORAGE_KEY_RAMPS);
+      if(cached){
+        rampData = sanitizeRampData(JSON.parse(cached));
+        buildRampIndex();
+        statusEl.textContent = `Loaded ${rampData.length.toLocaleString()} ramp(s) from on-device cache (works offline).`;
+        return;
+      }
+    }
+    statusEl.textContent = 'Downloading interchange/ramp dataset...';
+    const res = await fetch('ramps.json', { cache: 'no-store' });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    rampData = sanitizeRampData(JSON.parse(text));
+    buildRampIndex();
+    try{ localStorage.setItem(STORAGE_KEY_RAMPS, text); }catch(e){ /* dataset too big for storage quota; still usable this session */ }
+    statusEl.textContent = `Loaded ${rampData.length.toLocaleString()} ramp(s) from interchange/ramp dataset (cached for offline use).`;
+  }catch(err){
+    statusEl.textContent = rampData.length
+      ? `Using ${rampData.length.toLocaleString()} previously cached ramp(s) — couldn't refresh (${err.message}).`
+      : `Could not load ramp dataset (${err.message}). Ramp names will show as unavailable.`;
+  }
+}
+document.getElementById('ramp-reload').addEventListener('click', () => loadRampDataset(true));
+loadRampDataset(false);
+
+window.addEventListener('online', () => {
+  if(!rampData.length) loadRampDataset(true);
+});
+
 // ---------- Clock ----------
 function tickClock(){
   const now = new Date();
@@ -952,6 +1090,46 @@ function updateReadout(){
   }
 
   renderBoundToggle(result.expressway);
+  updateRampReadout(currentPos.lat, currentPos.lon);
+  refreshCameraDraftFromLiveGPS();
+}
+
+// Keeps the in-camera overlay (and, since it edits cameraDraftEntry directly,
+// whatever gets stamped into the photo at capture time) current with the
+// vehicle's actual position while the camera stays open — instead of
+// freezing everything at the instant the camera was opened. Only applies to
+// a fresh capture (cameraEditTargetIndex === null); attaching/replacing a
+// photo on an EXISTING entry deliberately keeps that entry's original
+// location untouched, same as before. Also stops once a shot has been taken
+// and is sitting in the Retake/Save review screen, so the ground doesn't
+// shift under a photo the user is about to save.
+function refreshCameraDraftFromLiveGPS(){
+  if(!cameraDraftEntry || cameraEditTargetIndex !== null) return;
+  if(!cameraModal || !cameraModal.classList.contains('show')) return;
+  if(pendingCaptureBlob) return;
+  if(!currentPos) return;
+  const result = computeKmStation(currentPos.lat, currentPos.lon);
+  const isOffMappedNetwork = !result || result.distance > offNetworkThresholdKm(currentPos.acc);
+  cameraDraftEntry.lat = currentPos.lat;
+  cameraDraftEntry.lon = currentPos.lon;
+  cameraDraftEntry.km = isOffMappedNetwork ? null : result.km;
+  cameraDraftEntry.expressway = isOffMappedNetwork ? '' : result.expressway;
+  cameraDraftEntry.bound = isOffMappedNetwork ? '' : (userBound || '');
+  updateCameraOverlay(cameraDraftEntry);
+}
+
+function updateRampReadout(lat, lon){
+  const rampEl = document.getElementById('ramp-tag');
+  const match = nearestRamp(lat, lon);
+  if(!match){
+    rampEl.classList.remove('show');
+    rampEl.textContent = '';
+    return;
+  }
+  rampEl.textContent = match.ramp.interchange
+    ? `⤴ ${match.ramp.interchange} — ${match.ramp.name}`
+    : `⤴ ${match.ramp.name}`;
+  rampEl.classList.add('show');
 }
 
 // ---------- Direction (bound) toggle — manual, since NB/SB coordinates are identical in this dataset ----------
@@ -1125,6 +1303,12 @@ document.addEventListener('click', (e) => {
 // for image data).
 let cameraStream = null;
 let cameraDraftEntry = null;
+// Set when the camera was opened from the edit modal's "Add / Change Photo"
+// button rather than a fresh lane/defect tap. When set, saveCapturedPhoto()
+// attaches the photo to this existing entry (replacing any old one) instead
+// of pushing a brand-new entry, and the entry's own km/lat/lon/bound are
+// left untouched — only its photo fields change.
+let cameraEditTargetIndex = null;
 let cameraLogoImage = null; // cached <img> decoded from the stored logo, cleared whenever the logo changes
 const CUSTOM_LOGO_KEY = 'kmtrack_customLogo';
 // Bumped every time the camera modal opens/closes. If the user taps Close
@@ -1251,6 +1435,50 @@ async function openCameraForNewEntry(type){
   }
 }
 
+// Attaches (or replaces) a photo on an EXISTING entry, opened from the edit
+// modal. Deliberately keeps the entry's original km/lat/lon/expressway/bound
+// — those describe where the defect actually is, not where the vehicle
+// happens to be when you get around to adding/retaking the photo, which may
+// be a completely different time and place. currentEntryCameraData() already
+// reads straight off the entry object, so the stamped overlay/photo end up
+// correct without touching live GPS at all.
+async function openCameraForEntryPhoto(index){
+  const entry = entries[index];
+  if(!entry) return;
+  closeEditModal();
+  playConfirmSound();
+
+  const myRequestId = ++cameraRequestId;
+  cameraEditTargetIndex = index;
+  cameraDraftEntry = {
+    type: entry.type, lat: entry.lat, lon: entry.lon,
+    km: entry.km, expressway: entry.expressway, bound: entry.bound,
+    lane: entry.lane || ''
+  };
+  cameraErrorEl.classList.remove('show');
+  cameraErrorEl.textContent = '';
+  cameraShutterBtn.disabled = false;
+  populateCameraLaneSelect(cameraDraftEntry.lane);
+  updateCameraOverlay(cameraDraftEntry);
+  cameraModal.classList.add('show');
+  cameraModal.setAttribute('aria-hidden','false');
+
+  try{
+    const stream = await requestCameraStream();
+    if(myRequestId !== cameraRequestId){
+      stream.getTracks().forEach(t => t.stop());
+      return;
+    }
+    cameraStream = stream;
+    cameraVideo.srcObject = stream;
+    await cameraVideo.play();
+  }catch(err){
+    if(myRequestId !== cameraRequestId) return;
+    cameraErrorEl.textContent = `Could not open the camera. ${err.message || err}`;
+    cameraErrorEl.classList.add('show');
+  }
+}
+
 function closeCamera(){
   cameraRequestId++; // invalidates any getUserMedia request still in flight
   if(cameraStream){
@@ -1261,6 +1489,7 @@ function closeCamera(){
   cameraModal.classList.remove('show');
   cameraModal.setAttribute('aria-hidden','true');
   cameraDraftEntry = null;
+  cameraEditTargetIndex = null;
   clearCaptureReview();
 }
 // closeCamera / event wiring for elements defined after this script tag
@@ -1548,18 +1777,39 @@ async function saveCapturedPhoto(){
   try{
     const photoId = newId();
     await putPhoto(photoId, pendingCaptureBlob);
-    entries.push({
-      ...cameraDraftEntry,
-      timestamp: fullTimestamp(),
-      photoId,
-      photoFilename: pendingCaptureFilename,
-      photoTimestamp: formatPhotoDate(pendingCaptureStamp)
-    });
-    saveEntries();
-    playConfirmSound();
-    clearCaptureReview();
-    closeCamera();
-    renderLog();
+
+    if(cameraEditTargetIndex !== null){
+      // Attaching/replacing a photo on an existing entry — its km/lat/lon/
+      // bound/type/lane are left exactly as they were; only photo fields change.
+      const idx = cameraEditTargetIndex;
+      const entry = entries[idx];
+      const oldPhotoId = entry ? entry.photoId : '';
+      if(entry){
+        entry.lane = cameraDraftEntry.lane || entry.lane;
+        entry.photoId = photoId;
+        entry.photoFilename = pendingCaptureFilename;
+        entry.photoTimestamp = formatPhotoDate(pendingCaptureStamp);
+        saveEntries();
+      }
+      playConfirmSound();
+      clearCaptureReview();
+      closeCamera();
+      renderLog();
+      if(oldPhotoId) await deletePhoto(oldPhotoId);
+    } else {
+      entries.push({
+        ...cameraDraftEntry,
+        timestamp: fullTimestamp(),
+        photoId,
+        photoFilename: pendingCaptureFilename,
+        photoTimestamp: formatPhotoDate(pendingCaptureStamp)
+      });
+      saveEntries();
+      playConfirmSound();
+      clearCaptureReview();
+      closeCamera();
+      renderLog();
+    }
   }catch(err){
     cameraErrorEl.textContent = `Could not save the photo on this device. ${err.message || err}`;
     cameraErrorEl.classList.add('show');
@@ -1569,6 +1819,24 @@ async function saveCapturedPhoto(){
 }
 // cameraShutterBtn and .category-camera-btn listeners are registered in
 // the DOMContentLoaded block below, once those elements actually exist.
+
+// Shared by the log-card "Remove Photo" button and the edit modal's Remove
+// Photo button — one place that clears the entry's photo fields and deletes
+// the underlying blob, so both stay in sync.
+async function removeEntryPhoto(idx, opts){
+  const entry = entries[idx];
+  if(!entry || !entry.photoId) return;
+  const skipConfirm = opts && opts.skipConfirm;
+  if(!skipConfirm && !confirm('Remove the photo from this inspection entry? The entry itself will stay.')) return;
+  const photoId = entry.photoId;
+  entry.photoId = '';
+  entry.photoFilename = '';
+  entry.photoTimestamp = '';
+  saveEntries();
+  renderLog();
+  if(editingEntryIndex === idx) renderEditPhotoPreview(entry);
+  await deletePhoto(photoId);
+}
 
 let activePhotoObjectUrl = null;
 async function viewPhotoForEntry(index){
@@ -1763,17 +2031,7 @@ function renderLog(){
   list.querySelectorAll('.photo-remove-btn').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       e.stopPropagation();
-      const idx = +e.currentTarget.dataset.idx;
-      const entry = entries[idx];
-      if(!entry || !entry.photoId) return;
-      if(!confirm('Remove the photo from this inspection entry? The entry itself will stay.')) return;
-      const photoId = entry.photoId;
-      entry.photoId = '';
-      entry.photoFilename = '';
-      entry.photoTimestamp = '';
-      saveEntries();
-      renderLog();
-      await deletePhoto(photoId);
+      await removeEntryPhoto(+e.currentTarget.dataset.idx);
     });
   });
   if(selectMode) updateBulkBar();
@@ -1955,12 +2213,103 @@ function updateCameraDraftLane(){
   updateCameraOverlay(cameraDraftEntry);
 }
 
+// Accepts "8+200" (station notation), plain decimals ("8.2"), or bare
+// integers ("8") as km. Blank input is valid and means "clear the km value"
+// (marks the entry as off-network) rather than an error.
+function parseKmInput(str){
+  const s = (str || '').trim();
+  if(!s) return { valid: true, km: null };
+  let m = s.match(/^(\d+)\s*\+\s*(\d{1,3})$/);
+  if(m){
+    const km = parseInt(m[1], 10) + parseInt(m[2].padEnd(3, '0'), 10) / 1000;
+    return { valid: true, km };
+  }
+  if(/^\d+(\.\d+)?$/.test(s)){
+    return { valid: true, km: parseFloat(s) };
+  }
+  return { valid: false, km: null };
+}
+
+function populateEditBoundSelect(expressway, currentValue){
+  const sel = document.getElementById('edit-bound-select');
+  const othersInput = document.getElementById('edit-bound-others-input');
+  sel.innerHTML = '';
+  const blank = document.createElement('option');
+  blank.value = ''; blank.textContent = '— (none)';
+  sel.appendChild(blank);
+  const options = expresswayBounds[expressway] || [];
+  options.forEach(opt => {
+    const o = document.createElement('option');
+    o.value = opt; o.textContent = opt;
+    sel.appendChild(o);
+  });
+  const custom = document.createElement('option');
+  custom.value = 'Others'; custom.textContent = 'Others (type manually)';
+  sel.appendChild(custom);
+
+  if(currentValue && options.includes(currentValue)){
+    sel.value = currentValue;
+    othersInput.style.display = 'none';
+    othersInput.value = '';
+  } else if(currentValue){
+    sel.value = 'Others';
+    othersInput.style.display = 'block';
+    othersInput.value = currentValue;
+  } else {
+    sel.value = '';
+    othersInput.style.display = 'none';
+    othersInput.value = '';
+  }
+}
+
+let editPhotoObjectUrl = null;
+async function renderEditPhotoPreview(entry){
+  const emptyEl = document.getElementById('edit-photo-empty');
+  const imgEl = document.getElementById('edit-photo-thumb');
+  const removeBtn = document.getElementById('edit-photo-remove-btn');
+  const addBtn = document.getElementById('edit-photo-add-btn');
+
+  if(editPhotoObjectUrl){ URL.revokeObjectURL(editPhotoObjectUrl); editPhotoObjectUrl = null; }
+
+  if(!entry || !entry.photoId){
+    imgEl.style.display = 'none';
+    imgEl.src = '';
+    emptyEl.style.display = 'flex';
+    removeBtn.style.display = 'none';
+    addBtn.textContent = '📷 Add Photo';
+    return;
+  }
+
+  addBtn.textContent = '📷 Change Photo';
+  removeBtn.style.display = 'block';
+  try{
+    const blob = await getPhoto(entry.photoId);
+    if(!blob){
+      emptyEl.textContent = 'Photo not found on this device';
+      emptyEl.style.display = 'flex';
+      imgEl.style.display = 'none';
+      return;
+    }
+    editPhotoObjectUrl = URL.createObjectURL(blob);
+    imgEl.src = editPhotoObjectUrl;
+    imgEl.style.display = 'block';
+    emptyEl.style.display = 'none';
+  }catch(e){
+    emptyEl.textContent = 'Could not load photo';
+    emptyEl.style.display = 'flex';
+    imgEl.style.display = 'none';
+  }
+}
+
 function openEditModal(index){
   editingEntryIndex = index;
   const entry = entries[index];
   if(!entry) return;
   populateDefectSelect(entry.type);
   populateLaneSelect(entry.lane || '');
+  document.getElementById('edit-km-input').value = (entry.km !== null && entry.km !== undefined) ? formatKmStation(entry.km) : '';
+  populateEditBoundSelect(entry.expressway, entry.bound || '');
+  renderEditPhotoPreview(entry);
   const modal = document.getElementById('edit-modal');
   modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
 }
@@ -1977,21 +2326,42 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('edit-lane-select').addEventListener('change', (e) => {
     document.getElementById('edit-lane-others-input').style.display = e.target.value === 'Others' ? 'block' : 'none';
   });
+  document.getElementById('edit-bound-select').addEventListener('change', (e) => {
+    document.getElementById('edit-bound-others-input').style.display = e.target.value === 'Others' ? 'block' : 'none';
+  });
 
   document.getElementById('edit-cancel').addEventListener('click', closeEditModal);
   document.getElementById('edit-save').addEventListener('click', () => {
     if(editingEntryIndex === null) return;
+    const kmResult = parseKmInput(document.getElementById('edit-km-input').value);
+    if(!kmResult.valid){
+      alert('Invalid KM Station. Use a format like 8+200, or a plain number like 8.2 — or leave it blank.');
+      return;
+    }
     const defectVal = document.getElementById('edit-defect-select').value;
     const laneSelVal = document.getElementById('edit-lane-select').value;
     const laneOthersVal = document.getElementById('edit-lane-others-input').value.trim();
-    entries[editingEntryIndex].type = defectVal;
-    entries[editingEntryIndex].lane = laneSelVal === 'Others' ? laneOthersVal : laneSelVal;
+    const boundSelVal = document.getElementById('edit-bound-select').value;
+    const boundOthersVal = document.getElementById('edit-bound-others-input').value.trim();
+    const entry = entries[editingEntryIndex];
+    entry.type = defectVal;
+    entry.lane = laneSelVal === 'Others' ? laneOthersVal : laneSelVal;
+    entry.km = kmResult.km;
+    entry.bound = boundSelVal === 'Others' ? boundOthersVal : boundSelVal;
     saveEntries();
     renderLog();
     closeEditModal();
   });
   document.getElementById('edit-modal').addEventListener('click', e => {
     if(e.target.id === 'edit-modal') closeEditModal();
+  });
+  document.getElementById('edit-photo-add-btn').addEventListener('click', () => {
+    if(editingEntryIndex === null) return;
+    openCameraForEntryPhoto(editingEntryIndex);
+  });
+  document.getElementById('edit-photo-remove-btn').addEventListener('click', async () => {
+    if(editingEntryIndex === null) return;
+    await removeEntryPhoto(editingEntryIndex);
   });
 });
 
@@ -2145,6 +2515,22 @@ if('serviceWorker' in navigator){
     <label class="edit-field-label">Lane:</label>
     <select id="edit-lane-select" class="edit-select"></select>
     <input id="edit-lane-others-input" type="text" class="edit-others-input" placeholder="Specify lane" style="display:none;">
+    <label class="edit-field-label">KM Station:</label>
+    <input id="edit-km-input" type="text" inputmode="decimal" placeholder="e.g. 8+200 — leave blank for off-network">
+    <label class="edit-field-label">Bound:</label>
+    <select id="edit-bound-select" class="edit-select"></select>
+    <input id="edit-bound-others-input" type="text" class="edit-others-input" placeholder="Specify direction" style="display:none;">
+    <label class="edit-field-label">Photo:</label>
+    <div class="edit-photo-row">
+      <div class="edit-photo-thumb-wrap" id="edit-photo-thumb-wrap">
+        <div class="edit-photo-empty" id="edit-photo-empty">No photo attached</div>
+        <img id="edit-photo-thumb" alt="Entry photo" style="display:none;">
+      </div>
+      <div class="edit-photo-actions">
+        <button type="button" class="edit-photo-add-btn" id="edit-photo-add-btn">📷 Add / Change Photo</button>
+        <button type="button" class="edit-photo-remove-btn" id="edit-photo-remove-btn" style="display:none;">Remove Photo</button>
+      </div>
+    </div>
     <div class="modal-actions"><button type="button" class="lane-cancel" id="edit-cancel">Cancel</button><button type="button" class="lane-save" id="edit-save">Save</button></div>
   </div>
 </div>
