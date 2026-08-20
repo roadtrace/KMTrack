@@ -53,6 +53,7 @@
     border:1px solid #3a4046;
     border-radius:10px;
     padding:14px 16px;
+    margin-top:10px;
     display:flex;
     align-items:stretch;
     gap:14px;
@@ -235,7 +236,9 @@
   .log-entry .info .meta{font-family:var(--mono); font-size:11px; color:#9aa0a6; margin-top:3px; line-height:1.5;}
   .log-entry .del{background:none; border:none; color:#c1392b; font-size:18px; cursor:pointer; padding:4px 8px;}
 
-  .count-bar{font-size:12px; color:#9aa0a6; margin-bottom:10px; display:flex; justify-content:space-between;}
+  .count-bar{font-size:12px; color:#9aa0a6; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; gap:10px;}
+  .count-bar-left{display:flex; align-items:center; gap:8px;}
+  .count-divider{color:#9aa0a6; opacity:.6;}
 
   /* Inspection log header + multi-select delete */
   .log-header{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;}
@@ -264,14 +267,11 @@
   .bulk-delete-btn:disabled{background:#3a4046; color:#6b7176; cursor:not-allowed;}
 
   .export-btn{
-    width:100%; padding:16px; margin-top:18px; border-radius:10px; border:none;
-    background:var(--line-yellow); color:#191c1f; font-weight:700; font-size:15px; cursor:pointer;
+    flex:0 0 auto; padding:6px 13px; border-radius:14px; border:none;
+    background:var(--line-yellow); color:#191c1f; font-weight:700; font-size:11px;
+    letter-spacing:0.3px; white-space:nowrap; cursor:pointer; -webkit-tap-highlight-color:transparent;
   }
   .export-btn:disabled{background:#3a4046; color:#6b7176; cursor:not-allowed;}
-  .clear-btn{
-    width:100%; padding:10px; margin-top:8px; border-radius:8px; border:1px solid var(--safety-red);
-    background:transparent; color:var(--safety-red); font-weight:700; font-size:13px; cursor:pointer;
-  }
 
 /* KMTrack adaptive header */
 header{display:flex;align-items:center;gap:12px;}
@@ -519,6 +519,19 @@ button {
 
 <main>
 
+  <section class="block">
+    <details class="calib">
+      <summary>▸ Network calibration data</summary>
+      <div class="calib-hint" id="calib-status">Loading NLEX network alignment...</div>
+      <button class="calib-add" id="calib-reload">↻ Reload dataset</button>
+    </details>
+    <details class="calib">
+      <summary>▸ Interchange / ramp data</summary>
+      <div class="calib-hint" id="ramp-status">Loading interchange/ramp dataset...</div>
+      <button class="calib-add" id="ramp-reload">↻ Reload dataset</button>
+    </details>
+  </section>
+
   <div class="readout">
     <div class="readout-main">
       <div class="field">
@@ -555,19 +568,6 @@ button {
     <div class="segment-tag" id="segment-tag">--</div>
     <div class="ramp-tag" id="ramp-tag"></div>
   </div>
-
-  <section class="block">
-    <details class="calib">
-      <summary>▸ Network calibration data</summary>
-      <div class="calib-hint" id="calib-status">Loading NLEX network alignment...</div>
-      <button class="calib-add" id="calib-reload">↻ Reload dataset</button>
-    </details>
-    <details class="calib">
-      <summary>▸ Interchange / ramp data</summary>
-      <div class="calib-hint" id="ramp-status">Loading interchange/ramp dataset...</div>
-      <button class="calib-add" id="ramp-reload">↻ Reload dataset</button>
-    </details>
-  </section>
 
   <section class="block gps-pending" id="defect-section">
     <div class="defect-header">
@@ -636,8 +636,12 @@ button {
       <button type="button" class="select-toggle-btn" id="select-toggle-btn">Select</button>
     </div>
     <div class="count-bar">
-      <span id="count-label">0 entries</span>
-      <span id="last-time">--</span>
+      <div class="count-bar-left">
+        <span id="count-label">0 entries</span>
+        <span class="count-divider">|</span>
+        <span id="last-time">--</span>
+      </div>
+      <button class="export-btn" id="export-btn" disabled>⬇ Export CSV</button>
     </div>
     <div class="bulk-actions-bar" id="bulk-actions-bar" style="display:none;">
       <button type="button" class="bulk-select-all-btn" id="bulk-select-all-btn">Select all</button>
@@ -645,9 +649,6 @@ button {
     </div>
     <div id="log-list"><div class="log-empty">No defects logged yet</div></div>
   </section>
-
-  <button class="export-btn" id="export-btn" disabled>⬇ Export CSV</button>
-  <button class="clear-btn" id="clear-btn">Clear all entries</button>
 
 </main>
 
@@ -2192,16 +2193,6 @@ document.addEventListener('click', (e) => {
     return;
   }
   openEditModal(idx);
-});
-
-document.getElementById('clear-btn').addEventListener('click', () => {
-  if(entries.length === 0) return;
-  if(confirm(`Delete all ${entries.length} logged entries? This cannot be undone.`)){
-    entries = [];
-    saveEntries();
-    renderLog();
-    clearPhotoStore();
-  }
 });
 
 
