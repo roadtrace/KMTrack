@@ -111,6 +111,7 @@
   .bound-panel-label{font-size:12px; color:#c7ccd1; font-weight:600; margin-bottom:8px;}
   .bound-toggle{display:flex; flex-direction:column; gap:8px;}
   .bound-hint{font-size:11px; color:#565c62; font-style:italic; line-height:1.4;}
+  .bound-auto-status{font-size:10px; color:#565c62; font-style:italic; line-height:1.4; margin-top:7px;}
   button.bound-btn{
     width:100%; padding:12px 8px; border-radius:8px; border:2px solid #3a4046;
     background:var(--asphalt-2); color:var(--line-white); font-weight:700; font-size:14px;
@@ -123,6 +124,30 @@
 
   /* Defect buttons */
   .defect-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+
+  /* Defect-focus dropdown + big-button focused layout */
+  .defect-header{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;}
+  .defect-header h2{margin:0; flex:0 0 auto;}
+  .defect-focus-select{
+    flex:0 1 auto; max-width:52%; margin-left:auto; padding:7px 26px 7px 10px; border-radius:8px; border:1px solid #3a4046;
+    background-color:var(--panel); color:var(--line-white); font-size:11px; font-weight:700;
+    letter-spacing:0.3px; appearance:none; -webkit-appearance:none;
+    background-image:url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239aa0a6' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 8px center; background-size:14px;
+  }
+  #defect-section.focused .defect-category{display:none;}
+  #defect-section.focused .defect-category.focused-category{display:block;}
+  #defect-section.focused .focused-category .category-label{font-size:16px;}
+  #defect-section.focused .focused-category .lane-btn-row{
+    display:grid; grid-template-columns:1fr 1fr; gap:12px;
+  }
+  #defect-section.focused .focused-category .lane-btn{
+    padding:34px 8px; font-size:28px; border-radius:16px;
+  }
+  #defect-section.focused .focused-category .lane-btn.others-btn{
+    grid-column:1 / -1; flex-direction:row; font-size:17px; padding:20px 12px;
+  }
+  #defect-section.focused .focused-category .lane-btn.others-btn .others-sub{font-size:12px; margin-top:0; margin-left:6px;}
 
   .defect-category{margin-bottom:14px;}
   .category-label{
@@ -515,10 +540,11 @@ button {
       <div class="status warn" id="gps-status">Requesting GPS permission...</div>
     </div>
     <div class="bound-panel">
-      <div class="bound-panel-label">Set Bound Manually</div>
+      <div class="bound-panel-label">Confirm Bound is Correct</div>
       <div class="bound-toggle" id="bound-toggle">
         <span class="bound-hint" id="bound-hint">detecting segment...</span>
       </div>
+      <div class="bound-auto-status" id="bound-auto-status"></div>
     </div>
   </div>
 
@@ -544,10 +570,19 @@ button {
   </section>
 
   <section class="block gps-pending" id="defect-section">
-    <h2>Log a defect</h2>
+    <div class="defect-header">
+      <h2>Log a defect</h2>
+      <select class="defect-focus-select" id="defect-focus-select" aria-label="Focus on one defect type">
+        <option value="">All defects</option>
+        <option value="Potholes">Potholes</option>
+        <option value="Shoving">Shoving</option>
+        <option value="Cracks (width>25 mm)">Cracks</option>
+        <option value="Others">Others</option>
+      </select>
+    </div>
     <div class="defect-gate">📍 Waiting for GPS fix — buttons activate automatically once your location is available. (If this doesn't clear, check that location access is allowed for this site.)</div>
 
-    <div class="defect-category">
+    <div class="defect-category" data-category="Potholes">
       <div class="category-label"><span class="category-label-text">Potholes</span> <button type="button" class="category-camera-btn" data-camera-type="Potholes" aria-label="Take Potholes photo">📷</button></div>
       <div class="lane-btn-row">
         <label class="lane-btn pothole haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Potholes" data-lane="1">1</label>
@@ -558,7 +593,7 @@ button {
       </div>
     </div>
 
-    <div class="defect-category">
+    <div class="defect-category" data-category="Shoving">
       <div class="category-label"><span class="category-label-text">Shoving</span> <button type="button" class="category-camera-btn" data-camera-type="Shoving" aria-label="Take Shoving photo">📷</button></div>
       <div class="lane-btn-row">
         <label class="lane-btn shoving haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Shoving" data-lane="1">1</label>
@@ -569,7 +604,7 @@ button {
       </div>
     </div>
 
-    <div class="defect-category">
+    <div class="defect-category" data-category="Cracks (width>25 mm)">
       <div class="category-label"><span class="category-label-text">Cracks</span> <button type="button" class="category-camera-btn" data-camera-type="Cracks (width>25 mm)" aria-label="Take Cracks photo">📷</button></div>
       <div class="lane-btn-row">
         <label class="lane-btn cracks haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Cracks (width>25 mm)" data-lane="1">1</label>
@@ -580,7 +615,7 @@ button {
       </div>
     </div>
 
-    <div class="defect-category">
+    <div class="defect-category" data-category="Others">
       <div class="category-label"><span class="category-label-text">Others <span class="category-sub">(i.e., Damaged markings, Ravelling, Debris)</span></span> <button type="button" class="category-camera-btn" data-camera-type="Others" aria-label="Take Others photo">📷</button></div>
       <div class="lane-btn-row">
         <label class="lane-btn other haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Others" data-lane="1">1</label>
@@ -1089,7 +1124,11 @@ function updateReadout(){
     tagEl.classList.remove('faroff');
   }
 
+  if(!isOffMappedNetwork){
+    detectBoundFromTrend(result.expressway, result.km);
+  }
   renderBoundToggle(result.expressway);
+  updateBoundAutoStatus(result.expressway);
   updateRampReadout(currentPos.lat, currentPos.lon);
   refreshCameraDraftFromLiveGPS();
 }
@@ -1132,7 +1171,73 @@ function updateRampReadout(lat, lon){
   rampEl.classList.add('show');
 }
 
-// ---------- Direction (bound) toggle — manual, since NB/SB coordinates are identical in this dataset ----------
+// ---------- Direction (bound) auto-detection ----------
+// Bound is inferred from whether km-station is increasing or decreasing as
+// you drive each corridor, using the known chainage convention below. The
+// buttons in the bound panel stay tappable so this can be corrected by hand
+// (e.g. right when GPS first locks, before enough distance has accumulated
+// to tell direction, or on a corridor not listed here) — a manual tap is a
+// one-off override, though continued driving on a mapped corridor will
+// still self-correct it if the tap turns out to disagree with the trend.
+const EXPRESSWAY_BOUND_BY_TREND = {
+  'NLEX':          { increasing: 'NB', decreasing: 'SB' },
+  'C3-SEG 8.1':    { increasing: 'EB', decreasing: 'WB' },
+  'CONNECTOR':     { increasing: 'SB', decreasing: 'NB' },
+  'C3-R10 RAMP':   { increasing: 'EB', decreasing: 'WB' },
+  'TABANG':        { increasing: 'WB', decreasing: 'EB' },
+  'SCTEX SPUR':    { increasing: 'WB', decreasing: 'EB' },
+  'SCTEX N':       { increasing: 'NB', decreasing: 'SB' },
+  'SCTEX S':       { increasing: 'SB', decreasing: 'NB' },
+  'SFEX':          { increasing: 'SB', decreasing: 'NB' }
+};
+
+let trendLastKm = null;
+let trendLastExpressway = null;
+let trendEstablished = false;
+const MIN_TREND_DELTA_KM = 0.02; // ~20 m — ignore GPS-noise-level wobble before committing to a direction
+
+function detectBoundFromTrend(expressway, km){
+  if(trendLastExpressway !== expressway){
+    // New corridor (or first fix ever) — can't tell direction from a single
+    // point, so just record the baseline and wait for the next one.
+    trendLastExpressway = expressway;
+    trendLastKm = km;
+    trendEstablished = false;
+    return;
+  }
+  if(trendLastKm === null){ trendLastKm = km; return; }
+
+  const delta = km - trendLastKm;
+  if(Math.abs(delta) < MIN_TREND_DELTA_KM) return;
+  trendLastKm = km;
+
+  const mapping = EXPRESSWAY_BOUND_BY_TREND[(expressway || '').trim().toUpperCase()];
+  if(!mapping) return; // corridor isn't in the table — stays fully manual
+
+  trendEstablished = true;
+  const detected = delta > 0 ? mapping.increasing : mapping.decreasing;
+  if(detected !== userBound){
+    userBound = detected;
+    saveBound();
+  }
+}
+
+function updateBoundAutoStatus(expressway){
+  const el = document.getElementById('bound-auto-status');
+  if(!el) return;
+  const options = expresswayBounds[expressway];
+  if(!options || options.length === 0){ el.textContent = ''; return; }
+  const mapping = EXPRESSWAY_BOUND_BY_TREND[(expressway || '').trim().toUpperCase()];
+  if(!mapping){
+    el.textContent = 'No auto-detect data for this segment — set manually.';
+  } else if(!trendEstablished){
+    el.textContent = 'Determining direction of travel…';
+  } else {
+    el.textContent = 'Auto-detected from direction of travel — tap to override.';
+  }
+}
+
+// ---------- Direction (bound) toggle — manual override / confirmation ----------
 function saveBound(){
   if(!storageAvailable) return;
   try{ localStorage.setItem(STORAGE_KEY_BOUND, userBound || ''); }catch(e){ /* non-critical */ }
@@ -2107,6 +2212,45 @@ document.querySelectorAll('.lane-log-trigger').forEach(cb => {
     logDefect(cb.dataset.defect, cb.dataset.lane);
   });
 });
+
+// ---------- Defect-focus dropdown ----------
+// Narrows "Log a defect" down to one category at a time — the buttons for
+// that category get bigger (a 2x2 grid for the four numbered lanes, with
+// "Others" as a full-width bar below) since a focused inspector tapping one
+// defect type repeatedly benefits more from bigger targets than from seeing
+// every category at once. "All defects" restores the original compact view.
+const STORAGE_KEY_DEFECT_FOCUS = 'nlex_defect_focus_v1';
+
+function applyDefectFocus(value){
+  const section = document.getElementById('defect-section');
+  const categories = section.querySelectorAll('.defect-category');
+  if(!value){
+    section.classList.remove('focused');
+    categories.forEach(cat => cat.classList.remove('focused-category'));
+    return;
+  }
+  section.classList.add('focused');
+  categories.forEach(cat => {
+    cat.classList.toggle('focused-category', cat.dataset.category === value);
+  });
+}
+
+function saveDefectFocus(value){
+  if(!storageAvailable) return;
+  try{ localStorage.setItem(STORAGE_KEY_DEFECT_FOCUS, value || ''); }catch(e){ /* non-critical */ }
+}
+
+(function initDefectFocus(){
+  const select = document.getElementById('defect-focus-select');
+  let saved = '';
+  try{ saved = localStorage.getItem(STORAGE_KEY_DEFECT_FOCUS) || ''; }catch(e){ /* non-critical */ }
+  select.value = saved;
+  applyDefectFocus(saved);
+  select.addEventListener('change', (e) => {
+    applyDefectFocus(e.target.value);
+    saveDefectFocus(e.target.value);
+  });
+})();
 
 // ---------- Combined Defect + Lane edit modal (opens when tapping any log entry) ----------
 const DEFECT_OPTIONS = [
