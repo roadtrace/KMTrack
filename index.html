@@ -61,12 +61,12 @@
   .readout-main{
     flex:1 1 auto; min-width:0;
     display:grid;
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
     gap:10px 16px;
   }
-  .readout-main .field{display:flex; flex-direction:column;}
+  .readout-main .field{display:flex; flex-direction:column; min-width:0;}
   .readout-main .field .label{font-size:10px; text-transform:uppercase; letter-spacing:1px; color:#9aa0a6;}
-  .readout-main .field .value{font-family:var(--mono); font-size:16px; margin-top:2px; word-break:break-all;}
+  .readout-main .field .value{font-family:var(--mono); font-size:clamp(11px,3.4vw,16px); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .readout-main .status{grid-column:1/-1; font-size:11px; font-family:var(--mono); margin-top:2px;}
   .status.ok{color:var(--safety-green);}
   .status.warn{color:var(--line-yellow);}
@@ -74,7 +74,7 @@
 
   /* Km-post signature element */
   .kmpost{
-    margin-top:14px;
+    margin-top:10px;
     background:var(--safety-green);
     border:3px solid var(--line-white);
     border-radius:6px;
@@ -120,7 +120,7 @@
   }
   button.bound-btn.active{background:var(--line-yellow); color:#191c1f; border-color:var(--line-yellow);}
 
-  section.block{margin-top:22px;}
+  section.block{margin-top:10px;}
   h2{font-size:13px; text-transform:uppercase; letter-spacing:1.2px; color:#9aa0a6; margin:0 0 10px;}
 
   /* Defect buttons */
@@ -216,7 +216,7 @@
   }
 
   /* Calibration panel */
-  details.calib{background:var(--panel); border:1px solid #3a4046; border-radius:10px; padding:10px 14px;}
+  details.calib{background:var(--panel); border:1px solid #3a4046; border-radius:10px; padding:10px 14px; margin-bottom:3px;}
   details.calib summary{cursor:pointer; font-size:13px; font-weight:700; color:var(--line-yellow); list-style:none;}
   details.calib summary::-webkit-details-marker{display:none;}
   .calib-add{margin-top:8px; background:#3a4046; border:none; color:var(--line-white); padding:8px 12px; border-radius:6px; cursor:pointer; font-size:12px;}
@@ -392,7 +392,7 @@ button {
   .camera-close,.camera-shutter{border:0;cursor:pointer;-webkit-tap-highlight-color:transparent;}
   .camera-close{background:rgba(0,0,0,.5);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:8px 12px;font-size:13px;}
   .camera-info{
-    position:absolute;left:0;right:0;bottom:0;padding:18px 18px calc(env(safe-area-inset-bottom) + 192px);
+    position:absolute;left:0;right:0;bottom:0;padding:18px 18px calc(env(safe-area-inset-bottom) + 250px);
     background:linear-gradient(to top,rgba(0,0,0,.86),rgba(0,0,0,.52),transparent);
     z-index:2;pointer-events:none;
   }
@@ -402,9 +402,66 @@ button {
   .camera-shutter{width:68px;height:68px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.5);box-shadow:0 0 0 3px rgba(0,0,0,.65);}
   .camera-shutter:active{transform:scale(.92);}
   .camera-shutter:disabled{opacity:.5;}
-  .camera-hint{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 24px);right:16px;color:#ddd;font-size:10px;font-family:var(--mono);z-index:4;}
+  .camera-hint{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 3px);right:16px;color:#ddd;font-size:9px;font-family:var(--mono);z-index:4;}
   .camera-error{position:absolute;left:18px;right:18px;top:50%;transform:translateY(-50%);padding:14px;border-radius:10px;background:rgba(193,57,43,.88);color:#fff;font-size:13px;line-height:1.45;z-index:5;display:none;}
   .camera-error.show{display:block;}
+
+  /* Single/Continuous mode toggle, top-left under the topbar */
+  .camera-mode-toggle{
+    position:absolute; top:calc(env(safe-area-inset-top) + 58px); left:14px; z-index:2;
+    display:flex; gap:6px;
+  }
+  .camera-mode-btn{
+    padding:7px 12px; border-radius:20px; border:1px solid rgba(255,255,255,.35);
+    background:rgba(0,0,0,.5); color:#fff; font-size:11px; font-weight:700; letter-spacing:.3px;
+    cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+  .camera-mode-btn.active{background:var(--line-yellow); color:#191c1f; border-color:var(--line-yellow);}
+
+  /* Continuous mode's lane buttons — replace the lane-picker + shutter.
+     Big and few, since these ARE the shutter: each tap grabs a frame,
+     stamps it, and commits it instantly with no review step. */
+  .camera-continuous-lanes{
+    display:none; position:absolute; left:14px; right:14px;
+    bottom:calc(env(safe-area-inset-bottom) + 15px);
+    z-index:3; flex-direction:column; gap:10px;
+  }
+  .camera-continuous-lanes.show{display:flex;}
+  .continuous-lane-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  /* ---- Continuous-mode button transparency: manual code-only control ----
+     Edit these two values by hand (0 = invisible, 1 = fully solid) to
+     change how see-through the border outline and the number text are.
+     The button background always stays fully transparent regardless.
+     Intentionally not exposed as an on-screen control. */
+  .continuous-lane-btn{
+    --continuous-border-alpha: .6;
+    --continuous-text-alpha: .6;
+    padding:22px 8px; border-radius:14px; border:3px solid; font-weight:800; font-size:22px;
+    cursor:pointer; -webkit-tap-highlight-color:transparent; box-shadow:0 4px 14px rgba(0,0,0,.35);
+    background:transparent;
+    color:rgba(255,255,255,var(--continuous-text-alpha));
+    text-shadow:0 1px 5px rgba(0,0,0,calc(0.9 * var(--continuous-text-alpha))), 0 0 3px rgba(0,0,0,calc(0.7 * var(--continuous-text-alpha)));
+  }
+  .continuous-lane-btn:active{transform:scale(.95);}
+  .continuous-lane-btn:disabled{opacity:.5;}
+  .continuous-lane-btn.others{grid-column:1 / -1; font-size:15px; padding:14px 8px;}
+  .continuous-lane-btn.pothole{border-color:rgba(244,180,0,var(--continuous-border-alpha));}
+  .continuous-lane-btn.shoving{border-color:rgba(217,119,47,var(--continuous-border-alpha));}
+  .continuous-lane-btn.cracks{border-color:rgba(201,201,201,var(--continuous-border-alpha));}
+  .continuous-lane-btn.other{border-color:rgba(193,112,122,var(--continuous-border-alpha));}
+
+  /* Brief flash + toast feedback on each continuous capture, replacing the
+     Retake/Save review screen (which would break the rapid-fire flow). */
+  .camera-flash{position:absolute; inset:0; z-index:8; background:#fff; opacity:0; pointer-events:none;}
+  .camera-flash.pulse{animation:cameraFlashPulse .35s ease-out;}
+  @keyframes cameraFlashPulse{ 0%{opacity:.85;} 100%{opacity:0;} }
+  .camera-toast{
+    position:absolute; left:50%; top:calc(env(safe-area-inset-top) + 60px); transform:translate(-50%,-8px);
+    z-index:9; background:rgba(20,20,20,.92); color:#fff; font-weight:700; font-size:13px;
+    padding:9px 16px; border-radius:20px; opacity:0; pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease; white-space:nowrap;
+  }
+  .camera-toast.show{opacity:1; transform:translate(-50%,0);}
 
   /* Tap-to-focus ring: purely visual feedback on every tap. The underlying
      focus constraint (see applyTapFocus) only actually takes effect on
@@ -1415,6 +1472,15 @@ let cameraDraftEntry = null;
 // of pushing a brand-new entry, and the entry's own km/lat/lon/bound are
 // left untouched — only its photo fields change.
 let cameraEditTargetIndex = null;
+// 'single' (default, unchanged behavior — shutter + Retake/Save review) or
+// 'continuous' (only offered for fresh multi-capture sessions, never when
+// attaching a photo to one specific existing entry). In continuous mode the
+// lane buttons themselves are the shutter — each tap grabs the current
+// frame, stamps it, and commits it immediately with no review step, so an
+// inspector can stay in the camera and rapid-fire through several defects
+// of the same category without leaving the viewfinder.
+let cameraMode = 'single';
+let continuousCapturing = false; // guards against overlapping captures if lanes are tapped faster than one can finish saving
 let cameraLogoImage = null; // cached <img> decoded from the stored logo, cleared whenever the logo changes
 const CUSTOM_LOGO_KEY = 'kmtrack_customLogo';
 // Bumped every time the camera modal opens/closes. If the user taps Close
@@ -1519,6 +1585,10 @@ async function openCameraForNewEntry(type){
   cameraShutterBtn.disabled = false;
   populateCameraLaneSelect('');
   updateCameraOverlay(draft);
+  applyContinuousLaneColors(type);
+  const modeToggle = document.getElementById('camera-mode-toggle');
+  if(modeToggle) modeToggle.style.display = '';
+  setCameraMode('single');
   cameraModal.classList.add('show');
   cameraModal.setAttribute('aria-hidden','false');
 
@@ -1566,6 +1636,9 @@ async function openCameraForEntryPhoto(index){
   cameraShutterBtn.disabled = false;
   populateCameraLaneSelect(cameraDraftEntry.lane);
   updateCameraOverlay(cameraDraftEntry);
+  const modeToggle = document.getElementById('camera-mode-toggle');
+  if(modeToggle) modeToggle.style.display = 'none';
+  setCameraMode('single');
   cameraModal.classList.add('show');
   cameraModal.setAttribute('aria-hidden','false');
 
@@ -1596,6 +1669,8 @@ function closeCamera(){
   cameraModal.setAttribute('aria-hidden','true');
   cameraDraftEntry = null;
   cameraEditTargetIndex = null;
+  continuousCapturing = false;
+  setCameraMode('single');
   clearCaptureReview();
 }
 // closeCamera / event wiring for elements defined after this script tag
@@ -1740,15 +1815,17 @@ function wrapLines(ctx, text, maxWidth){
   return lines;
 }
 
-async function captureInspectionPhoto(){
-  const entry = cameraDraftEntry;
-  if(!entry) return;
+// Draws the current video frame + stamped metadata band onto a canvas and
+// returns {blob, filename, stamp}, or null (with cameraErrorEl already set)
+// if the camera isn't ready or the canvas couldn't be encoded. Shared by
+// the single-shot path (which then shows a Retake/Save review) and the
+// continuous path (which commits immediately with no review).
+async function buildStampedPhotoBlob(entry){
   if(!cameraStream || !cameraVideo.videoWidth){
     cameraErrorEl.textContent = 'Camera is not ready yet. Please wait a moment and try again.';
     cameraErrorEl.classList.add('show');
-    return;
+    return null;
   }
-  cameraShutterBtn.disabled = true;
 
   const canvas = document.createElement('canvas');
   const w = cameraVideo.videoWidth;
@@ -1836,13 +1913,101 @@ async function captureInspectionPhoto(){
   if(!blob){
     cameraErrorEl.textContent = 'Could not create the inspection photo.';
     cameraErrorEl.classList.add('show');
-    cameraShutterBtn.disabled = false;
-    return;
+    return null;
   }
 
   const stamp = captureDate;
   const filename = `KMTrack_${entry.type.replace(/[^a-z0-9]+/gi,'_')}_${stamp.getFullYear()}${pad(stamp.getMonth()+1)}${pad(stamp.getDate())}_${pad(stamp.getHours())}${pad(stamp.getMinutes())}${pad(stamp.getSeconds())}.jpg`;
-  showCaptureReview(blob, filename, stamp);
+  return { blob, filename, stamp };
+}
+
+async function captureInspectionPhoto(){
+  const entry = cameraDraftEntry;
+  if(!entry) return;
+  cameraShutterBtn.disabled = true;
+  const result = await buildStampedPhotoBlob(entry);
+  cameraShutterBtn.disabled = false;
+  if(!result) return;
+  showCaptureReview(result.blob, result.filename, result.stamp);
+}
+
+// Continuous mode's capture path: the tapped lane button IS the shutter.
+// Grabs the current frame, stamps it, and commits a brand-new entry
+// immediately — no Retake/Save review, so rapid-fire tapping through
+// several defects of the same category doesn't break stride. Guarded by
+// continuousCapturing so a fast double-tap can't overlap two saves.
+async function captureContinuousLane(laneValue){
+  if(!cameraDraftEntry || continuousCapturing) return;
+  continuousCapturing = true;
+  document.querySelectorAll('.continuous-lane-btn').forEach(b => b.disabled = true);
+  cameraDraftEntry.lane = laneValue;
+  updateCameraOverlay(cameraDraftEntry);
+  try{
+    const result = await buildStampedPhotoBlob(cameraDraftEntry);
+    if(!result) return;
+    const photoId = newId();
+    await putPhoto(photoId, result.blob);
+    entries.push({
+      ...cameraDraftEntry,
+      timestamp: fullTimestamp(),
+      photoId,
+      photoFilename: result.filename,
+      photoTimestamp: formatPhotoDate(result.stamp)
+    });
+    saveEntries();
+    playConfirmSound();
+    renderLog();
+    flashCameraCapture(laneValue);
+  }catch(err){
+    cameraErrorEl.textContent = `Could not save the photo on this device. ${err.message || err}`;
+    cameraErrorEl.classList.add('show');
+  }finally{
+    continuousCapturing = false;
+    document.querySelectorAll('.continuous-lane-btn').forEach(b => b.disabled = false);
+  }
+}
+
+let cameraToastTimeoutId = null;
+function flashCameraCapture(laneValue){
+  const flash = document.getElementById('camera-flash');
+  const toast = document.getElementById('camera-toast');
+  if(!flash || !toast) return;
+  toast.textContent = `✓ Lane ${laneValue} logged`;
+  flash.classList.remove('pulse'); void flash.offsetWidth; flash.classList.add('pulse');
+  toast.classList.remove('show'); void toast.offsetWidth; toast.classList.add('show');
+  if(cameraToastTimeoutId) clearTimeout(cameraToastTimeoutId);
+  cameraToastTimeoutId = setTimeout(() => toast.classList.remove('show'), 900);
+}
+
+// Swaps the bottom controls between the single-shot shutter+lane-picker and
+// the big continuous lane buttons. Continuous mode always starts each
+// camera session reset to 'single' (see openCameraForNewEntry/closeCamera)
+// — it's an opt-in per session, not a sticky preference, so a quick single
+// photo never accidentally starts in rapid-fire mode.
+function setCameraMode(mode){
+  cameraMode = mode;
+  const toggle = document.getElementById('camera-mode-toggle');
+  if(toggle){
+    toggle.querySelectorAll('.camera-mode-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.mode === mode);
+    });
+  }
+  const lanePicker = document.getElementById('camera-lane-picker');
+  const bottomBar = document.querySelector('.camera-bottom');
+  const continuousPanel = document.getElementById('camera-continuous-lanes');
+  const hintEl = document.getElementById('camera-hint-text');
+  if(mode === 'continuous'){
+    if(lanePicker) lanePicker.style.display = 'none';
+    if(bottomBar) bottomBar.style.display = 'none';
+    if(continuousPanel) continuousPanel.classList.add('show');
+    if(hintEl) hintEl.textContent = '⚡Continuous — tap a lane to snap & log instantly';
+    if(cameraDraftEntry){ cameraDraftEntry.lane = ''; updateCameraOverlay(cameraDraftEntry); }
+  } else {
+    if(lanePicker) lanePicker.style.display = '';
+    if(bottomBar) bottomBar.style.display = '';
+    if(continuousPanel) continuousPanel.classList.remove('show');
+    if(hintEl) hintEl.textContent = 'Separate photo entry · metadata is stamped into the image';
+  }
 }
 
 // Shows the just-captured photo full-screen with Retake/Save instead of
@@ -1985,6 +2150,16 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => openCameraForNewEntry(btn.dataset.cameraType));
   });
 
+  // ---- Single/Continuous mode toggle ----
+  document.getElementById('camera-mode-toggle').addEventListener('click', (e) => {
+    const btn = e.target.closest('.camera-mode-btn');
+    if(!btn) return;
+    setCameraMode(btn.dataset.mode);
+  });
+  document.querySelectorAll('.continuous-lane-btn').forEach(btn => {
+    btn.addEventListener('click', () => captureContinuousLane(btn.dataset.lane));
+  });
+
   // ---- In-camera lane picker ----
   document.getElementById('camera-lane-select').addEventListener('change', (e) => {
     document.getElementById('camera-lane-others-input').style.display = e.target.value === 'Others' ? 'block' : 'none';
@@ -2042,6 +2217,17 @@ function typeClass(type){
   if(t.startsWith('cracks')) return 'cracks';
   if(t === 'others' || t === 'other') return 'other';
   return ''; // Potholes and any other specific defect picked from the edit dropdown fall back to the default yellow accent
+}
+
+// Colors the continuous-mode lane buttons to match whichever category's 📷
+// icon opened the camera, mirroring the same pothole/shoving/cracks/other
+// color coding used by the main lane-button grid on the log screen.
+function applyContinuousLaneColors(type){
+  const cls = typeClass(type) || 'pothole';
+  document.querySelectorAll('.continuous-lane-btn').forEach(btn => {
+    btn.classList.remove('pothole', 'shoving', 'cracks', 'other');
+    btn.classList.add(cls);
+  });
 }
 
 // ---------- Delete-entry confirmation (native confirm() — confirmed
@@ -2606,6 +2792,10 @@ if('serviceWorker' in navigator){
         <button class="camera-close" id="camera-close" type="button">Close</button>
       </div>
     </div>
+    <div class="camera-mode-toggle" id="camera-mode-toggle">
+      <button type="button" class="camera-mode-btn active" data-mode="single">📷 Single Shot</button>
+      <button type="button" class="camera-mode-btn" data-mode="continuous">⚡ Continuous</button>
+    </div>
     <div class="camera-info" id="camera-info">
       <div class="capture-time" id="camera-time">--</div>
       <div class="capture-meta" id="camera-meta">GPS unavailable</div>
@@ -2618,10 +2808,21 @@ if('serviceWorker' in navigator){
       </div>
       <input id="camera-lane-others-input" type="text" placeholder="Specify lane" style="display:none;">
     </div>
+    <div class="camera-continuous-lanes" id="camera-continuous-lanes">
+      <div class="continuous-lane-grid">
+        <button type="button" class="continuous-lane-btn" data-lane="1">1</button>
+        <button type="button" class="continuous-lane-btn" data-lane="2">2</button>
+        <button type="button" class="continuous-lane-btn" data-lane="3">3</button>
+        <button type="button" class="continuous-lane-btn" data-lane="4">4</button>
+      </div>
+      <button type="button" class="continuous-lane-btn others" data-lane="Others">Others</button>
+    </div>
+    <div class="camera-flash" id="camera-flash"></div>
+    <div class="camera-toast" id="camera-toast"></div>
     <div class="camera-bottom">
       <button class="camera-shutter" id="camera-shutter" type="button" aria-label="Capture photo"></button>
     </div>
-    <div class="camera-hint">Separate photo entry · metadata is stamped into the image</div>
+    <div class="camera-hint" id="camera-hint-text">Separate photo entry · metadata is stamped into the image</div>
     <div class="camera-review" id="camera-review" aria-hidden="true">
       <img id="camera-review-img" alt="Captured inspection photo">
       <div class="camera-review-actions">
