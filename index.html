@@ -1852,12 +1852,15 @@ async function drawStampBand(ctx, w, h, entry, dateLineText){
   }
 
   // The location line is a bolder "headline" above the other three (date,
-  // KM+direction+lane, coordinates) — but only when it actually names a
-  // known road; for an off-network capture (no matched expressway/km) it's
-  // just "North Luzon Expressway" filler, so it's dropped entirely and the
-  // stamp is date + KM line + coordinates only.
+  // KM+direction+lane, coordinates) — but only when GPS actually matched a
+  // known expressway at capture time. entry.expressway is that GPS-based
+  // signal specifically: it's set once when the photo is taken and never
+  // touched again, so it stays accurate even if someone later hand-types a
+  // KM Station value in the edit modal (which only ever changes entry.km,
+  // not entry.expressway) — a manually-entered km shouldn't make a
+  // genuinely off-network photo claim "North Luzon Expressway".
   const bodyFont = (fw) => `500 ${Math.round(fw*scale)}px -apple-system, BlinkMacSystemFont, Arial, sans-serif`;
-  const isOffNetwork = !data.kmText;
+  const isOffNetwork = !entry.expressway;
   const textStyles = [];
   if(!isOffNetwork){
     textStyles.push({ text: data.location, font: `800 ${Math.round(27*scale)}px -apple-system, BlinkMacSystemFont, Arial, sans-serif`, lineH: Math.round(32*scale), gapAfter: Math.round(6*scale) });
@@ -2634,6 +2637,44 @@ function parseKmInput(str){
   return { valid: false, km: null };
 }
 
+// The GPS-based network match sets entry.expressway automatically at
+// capture time, and it's what the photo watermark's headline ("NLEX · NB")
+// keys off — but there's no way to fix it afterward if GPS missed a real
+// match (weak signal, edge of coverage) or to explicitly confirm/clear an
+// off-network reading. This lets it be set by hand, same select+"Others"
+// pattern as the other fields.
+function populateEditExpresswaySelect(currentValue){
+  const sel = document.getElementById('edit-expressway-select');
+  const othersInput = document.getElementById('edit-expressway-others-input');
+  sel.innerHTML = '';
+  const blank = document.createElement('option');
+  blank.value = ''; blank.textContent = '— (off network)';
+  sel.appendChild(blank);
+  const knownExpressways = Object.keys(expresswayBounds).sort();
+  knownExpressways.forEach(opt => {
+    const o = document.createElement('option');
+    o.value = opt; o.textContent = opt;
+    sel.appendChild(o);
+  });
+  const custom = document.createElement('option');
+  custom.value = 'Others'; custom.textContent = 'Others (type manually)';
+  sel.appendChild(custom);
+
+  if(currentValue && knownExpressways.includes(currentValue)){
+    sel.value = currentValue;
+    othersInput.style.display = 'none';
+    othersInput.value = '';
+  } else if(currentValue){
+    sel.value = 'Others';
+    othersInput.style.display = 'block';
+    othersInput.value = currentValue;
+  } else {
+    sel.value = '';
+    othersInput.style.display = 'none';
+    othersInput.value = '';
+  }
+}
+
 function populateEditBoundSelect(expressway, currentValue){
   const sel = document.getElementById('edit-bound-select');
   const othersInput = document.getElementById('edit-bound-others-input');
@@ -2712,6 +2753,7 @@ function openEditModal(index){
   populateDefectSelect(entry.type);
   populateLaneSelect(entry.lane || '');
   document.getElementById('edit-km-input').value = (entry.km !== null && entry.km !== undefined) ? formatKmStation(entry.km) : '';
+  populateEditExpresswaySelect(entry.expressway || '');
   populateEditBoundSelect(entry.expressway, entry.bound || '');
   renderEditPhotoPreview(entry);
   const modal = document.getElementById('edit-modal');
@@ -2732,6 +2774,16 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('edit-bound-select').addEventListener('change', (e) => {
     document.getElementById('edit-bound-others-input').style.display = e.target.value === 'Others' ? 'block' : 'none';
+  });
+  document.getElementById('edit-expressway-select').addEventListener('change', (e) => {
+    const val = e.target.value;
+    document.getElementById('edit-expressway-others-input').style.display = val === 'Others' ? 'block' : 'none';
+    // Bound's own options depend on which expressway is picked (e.g. NB/SB
+    // only make sense for a mainline, ramps have their own EB/WB-style
+    // pairs), so refresh them. Reset to blank since whatever bound was
+    // selected before may not apply to the newly-chosen expressway.
+    const expresswayForBounds = val === 'Others' ? '' : val;
+    populateEditBoundSelect(expresswayForBounds, '');
   });
 
   // The number pad shown for this field (inputmode="decimal") has no "+"
@@ -2769,12 +2821,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const defectVal = document.getElementById('edit-defect-select').value;
     const laneSelVal = document.getElementById('edit-lane-select').value;
     const laneOthersVal = document.getElementById('edit-lane-others-input').value.trim();
+    const expresswaySelVal = document.getElementById('edit-expressway-select').value;
+    const expresswayOthersVal = document.getElementById('edit-expressway-others-input').value.trim();
     const boundSelVal = document.getElementById('edit-bound-select').value;
     const boundOthersVal = document.getElementById('edit-bound-others-input').value.trim();
     const entry = entries[editingEntryIndex];
     entry.type = defectVal;
     entry.lane = laneSelVal === 'Others' ? laneOthersVal : laneSelVal;
     entry.km = kmResult.km;
+    entry.expressway = expresswaySelVal === 'Others' ? expresswayOthersVal : expresswaySelVal;
     entry.bound = boundSelVal === 'Others' ? boundOthersVal : boundSelVal;
     saveEntries();
     renderLog();
@@ -2961,6 +3016,9 @@ if('serviceWorker' in navigator){
     <input id="edit-lane-others-input" type="text" class="edit-others-input" placeholder="Specify lane" style="display:none;">
     <label class="edit-field-label">KM Station:</label>
     <input id="edit-km-input" type="text" inputmode="decimal" placeholder="e.g. 8+200 — leave blank for off-network">
+    <label class="edit-field-label">Segment / Expressway:</label>
+    <select id="edit-expressway-select" class="edit-select"></select>
+    <input id="edit-expressway-others-input" type="text" class="edit-others-input" placeholder="Specify expressway/segment" style="display:none;">
     <label class="edit-field-label">Bound:</label>
     <select id="edit-bound-select" class="edit-select"></select>
     <input id="edit-bound-others-input" type="text" class="edit-others-input" placeholder="Specify direction" style="display:none;">
