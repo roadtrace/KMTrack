@@ -2728,6 +2728,25 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('edit-bound-others-input').style.display = e.target.value === 'Others' ? 'block' : 'none';
   });
 
+  // The number pad shown for this field (inputmode="decimal") has no "+"
+  // key, so typing plain digits like "8200" would otherwise be parsed as
+  // 8200 whole kilometers instead of the intended 8+200. Auto-insert the
+  // "+" once there are more than 3 digits, so the "km" vs "meters" split
+  // happens automatically without needing a "+" key at all. Only kicks in
+  // while the field is plain digits (no "+" or "." yet) so it doesn't
+  // fight with normal editing of an already-formatted existing value.
+  document.getElementById('edit-km-input').addEventListener('input', (e) => {
+    const el = e.target;
+    const raw = el.value;
+    if(raw.includes('+') || raw.includes('.')) return;
+    const digits = raw.replace(/\D/g, '');
+    if(digits.length > 3){
+      const kmPart = String(parseInt(digits.slice(0, -3), 10));
+      const meterPart = digits.slice(-3);
+      el.value = `${kmPart}+${meterPart}`;
+    }
+  });
+
   document.getElementById('edit-cancel').addEventListener('click', closeEditModal);
   document.getElementById('edit-save').addEventListener('click', () => {
     if(editingEntryIndex === null) return;
