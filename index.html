@@ -2732,18 +2732,23 @@ document.addEventListener('DOMContentLoaded', () => {
   // key, so typing plain digits like "8200" would otherwise be parsed as
   // 8200 whole kilometers instead of the intended 8+200. Auto-insert the
   // "+" once there are more than 3 digits, so the "km" vs "meters" split
-  // happens automatically without needing a "+" key at all. Only kicks in
-  // while the field is plain digits (no "+" or "." yet) so it doesn't
-  // fight with normal editing of an already-formatted existing value.
+  // happens automatically without needing a "+" key at all. The split is
+  // recomputed from the raw digits on *every* keystroke (not just once)
+  // so it keeps shifting correctly past 4 digits — e.g. 65823 -> 65+823,
+  // 112100 -> 112+100 — instead of freezing after the first "+" appears.
+  // Only bails out for a manually-typed "." (a plain decimal entry like
+  // "8.2"), which should be left alone.
   document.getElementById('edit-km-input').addEventListener('input', (e) => {
     const el = e.target;
     const raw = el.value;
-    if(raw.includes('+') || raw.includes('.')) return;
+    if(raw.includes('.')) return;
     const digits = raw.replace(/\D/g, '');
     if(digits.length > 3){
       const kmPart = String(parseInt(digits.slice(0, -3), 10));
       const meterPart = digits.slice(-3);
       el.value = `${kmPart}+${meterPart}`;
+    } else {
+      el.value = digits;
     }
   });
 
