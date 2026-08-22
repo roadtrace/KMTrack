@@ -436,14 +436,18 @@ button {
   .continuous-lane-btn{
     --continuous-border-alpha: .6;
     --continuous-text-alpha: .6;
-    padding:22px 8px; border-radius:14px; border:3px solid; font-weight:800; font-size:22px;
+    position:relative; padding:22px 8px; border-radius:14px; border:3px solid; font-weight:800; font-size:22px;
     cursor:pointer; -webkit-tap-highlight-color:transparent; box-shadow:0 4px 14px rgba(0,0,0,.35);
     background:transparent;
     color:rgba(255,255,255,var(--continuous-text-alpha));
     text-shadow:0 1px 5px rgba(0,0,0,calc(0.9 * var(--continuous-text-alpha))), 0 0 3px rgba(0,0,0,calc(0.7 * var(--continuous-text-alpha)));
   }
+  /* Checkbox-backed, same as the main lane buttons — a real native checkbox
+     sits invisibly over the whole label so tapping it gets iOS's built-in
+     switch-toggle haptic (see the .haptic-label note further up). */
+  .continuous-lane-btn input.continuous-lane-trigger{position:absolute; inset:0; opacity:0; margin:0; padding:0; cursor:pointer;}
   .continuous-lane-btn:active{transform:scale(.95);}
-  .continuous-lane-btn:disabled{opacity:.5;}
+  .continuous-lane-btn.is-disabled{opacity:.5; pointer-events:none;}
   .continuous-lane-btn.others{grid-column:1 / -1; font-size:15px; padding:14px 8px;}
   .continuous-lane-btn.pothole{border-color:rgba(244,180,0,var(--continuous-border-alpha));}
   .continuous-lane-btn.shoving{border-color:rgba(217,119,47,var(--continuous-border-alpha));}
@@ -1990,7 +1994,11 @@ async function captureInspectionPhoto(){
 async function captureContinuousLane(laneValue){
   if(!cameraDraftEntry || continuousCapturing) return;
   continuousCapturing = true;
-  document.querySelectorAll('.continuous-lane-btn').forEach(b => b.disabled = true);
+  document.querySelectorAll('.continuous-lane-btn').forEach(label => {
+    label.classList.add('is-disabled');
+    const cb = label.querySelector('.continuous-lane-trigger');
+    if(cb) cb.disabled = true;
+  });
   cameraDraftEntry.lane = laneValue;
   updateCameraOverlay(cameraDraftEntry);
   try{
@@ -2015,7 +2023,11 @@ async function captureContinuousLane(laneValue){
     cameraErrorEl.classList.add('show');
   }finally{
     continuousCapturing = false;
-    document.querySelectorAll('.continuous-lane-btn').forEach(b => b.disabled = false);
+    document.querySelectorAll('.continuous-lane-btn').forEach(label => {
+      label.classList.remove('is-disabled');
+      const cb = label.querySelector('.continuous-lane-trigger');
+      if(cb) cb.disabled = false;
+    });
   }
 }
 
@@ -2215,8 +2227,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if(!btn) return;
     setCameraMode(btn.dataset.mode);
   });
-  document.querySelectorAll('.continuous-lane-btn').forEach(btn => {
-    btn.addEventListener('click', () => captureContinuousLane(btn.dataset.lane));
+  document.querySelectorAll('.continuous-lane-trigger').forEach(cb => {
+    cb.addEventListener('change', () => captureContinuousLane(cb.dataset.lane));
   });
 
   // ---- In-camera lane picker ----
@@ -2876,12 +2888,12 @@ if('serviceWorker' in navigator){
     </div>
     <div class="camera-continuous-lanes" id="camera-continuous-lanes">
       <div class="continuous-lane-grid">
-        <button type="button" class="continuous-lane-btn" data-lane="1">1</button>
-        <button type="button" class="continuous-lane-btn" data-lane="2">2</button>
-        <button type="button" class="continuous-lane-btn" data-lane="3">3</button>
-        <button type="button" class="continuous-lane-btn" data-lane="4">4</button>
+        <label class="continuous-lane-btn"><input type="checkbox" switch class="continuous-lane-trigger" data-lane="1">1</label>
+        <label class="continuous-lane-btn"><input type="checkbox" switch class="continuous-lane-trigger" data-lane="2">2</label>
+        <label class="continuous-lane-btn"><input type="checkbox" switch class="continuous-lane-trigger" data-lane="3">3</label>
+        <label class="continuous-lane-btn"><input type="checkbox" switch class="continuous-lane-trigger" data-lane="4">4</label>
       </div>
-      <button type="button" class="continuous-lane-btn others" data-lane="Others">Others</button>
+      <label class="continuous-lane-btn others"><input type="checkbox" switch class="continuous-lane-trigger" data-lane="Others">Others</label>
     </div>
     <div class="camera-flash" id="camera-flash"></div>
     <div class="camera-toast" id="camera-toast"></div>
