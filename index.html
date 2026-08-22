@@ -1851,16 +1851,22 @@ async function drawStampBand(ctx, w, h, entry, dateLineText){
     logoW = Math.round(logo.width * logoH / logo.height);
   }
 
-  // The location line stays as a bolder "headline"; the other three lines
-  // (date/time, KM+direction+lane, coordinates) share one consistent
-  // font/size so they read as a uniform block underneath it.
+  // The location line is a bolder "headline" above the other three (date,
+  // KM+direction+lane, coordinates) — but only when it actually names a
+  // known road; for an off-network capture (no matched expressway/km) it's
+  // just "North Luzon Expressway" filler, so it's dropped entirely and the
+  // stamp is date + KM line + coordinates only.
   const bodyFont = (fw) => `500 ${Math.round(fw*scale)}px -apple-system, BlinkMacSystemFont, Arial, sans-serif`;
-  const textStyles = [
-    { text: data.location, font: `800 ${Math.round(27*scale)}px -apple-system, BlinkMacSystemFont, Arial, sans-serif`, lineH: Math.round(32*scale), gapAfter: Math.round(6*scale) },
+  const isOffNetwork = !data.kmText;
+  const textStyles = [];
+  if(!isOffNetwork){
+    textStyles.push({ text: data.location, font: `800 ${Math.round(27*scale)}px -apple-system, BlinkMacSystemFont, Arial, sans-serif`, lineH: Math.round(32*scale), gapAfter: Math.round(6*scale) });
+  }
+  textStyles.push(
     { text: dateLineText, font: bodyFont(26), lineH: Math.round(34*scale), gapAfter: Math.round(9*scale) },
     { text: `${kmText} · ${data.direction} · ${data.lane}`, font: bodyFont(26), lineH: Math.round(34*scale), gapAfter: Math.round(5*scale) },
     { text: `${formatCoordinate(entry.lat,'N','S')}, ${formatCoordinate(entry.lon,'E','W')}`, font: bodyFont(26), lineH: Math.round(34*scale), gapAfter: 0 }
-  ];
+  );
   let textBlockH = 0;
   textStyles.forEach(style => {
     ctx.font = style.font;
