@@ -714,7 +714,33 @@ button {
 </main>
 
 <script>
-let currentPos = null; // {lat, lon, acc}
+class GeoKalmanFilter{
+  constructor(){
+    this.variance = -1;
+    this.lat = 0; this.lon = 0; this.timestampMs = 0;
+  }
+  process(lat, lon, accuracyMeters, timestampMs, speedMs){
+    const acc = Math.max(accuracyMeters || 30, 1);
+    if(this.variance < 0){
+      this.timestampMs = timestampMs;
+      this.lat = lat; this.lon = lon;
+      this.variance = acc * acc;
+      return { lat: this.lat, lon: this.lon };
+    }
+    const dtSec = Math.max(0, (timestampMs - this.timestampMs) / 1000);
+    this.timestampMs = timestampMs;
+    const plausibleSpeed = (typeof speedMs === 'number' && speedMs >= 0) ? Math.max(speedMs * 1.5, 5) : 25;
+    if(dtSec > 0) this.variance += dtSec * plausibleSpeed * plausibleSpeed;
+    const gain = this.variance / (this.variance + acc * acc);
+    this.lat += gain * (lat - this.lat);
+    this.lon += gain * (lon - this.lon);
+    this.variance = (1 - gain) * this.variance;
+    return { lat: this.lat, lon: this.lon };
+  }
+}
+const gpsFilter = new GeoKalmanFilter();
+
+let currentPos = null; // {lat, lon, acc}; coordinates are Kalman-smoothed
 let calibData = [];    // {e, b, k, lat, lon} — loaded from the NLEX network dataset
 let entries = [];      // {type, timestamp, lat, lon, km, expressway, bound, lane, photoId, photoFilename, photoTimestamp}
 let expresswayBounds = {}; // { "NLEX": ["NB","SB"], "C3-R10 RAMP": ["EB","WB"], ... }
@@ -1347,7 +1373,9 @@ if(navigator.geolocation){
   navigator.geolocation.watchPosition(
     (pos) => {
       const firstFix = !currentPos;
-      currentPos = { lat: pos.coords.latitude, lon: pos.coords.longitude, acc: pos.coords.accuracy };
+      const speedMs = (typeof pos.coords.speed === 'number' && pos.coords.speed >= 0) ? pos.coords.speed : null;
+      const smoothed = gpsFilter.process(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy, pos.timestamp, speedMs);
+      currentPos = { lat: smoothed.lat, lon: smoothed.lon, acc: pos.coords.accuracy };
       gpsStatus.textContent = 'GPS locked — updating live';
       gpsStatus.className = 'status ok';
       if(firstFix){
@@ -2675,14 +2703,16 @@ function populateEditExpresswaySelect(currentValue){
   }
 }
 
-function populateEditBoundSelect(expressway, currentValue){
+function populateEditBoundSelect(currentValue){
   const sel = document.getElementById('edit-bound-select');
   const othersInput = document.getElementById('edit-bound-others-input');
   sel.innerHTML = '';
   const blank = document.createElement('option');
   blank.value = ''; blank.textContent = '— (none)';
   sel.appendChild(blank);
-  const options = expresswayBounds[expressway] || [];
+  // Corrections are not limited by the GPS-selected expressway. Inspectors
+  // can choose any standard compass direction or enter a custom direction.
+  const options = ['NB', 'SB', 'EB', 'WB'];
   options.forEach(opt => {
     const o = document.createElement('option');
     o.value = opt; o.textContent = opt;
@@ -2754,7 +2784,7 @@ function openEditModal(index){
   populateLaneSelect(entry.lane || '');
   document.getElementById('edit-km-input').value = (entry.km !== null && entry.km !== undefined) ? formatKmStation(entry.km) : '';
   populateEditExpresswaySelect(entry.expressway || '');
-  populateEditBoundSelect(entry.expressway, entry.bound || '');
+  populateEditBoundSelect(entry.bound || '');
   renderEditPhotoPreview(entry);
   const modal = document.getElementById('edit-modal');
   modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
@@ -2778,12 +2808,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('edit-expressway-select').addEventListener('change', (e) => {
     const val = e.target.value;
     document.getElementById('edit-expressway-others-input').style.display = val === 'Others' ? 'block' : 'none';
-    // Bound's own options depend on which expressway is picked (e.g. NB/SB
-    // only make sense for a mainline, ramps have their own EB/WB-style
-    // pairs), so refresh them. Reset to blank since whatever bound was
-    // selected before may not apply to the newly-chosen expressway.
-    const expresswayForBounds = val === 'Others' ? '' : val;
-    populateEditBoundSelect(expresswayForBounds, '');
   });
 
   // The number pad shown for this field (inputmode="decimal") has no "+"
@@ -2861,7 +2885,7 @@ function toDMM(value, posLabel, negLabel){
   return `${hemi}${deg} ${min.toFixed(4)}`;
 }
 
-document.getElementById('export-btn').addEventListener('click', () => {
+document.getElementById('export-btn').addEventListener('click', async () => {
   if(entries.length === 0) return;
   const header = ['Type of Defect', 'Timestamp', 'Latitude', 'Longitude', 'Latitude (DMM)', 'Longitude (DMM)', 'Expressway', 'Direction', 'Lane', 'Km Station', 'Photo', 'Photo Filename'];
   const rows = entries.map(e => [
@@ -2879,17 +2903,26 @@ document.getElementById('export-btn').addEventListener('click', () => {
     e.photoFilename || ''
   ]);
   const csv = [header, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
   const d = new Date();
   const fname = `kmtrack_${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}.csv`;
-  a.href = url;
-  a.download = fname;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  const exportBtn = document.getElementById('export-btn');
+  exportBtn.disabled = true;
+  let url = null;
+  try{
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fname;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }catch(err){
+    alert(`Could not export the CSV. ${err.message || err}`);
+  }finally{
+    if(url) URL.revokeObjectURL(url);
+    exportBtn.disabled = entries.length === 0;
+  }
 });
 
 /* Visual press feedback for quick defect buttons (the checkbox-backed
