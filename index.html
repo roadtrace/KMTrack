@@ -480,14 +480,6 @@ button {
     transition:opacity .15s ease, transform .15s ease;
   }
   .camera-focus-ring.show{opacity:1; transform:scale(1);}
-  .camera-zoom-control{
-    position:absolute; top:calc(env(safe-area-inset-top) + 104px); left:50%; transform:translateX(-50%);
-    z-index:7; display:none; align-items:center; gap:9px; width:min(68vw,300px); padding:7px 11px;
-    border-radius:22px; background:rgba(0,0,0,.58); color:#fff; font-size:11px; font-weight:700;
-  }
-  .camera-zoom-control.show{display:flex;}
-  .camera-zoom-control input{flex:1; min-width:0; accent-color:var(--line-yellow); touch-action:none;}
-  .camera-zoom-value{width:38px; text-align:right; font-family:var(--mono);}
 
   /* Capture review: shown after the shutter fires, before the photo is
      actually saved — lets the inspector retake a bad shot instead of it
@@ -569,6 +561,59 @@ button {
     .camera-info{padding-left:14px;padding-right:14px;}
     .camera-info .capture-time{font-size:13px;}
     .camera-info .capture-meta{font-size:10px;}
+  }
+
+  /* Landscape layout: use the wider viewport without changing the compact
+     portrait flow. The live readout stays on the left while defect logging
+     remains visible on the right for quick use inside an inspection vehicle. */
+  @media (orientation:landscape) and (min-width:700px){
+    body{padding-bottom:24px;}
+    header{padding:10px 18px 9px;}
+    .header-logo{max-height:42px; width:auto;}
+    main{
+      max-width:1180px; padding:12px 18px;
+      display:grid; grid-template-columns:minmax(300px,.8fr) minmax(430px,1.35fr);
+      grid-template-rows:auto auto auto auto auto; column-gap:18px; align-items:start;
+    }
+    main>section.block:first-child{grid-column:1;grid-row:1;}
+    main>.readout{grid-column:1;grid-row:2;}
+    main>.kmpost{grid-column:1;grid-row:3;}
+    main>#defect-section{grid-column:2;grid-row:1 / span 3;}
+    main>.lane-divider{grid-column:1 / -1;grid-row:4;width:100%;margin:12px 0 2px;}
+    main>section.block:last-child{grid-column:1 / -1;grid-row:5;}
+    #defect-section:not(.focused){display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;}
+    #defect-section:not(.focused)>.defect-header,
+    #defect-section:not(.focused)>.defect-gate{grid-column:1 / -1;}
+    #defect-section:not(.focused)>.defect-category{margin-bottom:0;}
+    .lane-btn{padding:16px 3px;}
+    #defect-section.focused .focused-category .lane-btn{padding:24px 8px;}
+    .readout{margin-top:8px;gap:10px;padding:12px;}
+    .bound-panel{flex-basis:116px;}
+    .kmpost{padding:9px 12px;}
+    .kmpost .kmvalue{font-size:30px;}
+    .lane-modal{width:min(620px,92vw);max-height:calc(100vh - 24px);overflow:auto;}
+
+    /* Camera controls are shortened and spread horizontally so the live
+       viewfinder remains usable on a shallow landscape phone screen. */
+    .camera-topbar{padding-top:calc(env(safe-area-inset-top) + 8px);}
+    .camera-mode-toggle{top:calc(env(safe-area-inset-top) + 50px);}
+    .camera-info{padding:16px 18px calc(env(safe-area-inset-bottom) + 104px);}
+    .camera-lane-picker{left:14px;right:auto;width:250px;bottom:calc(env(safe-area-inset-bottom) + 12px);}
+    .camera-bottom{height:86px;}
+    .camera-shutter{width:62px;height:62px;}
+    .camera-continuous-lanes.show{
+      display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;
+      bottom:calc(env(safe-area-inset-bottom) + 12px);
+    }
+    .camera-continuous-lanes .continuous-lane-grid{display:contents;}
+    .camera-continuous-lanes .continuous-lane-btn{padding:14px 6px;font-size:19px;}
+    .camera-continuous-lanes .continuous-lane-btn.others{grid-column:auto;padding:14px 6px;}
+    .camera-review{flex-direction:row;}
+    #camera-review-img{width:auto;height:100%;}
+    .camera-review-actions{width:180px;flex:0 0 180px;flex-direction:column;justify-content:center;}
+    .photo-card{height:100%;flex-direction:row;align-items:center;}
+    #photo-preview{max-width:calc(100% - 170px);max-height:100%;}
+    .photo-actions{width:160px;flex-direction:column;}
   }
 </style>
 </head>
@@ -1529,11 +1574,7 @@ const CUSTOM_LOGO_KEY = 'kmtrack_customLogo';
 // stream instead of attaching it to a now-closed modal — otherwise the
 // camera would keep running invisibly in the background.
 let cameraRequestId = 0;
-let cameraZoom = 1;
-let cameraUsesHardwareZoom = false;
 let cameraCapabilities = {};
-let cameraPinchStartDistance = 0;
-let cameraPinchStartZoom = 1;
 
 // Capture review state — set once the shutter fires, cleared on Save/Retake/Close.
 // The photo isn't committed to entries/IndexedDB until Save is tapped.
@@ -1623,65 +1664,18 @@ function cameraTrack(){
   return cameraStream ? cameraStream.getVideoTracks()[0] : null;
 }
 
-function updateDigitalZoomPreview(){
-  const scale = cameraUsesHardwareZoom ? 1 : cameraZoom;
-  cameraVideo.style.transform = `scale(${scale})`;
-  cameraVideo.style.transformOrigin = 'center center';
-}
-
-async function setCameraZoom(value){
-  const slider = document.getElementById('camera-zoom-slider');
-  const label = document.getElementById('camera-zoom-value');
-  const min = Number(slider.min); const max = Number(slider.max);
-  cameraZoom = Math.min(max, Math.max(min, Number(value) || min));
-  slider.value = cameraZoom;
-  label.textContent = `${cameraZoom.toFixed(1)}×`;
-
-  if(cameraUsesHardwareZoom){
-    const track = cameraTrack();
-    if(!track) return;
-    try{
-      const focusModes = cameraCapabilities.focusMode || [];
-      const constraints = { zoom: cameraZoom };
-      if(focusModes.includes('continuous')) constraints.focusMode = 'continuous';
-      await track.applyConstraints(constraints);
-      const applied = track.getSettings ? track.getSettings().zoom : null;
-      if(typeof applied === 'number'){
-        cameraZoom = applied;
-        slider.value = applied;
-        label.textContent = `${applied.toFixed(1)}×`;
-      }
-    }catch(err){
-      cameraErrorEl.textContent = `Camera zoom is unavailable. ${err.message || err}`;
-      cameraErrorEl.classList.add('show');
-    }
-  }
-  updateDigitalZoomPreview();
-}
-
-async function configureCameraControls(){
+async function configureCameraFocus(){
   const track = cameraTrack();
-  const control = document.getElementById('camera-zoom-control');
-  const slider = document.getElementById('camera-zoom-slider');
   try{
     cameraCapabilities = track && track.getCapabilities ? track.getCapabilities() : {};
   }catch(e){
     cameraCapabilities = {};
   }
-  const zoomCaps = cameraCapabilities.zoom;
-  cameraUsesHardwareZoom = !!(zoomCaps && Number.isFinite(zoomCaps.min) && Number.isFinite(zoomCaps.max) && zoomCaps.max > zoomCaps.min);
-  if(cameraUsesHardwareZoom){
-    slider.min = zoomCaps.min;
-    slider.max = zoomCaps.max;
-    slider.step = zoomCaps.step || 0.1;
-    const current = track.getSettings ? track.getSettings().zoom : zoomCaps.min;
-    cameraZoom = typeof current === 'number' ? current : zoomCaps.min;
-  }else{
-    slider.min = 1; slider.max = 4; slider.step = 0.1;
-    cameraZoom = 1;
+  const focusModes = cameraCapabilities.focusMode || [];
+  if(track && focusModes.includes('continuous')){
+    try{ await track.applyConstraints({ focusMode:'continuous' }); }
+    catch(e){ /* Browser keeps its default autofocus behavior. */ }
   }
-  control.classList.add('show');
-  await setCameraZoom(cameraZoom);
 }
 
 async function openCameraForNewEntry(type){
@@ -1715,7 +1709,7 @@ async function openCameraForNewEntry(type){
     cameraStream = stream;
     cameraVideo.srcObject = stream;
     await cameraVideo.play();
-    await configureCameraControls();
+    await configureCameraFocus();
   }catch(err){
     if(myRequestId !== cameraRequestId) return; // modal already closed; nothing to show the error on
     cameraErrorEl.textContent = `Could not open the camera. ${err.message || err}`;
@@ -1763,7 +1757,7 @@ async function openCameraForEntryPhoto(index){
     cameraStream = stream;
     cameraVideo.srcObject = stream;
     await cameraVideo.play();
-    await configureCameraControls();
+    await configureCameraFocus();
   }catch(err){
     if(myRequestId !== cameraRequestId) return;
     cameraErrorEl.textContent = `Could not open the camera. ${err.message || err}`;
@@ -1778,12 +1772,7 @@ function closeCamera(){
     cameraStream = null;
   }
   cameraVideo.srcObject = null;
-  cameraVideo.style.transform = '';
-  cameraZoom = 1;
-  cameraUsesHardwareZoom = false;
   cameraCapabilities = {};
-  const zoomControl = document.getElementById('camera-zoom-control');
-  if(zoomControl) zoomControl.classList.remove('show');
   cameraModal.classList.remove('show');
   cameraModal.setAttribute('aria-hidden','true');
   cameraDraftEntry = null;
@@ -1825,8 +1814,7 @@ async function applyTapFocus(clientX, clientY){
     if(caps.pointsOfInterest){
       const videoW = cameraVideo.videoWidth || (track.getSettings && track.getSettings().width) || 1;
       const videoH = cameraVideo.videoHeight || (track.getSettings && track.getSettings().height) || 1;
-      const digitalScale = cameraUsesHardwareZoom ? 1 : cameraZoom;
-      const coverScale = Math.max(rect.width / videoW, rect.height / videoH) * digitalScale;
+      const coverScale = Math.max(rect.width / videoW, rect.height / videoH);
       const renderedW = videoW * coverScale; const renderedH = videoH * coverScale;
       const sourceX = (clientX - rect.left + (renderedW - rect.width) / 2) / coverScale;
       const sourceY = (clientY - rect.top + (renderedH - rect.height) / 2) / coverScale;
@@ -1837,7 +1825,6 @@ async function applyTapFocus(clientX, clientY){
     }
     if(focusModes.includes('single-shot')) constraints.focusMode = 'single-shot';
     else if(focusModes.includes('continuous')) constraints.focusMode = 'continuous';
-    if(cameraUsesHardwareZoom) constraints.zoom = cameraZoom;
     await track.applyConstraints(constraints);
   }catch(e){
     cameraErrorEl.textContent = `Tap focus is not supported by this camera. ${e.message || e}`;
@@ -2056,12 +2043,7 @@ async function buildStampedPhotoBlob(entry){
   canvas.width = w;
   canvas.height = h;
   const ctx = canvas.getContext('2d');
-  if(!cameraUsesHardwareZoom && cameraZoom > 1){
-    const cropW = w / cameraZoom; const cropH = h / cameraZoom;
-    ctx.drawImage(cameraVideo, (w - cropW) / 2, (h - cropH) / 2, cropW, cropH, 0, 0, w, h);
-  }else{
-    ctx.drawImage(cameraVideo, 0, 0, w, h);
-  }
+  ctx.drawImage(cameraVideo, 0, 0, w, h);
 
   // Snapshot the plain frame BEFORE the stamp band is drawn. Stored
   // alongside the stamped photo so that later edits to this entry's
@@ -2366,18 +2348,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if(review && review.classList.contains('show')) return; // ignore taps while reviewing a captured shot
     applyTapFocus(e.clientX, e.clientY);
   });
-  document.getElementById('camera-zoom-slider').addEventListener('input', (e) => setCameraZoom(e.target.value));
-  cameraVideo.addEventListener('touchstart', (e) => {
-    if(e.touches.length !== 2) return;
-    cameraPinchStartDistance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-    cameraPinchStartZoom = cameraZoom;
-  }, {passive:true});
-  cameraVideo.addEventListener('touchmove', (e) => {
-    if(e.touches.length !== 2 || !cameraPinchStartDistance) return;
-    const distance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-    setCameraZoom(cameraPinchStartZoom * distance / cameraPinchStartDistance);
-  }, {passive:true});
-  cameraVideo.addEventListener('touchend', () => { cameraPinchStartDistance = 0; }, {passive:true});
   document.getElementById('camera-retake-btn').addEventListener('click', retakeCapturedPhoto);
   document.getElementById('camera-save-btn').addEventListener('click', saveCapturedPhoto);
   document.querySelectorAll('.category-camera-btn').forEach(btn => {
@@ -3118,11 +3088,6 @@ if('serviceWorker' in navigator){
       <button type="button" class="camera-mode-btn active" data-mode="single">📷 Single Shot</button>
       <button type="button" class="camera-mode-btn" data-mode="continuous">⚡ Continuous</button>
     </div>
-    <label class="camera-zoom-control" id="camera-zoom-control">
-      <span>Zoom</span>
-      <input id="camera-zoom-slider" type="range" min="1" max="4" step="0.1" value="1" aria-label="Camera zoom">
-      <span class="camera-zoom-value" id="camera-zoom-value">1.0×</span>
-    </label>
     <div class="camera-info" id="camera-info">
       <div class="capture-time" id="camera-time">--</div>
       <div class="capture-meta" id="camera-meta">GPS unavailable</div>
