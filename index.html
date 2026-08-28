@@ -272,6 +272,8 @@
     letter-spacing:0.3px; white-space:nowrap; cursor:pointer; -webkit-tap-highlight-color:transparent;
   }
   .export-btn:disabled{background:#3a4046; color:#6b7176; cursor:not-allowed;}
+  .export-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end;}
+  .backup-btn{background:var(--safety-green);color:#fff;}
 
 /* KMTrack adaptive header */
 header{display:flex;align-items:center;gap:12px;}
@@ -755,7 +757,10 @@ button {
         <span class="count-divider">|</span>
         <span id="last-time">--</span>
       </div>
-      <button class="export-btn" id="export-btn" disabled>⬇ Export CSV</button>
+      <div class="export-actions">
+        <button class="export-btn" id="export-btn" disabled>⬇ Export Excel</button>
+        <button class="export-btn backup-btn" id="backup-btn" disabled>⬇ Backup ZIP</button>
+      </div>
     </div>
     <div class="bulk-actions-bar" id="bulk-actions-bar" style="display:none;">
       <button type="button" class="bulk-select-all-btn" id="bulk-select-all-btn">Select all</button>
@@ -2462,6 +2467,7 @@ function exitSelectMode(){
 function renderLog(){
   const list = document.getElementById('log-list');
   const exportBtn = document.getElementById('export-btn');
+  const backupBtn = document.getElementById('backup-btn');
   document.getElementById('count-mini').textContent = entries.length;
   document.getElementById('count-label').textContent = `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}`;
   document.getElementById('last-time').textContent = entries.length ? `last: ${entries[entries.length-1].timestamp.split(' ')[1]}` : '--';
@@ -2469,10 +2475,12 @@ function renderLog(){
   if(entries.length === 0){
     list.innerHTML = '<div class="log-empty">No defects logged yet</div>';
     exportBtn.disabled = true;
+    backupBtn.disabled = true;
     if(selectMode) exitSelectMode();
     return;
   }
   exportBtn.disabled = false;
+  backupBtn.disabled = false;
 
   list.innerHTML = '';
   entries.slice().reverse().forEach((e) => {
@@ -2969,7 +2977,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// ---------- CSV export ----------
+// ---------- Excel export ----------
 function toDMM(value, posLabel, negLabel){
   // Converts decimal degrees to "N14 49.1819" style degrees + decimal-minutes,
   // matching common dashcam GPS overlay formatting — for cross-referencing
@@ -2981,31 +2989,66 @@ function toDMM(value, posLabel, negLabel){
   return `${hemi}${deg} ${min.toFixed(4)}`;
 }
 
+function xmlEscape(value){
+  return String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+}
+
+function excelColumnName(index){
+  let name='';
+  for(let n=index+1;n>0;n=Math.floor((n-1)/26)) name=String.fromCharCode(65+((n-1)%26))+name;
+  return name;
+}
+
+function inspectionWorkbookRows(){
+  return [
+    ['Type of Defect','Timestamp','Latitude','Longitude','Latitude (DMM)','Longitude (DMM)','Expressway','Direction','Lane','Km Station','Photo','Photo Filename'],
+    ...entries.map(e=>[
+      e.type,e.timestamp,e.lat,e.lon,toDMM(e.lat,'N','S'),toDMM(e.lon,'E','W'),
+      e.expressway||'',e.bound||'',e.lane||'',e.km===null||e.km===undefined?'':Number(kmToCsvNumber(e.km)),
+      e.photoId?'Yes':'No',e.photoFilename||''
+    ])
+  ];
+}
+
+async function buildInspectionWorkbook(createdAt){
+  const rows=inspectionWorkbookRows();
+  const rowXml=rows.map((row,rowIndex)=>{
+    const cells=row.map((value,colIndex)=>{
+      const ref=`${excelColumnName(colIndex)}${rowIndex+1}`;
+      if(typeof value==='number'&&Number.isFinite(value)) return `<c r="${ref}" s="${colIndex===2||colIndex===3?2:colIndex===9?3:0}"><v>${value}</v></c>`;
+      const style=rowIndex===0?' s="1"':'';
+      return `<c r="${ref}" t="inlineStr"${style}><is><t xml:space="preserve">${xmlEscape(value)}</t></is></c>`;
+    }).join('');
+    return `<row r="${rowIndex+1}">${cells}</row>`;
+  }).join('');
+  const sheet=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><dimension ref="A1:L${rows.length}"/><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols><col min="1" max="1" width="28" customWidth="1"/><col min="2" max="2" width="21" customWidth="1"/><col min="3" max="6" width="18" customWidth="1"/><col min="7" max="9" width="17" customWidth="1"/><col min="10" max="11" width="13" customWidth="1"/><col min="12" max="12" width="42" customWidth="1"/></cols><sheetData>${rowXml}</sheetData><autoFilter ref="A1:L${rows.length}"/></worksheet>`;
+  const files=[
+    {name:'[Content_Types].xml',blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/><Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/></Types>`]),date:createdAt},
+    {name:'_rels/.rels',blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/></Relationships>`]),date:createdAt},
+    {name:'xl/workbook.xml',blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Inspection Log" sheetId="1" r:id="rId1"/></sheets></workbook>`]),date:createdAt},
+    {name:'xl/_rels/workbook.xml.rels',blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`]),date:createdAt},
+    {name:'xl/styles.xml',blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><color rgb="FF191C1F"/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFF4B400"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/><xf numFmtId="2" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="4" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`]),date:createdAt},
+    {name:'xl/worksheets/sheet1.xml',blob:new Blob([sheet]),date:createdAt},
+    {name:'docProps/core.xml',blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>KMTrack Inspection Log</dc:title><dc:creator>KMTrack</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">${createdAt.toISOString()}</dcterms:created></cp:coreProperties>`]),date:createdAt},
+    {name:'docProps/app.xml',blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"><Application>KMTrack</Application></Properties>`]),date:createdAt}
+  ];
+  const zip=await createStoredZip(files);
+  return zip.slice(0,zip.size,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+}
+
+function exportTimestamp(date){
+  return `${date.getFullYear()}${pad(date.getMonth()+1)}${pad(date.getDate())}_${pad(date.getHours())}${pad(date.getMinutes())}`;
+}
+
 document.getElementById('export-btn').addEventListener('click', async () => {
   if(entries.length === 0) return;
-  const header = ['Type of Defect', 'Timestamp', 'Latitude', 'Longitude', 'Latitude (DMM)', 'Longitude (DMM)', 'Expressway', 'Direction', 'Lane', 'Km Station', 'Photo', 'Photo Filename'];
-  const rows = entries.map(e => [
-    e.type,
-    e.timestamp,
-    e.lat.toFixed(6),
-    e.lon.toFixed(6),
-    toDMM(e.lat, 'N', 'S'),
-    toDMM(e.lon, 'E', 'W'),
-    e.expressway || '',
-    e.bound || '',
-    e.lane || '',
-    kmToCsvNumber(e.km),
-    e.photoId ? 'Yes' : 'No',
-    e.photoFilename || ''
-  ]);
-  const csv = [header, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
   const d = new Date();
-  const fname = `kmtrack_${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}.csv`;
+  const fname = `kmtrack_${exportTimestamp(d)}.xlsx`;
   const exportBtn = document.getElementById('export-btn');
   exportBtn.disabled = true;
   let url = null;
   try{
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const blob = await buildInspectionWorkbook(d);
     url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -3014,10 +3057,131 @@ document.getElementById('export-btn').addEventListener('click', async () => {
     a.click();
     document.body.removeChild(a);
   }catch(err){
-    alert(`Could not export the CSV. ${err.message || err}`);
+    alert(`Could not export the Excel workbook. ${err.message || err}`);
   }finally{
     if(url) URL.revokeObjectURL(url);
     exportBtn.disabled = entries.length === 0;
+  }
+});
+
+// ---------- Complete local backup (uncompressed ZIP, no external library) ----------
+// ZIP "store" mode keeps the already-compressed JPEGs as-is, avoiding a large
+// dependency and needless recompression. Each photo is read once for its CRC,
+// then the original Blob is appended directly to the archive.
+const ZIP_CRC_TABLE = (() => {
+  const table = new Uint32Array(256);
+  for(let n=0;n<256;n++){
+    let c=n;
+    for(let k=0;k<8;k++) c=(c&1) ? (0xedb88320^(c>>>1)) : (c>>>1);
+    table[n]=c>>>0;
+  }
+  return table;
+})();
+
+function zipCrc32(bytes){
+  let crc=0xffffffff;
+  for(const byte of bytes) crc=ZIP_CRC_TABLE[(crc^byte)&0xff]^(crc>>>8);
+  return (crc^0xffffffff)>>>0;
+}
+
+function zipHeader(size){ return new DataView(new ArrayBuffer(size)); }
+function zipU16(view, offset, value){ view.setUint16(offset,value,true); }
+function zipU32(view, offset, value){ view.setUint32(offset,value>>>0,true); }
+function zipDosDateTime(date){
+  const year=Math.max(1980,date.getFullYear());
+  return {
+    time:(date.getHours()<<11)|(date.getMinutes()<<5)|(date.getSeconds()>>1),
+    date:((year-1980)<<9)|((date.getMonth()+1)<<5)|date.getDate()
+  };
+}
+
+async function createStoredZip(files){
+  const encoder=new TextEncoder();
+  const parts=[]; const central=[];
+  let offset=0;
+  for(const file of files){
+    const nameBytes=encoder.encode(file.name);
+    const dataBytes=new Uint8Array(await file.blob.arrayBuffer());
+    const size=dataBytes.byteLength;
+    if(size>0xffffffff || offset>0xffffffff) throw new Error('Backup is too large for a standard ZIP file.');
+    const crc=zipCrc32(dataBytes);
+    const dos=zipDosDateTime(file.date || new Date());
+    const local=zipHeader(30+nameBytes.length);
+    zipU32(local,0,0x04034b50); zipU16(local,4,20); zipU16(local,6,0x0800); zipU16(local,8,0);
+    zipU16(local,10,dos.time); zipU16(local,12,dos.date); zipU32(local,14,crc);
+    zipU32(local,18,size); zipU32(local,22,size); zipU16(local,26,nameBytes.length); zipU16(local,28,0);
+    new Uint8Array(local.buffer,30).set(nameBytes);
+    parts.push(local.buffer,file.blob);
+
+    const record=zipHeader(46+nameBytes.length);
+    zipU32(record,0,0x02014b50); zipU16(record,4,20); zipU16(record,6,20); zipU16(record,8,0x0800); zipU16(record,10,0);
+    zipU16(record,12,dos.time); zipU16(record,14,dos.date); zipU32(record,16,crc);
+    zipU32(record,20,size); zipU32(record,24,size); zipU16(record,28,nameBytes.length);
+    zipU16(record,30,0); zipU16(record,32,0); zipU16(record,34,0); zipU16(record,36,0); zipU32(record,38,0); zipU32(record,42,offset);
+    new Uint8Array(record.buffer,46).set(nameBytes);
+    central.push(record.buffer);
+    offset+=local.byteLength+size;
+  }
+  const centralSize=central.reduce((sum,part)=>sum+part.byteLength,0);
+  const end=zipHeader(22);
+  zipU32(end,0,0x06054b50); zipU16(end,4,0); zipU16(end,6,0);
+  zipU16(end,8,files.length); zipU16(end,10,files.length);
+  zipU32(end,12,centralSize); zipU32(end,16,offset); zipU16(end,20,0);
+  return new Blob([...parts,...central,end.buffer],{type:'application/zip'});
+}
+
+function safeBackupFilename(name,index){
+  const cleaned=String(name||'inspection_photo.jpg').replace(/[\\/:*?"<>|\x00-\x1f]/g,'_').replace(/^\.+/,'').slice(0,140);
+  return `${String(index+1).padStart(4,'0')}_${cleaned||'inspection_photo.jpg'}`;
+}
+
+document.getElementById('backup-btn').addEventListener('click', async () => {
+  if(entries.length===0) return;
+  const button=document.getElementById('backup-btn');
+  const csvButton=document.getElementById('export-btn');
+  button.disabled=true; csvButton.disabled=true;
+  const originalLabel=button.textContent;
+  let url=null;
+  try{
+    const createdAt=new Date();
+    const stamp=exportTimestamp(createdAt);
+    const files=[
+      {name:`KMTrack_backup_${stamp}/inspection_log.xlsx`,blob:await buildInspectionWorkbook(createdAt),date:createdAt},
+      {name:`KMTrack_backup_${stamp}/README.txt`,blob:new Blob(['KMTrack inspection backup\n\nThis archive contains the inspection Excel workbook, available stamped photos, and manifest.json.\nPhotos listed as missing in the manifest were referenced by the log but were not present in this browser storage at export time.\n'],{type:'text/plain;charset=utf-8'}),date:createdAt}
+    ];
+    const manifestEntries=[];
+    let exportedPhotos=0; let missingPhotos=0;
+    for(let i=0;i<entries.length;i++){
+      const entry=entries[i];
+      let archivePhotoPath=''; let photoAvailable=false;
+      if(entry.photoId){
+        button.textContent=`Packing ${i+1}/${entries.length}…`;
+        const photo=await getPhoto(entry.photoId);
+        if(photo){
+          archivePhotoPath=`KMTrack_backup_${stamp}/photos/${safeBackupFilename(entry.photoFilename,i)}`;
+          files.push({name:archivePhotoPath,blob:photo,date:createdAt});
+          photoAvailable=true; exportedPhotos++;
+        }else missingPhotos++;
+      }
+      manifestEntries.push({...entry,photoAvailable,archivePhotoPath});
+      await new Promise(resolve=>setTimeout(resolve,0));
+    }
+    const manifest={format:'KMTrack inspection backup',version:1,createdAt:createdAt.toISOString(),entryCount:entries.length,photoCount:exportedPhotos,missingPhotoCount:missingPhotos,entries:manifestEntries};
+    files.push({name:`KMTrack_backup_${stamp}/manifest.json`,blob:new Blob([JSON.stringify(manifest,null,2)],{type:'application/json'}),date:createdAt});
+    button.textContent='Building ZIP…';
+    const zip=await createStoredZip(files);
+    url=URL.createObjectURL(zip);
+    const link=document.createElement('a');
+    link.href=url; link.download=`KMTrack_backup_${stamp}.zip`;
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    const note=missingPhotos ? ` ${missingPhotos} referenced photo(s) were missing and are identified in manifest.json.` : '';
+    alert(`Backup ready: ${entries.length} entries and ${exportedPhotos} photos.${note}`);
+  }catch(err){
+    alert(`Could not create the backup ZIP. ${err.message||err}`);
+  }finally{
+    if(url) URL.revokeObjectURL(url);
+    button.textContent=originalLabel;
+    button.disabled=entries.length===0; csvButton.disabled=entries.length===0;
   }
 });
 
