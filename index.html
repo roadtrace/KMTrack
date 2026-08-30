@@ -2216,31 +2216,46 @@ async function drawStampBand(ctx, w, h, entry, dateLineText){
   const bandH = topPad + logoBlockH + textBlockH + bottomPad;
   const bandY = h - bandH;
 
-  // Solid (not gradient) scrim: guarantees the text stays readable no
-  // matter what's behind it — a light wall, sky, pavement, anything.
-  ctx.fillStyle = 'rgba(5,9,13,0.80)';
-  ctx.fillRect(0, bandY, w, bandH);
+  // No backing panel: the photo remains visible beneath the watermark. The
+  // text receives its own outline and drop shadow below so it stays readable
+  // over both pale sky/concrete and dark pavement.
 
-  // Left accent stripe, echoing the reference stamp's colour keyline.
+  // Left accent stripe keeps the watermark visually grouped without a box.
   ctx.fillStyle = '#f4b400';
   ctx.fillRect(edgePad, bandY + topPad, stripeW, bandH - topPad - bottomPad);
 
   let y = bandY + topPad;
   if(logo){
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.9)';
+    ctx.shadowBlur = Math.round(6*scale);
+    ctx.shadowOffsetX = Math.round(2*scale);
+    ctx.shadowOffsetY = Math.round(3*scale);
     ctx.drawImage(logo, contentX, y, logoW, logoH);
+    ctx.restore();
     y += logoBlockH;
   }
 
+  ctx.save();
   ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = 'rgba(0,0,0,0.9)';
+  ctx.lineWidth = Math.max(2, Math.round(3*scale));
+  ctx.lineJoin = 'round';
+  ctx.shadowColor = 'rgba(0,0,0,0.95)';
+  ctx.shadowBlur = Math.round(6*scale);
+  ctx.shadowOffsetX = Math.round(2*scale);
+  ctx.shadowOffsetY = Math.round(3*scale);
   ctx.textBaseline = 'top';
   textStyles.forEach(style => {
     ctx.font = style.font;
     style.lines.forEach(line => {
+      ctx.strokeText(line, contentX, y);
       ctx.fillText(line, contentX, y);
       y += style.lineH;
     });
     y += style.gapAfter;
   });
+  ctx.restore();
 }
 
 async function buildStampedPhotoBlob(entry){
