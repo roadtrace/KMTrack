@@ -12,20 +12,45 @@
 <link rel="manifest" href="manifest.json">
 <title>KMTrack — Road Inspection Log</title>
 <style>
+  @font-face{
+    font-family:'Inter';
+    src:url('fonts/InterVariable.woff2') format('woff2');
+    font-style:normal;
+    font-weight:100 900;
+    font-display:swap;
+  }
   :root{
-    --asphalt:#191c1f;
-    --asphalt-2:#22262a;
-    --panel:#2a2f34;
+    --asphalt:#14181c;
+    --asphalt-2:#1c2126;
+    --panel:#252b31;
+    --panel-raised:#2b3239;
+    --surface-soft:#303840;
     --line-yellow:#f4b400;
-    --line-white:#f4f4f2;
+    --line-white:#f5f7f8;
     --safety-green:#2e8b57;
     --safety-red:#c1392b;
     --safety-orange:#d9772f;
-    --mono: 'Courier New', ui-monospace, monospace;
-    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --text-muted:#a7b0b8;
+    --text-subtle:#707b84;
+    --border:rgba(255,255,255,.10);
+    --border-strong:rgba(255,255,255,.18);
+    --radius-sm:8px;
+    --radius-md:12px;
+    --radius-lg:16px;
+    --radius-pill:999px;
+    --space-1:4px;
+    --space-2:8px;
+    --space-3:12px;
+    --space-4:16px;
+    --space-6:24px;
+    --shadow-card:0 10px 28px rgba(0,0,0,.18);
+    --font-ui:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
+    --mono:var(--font-ui);
+    --sans:var(--font-ui);
   }
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;background:var(--asphalt);color:var(--line-white);font-family:var(--sans);}
+  html,body{margin:0;padding:0;background:var(--asphalt);color:var(--line-white);font-family:var(--font-ui);font-synthesis:none;}
+  button,input,select,textarea{font-family:inherit;}
   body{padding-bottom:40px;}
 
   /* Dashed lane-line divider used as a structural motif */
@@ -581,6 +606,116 @@ button {
     .camera-info .capture-meta{font-size:10px;}
   }
 
+  /* ---------- Unified modern interface system ---------- */
+  body{line-height:1.4;letter-spacing:-.005em;}
+  header{
+    border-bottom-width:2px;
+    box-shadow:0 8px 24px rgba(0,0,0,.20);
+  }
+  header h1,.header-copy h1{font-weight:750;letter-spacing:-.025em;}
+  header .sub{color:var(--text-muted);font-weight:450;letter-spacing:0;}
+
+  .readout,.bound-panel,details.calib,.log-entry{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+  }
+  .readout,.bound-panel,details.calib{box-shadow:var(--shadow-card);}
+  .kmpost{
+    border:2px solid rgba(255,255,255,.88);
+    border-radius:var(--radius-lg);
+    box-shadow:0 12px 32px rgba(0,0,0,.24);
+  }
+  .lane-modal{
+    background:var(--panel-raised);
+    border-color:var(--border-strong);
+    border-radius:var(--radius-lg);
+  }
+
+  h2,.kmpost .kmlabel,.readout-main .field .label{
+    font-weight:700;
+    letter-spacing:.10em;
+  }
+  h2,.readout-main .field .label{color:var(--text-muted);}
+  .readout-main .field .value,
+  .readout-main .status,
+  .kmpost .kmvalue,
+  .nearby-asset-station,
+  header .sub,
+  .log-entry .info .meta,
+  .photo-status,
+  .camera-info .capture-meta,
+  .camera-hint{
+    font-family:var(--font-ui);
+    font-variant-numeric:tabular-nums;
+    font-feature-settings:'tnum' 1;
+  }
+  .readout-main .field .value{font-weight:600;letter-spacing:.01em;}
+  .readout-main .status{font-weight:500;}
+  .kmpost .kmvalue{font-weight:760;letter-spacing:-.035em;}
+  .nearby-asset-station{font-weight:700;letter-spacing:.01em;}
+  .kmpost .kmlabel{letter-spacing:.12em;}
+  .kmpost .kmunit,.nearby-asset-distance{color:rgba(240,255,246,.82);}
+  .bound-hint,.bound-auto-status,.log-empty{color:var(--text-subtle);}
+  .category-label .category-sub,.calib-hint,.count-bar,.log-entry .info .meta,.edit-field-label,.logo-hint{color:var(--text-muted);}
+
+  button,select,input,.logo-upload-label{
+    transition:transform 120ms ease,filter 120ms ease,background-color 160ms ease,border-color 160ms ease,box-shadow 160ms ease;
+  }
+  button:focus-visible,select:focus-visible,input:focus-visible,.logo-upload-label:focus-visible{
+    outline:3px solid rgba(244,180,0,.55);
+    outline-offset:2px;
+  }
+  button.bound-btn{
+    min-height:48px;border:1px solid var(--border-strong);border-radius:var(--radius-md);
+    background:var(--panel-raised);box-shadow:0 4px 12px rgba(0,0,0,.12);
+  }
+  button.bound-btn.active{box-shadow:0 6px 16px rgba(244,180,0,.20);}
+  .lane-btn{
+    min-height:48px;border-radius:var(--radius-md);
+    box-shadow:0 6px 16px rgba(0,0,0,.16);
+    transition:transform 100ms ease,filter 100ms ease,box-shadow 140ms ease;
+  }
+  .lane-btn:active{transform:scale(.97);filter:brightness(.9);box-shadow:0 2px 8px rgba(0,0,0,.18);}
+  .defect-focus-select,.add-custom input,.edit-select,.lane-modal input,.camera-lane-picker select,.camera-lane-picker input{
+    min-height:48px;border-radius:var(--radius-md);border-color:var(--border-strong);
+  }
+  .defect-focus-select{background-color:var(--panel-raised);font-size:12px;padding-left:14px;}
+  details.calib{padding:12px 16px;margin-bottom:8px;}
+  details.calib summary{min-height:24px;display:flex;align-items:center;}
+  .log-entry{border-left:4px solid var(--line-yellow);box-shadow:0 5px 16px rgba(0,0,0,.12);}
+
+  .calib-add,.select-toggle-btn,.export-btn,.bulk-actions-bar button,
+  .custom-log-btn,.add-custom button,.modal-actions button,
+  .edit-photo-add-btn,.edit-photo-remove-btn,.logo-upload-label,.logo-remove-btn,
+  .photo-actions button,.photo-actions a,.camera-close,.camera-logo-btn{
+    min-height:48px;border-radius:var(--radius-md);display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .select-toggle-btn,.export-btn{border-radius:var(--radius-pill);padding-left:16px;padding-right:16px;}
+  .export-btn{box-shadow:0 5px 14px rgba(0,0,0,.14);}
+  .bulk-actions-bar{gap:var(--space-3);}
+  .modal-actions{gap:var(--space-3);margin-top:var(--space-4);}
+
+  .category-camera-btn{
+    width:40px;height:40px;border-radius:var(--radius-md);border:1px solid var(--border-strong);
+    background:rgba(255,255,255,.055);color:var(--line-white);
+  }
+  .category-camera-btn:hover{background:rgba(255,255,255,.10);}
+  .category-camera-btn::before,.photo-view-btn::before,.edit-photo-add-btn::before,
+  .camera-mode-btn[data-mode="single"]::before{
+    content:'';display:inline-block;width:18px;height:18px;flex:0 0 18px;background:currentColor;
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M9 3 7.2 5H4a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h16a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3h-3.2L15 3H9Zm3 4.25A5.25 5.25 0 1 1 12 17.75 5.25 5.25 0 0 1 12 7.25Zm0 2A3.25 3.25 0 1 0 12 15.75 3.25 3.25 0 0 0 12 9.25Z'/%3E%3C/svg%3E") center/contain no-repeat;
+    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M9 3 7.2 5H4a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h16a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3h-3.2L15 3H9Zm3 4.25A5.25 5.25 0 1 1 12 17.75 5.25 5.25 0 0 1 12 7.25Zm0 2A3.25 3.25 0 1 0 12 15.75 3.25 3.25 0 0 0 12 9.25Z'/%3E%3C/svg%3E") center/contain no-repeat;
+  }
+  .calib-add::before{
+    content:'↻';font-size:18px;line-height:1;font-weight:600;
+  }
+  .export-btn::before{
+    content:'↓';font-size:17px;line-height:1;font-weight:700;
+  }
+  .photo-view-btn,.photo-remove-btn{min-height:40px;border-radius:var(--radius-sm);}
+  .camera-mode-btn,.camera-close,.camera-logo-btn{font-weight:650;}
+
   /* Landscape dashboard: calibration/GPS, direction, and KM/asset cards form
      one clean top row; the large defect controls span the full width below. */
   @media (orientation:landscape) and (min-width:700px){
@@ -699,12 +834,12 @@ button {
     <details class="calib">
       <summary>▸ Network calibration data</summary>
       <div class="calib-hint" id="calib-status">Loading NLEX network alignment...</div>
-      <button class="calib-add" id="calib-reload">↻ Reload dataset</button>
+      <button class="calib-add" id="calib-reload">Reload dataset</button>
     </details>
     <details class="calib">
       <summary>▸ Interchange / ramp data</summary>
       <div class="calib-hint" id="ramp-status">Loading interchange/ramp dataset...</div>
-      <button class="calib-add" id="ramp-reload">↻ Reload dataset</button>
+      <button class="calib-add" id="ramp-reload">Reload dataset</button>
     </details>
   </section>
 
@@ -769,7 +904,7 @@ button {
     <div class="defect-gate">📍 Waiting for GPS fix — buttons activate automatically once your location is available. (If this doesn't clear, check that location access is allowed for this site.)</div>
 
     <div class="defect-category" data-category="Potholes">
-      <div class="category-label"><span class="category-label-text">Potholes</span> <button type="button" class="category-camera-btn" data-camera-type="Potholes" aria-label="Take Potholes photo">📷</button></div>
+      <div class="category-label"><span class="category-label-text">Potholes</span> <button type="button" class="category-camera-btn" data-camera-type="Potholes" aria-label="Take Potholes photo"></button></div>
       <div class="lane-btn-row">
         <label class="lane-btn pothole haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Potholes" data-lane="1">1</label>
         <label class="lane-btn pothole haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Potholes" data-lane="2">2</label>
@@ -780,7 +915,7 @@ button {
     </div>
 
     <div class="defect-category" data-category="Shoving">
-      <div class="category-label"><span class="category-label-text">Shoving</span> <button type="button" class="category-camera-btn" data-camera-type="Shoving" aria-label="Take Shoving photo">📷</button></div>
+      <div class="category-label"><span class="category-label-text">Shoving</span> <button type="button" class="category-camera-btn" data-camera-type="Shoving" aria-label="Take Shoving photo"></button></div>
       <div class="lane-btn-row">
         <label class="lane-btn shoving haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Shoving" data-lane="1">1</label>
         <label class="lane-btn shoving haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Shoving" data-lane="2">2</label>
@@ -791,7 +926,7 @@ button {
     </div>
 
     <div class="defect-category" data-category="Cracks (width>25 mm)">
-      <div class="category-label"><span class="category-label-text">Cracks</span> <button type="button" class="category-camera-btn" data-camera-type="Cracks (width>25 mm)" aria-label="Take Cracks photo">📷</button></div>
+      <div class="category-label"><span class="category-label-text">Cracks</span> <button type="button" class="category-camera-btn" data-camera-type="Cracks (width>25 mm)" aria-label="Take Cracks photo"></button></div>
       <div class="lane-btn-row">
         <label class="lane-btn cracks haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Cracks (width>25 mm)" data-lane="1">1</label>
         <label class="lane-btn cracks haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Cracks (width>25 mm)" data-lane="2">2</label>
@@ -802,7 +937,7 @@ button {
     </div>
 
     <div class="defect-category" data-category="Others">
-      <div class="category-label"><span class="category-label-text">Others <span class="category-sub">(i.e., Damaged markings, Ravelling, Debris)</span></span> <button type="button" class="category-camera-btn" data-camera-type="Others" aria-label="Take Others photo">📷</button></div>
+      <div class="category-label"><span class="category-label-text">Others <span class="category-sub">(i.e., Damaged markings, Ravelling, Debris)</span></span> <button type="button" class="category-camera-btn" data-camera-type="Others" aria-label="Take Others photo"></button></div>
       <div class="lane-btn-row">
         <label class="lane-btn other haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Others" data-lane="1">1</label>
         <label class="lane-btn other haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Others" data-lane="2">2</label>
@@ -828,8 +963,8 @@ button {
         <span id="last-time">--</span>
       </div>
       <div class="export-actions">
-        <button class="export-btn" id="export-btn" disabled>⬇ Export Excel</button>
-        <button class="export-btn backup-btn" id="backup-btn" disabled>⬇ Backup ZIP</button>
+        <button class="export-btn" id="export-btn" disabled>Export Excel</button>
+        <button class="export-btn backup-btn" id="backup-btn" disabled>Backup ZIP</button>
       </div>
     </div>
     <div class="bulk-actions-bar" id="bulk-actions-bar" style="display:none;">
@@ -2715,7 +2850,7 @@ function renderLog(){
 
     const photoActionsHtml = e.photoId ? `
       <div class="entry-actions">
-        <button type="button" class="photo-view-btn" data-idx="${realIdx}">📷 View Photo</button>
+        <button type="button" class="photo-view-btn" data-idx="${realIdx}">View Photo</button>
         <button type="button" class="photo-remove-btn" data-idx="${realIdx}">Remove Photo</button>
       </div>
       <div class="photo-status">Photo entry${e.photoTimestamp ? ' · '+e.photoTimestamp : ''}</div>
@@ -3078,11 +3213,11 @@ async function renderEditPhotoPreview(entry){
     imgEl.src = '';
     emptyEl.style.display = 'flex';
     removeBtn.style.display = 'none';
-    addBtn.textContent = '📷 Add Photo';
+    addBtn.textContent = 'Add Photo';
     return;
   }
 
-  addBtn.textContent = '📷 Change Photo';
+  addBtn.textContent = 'Change Photo';
   removeBtn.style.display = 'block';
   try{
     const blob = await getPhoto(entry.photoId);
@@ -3472,7 +3607,7 @@ if('serviceWorker' in navigator){
       </div>
     </div>
     <div class="camera-mode-toggle" id="camera-mode-toggle">
-      <button type="button" class="camera-mode-btn active" data-mode="single">📷 Single Shot</button>
+      <button type="button" class="camera-mode-btn active" data-mode="single">Single Shot</button>
       <button type="button" class="camera-mode-btn" data-mode="continuous">⚡ Continuous</button>
     </div>
     <div class="camera-info" id="camera-info">
@@ -3545,7 +3680,7 @@ if('serviceWorker' in navigator){
         <img id="edit-photo-thumb" alt="Entry photo" style="display:none;">
       </div>
       <div class="edit-photo-actions">
-        <button type="button" class="edit-photo-add-btn" id="edit-photo-add-btn">📷 Add / Change Photo</button>
+        <button type="button" class="edit-photo-add-btn" id="edit-photo-add-btn">Add / Change Photo</button>
         <button type="button" class="edit-photo-remove-btn" id="edit-photo-remove-btn" style="display:none;">Remove Photo</button>
       </div>
     </div>
@@ -3555,7 +3690,7 @@ if('serviceWorker' in navigator){
 
 <div id="logo-modal" class="modal-backdrop" aria-hidden="true">
   <div class="lane-modal" role="dialog" aria-modal="true" aria-labelledby="logo-modal-title">
-    <h3 id="logo-modal-title">🖼 Inspection photo logo</h3>
+    <h3 id="logo-modal-title">Inspection photo logo</h3>
     <div class="logo-preview-box" id="logo-preview-box">
       <div class="logo-empty" id="logo-empty-msg">No logo set — photos are stamped without one</div>
       <img id="logo-preview-img" alt="Current logo" style="display:none;">
