@@ -654,6 +654,9 @@ button {
   .readout-main .field .value{font-weight:400;letter-spacing:.01em;}
   .readout-main .field .value,
   .log-entry .info .meta{font-family:var(--font-readout);}
+  .log-entry .info .meta{
+    white-space:nowrap;font-size:clamp(9px,2.45vw,11px);letter-spacing:-.015em;
+  }
   .readout-main .status{font-weight:500;}
   .kmpost .kmvalue{font-weight:760;letter-spacing:-.035em;}
   .nearby-asset-station{font-weight:700;letter-spacing:.01em;}
@@ -686,7 +689,11 @@ button {
   .defect-focus-select{background-color:var(--panel-raised);font-size:12px;padding-left:14px;}
   details.calib{padding:12px 16px;margin-bottom:8px;}
   details.calib summary{min-height:24px;display:flex;align-items:center;}
-  .log-entry{border-left:4px solid var(--line-yellow);box-shadow:0 5px 16px rgba(0,0,0,.12);}
+  .log-entry{position:relative;border-left:4px solid var(--line-yellow);box-shadow:0 5px 16px rgba(0,0,0,.12);}
+  .log-entry .info{min-width:0;flex:1;}
+  .log-entry:not(.select-mode) .info{width:100%;}
+  .log-entry:not(.select-mode) .info .type{padding-right:34px;}
+  .log-entry:not(.select-mode) .del{position:absolute;right:8px;top:8px;}
 
   .calib-add,.select-toggle-btn,.export-btn,.bulk-actions-bar button,
   .custom-log-btn,.add-custom button,.modal-actions button,
