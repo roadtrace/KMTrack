@@ -944,8 +944,8 @@ button {
         <div class="kmunit">kilometers (interpolated)</div>
       </div>
       <div class="nearby-asset" aria-live="polite">
-        <div class="kmlabel">NEARBY BRIDGE / ASSET</div>
-        <div class="nearby-asset-name" id="nearby-asset-name">Loading asset data...</div>
+        <div class="kmlabel">NEARBY BRIDGE</div>
+        <div class="nearby-asset-name" id="nearby-asset-name">Loading bridge data...</div>
         <div class="nearby-asset-station" id="nearby-asset-station">--</div>
         <div class="nearby-asset-distance" id="nearby-asset-distance"></div>
       </div>
@@ -1520,6 +1520,55 @@ function nearestBridgeAsset(lat, lon, currentKm, expressway){
   return best;
 }
 
+// On the NLEX mainline, keep showing the bridge currently being traversed;
+// as soon as its station range is passed, advance immediately to the closest
+// bridge ahead in the selected/detected direction. There is deliberately no
+// 1 km cutoff in this mode—the inspector should always know what comes next.
+// If KM/direction is unavailable, retain the geographic nearby fallback.
+function bridgeForDirectionOfTravel(lat, lon, currentKm, expressway, bound){
+  const normalizedExpressway = String(expressway || '').trim().toUpperCase();
+  const normalizedBound = String(bound || '').trim().toUpperCase();
+  const canFindAhead = normalizedExpressway === 'NLEX'
+    && Number.isFinite(currentKm)
+    && (normalizedBound === 'NB' || normalizedBound === 'SB');
+
+  if(!canFindAhead){
+    const nearby = nearestBridgeAsset(lat, lon, currentKm, expressway);
+    return nearby ? { ...nearby, mode:'nearby' } : null;
+  }
+
+  let best = null;
+  for(const asset of bridgeData){
+    // Direction-neutral crossings/overpasses apply to both carriageways;
+    // explicitly tagged NB/SB rows only apply to their matching direction.
+    if(asset.direction && asset.direction !== normalizedBound) continue;
+
+    const fromKm = parseBridgeStation(asset.from);
+    const toKm = parseBridgeStation(asset.to);
+    if(fromKm === null) continue;
+    const startKm = Math.min(fromKm, toKm === null ? fromKm : toKm);
+    const endKm = Math.max(fromKm, toKm === null ? fromKm : toKm);
+    const withinStationRange = currentKm >= startKm && currentKm <= endKm;
+    let distanceKm;
+
+    if(normalizedBound === 'NB'){
+      if(currentKm > endKm) continue;
+      distanceKm = withinStationRange ? 0 : Math.max(0, startKm - currentKm);
+    }else{
+      if(currentKm < startKm) continue;
+      distanceKm = withinStationRange ? 0 : Math.max(0, currentKm - endKm);
+    }
+
+    // Prefer a direction-specific record when it coincides with a neutral
+    // crossing, then use distance to select the next bridge ahead.
+    const score = distanceKm + (asset.direction ? 0 : 0.0001);
+    if(!best || score < best.score){
+      best = { asset, distanceKm, withinStationRange, score, mode:'ahead' };
+    }
+  }
+  return best;
+}
+
 function updateBridgeReadout(lat, lon, kmResult, isOffMappedNetwork){
   const nameEl = document.getElementById('nearby-asset-name');
   const stationEl = document.getElementById('nearby-asset-station');
@@ -1527,30 +1576,33 @@ function updateBridgeReadout(lat, lon, kmResult, isOffMappedNetwork){
   if(!nameEl || !stationEl || !distanceEl) return;
 
   if(!bridgeData.length){
-    nameEl.textContent = 'Asset data unavailable';
+    nameEl.textContent = 'Bridge data unavailable';
     stationEl.textContent = '--';
     distanceEl.textContent = '';
     return;
   }
 
-  const match = nearestBridgeAsset(
+  const match = bridgeForDirectionOfTravel(
     lat,
     lon,
     kmResult && !isOffMappedNetwork ? kmResult.km : null,
-    kmResult && !isOffMappedNetwork ? kmResult.expressway : ''
+    kmResult && !isOffMappedNetwork ? kmResult.expressway : '',
+    userBound || (kmResult && !isOffMappedNetwork ? kmResult.bound : '')
   );
   if(!match){
-    nameEl.textContent = 'No nearby bridge / asset';
+    nameEl.textContent = kmResult && !isOffMappedNetwork ? 'No upcoming bridge' : 'No nearby bridge';
     stationEl.textContent = '--';
-    distanceEl.textContent = `Nothing within ${Math.round(bridgeApproachRadiusKm * 1000)} m`;
+    distanceEl.textContent = kmResult && !isOffMappedNetwork
+      ? 'No further bridge found in this direction'
+      : `Nothing within ${Math.round(bridgeApproachRadiusKm * 1000)} m`;
     return;
   }
 
   nameEl.textContent = match.asset.displayName;
   stationEl.textContent = bridgeStationLabel(match.asset);
   distanceEl.textContent = match.withinStationRange
-    ? 'Currently within this asset range'
-    : `Approximately ${Math.max(0, Math.round(match.distanceKm * 1000))} m away`;
+    ? 'Currently within this bridge range'
+    : `Approximately ${Math.max(0, Math.round(match.distanceKm * 1000))} m ${match.mode === 'ahead' ? 'ahead' : 'away'}`;
 }
 
 async function loadBridgeDataset(){
@@ -1572,7 +1624,7 @@ async function loadBridgeDataset(){
     if(currentPos){
       updateReadout();
     } else {
-      document.getElementById('nearby-asset-name').textContent = 'Asset data unavailable';
+      document.getElementById('nearby-asset-name').textContent = 'Bridge data unavailable';
       document.getElementById('nearby-asset-station').textContent = '--';
       document.getElementById('nearby-asset-distance').textContent = '';
     }
@@ -1683,11 +1735,10 @@ function updateReadout(){
     tagEl.textContent = `${result.expressway} · ${displayBound}`;
     tagEl.classList.remove('faroff');
   }
-  updateBridgeReadout(currentPos.lat, currentPos.lon, result, isOffMappedNetwork);
-
   if(!isOffMappedNetwork){
     detectBoundFromTrend(result.expressway, result.km);
   }
+  updateBridgeReadout(currentPos.lat, currentPos.lon, result, isOffMappedNetwork);
   renderBoundToggle(result.expressway);
   updateBoundAutoStatus(result.expressway);
   updateRampReadout(currentPos.lat, currentPos.lon);
