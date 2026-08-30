@@ -63,7 +63,7 @@
     background:var(--asphalt-2);
     padding:16px 16px 14px;
     border-bottom:3px solid var(--line-yellow);
-    position:sticky; top:0; z-index:10;
+    position:sticky; z-index:10;
   }
   header h1{
     margin:0; font-size:17px; letter-spacing:0.5px; font-weight:700;
@@ -429,14 +429,13 @@ button {
   #camera-video{width:100%;height:100%;object-fit:cover;background:#000;}
   .camera-topbar{
     position:absolute;top:0;left:0;right:0;padding:calc(env(safe-area-inset-top) + 12px) 14px 12px;
-    display:flex;align-items:center;justify-content:space-between;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
     background:linear-gradient(to bottom,rgba(0,0,0,.68),transparent);z-index:2;
   }
-  .camera-topbar .camera-title{font-weight:800;font-size:14px;letter-spacing:.7px;color:#fff;}
   .camera-close,.camera-shutter{border:0;cursor:pointer;-webkit-tap-highlight-color:transparent;}
-  .camera-close{background:rgba(0,0,0,.5);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:8px 12px;font-size:13px;}
+  .camera-close{background:rgba(0,0,0,.5);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:50%;width:44px;height:44px;padding:0;font-size:24px;line-height:1;}
   .camera-info{
-    position:absolute;left:0;right:0;bottom:0;padding:18px 18px calc(env(safe-area-inset-bottom) + 250px);
+    position:absolute;left:0;right:0;bottom:0;padding:18px 18px calc(env(safe-area-inset-bottom) + 285px);
     background:linear-gradient(to top,rgba(0,0,0,.86),rgba(0,0,0,.52),transparent);
     z-index:2;pointer-events:none;
   }
@@ -450,15 +449,19 @@ button {
   .camera-error{position:absolute;left:18px;right:18px;top:50%;transform:translateY(-50%);padding:14px;border-radius:10px;background:rgba(193,57,43,.88);color:#fff;font-size:13px;line-height:1.45;z-index:5;display:none;}
   .camera-error.show{display:block;}
 
-  /* Single/Continuous mode toggle, top-left under the topbar */
+  /* Single/Continuous mode toggle, aligned inside the camera top bar. */
   .camera-mode-toggle{
-    position:absolute; top:calc(env(safe-area-inset-top) + 58px); left:14px; z-index:2;
-    display:flex; gap:6px;
+    display:flex;align-items:center;gap:6px;min-width:0;
   }
   .camera-mode-btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;
     padding:7px 12px; border-radius:20px; border:1px solid rgba(255,255,255,.35);
     background:rgba(0,0,0,.5); color:#fff; font-size:11px; font-weight:700; letter-spacing:.3px;
     cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+  .camera-mode-icon{
+    width:18px;height:18px;flex:0 0 18px;fill:none;stroke:currentColor;
+    stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
   }
   .camera-mode-btn.active{background:var(--line-yellow); color:#191c1f; border-color:var(--line-yellow);}
 
@@ -657,6 +660,9 @@ button {
   .log-entry .info .meta{
     white-space:nowrap;font-size:clamp(9px,2.45vw,11px);letter-spacing:-.015em;
   }
+  .photo-status{
+    font-family:var(--font-readout);font-size:clamp(9px,2.45vw,11px);letter-spacing:-.015em;
+  }
   .readout-main .status{font-weight:500;}
   .kmpost .kmvalue{font-weight:760;letter-spacing:-.035em;}
   .nearby-asset-station{font-weight:700;letter-spacing:.01em;}
@@ -725,6 +731,27 @@ button {
   }
   .photo-view-btn,.photo-remove-btn{min-height:34px;padding:5px 9px;border-radius:var(--radius-sm);}
   .camera-mode-btn,.camera-close,.camera-logo-btn{font-weight:650;}
+  .camera-mode-btn,
+  .camera-topbar .camera-logo-btn,
+  .camera-topbar .camera-close{
+    height:36px;min-height:36px;font-size:11px;
+  }
+  .camera-topbar .camera-close{
+    width:36px;min-width:36px;padding:0;border-radius:50%;
+  }
+  @media (max-width:380px){
+    .camera-topbar{padding-left:10px;padding-right:10px;gap:8px;}
+    .camera-mode-toggle{gap:4px;}
+    .camera-mode-btn{padding:7px 8px;gap:4px;}
+    .camera-mode-btn[data-mode="single"]::before{width:14px;height:14px;flex-basis:14px;}
+    .camera-mode-icon{width:14px;height:14px;flex-basis:14px;}
+    .camera-topbar-actions{gap:6px;}
+    .camera-logo-btn{padding-left:9px;padding-right:9px;}
+    .camera-mode-btn,
+    .camera-topbar .camera-logo-btn,
+    .camera-topbar .camera-close{height:34px;min-height:34px;font-size:10px;}
+    .camera-topbar .camera-close{width:34px;min-width:34px;}
+  }
   @media (max-width:600px){
     .count-bar{
       display:grid;grid-template-columns:minmax(0,1fr);align-items:stretch;gap:10px;
@@ -795,7 +822,6 @@ button {
     /* Camera controls are shortened and spread horizontally so the live
        viewfinder remains usable on a shallow landscape phone screen. */
     .camera-topbar{padding-top:calc(env(safe-area-inset-top) + 8px);}
-    .camera-mode-toggle{top:calc(env(safe-area-inset-top) + 50px);}
     .camera-info{padding:16px 18px calc(env(safe-area-inset-bottom) + 104px);}
     .camera-lane-picker{left:14px;right:auto;width:250px;bottom:calc(env(safe-area-inset-bottom) + 12px);}
     .camera-bottom{height:86px;}
@@ -805,8 +831,8 @@ button {
       bottom:calc(env(safe-area-inset-bottom) + 12px);
     }
     .camera-continuous-lanes .continuous-lane-grid{display:contents;}
-    .camera-continuous-lanes .continuous-lane-btn{min-height:68px;padding:18px 6px;font-size:19px;}
-    .camera-continuous-lanes .continuous-lane-btn.others{grid-column:auto;min-height:68px;padding:18px 6px;}
+    .camera-continuous-lanes .continuous-lane-btn{min-height:80px;padding:22px 6px;font-size:19px;}
+    .camera-continuous-lanes .continuous-lane-btn.others{grid-column:auto;min-height:80px;padding:22px 6px;}
     .camera-review{flex-direction:row;}
     #camera-review-img{width:auto;height:100%;}
     .camera-review-actions{width:180px;flex:0 0 180px;flex-direction:column;justify-content:center;}
@@ -3621,15 +3647,22 @@ if('serviceWorker' in navigator){
     <video id="camera-video" autoplay playsinline muted></video>
     <div class="camera-focus-ring" id="camera-focus-ring"></div>
     <div class="camera-topbar">
-      <div class="camera-title">KMTRACK · INSPECTION PHOTO</div>
+      <div class="camera-mode-toggle" id="camera-mode-toggle">
+        <button type="button" class="camera-mode-btn active" data-mode="single">Single Shot</button>
+        <button type="button" class="camera-mode-btn" data-mode="continuous">
+          <svg class="camera-mode-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M7 4h11a2 2 0 0 1 2 2v10"/>
+            <path d="M4 7h11a2 2 0 0 1 2 2v10"/>
+            <rect x="2" y="10" width="15" height="11" rx="2"/>
+            <circle cx="9.5" cy="15.5" r="3"/>
+          </svg>
+          <span>Continuous</span>
+        </button>
+      </div>
       <div class="camera-topbar-actions">
         <button class="camera-logo-btn" id="camera-logo-btn" type="button"><span class="dot"></span>Logo</button>
-        <button class="camera-close" id="camera-close" type="button">Close</button>
+        <button class="camera-close" id="camera-close" type="button" aria-label="Close camera" title="Close camera">×</button>
       </div>
-    </div>
-    <div class="camera-mode-toggle" id="camera-mode-toggle">
-      <button type="button" class="camera-mode-btn active" data-mode="single">Single Shot</button>
-      <button type="button" class="camera-mode-btn" data-mode="continuous">⚡ Continuous</button>
     </div>
     <div class="camera-info" id="camera-info">
       <div class="capture-time" id="camera-time">--</div>
