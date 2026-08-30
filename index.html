@@ -51,6 +51,11 @@
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--asphalt);color:var(--line-white);font-family:var(--font-ui);font-synthesis:none;}
+  html,body{
+    width:100%;max-width:100%;overflow-x:hidden;overflow-x:clip;
+    overscroll-behavior-x:none;
+  }
+  body{touch-action:pan-y;}
   button,input,select,textarea{font-family:inherit;}
   body{padding-bottom:40px;}
 
@@ -326,16 +331,15 @@ header{display:flex;align-items:center;gap:12px;}
 .header-copy h1{margin:0;white-space:nowrap;font-size:clamp(15px,2.5vw,23px);line-height:1.05;}
 .header-copy .blue{color:#148bd8;}.header-copy .white{color:#fff;}
 .header-copy .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-@media(max-width:600px){header{padding:calc(env(safe-area-inset-top) + 8px) calc(env(safe-area-inset-right) + 12px) 8px calc(env(safe-area-inset-left) + 12px)}.header-logo{height:55px;max-width:42vw}.header-divider{height:48px;width:3px;margin:0 8px}.header-copy h1{font-size:15px}.header-copy .sub{font-size:9px}}
+@media(max-width:600px){header{padding:calc(env(safe-area-inset-top) + 6px) calc(env(safe-area-inset-right) + 12px) 8px calc(env(safe-area-inset-left) + 12px)}.header-logo{height:55px;max-width:42vw}.header-divider{height:48px;width:3px;margin:0 8px}.header-copy h1{font-size:15px}.header-copy .sub{font-size:9px}}
 
 
 .lane-help{margin:0 0 10px;color:#9aa0a6;font-size:12px;}
 .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:100;align-items:center;justify-content:center;padding:18px;}
 .modal-backdrop.open{display:flex;}
-/* Opened from the camera topbar, which sits at z-index:200 — needs to
-   render above it, or it's invisible (but still technically "open")
-   until the camera closes. */
-#logo-modal{z-index:250;}
+/* Opened from the camera topbar, so this dialog must sit one layer above
+   the full-screen live camera rather than behind it. */
+#logo-modal{z-index:1100;}
 .lane-modal{width:min(360px,100%);background:#101820;border:1px solid #334b5c;border-radius:12px;padding:16px;box-shadow:0 16px 50px rgba(0,0,0,.45);}
 .lane-modal h3{margin:0 0 12px;font-size:16px;}
 .lane-modal input{width:100%;box-sizing:border-box;padding:11px;border-radius:8px;border:1px solid #3a566a;background:#08131d;color:#fff;font-size:16px;}
@@ -425,7 +429,7 @@ button {
   /* Full-screen camera capture */
   .camera-modal,.photo-modal{
     position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;
-    z-index:2147483647;display:none;background:#000;overscroll-behavior:none;
+    z-index:1000;display:none;background:#000;overscroll-behavior:none;
   }
   .camera-modal.show,.photo-modal.show{display:flex;}
   .camera-shell{position:relative;width:100%;height:100%;overflow:hidden;background:#000;}
@@ -444,13 +448,16 @@ button {
     background:linear-gradient(to top,rgba(0,0,0,.86),rgba(0,0,0,.52),transparent);
     z-index:2;pointer-events:none;
   }
+  .camera-shell.camera-mode-single .camera-info{
+    padding-bottom:calc(env(safe-area-inset-bottom) + 180px);
+  }
   .camera-info .capture-time{font-size:14px;font-weight:700;margin-top:5px;color:#fff;}
   .camera-info .capture-meta{font-family:var(--mono);font-size:11px;line-height:1.55;color:#f2f2f2;margin-top:3px;}
   .camera-bottom{position:absolute;left:0;right:0;bottom:0;height:92px;z-index:3;display:flex;justify-content:center;align-items:center;padding-bottom:env(safe-area-inset-bottom);}
   .camera-shutter{width:68px;height:68px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.5);box-shadow:0 0 0 3px rgba(0,0,0,.65);}
   .camera-shutter:active{transform:scale(.92);}
   .camera-shutter:disabled{opacity:.5;}
-  .camera-hint{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 3px);right:16px;color:#ddd;font-size:9px;font-family:var(--mono);z-index:4;}
+  .camera-hint{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 1px);right:16px;color:#ddd;font-size:9px;font-family:var(--mono);z-index:4;}
   .camera-error{position:absolute;left:18px;right:18px;top:50%;transform:translateY(-50%);padding:14px;border-radius:10px;background:rgba(193,57,43,.88);color:#fff;font-size:13px;line-height:1.45;z-index:5;display:none;}
   .camera-error.show{display:block;}
 
@@ -832,6 +839,7 @@ button {
        viewfinder remains usable on a shallow landscape phone screen. */
     .camera-topbar{padding-top:calc(env(safe-area-inset-top) + 8px);}
     .camera-info{padding:16px 18px calc(env(safe-area-inset-bottom) + 104px);}
+    .camera-shell.camera-mode-single .camera-info{padding-bottom:calc(env(safe-area-inset-bottom) + 104px);}
     .camera-lane-picker{left:14px;right:auto;width:250px;bottom:calc(env(safe-area-inset-bottom) + 12px);}
     .camera-bottom{height:86px;}
     .camera-shutter{width:62px;height:62px;}
@@ -879,7 +887,7 @@ button {
     <div class="header-copy">
       <h1><span class="white">Road Inspection Log</span></h1>
       <div class="sub" id="clock">-- -- --</div>
-      <div class="sub" id="storage-status">checking on-device storage...</div>
+      <div class="sub" id="storage-status" hidden></div>
     </div>
   </div>
 </header>
@@ -1200,7 +1208,10 @@ function saveEntries(){
     storageAvailable = false;
     console.error('Could not save entries', e);
     const el = document.getElementById('storage-status');
-    if(el) el.textContent = '⚠ Save failed — storage blocked (check you\'re not in Private Browsing). Export now to avoid losing this entry.';
+    if(el){
+      el.hidden = false;
+      el.textContent = '⚠ Save failed — storage blocked (check you\'re not in Private Browsing). Export now to avoid losing this entry.';
+    }
   }
 }
 
@@ -1208,15 +1219,16 @@ loadFromStorage();
 window.addEventListener('DOMContentLoaded', () => {
   const el = document.getElementById('storage-status');
   if(storageAvailable){
-    el.textContent = entries.length
-      ? `${entries.length} entries saved on this device`
-      : 'on-device storage ready — entries will be saved automatically';
     const isIOS = /iP(hone|od|ad)/.test(navigator.userAgent);
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
     if(isIOS && !isStandalone){
-      el.textContent += ' — for more reliable storage across days, add this to your Home Screen instead of using it as a Safari tab.';
+      el.hidden = false;
+      el.textContent = 'For more reliable storage, add KMTrack to your Home Screen.';
+    }else{
+      el.hidden = true;
     }
   } else {
+    el.hidden = false;
     el.textContent = '⚠ On-device storage is blocked in this tab (likely Private Browsing) — entries will NOT be saved. Use a normal Safari tab, or export after every session.';
   }
 });
@@ -1571,10 +1583,14 @@ loadBridgeDataset();
 // ---------- Clock ----------
 function tickClock(){
   const now = new Date();
-  document.getElementById('clock').textContent = now.toLocaleString('en-GB', {
-    year:'numeric', month:'2-digit', day:'2-digit',
-    hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
-  }).replace(',', '');
+  const dateText = now.toLocaleDateString('en-GB', {
+    day:'2-digit', month:'short', year:'numeric'
+  });
+  const timeText = now.toLocaleTimeString('en-US', {
+    hour:'numeric', minute:'2-digit', hour12:true
+  });
+  const savedText = storageAvailable ? `${entries.length} saved` : 'storage blocked';
+  document.getElementById('clock').textContent = `${dateText} · ${timeText} · ${savedText}`;
 }
 setInterval(tickClock, 1000);
 tickClock();
@@ -2629,6 +2645,11 @@ function flashCameraCapture(laneValue){
 // photo never accidentally starts in rapid-fire mode.
 function setCameraMode(mode){
   cameraMode = mode;
+  const cameraShell = cameraModal ? cameraModal.querySelector('.camera-shell') : null;
+  if(cameraShell){
+    cameraShell.classList.toggle('camera-mode-single', mode === 'single');
+    cameraShell.classList.toggle('camera-mode-continuous', mode === 'continuous');
+  }
   const toggle = document.getElementById('camera-mode-toggle');
   if(toggle){
     toggle.querySelectorAll('.camera-mode-btn').forEach(btn => {
