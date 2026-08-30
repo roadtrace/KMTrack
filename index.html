@@ -581,34 +581,59 @@ button {
     .camera-info .capture-meta{font-size:10px;}
   }
 
-  /* Landscape layout: use the wider viewport without changing the compact
-     portrait flow. The live readout stays on the left while defect logging
-     remains visible on the right for quick use inside an inspection vehicle. */
+  /* Landscape dashboard: calibration/GPS, direction, and KM/asset cards form
+     one clean top row; the large defect controls span the full width below. */
   @media (orientation:landscape) and (min-width:700px){
     body{padding-bottom:24px;}
-    header{padding:10px 18px 9px;}
-    .header-logo{max-height:42px; width:auto;}
+    header{padding:8px 18px 9px;}
+    .header-logo{height:68px;max-height:68px;width:auto;}
+    .header-copy h1{font-size:26px;}
     main{
       max-width:1180px; padding:12px 18px;
-      display:grid; grid-template-columns:minmax(300px,.8fr) minmax(430px,1.35fr);
-      grid-template-rows:auto auto auto auto auto; column-gap:18px; align-items:start;
+      display:grid;
+      grid-template-columns:minmax(250px,1fr) minmax(135px,.48fr) minmax(360px,1.5fr);
+      grid-template-rows:auto auto auto auto auto;
+      column-gap:16px;row-gap:10px;align-items:stretch;
     }
-    main>section.block:first-child{grid-column:1;grid-row:1;}
-    main>.readout{grid-column:1;grid-row:2;}
-    main>.kmpost{grid-column:1;grid-row:3;}
-    main>#defect-section{grid-column:2;grid-row:1 / span 3;}
+    main>section.block:first-child{grid-column:1;grid-row:1;margin-top:10px;}
+    main>.readout{display:contents;}
+    main>.readout>.readout-main{
+      grid-column:1;grid-row:2;background:var(--panel);border:1px solid #3a4046;
+      border-radius:10px;padding:14px 16px;align-self:stretch;
+    }
+    main>.readout>.bound-panel{
+      grid-column:2;grid-row:1 / span 2;margin-top:10px;align-self:stretch;
+      min-width:0;flex-basis:auto;padding:14px 16px;
+    }
+    main>.kmpost{
+      grid-column:3;grid-row:1 / span 2;align-self:stretch;min-height:0;height:auto;
+      padding:24px 24px;margin-top:10px;display:flex;flex-direction:column;justify-content:center;
+    }
+    main>#defect-section{grid-column:1 / -1;grid-row:3;margin-top:18px;}
     main>.lane-divider{grid-column:1 / -1;grid-row:4;width:100%;margin:12px 0 2px;}
     main>section.block:last-child{grid-column:1 / -1;grid-row:5;}
-    #defect-section:not(.focused){display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;}
+    #defect-section:not(.focused){display:grid;grid-template-columns:1fr 1fr;gap:14px 20px;}
     #defect-section:not(.focused)>.defect-header,
     #defect-section:not(.focused)>.defect-gate{grid-column:1 / -1;}
     #defect-section:not(.focused)>.defect-category{margin-bottom:0;}
-    .lane-btn{padding:16px 3px;}
-    #defect-section.focused .focused-category .lane-btn{padding:24px 8px;}
-    .readout{margin-top:8px;gap:10px;padding:12px;}
-    .bound-panel{flex-basis:116px;}
-    .kmpost{padding:9px 12px;}
-    .kmpost .kmvalue{font-size:30px;}
+    #defect-section:not(.focused)>.defect-category[data-category="Potholes"]{order:1;}
+    #defect-section:not(.focused)>.defect-category[data-category="Cracks (width>25 mm)"]{order:2;}
+    #defect-section:not(.focused)>.defect-category[data-category="Shoving"]{order:3;}
+    #defect-section:not(.focused)>.defect-category[data-category="Others"]{order:4;}
+    .category-label{font-size:15px;margin-bottom:8px;}
+    .lane-btn-row{gap:8px;}
+    .lane-btn{padding:20px 4px;font-size:20px;min-height:72px;border-radius:10px;}
+    #defect-section.focused .focused-category .lane-btn{padding:32px 8px;font-size:28px;}
+    .kmpost-grid{width:100%;gap:22px;align-items:center;}
+    .kmpost-current{padding-right:8px;}
+    .kmpost .kmlabel{font-size:13px;letter-spacing:2.2px;}
+    .kmpost .kmvalue{font-size:clamp(40px,5vw,58px);margin-top:8px;}
+    .kmpost .kmunit{font-size:14px;margin-top:6px;}
+    .nearby-asset{padding-left:22px;min-height:160px;}
+    .nearby-asset-name{font-size:clamp(19px,2.1vw,24px);line-height:1.2;margin-top:10px;}
+    .nearby-asset-station{font-size:17px;margin-top:12px;}
+    .nearby-asset-distance{font-size:13px;margin-top:8px;}
+    .kmpost .segment-tag,.kmpost .ramp-tag.show{align-self:flex-start;font-size:14px;margin-top:12px;padding:7px 14px;}
     .lane-modal{width:min(620px,92vw);max-height:calc(100vh - 24px);overflow:auto;}
 
     /* Camera controls are shortened and spread horizontally so the live
@@ -632,6 +657,25 @@ button {
     .photo-card{height:100%;flex-direction:row;align-items:center;}
     #photo-preview{max-width:calc(100% - 170px);max-height:100%;}
     .photo-actions{width:160px;flex-direction:column;}
+  }
+  @media (orientation:landscape) and (min-width:700px) and (max-width:900px){
+    main{
+      grid-template-columns:minmax(215px,1fr) minmax(120px,.5fr) minmax(320px,1.5fr);
+      column-gap:12px;padding-left:12px;padding-right:12px;
+    }
+    main>.readout>.readout-main{padding:12px;gap:8px 10px;}
+    main>.readout>.bound-panel{padding:12px 10px;}
+    main>.kmpost{padding:18px 16px;}
+    .kmpost-grid{gap:14px;}
+    .kmpost .kmlabel{font-size:10px;letter-spacing:1.5px;}
+    .kmpost .kmvalue{font-size:34px;}
+    .kmpost .kmunit{font-size:11px;}
+    .nearby-asset{padding-left:14px;min-height:130px;}
+    .nearby-asset-name{font-size:16px;}
+    .nearby-asset-station{font-size:13px;margin-top:8px;}
+    .nearby-asset-distance{font-size:10px;margin-top:6px;}
+    .kmpost .segment-tag,.kmpost .ramp-tag.show{font-size:11px;margin-top:8px;padding:5px 10px;}
+    .lane-btn{min-height:64px;padding:17px 3px;font-size:18px;}
   }
 </style>
 </head>
