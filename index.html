@@ -110,21 +110,14 @@
     border:3px solid var(--line-white);
     border-radius:6px;
     padding:12px 14px;
-    text-align:left;
+    text-align:center;
     position:relative;
   }
-  .kmpost-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:stretch;}
-  .kmpost-current{min-width:0;padding-right:2px;}
+  .kmpost-grid{display:flex;justify-content:center;align-items:center;width:100%;}
+  .kmpost-current{min-width:0;width:100%;padding-right:0;text-align:center;}
   .kmpost .kmlabel{font-size:11px; letter-spacing:2px; font-weight:700; color:#dff5e6;}
   .kmpost .kmvalue{font-family:var(--mono); font-size:clamp(27px,8vw,34px); font-weight:700; line-height:1.1; margin-top:2px; white-space:nowrap;}
   .kmpost .kmunit{font-size:12px; color:#dff5e6;}
-  .nearby-asset{
-    min-width:0;border-left:1px solid rgba(255,255,255,.45);padding-left:14px;
-    display:flex;flex-direction:column;justify-content:center;
-  }
-  .nearby-asset-name{font-size:15px;font-weight:800;line-height:1.25;margin-top:5px;overflow-wrap:anywhere;}
-  .nearby-asset-station{font-family:var(--mono);font-size:13px;font-weight:700;color:#fff;margin-top:5px;}
-  .nearby-asset-distance{font-size:10px;color:#dff5e6;margin-top:4px;}
   .kmpost .segment-tag{
     margin-top:10px; display:inline-block; background:rgba(0,0,0,0.25);
     padding:5px 12px; border-radius:20px; font-size:12px; font-weight:700;
@@ -139,10 +132,6 @@
   .kmpost .ramp-tag.show{display:inline-block;}
   @media (max-width:380px){
     .kmpost{padding:11px 12px;}
-    .kmpost-grid{gap:10px;}
-    .nearby-asset{padding-left:10px;}
-    .nearby-asset-name{font-size:13px;}
-    .nearby-asset-station{font-size:11px;}
   }
 
   /* Bound (direction) toggle — now a compact side panel inside .readout,
@@ -660,7 +649,6 @@ button {
   .readout-main .field .value,
   .readout-main .status,
   .kmpost .kmvalue,
-  .nearby-asset-station,
   header .sub,
   .log-entry .info .meta,
   .photo-status,
@@ -681,9 +669,8 @@ button {
   }
   .readout-main .status{font-weight:500;}
   .kmpost .kmvalue{font-weight:760;letter-spacing:-.035em;}
-  .nearby-asset-station{font-weight:700;letter-spacing:.01em;}
   .kmpost .kmlabel{letter-spacing:.12em;}
-  .kmpost .kmunit,.nearby-asset-distance{color:rgba(240,255,246,.82);}
+  .kmpost .kmunit{color:rgba(240,255,246,.82);}
   .bound-hint,.bound-auto-status,.log-empty{color:var(--text-subtle);}
   .category-label .category-sub,.calib-hint,.count-bar,.log-entry .info .meta,.edit-field-label,.logo-hint{color:var(--text-muted);}
 
@@ -780,7 +767,7 @@ button {
     .export-btn{width:100%;min-width:0;padding-left:10px;padding-right:10px;}
   }
 
-  /* Landscape dashboard: calibration/GPS, direction, and KM/asset cards form
+  /* Landscape dashboard: calibration/GPS, direction, and KM card form
      one clean top row; the large defect controls span the full width below. */
   @media (orientation:landscape) and (min-width:700px){
     body{padding-bottom:24px;}
@@ -823,15 +810,11 @@ button {
     .lane-btn-row{gap:8px;}
     .lane-btn{padding:20px 4px;font-size:20px;min-height:72px;border-radius:10px;}
     #defect-section.focused .focused-category .lane-btn{padding:32px 8px;font-size:28px;}
-    .kmpost-grid{width:100%;gap:22px;align-items:center;}
-    .kmpost-current{padding-right:8px;}
+    .kmpost-grid{width:100%;align-items:center;}
+    .kmpost-current{padding-right:0;}
     .kmpost .kmlabel{font-size:13px;letter-spacing:2.2px;}
     .kmpost .kmvalue{font-size:clamp(40px,5vw,58px);margin-top:8px;}
     .kmpost .kmunit{font-size:14px;margin-top:6px;}
-    .nearby-asset{padding-left:22px;min-height:160px;}
-    .nearby-asset-name{font-size:clamp(19px,2.1vw,24px);line-height:1.2;margin-top:10px;}
-    .nearby-asset-station{font-size:17px;margin-top:12px;}
-    .nearby-asset-distance{font-size:13px;margin-top:8px;}
     .kmpost .segment-tag,.kmpost .ramp-tag.show{align-self:flex-start;font-size:14px;margin-top:12px;padding:7px 14px;}
     .lane-modal{width:min(620px,92vw);max-height:calc(100vh - 24px);overflow:auto;}
 
@@ -865,14 +848,9 @@ button {
     main>.readout>.readout-main{padding:12px;gap:8px 10px;}
     main>.readout>.bound-panel{padding:12px 10px;}
     main>.kmpost{padding:18px 16px;}
-    .kmpost-grid{gap:14px;}
     .kmpost .kmlabel{font-size:10px;letter-spacing:1.5px;}
     .kmpost .kmvalue{font-size:34px;}
     .kmpost .kmunit{font-size:11px;}
-    .nearby-asset{padding-left:14px;min-height:130px;}
-    .nearby-asset-name{font-size:16px;}
-    .nearby-asset-station{font-size:13px;margin-top:8px;}
-    .nearby-asset-distance{font-size:10px;margin-top:6px;}
     .kmpost .segment-tag,.kmpost .ramp-tag.show{font-size:11px;margin-top:8px;padding:5px 10px;}
     .lane-btn{min-height:64px;padding:17px 3px;font-size:18px;}
   }
@@ -942,12 +920,6 @@ button {
         <div class="kmlabel">CURRENT KM STATION</div>
         <div class="kmvalue" id="km-value">--.---</div>
         <div class="kmunit">kilometers (interpolated)</div>
-      </div>
-      <div class="nearby-asset" aria-live="polite">
-        <div class="kmlabel">NEARBY BRIDGE</div>
-        <div class="nearby-asset-name" id="nearby-asset-name">Loading bridge data...</div>
-        <div class="nearby-asset-station" id="nearby-asset-station">--</div>
-        <div class="nearby-asset-distance" id="nearby-asset-distance"></div>
       </div>
     </div>
     <div class="segment-tag" id="segment-tag">--</div>
@@ -1444,194 +1416,6 @@ window.addEventListener('online', () => {
   if(!rampData.length) loadRampDataset(true);
 });
 
-// ---------- Nearby NLEX bridge / asset lookup ----------
-// Kept separate from the calibration points: this layer identifies an asset
-// for the live display but never changes KM interpolation or logged defects.
-let bridgeData = [];
-let bridgeApproachRadiusKm = 1;
-
-function parseBridgeStation(value){
-  if(typeof value !== 'string') return null;
-  const match = value.trim().match(/^(\d+)\+(\d{1,3})$/);
-  if(!match) return null; // Letter-prefixed/suffixed stations belong to spurs/segments.
-  return Number(match[1]) + Number(match[2]) / 1000;
-}
-
-function sanitizeBridgeData(raw){
-  if(raw && Number.isFinite(raw.approachRadiusMeters) && raw.approachRadiusMeters > 0){
-    bridgeApproachRadiusKm = raw.approachRadiusMeters / 1000;
-  }
-  const assets = raw && Array.isArray(raw.assets) ? raw.assets : (Array.isArray(raw) ? raw : []);
-  return assets.filter(asset => asset && typeof asset.name === 'string' && asset.name.trim()
-    && Number.isFinite(asset.lat) && Number.isFinite(asset.lon)
-  ).map(asset => {
-    const name = asset.name.trim();
-    const directionMatch = name.match(/\s*\((NB|SB|EB|WB)\)\s*$/i);
-    return {
-      name,
-      displayName: name.replace(/\s*\((NB|SB|EB|WB)\)\s*$/i, '').trim(),
-      direction: directionMatch ? directionMatch[1].toUpperCase() : '',
-      from: typeof asset.from === 'string' ? asset.from.trim() : '',
-      to: typeof asset.to === 'string' ? asset.to.trim() : '',
-      lat: asset.lat,
-      lon: asset.lon
-    };
-  });
-}
-
-function bridgeStationLabel(asset){
-  if(!asset.from) return 'KM station unavailable';
-  if(asset.to && asset.to !== asset.from) return `KM ${asset.from} to ${asset.to}`;
-  return `KM ${asset.from}`;
-}
-
-function nearestBridgeAsset(lat, lon, currentKm, expressway){
-  if(!bridgeData.length) return null;
-  const canUseMainlineKm = String(expressway || '').trim().toUpperCase() === 'NLEX'
-    && Number.isFinite(currentKm);
-  let best = null;
-
-  for(const asset of bridgeData){
-    const geoDistanceKm = haversineKm(lat, lon, asset.lat, asset.lon);
-    const fromKm = parseBridgeStation(asset.from);
-    const toKm = parseBridgeStation(asset.to);
-    let stationDistanceKm = Infinity;
-    let withinStationRange = false;
-
-    if(canUseMainlineKm && fromKm !== null){
-      const startKm = Math.min(fromKm, toKm === null ? fromKm : toKm);
-      const endKm = Math.max(fromKm, toKm === null ? fromKm : toKm);
-      stationDistanceKm = currentKm < startKm ? startKm - currentKm
-        : currentKm > endKm ? currentKm - endKm : 0;
-      withinStationRange = stationDistanceKm === 0 && toKm !== null;
-    }
-
-    const distanceKm = Math.min(geoDistanceKm, stationDistanceKm);
-    if(distanceKm > bridgeApproachRadiusKm) continue;
-
-    // Prefer the current carriageway when the sheet has separate NB/SB rows,
-    // without excluding direction-neutral assets such as overpasses.
-    const boundPenalty = asset.direction && userBound && asset.direction !== userBound ? 0.2 : 0;
-    const score = distanceKm + boundPenalty;
-    if(!best || score < best.score){
-      best = { asset, distanceKm, withinStationRange, score };
-    }
-  }
-  return best;
-}
-
-// On the NLEX mainline, keep showing the bridge currently being traversed;
-// as soon as its station range is passed, advance immediately to the closest
-// bridge ahead in the selected/detected direction. There is deliberately no
-// 1 km cutoff in this mode—the inspector should always know what comes next.
-// If KM/direction is unavailable, retain the geographic nearby fallback.
-function bridgeForDirectionOfTravel(lat, lon, currentKm, expressway, bound){
-  const normalizedExpressway = String(expressway || '').trim().toUpperCase();
-  const normalizedBound = String(bound || '').trim().toUpperCase();
-  const canFindAhead = normalizedExpressway === 'NLEX'
-    && Number.isFinite(currentKm)
-    && (normalizedBound === 'NB' || normalizedBound === 'SB');
-
-  if(!canFindAhead){
-    const nearby = nearestBridgeAsset(lat, lon, currentKm, expressway);
-    return nearby ? { ...nearby, mode:'nearby' } : null;
-  }
-
-  let best = null;
-  for(const asset of bridgeData){
-    // Direction-neutral crossings/overpasses apply to both carriageways;
-    // explicitly tagged NB/SB rows only apply to their matching direction.
-    if(asset.direction && asset.direction !== normalizedBound) continue;
-
-    const fromKm = parseBridgeStation(asset.from);
-    const toKm = parseBridgeStation(asset.to);
-    if(fromKm === null) continue;
-    const startKm = Math.min(fromKm, toKm === null ? fromKm : toKm);
-    const endKm = Math.max(fromKm, toKm === null ? fromKm : toKm);
-    const withinStationRange = currentKm >= startKm && currentKm <= endKm;
-    let distanceKm;
-
-    if(normalizedBound === 'NB'){
-      if(currentKm > endKm) continue;
-      distanceKm = withinStationRange ? 0 : Math.max(0, startKm - currentKm);
-    }else{
-      if(currentKm < startKm) continue;
-      distanceKm = withinStationRange ? 0 : Math.max(0, currentKm - endKm);
-    }
-
-    // Prefer a direction-specific record when it coincides with a neutral
-    // crossing, then use distance to select the next bridge ahead.
-    const score = distanceKm + (asset.direction ? 0 : 0.0001);
-    if(!best || score < best.score){
-      best = { asset, distanceKm, withinStationRange, score, mode:'ahead' };
-    }
-  }
-  return best;
-}
-
-function updateBridgeReadout(lat, lon, kmResult, isOffMappedNetwork){
-  const nameEl = document.getElementById('nearby-asset-name');
-  const stationEl = document.getElementById('nearby-asset-station');
-  const distanceEl = document.getElementById('nearby-asset-distance');
-  if(!nameEl || !stationEl || !distanceEl) return;
-
-  if(!bridgeData.length){
-    nameEl.textContent = 'Bridge data unavailable';
-    stationEl.textContent = '--';
-    distanceEl.textContent = '';
-    return;
-  }
-
-  const match = bridgeForDirectionOfTravel(
-    lat,
-    lon,
-    kmResult && !isOffMappedNetwork ? kmResult.km : null,
-    kmResult && !isOffMappedNetwork ? kmResult.expressway : '',
-    userBound || (kmResult && !isOffMappedNetwork ? kmResult.bound : '')
-  );
-  if(!match){
-    nameEl.textContent = kmResult && !isOffMappedNetwork ? 'No upcoming bridge' : 'No nearby bridge';
-    stationEl.textContent = '--';
-    distanceEl.textContent = kmResult && !isOffMappedNetwork
-      ? 'No further bridge found in this direction'
-      : `Nothing within ${Math.round(bridgeApproachRadiusKm * 1000)} m`;
-    return;
-  }
-
-  nameEl.textContent = match.asset.displayName;
-  stationEl.textContent = bridgeStationLabel(match.asset);
-  distanceEl.textContent = match.withinStationRange
-    ? 'Currently within this bridge range'
-    : `Approximately ${Math.max(0, Math.round(match.distanceKm * 1000))} m ${match.mode === 'ahead' ? 'ahead' : 'away'}`;
-}
-
-async function loadBridgeDataset(){
-  try{
-    const response = await fetch('bridges.json', { cache: 'no-store' });
-    if(!response.ok) throw new Error('HTTP ' + response.status);
-    bridgeData = sanitizeBridgeData(await response.json());
-    if(!bridgeData.length) throw new Error('no valid records');
-    if(currentPos){
-      updateReadout();
-    } else {
-      document.getElementById('nearby-asset-name').textContent = 'Waiting for GPS location';
-      document.getElementById('nearby-asset-station').textContent = '--';
-      document.getElementById('nearby-asset-distance').textContent = '';
-    }
-  }catch(err){
-    bridgeData = [];
-    console.error('Could not load bridge / asset dataset', err);
-    if(currentPos){
-      updateReadout();
-    } else {
-      document.getElementById('nearby-asset-name').textContent = 'Bridge data unavailable';
-      document.getElementById('nearby-asset-station').textContent = '--';
-      document.getElementById('nearby-asset-distance').textContent = '';
-    }
-  }
-}
-loadBridgeDataset();
-
 // ---------- Clock ----------
 function tickClock(){
   const now = new Date();
@@ -1721,7 +1505,6 @@ function updateReadout(){
     kmEl.textContent = '--.---';
     tagEl.textContent = calibData.length ? '--' : 'dataset not loaded';
     tagEl.classList.remove('faroff');
-    updateBridgeReadout(currentPos.lat, currentPos.lon, null, true);
     return;
   }
 
@@ -1738,7 +1521,6 @@ function updateReadout(){
   if(!isOffMappedNetwork){
     detectBoundFromTrend(result.expressway, result.km);
   }
-  updateBridgeReadout(currentPos.lat, currentPos.lon, result, isOffMappedNetwork);
   renderBoundToggle(result.expressway);
   updateBoundAutoStatus(result.expressway);
   updateRampReadout(currentPos.lat, currentPos.lon);
