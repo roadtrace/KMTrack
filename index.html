@@ -275,9 +275,10 @@
   .swipe-row .log-entry{margin-bottom:0;will-change:transform;transition:transform 180ms ease;}
   .swipe-row .log-entry:focus-visible{outline:3px solid rgba(244,180,0,.65);outline-offset:-3px;}
   .swipe-row.dragging .log-entry{transition:none;}
-  .swipe-action{position:absolute;inset-block:0;width:88px;border:0;color:#fff;font-weight:750;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .swipe-action{position:absolute;inset-block:0;width:88px;border:0;color:#fff;font-weight:750;cursor:pointer;display:flex;align-items:center;justify-content:center;visibility:hidden;pointer-events:none;}
   .swipe-action.edit{left:0;background:#1d78b5;}
   .swipe-action.delete{right:0;background:var(--safety-red);}
+  .swipe-row.dragging .swipe-action,.swipe-row.swipe-open .swipe-action,.swipe-row.swipe-preview .swipe-action.edit{visibility:visible;pointer-events:auto;}
   .swipe-undo{position:fixed;z-index:1100;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;align-items:center;gap:16px;max-width:calc(100vw - 28px);padding:11px 12px 11px 16px;border-radius:12px;background:#f3f5f6;color:#191c1f;box-shadow:0 10px 30px rgba(0,0,0,.35);font-size:13px;}
   .swipe-undo button{border:0;background:transparent;color:#1269a1;font-weight:800;min-height:36px;padding:4px 8px;cursor:pointer;}
   .swipe-preview .log-entry{animation:swipe-preview 900ms ease-in-out 250ms 1;}
@@ -904,7 +905,7 @@ button {
     box-shadow:0 12px 24px rgba(0,0,0,.28);overflow:hidden;
   }
   .dataset-drawer>summary{
-    min-height:62px;padding:23px 22px 11px;display:flex;align-items:center;gap:11px;
+    min-height:48px;padding:20px 22px 5px;display:flex;align-items:center;gap:11px;
     cursor:pointer;list-style:none;color:#dfe4e8;font-size:10px;font-weight:750;
     letter-spacing:.035em;text-transform:uppercase;-webkit-tap-highlight-color:transparent;
   }
@@ -929,8 +930,8 @@ button {
     box-shadow:0 14px 32px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.035);
     backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   }
-  .readout-main{gap:10px 16px;padding:0;}
-  .readout-main .field .label{font-size:10px;letter-spacing:.14em;color:#aeb4c0;}
+  .readout-main{grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);gap:10px 8px;padding:0;}
+  .readout-main .field .label{font-size:10px;letter-spacing:.14em;color:#aeb4c0;white-space:nowrap;}
   .readout-main .field .value{font-size:clamp(11px,3.4vw,16px);margin-top:2px;letter-spacing:.01em;}
   .readout-main .status{font-size:11px;margin-top:2px;}
   .bound-panel{
@@ -965,7 +966,7 @@ button {
     .dataset-drawer{width:calc(100% - 20px);}
     .dataset-drawer>summary{padding-left:18px;padding-right:18px;}
     .readout{padding:14px 16px;gap:14px;}
-    .readout-main{gap:10px 16px;}
+    .readout-main{gap:10px 8px;}
     .bound-panel{flex-basis:132px;padding:10px 12px;}
     button.bound-btn{min-height:48px;}
   }
@@ -2946,7 +2947,7 @@ function setSwipeOffset(row, offset){
 function closeOpenSwipe(exceptId){
   if(!openSwipeEntryId || openSwipeEntryId === exceptId) return;
   const openRow = document.querySelector(`.swipe-row[data-entry-id="${CSS.escape(openSwipeEntryId)}"]`);
-  if(openRow) setSwipeOffset(openRow, 0);
+  if(openRow){ openRow.classList.remove('swipe-open'); setSwipeOffset(openRow, 0); }
   openSwipeEntryId = null;
 }
 
@@ -3007,22 +3008,22 @@ function wireSwipeRows(list){
       const decision = KMTrackSwipe.releaseDecision(rawOffset, row.getBoundingClientRect().width);
       const idx = Number(card.dataset.idx);
       if(decision === 'edit'){
-        openSwipeEntryId = null; setSwipeOffset(row, 0); openEditModal(idx);
+        openSwipeEntryId = null; row.classList.remove('swipe-open'); setSwipeOffset(row, 0); openEditModal(idx);
       }else if(decision === 'delete'){
         openSwipeEntryId = null; deletionController.remove(idx, true);
       }else if(decision === 'reveal-edit'){
-        closeOpenSwipe(entryId); openSwipeEntryId = entryId; setSwipeOffset(row, KMTrackSwipe.REVEAL_WIDTH_PX);
+        closeOpenSwipe(entryId); openSwipeEntryId = entryId; row.classList.add('swipe-open'); setSwipeOffset(row, KMTrackSwipe.REVEAL_WIDTH_PX);
       }else if(decision === 'reveal-delete'){
-        closeOpenSwipe(entryId); openSwipeEntryId = entryId; setSwipeOffset(row, -KMTrackSwipe.REVEAL_WIDTH_PX);
+        closeOpenSwipe(entryId); openSwipeEntryId = entryId; row.classList.add('swipe-open'); setSwipeOffset(row, -KMTrackSwipe.REVEAL_WIDTH_PX);
       }else{
-        openSwipeEntryId = null; setSwipeOffset(row, 0);
+        openSwipeEntryId = null; row.classList.remove('swipe-open'); setSwipeOffset(row, 0);
       }
     };
     row.addEventListener('pointerup', finish);
     row.addEventListener('pointercancel', e => {
       if(e.pointerId !== pointerId) return;
       pointerId = null; row.classList.remove('dragging');
-      openSwipeEntryId = null; setSwipeOffset(row, 0);
+      openSwipeEntryId = null; row.classList.remove('swipe-open'); setSwipeOffset(row, 0);
     });
   });
   maybeShowSwipePreview(list);
@@ -3091,7 +3092,7 @@ function renderLog(){
 
     const checkboxHtml = selectMode
       ? `<div class="entry-checkbox${isSelected ? ' checked' : ''}" data-idx="${realIdx}">${isSelected ? '✓' : ''}</div>`
-      : `<button type="button" class="del" data-idx="${realIdx}" aria-label="Delete ${e.type} entry">✕</button>`;
+      : '';
 
     div.innerHTML = `
       <div class="info">
@@ -3104,16 +3105,6 @@ function renderLog(){
     row.innerHTML = `<button type="button" class="swipe-action edit" data-idx="${realIdx}" aria-label="Edit ${e.type} entry">Edit</button><button type="button" class="swipe-action delete" data-idx="${realIdx}" aria-label="Delete ${e.type} entry">Delete</button>`;
     row.appendChild(div);
     list.appendChild(row);
-  });
-  list.querySelectorAll('.del').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const idx = +e.currentTarget.dataset.idx;
-      const entry = entries[idx];
-      if(!entry) return;
-      if(!confirm(`Delete this entry?\n\n${entry.type}${entry.lane ? ' · Lane: '+entry.lane : ''}\n${entry.timestamp}`)) return;
-      deletionController.remove(idx, false);
-    });
   });
   list.querySelectorAll('.photo-view-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -3179,7 +3170,7 @@ document.getElementById('bulk-delete-btn').addEventListener('click', async () =>
 });
 
 document.addEventListener('click', (e) => {
-  if(e.target.closest('.del') || e.target.closest('.swipe-action') || e.target.closest('.photo-view-btn') || e.target.closest('.photo-remove-btn')) return;
+  if(e.target.closest('.swipe-action') || e.target.closest('.photo-view-btn') || e.target.closest('.photo-remove-btn')) return;
   const card = e.target.closest('.log-entry');
   if(!card || card.dataset.idx === undefined) return;
   if(card.dataset.suppressClick === '1') return;
