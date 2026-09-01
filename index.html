@@ -271,6 +271,24 @@
   .log-entry .info .type{font-weight:700; font-size:14px;}
   .log-entry .info .meta{font-family:var(--mono); font-size:11px; color:#9aa0a6; margin-top:3px; line-height:1.5;}
   .log-entry .del{background:none; border:none; color:#c1392b; font-size:18px; cursor:pointer; padding:4px 8px;}
+  .swipe-row{position:relative;overflow:hidden;border-radius:8px;margin-bottom:8px;touch-action:pan-y;}
+  .swipe-row .log-entry{margin-bottom:0;will-change:transform;transition:transform 180ms ease;}
+  .swipe-row .log-entry:focus-visible{outline:3px solid rgba(244,180,0,.65);outline-offset:-3px;}
+  .swipe-row.dragging .log-entry{transition:none;}
+  .swipe-action{position:absolute;inset-block:0;width:88px;border:0;color:#fff;font-weight:750;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .swipe-action.edit{left:0;background:#1d78b5;}
+  .swipe-action.delete{right:0;background:var(--safety-red);}
+  .swipe-undo{position:fixed;z-index:1100;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;align-items:center;gap:16px;max-width:calc(100vw - 28px);padding:11px 12px 11px 16px;border-radius:12px;background:#f3f5f6;color:#191c1f;box-shadow:0 10px 30px rgba(0,0,0,.35);font-size:13px;}
+  .swipe-undo button{border:0;background:transparent;color:#1269a1;font-weight:800;min-height:36px;padding:4px 8px;cursor:pointer;}
+  .swipe-preview .log-entry{animation:swipe-preview 900ms ease-in-out 250ms 1;}
+  @keyframes swipe-preview{0%,100%{transform:translateX(0)}38%{transform:translateX(44px)}62%{transform:translateX(44px)}}
+  @media (prefers-reduced-motion:reduce){
+    .swipe-row .log-entry{transition:none;}
+    .swipe-preview .log-entry{animation:none;}
+  }
+  @media (forced-colors:active){
+    .swipe-action,.swipe-undo{border:1px solid ButtonText;}
+  }
 
   .count-bar{font-size:12px; color:#9aa0a6; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; gap:10px;}
   .count-bar-left{display:flex; align-items:center; gap:8px;}
@@ -854,36 +872,154 @@ button {
     .kmpost .segment-tag,.kmpost .ramp-tag.show{font-size:11px;margin-top:8px;padding:5px 10px;}
     .lane-btn{min-height:64px;padding:17px 3px;font-size:18px;}
   }
+
+  /* ---------- 2026 centered glass interface ---------- */
+  html{background:#0b1722;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 7% 40%,rgba(24,132,178,.27) 0,transparent 38%),
+      radial-gradient(circle at 82% 28%,rgba(61,67,145,.19) 0,transparent 40%),
+      linear-gradient(155deg,#102231 0%,#141a27 46%,#07111a 100%);
+    background-attachment:fixed;
+  }
+  .top-shell{position:sticky;top:0;z-index:20;}
+  header{
+    position:relative;z-index:2;display:block;
+    min-height:0;padding:calc(env(safe-area-inset-top) + 16px) 16px 14px;
+    background:linear-gradient(145deg,rgba(31,38,44,.98),rgba(21,27,32,.98));
+    border-radius:0 0 30px 30px;
+    box-shadow:0 12px 28px rgba(0,0,0,.30);
+  }
+  .header-brand{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;}
+  .header-logo{width:auto;height:72px;max-width:min(55vw,430px);max-height:72px;object-fit:contain;object-position:center;flex:none;}
+  .header-copy{width:100%;align-items:center;text-align:center;margin-top:4px;}
+  .header-copy .sub{font-family:var(--font-ui);font-size:12px;letter-spacing:.035em;color:#aeb4bc;max-width:min(92vw,480px);}
+  #storage-status:not([hidden]){margin-top:5px;color:#efc067;white-space:normal;}
+
+  .dataset-drawer{
+    position:relative;z-index:1;margin:-20px auto 0;width:min(100%,560px);
+    background:linear-gradient(180deg,rgba(30,41,49,.98),rgba(17,30,39,.98));
+    border:1px solid rgba(255,255,255,.04);border-top:0;border-radius:0 0 30px 30px;
+    box-shadow:0 12px 24px rgba(0,0,0,.28);overflow:hidden;
+  }
+  .dataset-drawer>summary{
+    min-height:62px;padding:23px 22px 11px;display:flex;align-items:center;gap:11px;
+    cursor:pointer;list-style:none;color:#dfe4e8;font-size:10px;font-weight:750;
+    letter-spacing:.035em;text-transform:uppercase;-webkit-tap-highlight-color:transparent;
+  }
+  .dataset-drawer>summary::-webkit-details-marker{display:none;}
+  .dataset-state-dot{width:9px;height:9px;flex:0 0 9px;border-radius:50%;background:#d39a26;box-shadow:0 0 0 3px rgba(211,154,38,.10),0 0 10px rgba(211,154,38,.65);}
+  .dataset-drawer.loaded .dataset-state-dot{background:#45e3a0;box-shadow:0 0 0 3px rgba(69,227,160,.12),0 0 11px rgba(69,227,160,.95);}
+  .dataset-state-label{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .dataset-chevron{width:22px;height:22px;border:1px solid rgba(255,255,255,.38);border-radius:50%;position:relative;flex:0 0 22px;}
+  .dataset-chevron::after{content:'';position:absolute;left:7px;top:5px;width:6px;height:6px;border-right:1.5px solid #dbe1e6;border-bottom:1.5px solid #dbe1e6;transform:rotate(45deg);transition:transform 180ms ease,top 180ms ease;}
+  .dataset-drawer[open] .dataset-chevron::after{top:8px;transform:rotate(225deg);}
+  .dataset-content{padding:0 14px 15px;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .dataset-panel{min-width:0;padding:12px 13px;border:1px solid rgba(255,255,255,.10);border-radius:14px;background:rgba(255,255,255,.035);}
+  .dataset-panel-title{font-size:11px;font-weight:750;color:#f1f3f5;margin-bottom:5px;}
+  .dataset-panel .calib-hint{min-height:34px;margin:0 0 9px;}
+  .dataset-panel .calib-add{margin:0;min-height:38px;width:100%;border-radius:10px;}
+
+  main{padding-top:12px;}
+  .readout{
+    margin-top:6px;padding:14px 16px;gap:14px;
+    background:linear-gradient(135deg,rgba(39,39,53,.66),rgba(28,32,45,.53));
+    border:1px solid rgba(176,184,205,.22);border-radius:18px;
+    box-shadow:0 14px 32px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.035);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  }
+  .readout-main{gap:10px 16px;padding:0;}
+  .readout-main .field .label{font-size:10px;letter-spacing:.14em;color:#aeb4c0;}
+  .readout-main .field .value{font-size:clamp(11px,3.4vw,16px);margin-top:2px;letter-spacing:.01em;}
+  .readout-main .status{font-size:11px;margin-top:2px;}
+  .bound-panel{
+    flex-basis:132px;padding:10px 12px;background:rgba(31,38,47,.50);
+    border-color:rgba(255,255,255,.16);border-radius:10px;box-shadow:none;
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  }
+  .bound-panel-label{font-size:12px;margin-bottom:8px;}
+  .bound-toggle{gap:8px;}
+  button.bound-btn{min-height:48px;border-color:rgba(255,255,255,.18);background:rgba(47,55,64,.72);border-radius:12px;box-shadow:none;}
+  button.bound-btn.active{background:linear-gradient(145deg,#ffc000,#f2ad00);border-color:#ffc000;box-shadow:0 9px 18px rgba(244,180,0,.18);}
+
+  .kmpost{
+    margin-top:12px;padding:17px 18px;
+    border:2px solid transparent;border-radius:20px;
+    background:
+      linear-gradient(135deg,rgba(27,139,98,.92),rgba(23,102,82,.88)) padding-box,
+      linear-gradient(125deg,rgba(210,255,236,.58),rgba(107,211,184,.28) 52%,rgba(235,255,248,.72)) border-box;
+    box-shadow:0 14px 34px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.08);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  }
+  .kmpost .kmvalue{font-size:clamp(34px,10vw,44px);}
+  .kmpost .kmlabel{font-size:11px;}
+  .kmpost .kmunit{font-size:12px;}
+  .defect-focus-select,.select-toggle-btn{height:42px;min-height:42px;padding-top:6px;padding-bottom:6px;}
+  .lane-divider{display:none;}
+
+  @media(max-width:600px){
+    header{min-height:0;padding:calc(env(safe-area-inset-top) + 4px) 12px 8px;}
+    .header-logo{width:auto;height:55px;max-width:42vw;max-height:55px;}
+    .header-copy .sub{font-size:9px;}
+    .dataset-drawer{width:calc(100% - 20px);}
+    .dataset-drawer>summary{padding-left:18px;padding-right:18px;}
+    .readout{padding:14px 16px;gap:14px;}
+    .readout-main{gap:10px 16px;}
+    .bound-panel{flex-basis:132px;padding:10px 12px;}
+    button.bound-btn{min-height:48px;}
+  }
+  @media(max-width:390px){
+    .dataset-content{grid-template-columns:1fr;}
+    .readout{padding:12px;gap:10px;}
+    .readout-main .field .value{font-size:12px;letter-spacing:.01em;}
+    .bound-panel{flex-basis:112px;padding:9px;}
+  }
+  @media (orientation:landscape) and (min-width:700px){
+    header{min-height:0;padding:calc(env(safe-area-inset-top) + 8px) 18px 9px;}
+    .header-logo{height:58px;width:auto;max-height:58px;}
+    .header-copy{margin-top:0;}
+    .dataset-drawer{width:min(calc(100% - 36px),1144px);}
+    main>section.block:first-child{display:none;}
+    main>.readout>.readout-main{grid-row:1 / span 2;background:linear-gradient(135deg,rgba(39,39,53,.66),rgba(28,32,45,.53));border-color:rgba(176,184,205,.22);border-radius:18px;}
+  }
+  @media (prefers-reduced-motion:reduce){.dataset-chevron::after{transition:none;}}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="header-brand">
-    <img class="header-logo" src="KMTrack.png" alt="KMTrack">
-    <div class="header-divider"></div>
-    <div class="header-copy">
-      <h1><span class="white">Road Inspection Log</span></h1>
-      <div class="sub" id="clock">-- -- --</div>
-      <div class="sub" id="storage-status" hidden></div>
+<div class="top-shell">
+  <header>
+    <div class="header-brand">
+      <img class="header-logo" src="KMTrack.png" alt="KMTrack">
+      <div class="header-copy">
+        <div class="sub" id="clock">-- -- --</div>
+        <div class="sub" id="storage-status" hidden></div>
+      </div>
     </div>
-  </div>
-</header>
+  </header>
+</div>
+  <details class="dataset-drawer" id="dataset-drawer">
+    <summary>
+      <span class="dataset-state-dot" aria-hidden="true"></span>
+      <span class="dataset-state-label" id="dataset-state-label">Loading network data</span>
+      <span class="dataset-chevron" aria-hidden="true"></span>
+    </summary>
+    <div class="dataset-content">
+      <div class="dataset-panel">
+        <div class="dataset-panel-title">Network calibration data</div>
+        <div class="calib-hint" id="calib-status">Loading NLEX network alignment...</div>
+        <button class="calib-add" id="calib-reload">Reload dataset</button>
+      </div>
+      <div class="dataset-panel">
+        <div class="dataset-panel-title">Interchange / ramp data</div>
+        <div class="calib-hint" id="ramp-status">Loading interchange/ramp dataset...</div>
+        <button class="calib-add" id="ramp-reload">Reload dataset</button>
+      </div>
+    </div>
+  </details>
 
 <main>
-
-  <section class="block">
-    <details class="calib">
-      <summary>▸ Network calibration data</summary>
-      <div class="calib-hint" id="calib-status">Loading NLEX network alignment...</div>
-      <button class="calib-add" id="calib-reload">Reload dataset</button>
-    </details>
-    <details class="calib">
-      <summary>▸ Interchange / ramp data</summary>
-      <div class="calib-hint" id="ramp-status">Loading interchange/ramp dataset...</div>
-      <button class="calib-add" id="ramp-reload">Reload dataset</button>
-    </details>
-  </section>
 
   <div class="readout">
     <div class="readout-main">
@@ -1012,6 +1148,7 @@ button {
 
 </main>
 
+<script src="./swipe-actions.js"></script>
 <script>
 class GeoKalmanFilter{
   constructor(){
@@ -1041,7 +1178,7 @@ const gpsFilter = new GeoKalmanFilter();
 
 let currentPos = null; // {lat, lon, acc}; coordinates are Kalman-smoothed
 let calibData = [];    // {e, b, k, lat, lon} — loaded from the NLEX network dataset
-let entries = [];      // {type, timestamp, lat, lon, km, expressway, bound, lane, photoId, photoFilename, photoTimestamp}
+let entries = [];      // {id, type, timestamp, lat, lon, km, expressway, bound, lane, photoId, photoFilename, photoTimestamp}
 let expresswayBounds = {}; // { "NLEX": ["NB","SB"], "C3-R10 RAMP": ["EB","WB"], ... }
 let userBound = null;      // manually selected direction, e.g. "NB"
 let currentExpressway = null; // last detected corridor, used to know which bound pair to show
@@ -1125,7 +1262,20 @@ function newId(){
 const STORAGE_KEY_ENTRIES = 'nlex_inspection_entries_v1';
 const STORAGE_KEY_DATASET = 'nlex_network_dataset_v1';
 const STORAGE_KEY_BOUND = 'nlex_user_bound_v1';
+const STORAGE_KEY_SWIPE_PREVIEW = 'kmtrack_swipe_preview_v1';
 let storageAvailable = true;
+let calibrationDatasetReady = false;
+let rampDatasetReady = false;
+
+function updateDatasetDrawerState(){
+  const drawer = document.getElementById('dataset-drawer');
+  const label = document.getElementById('dataset-state-label');
+  if(!drawer || !label) return;
+  drawer.classList.toggle('loaded', calibrationDatasetReady);
+  label.textContent = calibrationDatasetReady && rampDatasetReady
+    ? 'Network + ramp data loaded'
+    : calibrationDatasetReady ? 'Network data loaded' : 'Loading network data';
+}
 
 function testStorageWritable(){
   try{
@@ -1149,9 +1299,11 @@ function loadFromStorage(){
       // malformed entries, and backfill fields introduced after some
       // entries were already saved (photoId/photoFilename/photoTimestamp),
       // so older logs don't break the photo UI or CSV export.
+      let addedStableIds = false;
       entries = (Array.isArray(parsed) ? parsed : [])
         .filter(e => e && typeof e === 'object' && typeof e.lat === 'number' && typeof e.lon === 'number')
         .map(e => ({
+          id: typeof e.id === 'string' && e.id ? e.id : (addedStableIds = true, newId()),
           type: typeof e.type === 'string' && e.type ? e.type : 'Others',
           timestamp: typeof e.timestamp === 'string' && e.timestamp ? e.timestamp : fullTimestamp(),
           lat: e.lat,
@@ -1164,6 +1316,7 @@ function loadFromStorage(){
           photoFilename: typeof e.photoFilename === 'string' ? e.photoFilename : '',
           photoTimestamp: typeof e.photoTimestamp === 'string' ? e.photoTimestamp : ''
         }));
+      if(addedStableIds) localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(entries));
     }
     const savedBound = localStorage.getItem(STORAGE_KEY_BOUND);
     if(savedBound) userBound = savedBound;
@@ -1277,7 +1430,9 @@ async function loadCalibrationDataset(forceNetwork){
         calibData = sanitizeCalibData(JSON.parse(cached));
         buildExpresswayBoundsMap();
         buildSpatialIndex();
+        calibrationDatasetReady = calibData.length > 0;
         statusEl.textContent = `Loaded ${calibData.length.toLocaleString()} points from on-device cache (works offline).`;
+        updateDatasetDrawerState();
         return;
       }
     }
@@ -1288,12 +1443,16 @@ async function loadCalibrationDataset(forceNetwork){
     calibData = sanitizeCalibData(JSON.parse(text));
     buildExpresswayBoundsMap();
     buildSpatialIndex();
+    calibrationDatasetReady = calibData.length > 0;
     try{ localStorage.setItem(STORAGE_KEY_DATASET, text); }catch(e){ /* dataset too big for storage quota; still usable this session */ }
     statusEl.textContent = `Loaded ${calibData.length.toLocaleString()} points from NLEX network dataset (cached for offline use).`;
   }catch(err){
+    calibrationDatasetReady = calibData.length > 0;
     statusEl.textContent = calibData.length
       ? `Using ${calibData.length.toLocaleString()} previously cached points — couldn't refresh (${err.message}).`
       : `Could not load network dataset (${err.message}). Km station will show as unavailable.`;
+  }finally{
+    updateDatasetDrawerState();
   }
 }
 document.getElementById('calib-reload').addEventListener('click', () => loadCalibrationDataset(true));
@@ -1391,7 +1550,9 @@ async function loadRampDataset(forceNetwork){
       if(cached){
         rampData = sanitizeRampData(JSON.parse(cached));
         buildRampIndex();
+        rampDatasetReady = rampData.length > 0;
         statusEl.textContent = `Loaded ${rampData.length.toLocaleString()} ramp(s) from on-device cache (works offline).`;
+        updateDatasetDrawerState();
         return;
       }
     }
@@ -1401,12 +1562,16 @@ async function loadRampDataset(forceNetwork){
     const text = await res.text();
     rampData = sanitizeRampData(JSON.parse(text));
     buildRampIndex();
+    rampDatasetReady = rampData.length > 0;
     try{ localStorage.setItem(STORAGE_KEY_RAMPS, text); }catch(e){ /* dataset too big for storage quota; still usable this session */ }
     statusEl.textContent = `Loaded ${rampData.length.toLocaleString()} ramp(s) from interchange/ramp dataset (cached for offline use).`;
   }catch(err){
+    rampDatasetReady = rampData.length > 0;
     statusEl.textContent = rampData.length
       ? `Using ${rampData.length.toLocaleString()} previously cached ramp(s) — couldn't refresh (${err.message}).`
       : `Could not load ramp dataset (${err.message}). Ramp names will show as unavailable.`;
+  }finally{
+    updateDatasetDrawerState();
   }
 }
 document.getElementById('ramp-reload').addEventListener('click', () => loadRampDataset(true));
@@ -1724,6 +1889,7 @@ function logDefect(type, lane){
   const isOffMappedNetwork = !result || result.distance > offNetworkThresholdKm(currentPos.acc);
 
   entries.push({
+    id: newId(),
     type,
     timestamp: fullTimestamp(),
     lat: currentPos.lat,
@@ -2433,6 +2599,7 @@ async function captureContinuousLane(laneValue){
     await putPhoto(photoId + ':raw', result.rawBlob);
     entries.push({
       ...cameraDraftEntry,
+      id: newId(),
       timestamp: fullTimestamp(),
       photoId,
       photoFilename: result.filename,
@@ -2573,6 +2740,7 @@ async function saveCapturedPhoto(){
     } else {
       entries.push({
         ...cameraDraftEntry,
+        id: newId(),
         timestamp: fullTimestamp(),
         photoId,
         photoFilename: pendingCaptureFilename,
@@ -2740,6 +2908,125 @@ function applyContinuousLaneColors(type){
 // ---------- Multi-select delete mode ----------
 let selectMode = false;
 let selectedIndices = new Set();
+let openSwipeEntryId = null;
+let swipePreviewChecked = false;
+let undoNotice = null;
+
+function hideSwipeUndo(){
+  if(undoNotice){ undoNotice.remove(); undoNotice = null; }
+}
+
+function showSwipeUndo(){
+  hideSwipeUndo();
+  const notice = document.createElement('div');
+  notice.className = 'swipe-undo';
+  notice.setAttribute('role', 'status');
+  notice.setAttribute('aria-live', 'polite');
+  notice.innerHTML = '<span>Inspection entry deleted</span><button type="button">Undo</button>';
+  notice.querySelector('button').addEventListener('click', () => deletionController.undo());
+  document.body.appendChild(notice);
+  undoNotice = notice;
+}
+
+const deletionController = KMTrackSwipe.createDeletionController({
+  getEntries: () => entries,
+  persist: saveEntries,
+  render: renderLog,
+  deletePhoto,
+  onPending: showSwipeUndo,
+  onFinalize: hideSwipeUndo,
+  onUndo: hideSwipeUndo
+});
+
+function setSwipeOffset(row, offset){
+  const card = row.querySelector('.log-entry');
+  if(card) card.style.transform = `translateX(${offset}px)`;
+}
+
+function closeOpenSwipe(exceptId){
+  if(!openSwipeEntryId || openSwipeEntryId === exceptId) return;
+  const openRow = document.querySelector(`.swipe-row[data-entry-id="${CSS.escape(openSwipeEntryId)}"]`);
+  if(openRow) setSwipeOffset(openRow, 0);
+  openSwipeEntryId = null;
+}
+
+function maybeShowSwipePreview(list){
+  if(swipePreviewChecked || selectMode) return;
+  swipePreviewChecked = true;
+  let shown = false;
+  try{ shown = localStorage.getItem(STORAGE_KEY_SWIPE_PREVIEW) === '1'; }catch(e){ /* non-critical */ }
+  if(shown) return;
+  try{ localStorage.setItem(STORAGE_KEY_SWIPE_PREVIEW, '1'); }catch(e){ /* non-critical */ }
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const first = list.querySelector('.swipe-row');
+  if(!first) return;
+  first.classList.add('swipe-preview');
+  first.addEventListener('animationend', () => first.classList.remove('swipe-preview'), {once:true});
+}
+
+function wireSwipeRows(list){
+  if(selectMode) return;
+  list.querySelectorAll('.swipe-row').forEach(row => {
+    const card = row.querySelector('.log-entry');
+    const entryId = row.dataset.entryId;
+    let startX = 0, startY = 0, lastX = 0, baseOffset = 0;
+    let pointerId = null, intent = '';
+
+    row.addEventListener('pointerdown', e => {
+      if(e.button !== undefined && e.button !== 0) return;
+      if(e.target.closest('button, a, input, select')) return;
+      closeOpenSwipe(entryId);
+      pointerId = e.pointerId;
+      startX = lastX = e.clientX; startY = e.clientY;
+      baseOffset = openSwipeEntryId === entryId ? (card.style.transform.includes('-') ? -KMTrackSwipe.REVEAL_WIDTH_PX : KMTrackSwipe.REVEAL_WIDTH_PX) : 0;
+      intent = '';
+    });
+    row.addEventListener('pointermove', e => {
+      if(e.pointerId !== pointerId) return;
+      lastX = e.clientX;
+      const dx = e.clientX - startX, dy = e.clientY - startY;
+      if(!intent && Math.max(Math.abs(dx), Math.abs(dy)) >= 10){
+        intent = Math.abs(dx) > Math.abs(dy) * 1.25 ? 'horizontal' : 'vertical';
+        if(intent === 'horizontal'){
+          row.classList.add('dragging');
+          try{ row.setPointerCapture(pointerId); }catch(err){ /* pointer may already be released */ }
+        }
+      }
+      if(intent !== 'horizontal') return;
+      e.preventDefault();
+      setSwipeOffset(row, KMTrackSwipe.resistedOffset(baseOffset + dx));
+    });
+    const finish = e => {
+      if(e.pointerId !== pointerId) return;
+      const dx = lastX - startX;
+      pointerId = null; row.classList.remove('dragging');
+      if(intent !== 'horizontal') return;
+      card.dataset.suppressClick = '1';
+      setTimeout(() => delete card.dataset.suppressClick, 0);
+      const rawOffset = baseOffset + dx;
+      const decision = KMTrackSwipe.releaseDecision(rawOffset, row.getBoundingClientRect().width);
+      const idx = Number(card.dataset.idx);
+      if(decision === 'edit'){
+        openSwipeEntryId = null; setSwipeOffset(row, 0); openEditModal(idx);
+      }else if(decision === 'delete'){
+        openSwipeEntryId = null; deletionController.remove(idx, true);
+      }else if(decision === 'reveal-edit'){
+        closeOpenSwipe(entryId); openSwipeEntryId = entryId; setSwipeOffset(row, KMTrackSwipe.REVEAL_WIDTH_PX);
+      }else if(decision === 'reveal-delete'){
+        closeOpenSwipe(entryId); openSwipeEntryId = entryId; setSwipeOffset(row, -KMTrackSwipe.REVEAL_WIDTH_PX);
+      }else{
+        openSwipeEntryId = null; setSwipeOffset(row, 0);
+      }
+    };
+    row.addEventListener('pointerup', finish);
+    row.addEventListener('pointercancel', e => {
+      if(e.pointerId !== pointerId) return;
+      pointerId = null; row.classList.remove('dragging');
+      openSwipeEntryId = null; setSwipeOffset(row, 0);
+    });
+  });
+  maybeShowSwipePreview(list);
+}
 
 function updateBulkBar(){
   const bar = document.getElementById('bulk-actions-bar');
@@ -2760,6 +3047,7 @@ function exitSelectMode(){
 }
 
 function renderLog(){
+  openSwipeEntryId = null;
   const list = document.getElementById('log-list');
   const exportBtn = document.getElementById('export-btn');
   const backupBtn = document.getElementById('backup-btn');
@@ -2781,9 +3069,17 @@ function renderLog(){
   entries.slice().reverse().forEach((e) => {
     const realIdx = entries.indexOf(e);
     const div = document.createElement('div');
+    const row = document.createElement('div');
     const isSelected = selectedIndices.has(realIdx);
     div.className = 'log-entry ' + typeClass(e.type) + (selectMode ? ' select-mode' : '') + (isSelected ? ' selected' : '');
     div.dataset.idx = realIdx;
+    if(!selectMode){
+      div.tabIndex = 0;
+      div.setAttribute('role', 'button');
+      div.setAttribute('aria-label', `Edit ${e.type} inspection entry`);
+    }
+    row.className = 'swipe-row';
+    row.dataset.entryId = e.id;
 
     const photoActionsHtml = e.photoId ? `
       <div class="entry-actions">
@@ -2795,7 +3091,7 @@ function renderLog(){
 
     const checkboxHtml = selectMode
       ? `<div class="entry-checkbox${isSelected ? ' checked' : ''}" data-idx="${realIdx}">${isSelected ? '✓' : ''}</div>`
-      : `<button class="del" data-idx="${realIdx}">✕</button>`;
+      : `<button type="button" class="del" data-idx="${realIdx}" aria-label="Delete ${e.type} entry">✕</button>`;
 
     div.innerHTML = `
       <div class="info">
@@ -2805,7 +3101,9 @@ function renderLog(){
       </div>
       ${checkboxHtml}
     `;
-    list.appendChild(div);
+    row.innerHTML = `<button type="button" class="swipe-action edit" data-idx="${realIdx}" aria-label="Edit ${e.type} entry">Edit</button><button type="button" class="swipe-action delete" data-idx="${realIdx}" aria-label="Delete ${e.type} entry">Delete</button>`;
+    row.appendChild(div);
+    list.appendChild(row);
   });
   list.querySelectorAll('.del').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -2814,14 +3112,7 @@ function renderLog(){
       const entry = entries[idx];
       if(!entry) return;
       if(!confirm(`Delete this entry?\n\n${entry.type}${entry.lane ? ' · Lane: '+entry.lane : ''}\n${entry.timestamp}`)) return;
-      const photoId = entry.photoId;
-      entries.splice(idx, 1);
-      saveEntries();
-      renderLog();
-      if(photoId){
-        deletePhoto(photoId);
-        deletePhoto(photoId + ':raw');
-      }
+      deletionController.remove(idx, false);
     });
   });
   list.querySelectorAll('.photo-view-btn').forEach(btn => {
@@ -2836,6 +3127,13 @@ function renderLog(){
       await removeEntryPhoto(+e.currentTarget.dataset.idx);
     });
   });
+  list.querySelectorAll('.swipe-action.edit').forEach(btn => btn.addEventListener('click', e => {
+    e.stopPropagation(); openEditModal(+e.currentTarget.dataset.idx);
+  }));
+  list.querySelectorAll('.swipe-action.delete').forEach(btn => btn.addEventListener('click', e => {
+    e.stopPropagation(); deletionController.remove(+e.currentTarget.dataset.idx, true);
+  }));
+  wireSwipeRows(list);
   if(selectMode) updateBulkBar();
 }
 renderLog();
@@ -2881,9 +3179,10 @@ document.getElementById('bulk-delete-btn').addEventListener('click', async () =>
 });
 
 document.addEventListener('click', (e) => {
-  if(e.target.closest('.del') || e.target.closest('.photo-view-btn') || e.target.closest('.photo-remove-btn')) return;
+  if(e.target.closest('.del') || e.target.closest('.swipe-action') || e.target.closest('.photo-view-btn') || e.target.closest('.photo-remove-btn')) return;
   const card = e.target.closest('.log-entry');
   if(!card || card.dataset.idx === undefined) return;
+  if(card.dataset.suppressClick === '1') return;
   const idx = Number(card.dataset.idx);
   if(selectMode){
     if(selectedIndices.has(idx)) selectedIndices.delete(idx); else selectedIndices.add(idx);
@@ -2892,6 +3191,13 @@ document.addEventListener('click', (e) => {
     return;
   }
   openEditModal(idx);
+});
+
+document.addEventListener('keydown', e => {
+  const card = e.target.closest('.log-entry');
+  if(!card || e.target !== card || selectMode || (e.key !== 'Enter' && e.key !== ' ')) return;
+  e.preventDefault();
+  openEditModal(Number(card.dataset.idx));
 });
 
 
@@ -3295,14 +3601,7 @@ function excelColumnName(index){
 }
 
 function inspectionWorkbookRows(){
-  return [
-    ['Type of Defect','Timestamp','Latitude','Longitude','Latitude (DMM)','Longitude (DMM)','Expressway','Direction','Lane','Km Station','Photo','Photo Filename'],
-    ...entries.map(e=>[
-      e.type,e.timestamp,e.lat,e.lon,toDMM(e.lat,'N','S'),toDMM(e.lon,'E','W'),
-      e.expressway||'',e.bound||'',e.lane||'',e.km===null||e.km===undefined?'':Number(kmToCsvNumber(e.km)),
-      e.photoId?'Yes':'No',e.photoFilename||''
-    ])
-  ];
+  return KMTrackSwipe.inspectionWorkbookRows(entries, toDMM, kmToCsvNumber);
 }
 
 async function buildInspectionWorkbook(createdAt){
@@ -3458,7 +3757,8 @@ document.getElementById('backup-btn').addEventListener('click', async () => {
           photoAvailable=true; exportedPhotos++;
         }else missingPhotos++;
       }
-      manifestEntries.push({...entry,photoAvailable,archivePhotoPath});
+      const {id: internalId, ...exportEntry} = entry;
+      manifestEntries.push({...exportEntry,photoAvailable,archivePhotoPath});
       await new Promise(resolve=>setTimeout(resolve,0));
     }
     const manifest={format:'KMTrack inspection backup',version:1,createdAt:createdAt.toISOString(),entryCount:entries.length,photoCount:exportedPhotos,missingPhotoCount:missingPhotos,entries:manifestEntries};
