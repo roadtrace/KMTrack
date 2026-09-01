@@ -888,9 +888,12 @@ button {
   header{
     position:relative;z-index:2;display:block;
     min-height:0;padding:calc(env(safe-area-inset-top) + 16px) 16px 14px;
-    background:linear-gradient(145deg,rgba(31,38,44,.98),rgba(21,27,32,.98));
+    background:
+      radial-gradient(circle at 16% 10%,rgba(31,112,158,.24),transparent 46%),
+      linear-gradient(145deg,rgba(27,48,64,.98),rgba(15,27,38,.98));
+    border:1px solid rgba(122,170,204,.16);border-top:0;
     border-radius:0 0 30px 30px;
-    box-shadow:0 12px 28px rgba(0,0,0,.30);
+    box-shadow:0 12px 28px rgba(0,0,0,.30),inset 0 -1px rgba(170,211,238,.055);
   }
   .header-brand{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;}
   .header-logo{width:auto;height:72px;max-width:min(55vw,430px);max-height:72px;object-fit:contain;object-position:center;flex:none;}
