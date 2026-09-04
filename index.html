@@ -8,8 +8,14 @@
 <meta name="theme-color" content="#07131f">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
+<script>
+  try{
+    if(localStorage.getItem('kmtrack_theme_v1') === 'light') document.documentElement.dataset.theme = 'light';
+  }catch(e){ /* theme preference is non-critical */ }
+</script>
 <link rel="apple-touch-icon" href="KMTrack_logo.png">
 <link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 <title>KMTrack — Road Inspection Log</title>
 <style>
   @font-face{
@@ -34,10 +40,12 @@
     --text-subtle:#707b84;
     --border:rgba(255,255,255,.10);
     --border-strong:rgba(255,255,255,.18);
+    --radius-xs:4px;
     --radius-sm:8px;
     --radius-md:12px;
     --radius-lg:16px;
-    --radius-pill:999px;
+    --radius-xl:24px;
+    --radius-full:9999px;
     --space-1:4px;
     --space-2:8px;
     --space-3:12px;
@@ -82,7 +90,7 @@
   .readout{
     background:var(--panel);
     border:1px solid #3a4046;
-    border-radius:10px;
+    border-radius:var(--radius-sm);
     padding:14px 16px;
     margin-top:10px;
     display:flex;
@@ -108,7 +116,7 @@
     margin-top:10px;
     background:var(--safety-green);
     border:3px solid var(--line-white);
-    border-radius:6px;
+    border-radius:var(--radius-xs);
     padding:12px 14px;
     text-align:center;
     position:relative;
@@ -120,13 +128,13 @@
   .kmpost .kmunit{font-size:12px; color:#dff5e6;}
   .kmpost .segment-tag{
     margin-top:10px; display:inline-block; background:rgba(0,0,0,0.25);
-    padding:5px 12px; border-radius:20px; font-size:12px; font-weight:700;
+    padding:5px 12px; border-radius:var(--radius-lg); font-size:12px; font-weight:700;
     letter-spacing:0.5px; color:#f4f4f2;
   }
   .kmpost .segment-tag.faroff{background:rgba(193,57,43,0.5);}
   .kmpost .ramp-tag{
     display:none; margin-top:8px; background:rgba(47,143,224,0.22); border:1px solid #2f8fe0;
-    color:#e3f2ff; padding:6px 12px; border-radius:20px; font-size:12px; font-weight:700;
+    color:#e3f2ff; padding:6px 12px; border-radius:var(--radius-lg); font-size:12px; font-weight:700;
     letter-spacing:0.3px; line-height:1.4;
   }
   .kmpost .ramp-tag.show{display:inline-block;}
@@ -140,7 +148,7 @@
     flex:0 0 132px;
     background:var(--asphalt-2);
     border:1px solid #3a4046;
-    border-radius:10px;
+    border-radius:var(--radius-sm);
     padding:10px 12px;
     display:flex;
     flex-direction:column;
@@ -150,7 +158,7 @@
   .bound-hint{font-size:11px; color:#565c62; font-style:italic; line-height:1.4;}
   .bound-auto-status{font-size:10px; color:#565c62; font-style:italic; line-height:1.4; margin-top:7px;}
   button.bound-btn{
-    width:100%; padding:12px 8px; border-radius:8px; border:2px solid #3a4046;
+    width:100%; padding:12px 8px; border-radius:var(--radius-sm); border:2px solid #3a4046;
     background:var(--asphalt-2); color:var(--line-white); font-weight:700; font-size:14px;
     cursor:pointer; -webkit-tap-highlight-color:transparent;
   }
@@ -166,7 +174,7 @@
   .defect-header{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;}
   .defect-header h2{margin:0; flex:0 0 auto;}
   .defect-focus-select{
-    flex:0 1 auto; max-width:52%; margin-left:auto; padding:7px 26px 7px 10px; border-radius:8px; border:1px solid #3a4046;
+    flex:0 1 auto; max-width:52%; margin-left:auto; padding:7px 26px 7px 10px; border-radius:var(--radius-sm); border:1px solid #3a4046;
     background-color:var(--panel); color:var(--line-white); font-size:11px; font-weight:700;
     letter-spacing:0.3px; appearance:none; -webkit-appearance:none;
     background-image:url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239aa0a6' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
@@ -179,7 +187,7 @@
     display:grid; grid-template-columns:1fr 1fr; gap:12px;
   }
   #defect-section.focused .focused-category .lane-btn{
-    padding:34px 8px; font-size:28px; border-radius:16px;
+    padding:34px 8px; font-size:28px; border-radius:var(--radius-lg);
   }
   #defect-section.focused .focused-category .lane-btn.others-btn{
     grid-column:1 / -1; flex-direction:row; font-size:17px; padding:20px 12px;
@@ -196,7 +204,7 @@
   .lane-btn-row{display:grid; grid-template-columns:repeat(5,1fr); gap:5px;}
   .lane-btn{
     position:relative; display:flex; align-items:center; justify-content:center; text-align:center;
-    padding:12px 2px; border-radius:8px; border:none; font-weight:700; font-size:15px;
+    padding:12px 2px; border-radius:var(--radius-sm); border:none; font-weight:700; font-size:15px;
     cursor:pointer; -webkit-tap-highlight-color:transparent; transition:transform 0.08s ease;
   }
   .lane-btn:active{transform:scale(0.94);}
@@ -211,7 +219,7 @@
     padding:20px 10px;
     font-size:15px;
     font-weight:700;
-    border-radius:10px;
+    border-radius:var(--radius-sm);
     border:none;
     color:#191c1f;
     cursor:pointer;
@@ -226,11 +234,11 @@
 
   .add-custom{display:flex; gap:8px; margin-top:10px;}
   .add-custom input{
-    flex:1; padding:10px; border-radius:8px; border:1px solid #3a4046;
+    flex:1; padding:10px; border-radius:var(--radius-sm); border:1px solid #3a4046;
     background:var(--panel); color:var(--line-white); font-size:14px;
   }
   .add-custom button{
-    padding:10px 14px; border-radius:8px; border:none; background:#565c62; color:var(--line-white);
+    padding:10px 14px; border-radius:var(--radius-sm); border:none; background:#565c62; color:var(--line-white);
     font-weight:700; cursor:pointer;
   }
 
@@ -247,21 +255,21 @@
   }
   .custom-log-btn{
     position:relative; display:flex; align-items:center; justify-content:center;
-    padding:10px 14px; border-radius:8px; border:none; background:#565c62; color:var(--line-white);
+    padding:10px 14px; border-radius:var(--radius-sm); border:none; background:#565c62; color:var(--line-white);
     font-weight:700; cursor:pointer; -webkit-tap-highlight-color:transparent;
   }
 
   /* Calibration panel */
-  details.calib{background:var(--panel); border:1px solid #3a4046; border-radius:10px; padding:10px 14px; margin-bottom:3px;}
+  details.calib{background:var(--panel); border:1px solid #3a4046; border-radius:var(--radius-sm); padding:10px 14px; margin-bottom:3px;}
   details.calib summary{cursor:pointer; font-size:13px; font-weight:700; color:var(--line-yellow); list-style:none;}
   details.calib summary::-webkit-details-marker{display:none;}
-  .calib-add{margin-top:2px; background:#3a4046; border:none; color:var(--line-white); padding:8px 12px; border-radius:6px; cursor:pointer; font-size:12px;}
+  .calib-add{margin-top:2px; background:#3a4046; border:none; color:var(--line-white); padding:8px 12px; border-radius:var(--radius-xs); cursor:pointer; font-size:12px;}
   .calib-hint{font-size:11px; color:#9aa0a6; margin-top:8px; line-height:1.5;}
 
   /* Log table */
-  .log-empty{color:#565c62; font-size:13px; text-align:center; padding:20px 0; border:1px dashed #3a4046; border-radius:10px;}
+  .log-empty{color:#565c62; font-size:13px; text-align:center; padding:20px 0; border:1px dashed #3a4046; border-radius:var(--radius-sm);}
   .log-entry{
-    background:var(--panel); border-radius:8px; padding:10px 12px; margin-bottom:8px;
+    background:var(--panel); border-radius:var(--radius-sm); padding:10px 12px; margin-bottom:8px;
     display:flex; justify-content:space-between; align-items:center; gap:10px;
     border-left:4px solid var(--line-yellow); cursor:pointer;
   }
@@ -271,7 +279,7 @@
   .log-entry .info .type{font-weight:700; font-size:14px;}
   .log-entry .info .meta{font-family:var(--mono); font-size:11px; color:#9aa0a6; margin-top:3px; line-height:1.5;}
   .log-entry .del{background:none; border:none; color:#c1392b; font-size:18px; cursor:pointer; padding:4px 8px;}
-  .swipe-row{position:relative;overflow:hidden;border-radius:8px;margin-bottom:8px;touch-action:pan-y;}
+  .swipe-row{position:relative;overflow:hidden;border-radius:var(--radius-sm);margin-bottom:8px;touch-action:pan-y;}
   .swipe-row .log-entry{margin-bottom:0;will-change:transform;transition:transform 180ms ease;}
   .swipe-row .log-entry:focus-visible{outline:3px solid rgba(244,180,0,.65);outline-offset:-3px;}
   .swipe-row.dragging .log-entry{transition:none;}
@@ -279,7 +287,7 @@
   .swipe-action.edit{left:0;background:#1d78b5;}
   .swipe-action.delete{right:0;background:var(--safety-red);}
   .swipe-row.dragging .swipe-action,.swipe-row.swipe-open .swipe-action,.swipe-row.swipe-preview .swipe-action.edit{visibility:visible;pointer-events:auto;}
-  .swipe-undo{position:fixed;z-index:1100;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;align-items:center;gap:16px;max-width:calc(100vw - 28px);padding:11px 12px 11px 16px;border-radius:12px;background:#f3f5f6;color:#191c1f;box-shadow:0 10px 30px rgba(0,0,0,.35);font-size:13px;}
+  .swipe-undo{position:fixed;z-index:1100;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;align-items:center;gap:16px;max-width:calc(100vw - 28px);padding:11px 12px 11px 16px;border-radius:var(--radius-md);background:#f3f5f6;color:#191c1f;box-shadow:0 10px 30px rgba(0,0,0,.35);font-size:13px;}
   .swipe-undo button{border:0;background:transparent;color:#1269a1;font-weight:800;min-height:36px;padding:4px 8px;cursor:pointer;}
   .swipe-preview .log-entry{animation:swipe-preview 900ms ease-in-out 250ms 1;}
   @keyframes swipe-preview{0%,100%{transform:translateX(0)}38%{transform:translateX(44px)}62%{transform:translateX(44px)}}
@@ -300,21 +308,21 @@
   .log-header h2{margin:0;}
   .select-toggle-btn{
     flex:0 0 auto; background:transparent; border:1px solid #565c62; color:#c7ccd1;
-    font-size:11px; font-weight:700; letter-spacing:0.3px; padding:7px 12px; border-radius:20px;
+    font-size:11px; font-weight:700; letter-spacing:0.3px; padding:7px 12px; border-radius:var(--radius-lg);
     cursor:pointer; -webkit-tap-highlight-color:transparent;
   }
   .select-toggle-btn.active{background:var(--line-yellow); color:#191c1f; border-color:var(--line-yellow);}
   .log-entry.select-mode{cursor:pointer;}
   .log-entry.selected{outline:2px solid var(--line-yellow); outline-offset:-2px; background:#33383d;}
   .entry-checkbox{
-    flex:0 0 auto; width:22px; height:22px; border-radius:6px; border:2px solid #6b7176;
+    flex:0 0 auto; width:22px; height:22px; border-radius:var(--radius-xs); border:2px solid #6b7176;
     display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;
     color:#191c1f; background:transparent;
   }
   .entry-checkbox.checked{background:var(--line-yellow); border-color:var(--line-yellow);}
   .bulk-actions-bar{display:flex; gap:8px; margin-bottom:10px;}
   .bulk-actions-bar button{
-    flex:1; padding:12px; border-radius:8px; border:none; font-weight:700; font-size:13px;
+    flex:1; padding:12px; border-radius:var(--radius-sm); border:none; font-weight:700; font-size:13px;
     cursor:pointer; -webkit-tap-highlight-color:transparent;
   }
   .bulk-select-all-btn{background:#565c62; color:var(--line-white);}
@@ -322,7 +330,7 @@
   .bulk-delete-btn:disabled{background:#3a4046; color:#6b7176; cursor:not-allowed;}
 
   .export-btn{
-    flex:0 0 auto; padding:6px 13px; border-radius:14px; border:none;
+    flex:0 0 auto; padding:6px 13px; border-radius:var(--radius-md); border:none;
     background:var(--line-yellow); color:#191c1f; font-weight:700; font-size:11px;
     letter-spacing:0.3px; white-space:nowrap; cursor:pointer; -webkit-tap-highlight-color:transparent;
   }
@@ -334,7 +342,7 @@
 header{display:flex;align-items:center;gap:12px;}
 .header-brand{display:flex;align-items:center;width:100%;min-width:0;}
 .header-logo{display:block;width:auto;height:72px;max-width:min(55vw,430px);object-fit:contain;object-position:left center;flex:0 1 auto;}
-.header-divider{width:3px;height:64px;margin:0 12px;background:#fff;border-radius:2px;flex:0 0 auto;}
+.header-divider{width:3px;height:64px;margin:0 12px;background:#fff;border-radius:var(--radius-xs);flex:0 0 auto;}
 .header-copy{min-width:0;display:flex;flex-direction:column;justify-content:center;}
 .header-copy h1{margin:0;white-space:nowrap;font-size:clamp(15px,2.5vw,23px);line-height:1.05;}
 .header-copy .blue{color:#148bd8;}.header-copy .white{color:#fff;}
@@ -348,33 +356,33 @@ header{display:flex;align-items:center;gap:12px;}
 /* Opened from the camera topbar, so this dialog must sit one layer above
    the full-screen live camera rather than behind it. */
 #logo-modal{z-index:1100;}
-.lane-modal{width:min(360px,100%);background:#101820;border:1px solid #334b5c;border-radius:12px;padding:16px;box-shadow:0 16px 50px rgba(0,0,0,.45);}
+.lane-modal{width:min(360px,100%);background:#101820;border:1px solid #334b5c;border-radius:var(--radius-md);padding:16px;box-shadow:0 16px 50px rgba(0,0,0,.45);}
 .lane-modal h3{margin:0 0 12px;font-size:16px;}
-.lane-modal input{width:100%;box-sizing:border-box;padding:11px;border-radius:8px;border:1px solid #3a566a;background:#08131d;color:#fff;font-size:16px;}
+.lane-modal input{width:100%;box-sizing:border-box;padding:11px;border-radius:var(--radius-sm);border:1px solid #3a566a;background:#08131d;color:#fff;font-size:16px;}
 .edit-field-label{display:block; font-size:12px; font-style:italic; color:#9aa0a6; margin:12px 0 6px;}
 .edit-field-label:first-of-type{margin-top:0;}
 .edit-select{
-  width:100%; box-sizing:border-box; padding:11px; border-radius:8px; border:1px solid #3a566a;
+  width:100%; box-sizing:border-box; padding:11px; border-radius:var(--radius-sm); border:1px solid #3a566a;
   background:#08131d; color:#fff; font-size:16px; appearance:none; -webkit-appearance:none;
   background-image:url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat:no-repeat; background-position:right 10px center; background-size:20px;
 }
 .edit-others-input{margin-top:8px;}
-.modal-actions{display:flex;gap:8px;margin-top:12px}.modal-actions button{flex:1;padding:10px;border-radius:8px;border:0;font-weight:700}.lane-save{background:#1d78b5;color:#fff}.lane-cancel{background:#263541;color:#d9e1e8}
+.modal-actions{display:flex;gap:8px;margin-top:12px}.modal-actions button{flex:1;padding:10px;border-radius:var(--radius-sm);border:0;font-weight:700}.lane-save{background:#1d78b5;color:#fff}.lane-cancel{background:#263541;color:#d9e1e8}
 .edit-photo-row{display:flex; gap:10px; align-items:stretch;}
 .edit-photo-thumb-wrap{
-  flex:0 0 84px; width:84px; height:84px; border-radius:10px; border:1px dashed #3a566a;
+  flex:0 0 84px; width:84px; height:84px; border-radius:var(--radius-sm); border:1px dashed #3a566a;
   background:#08131d; display:flex; align-items:center; justify-content:center; overflow:hidden;
 }
 .edit-photo-thumb-wrap img{width:100%; height:100%; object-fit:cover; display:block;}
 .edit-photo-empty{color:#5c6b76; font-size:10px; text-align:center; line-height:1.4; padding:0 6px;}
 .edit-photo-actions{flex:1; display:flex; flex-direction:column; gap:6px; justify-content:center;}
 .edit-photo-add-btn{
-  padding:10px; border-radius:8px; border:1px solid #3a566a; background:#1d78b5; color:#fff;
+  padding:10px; border-radius:var(--radius-sm); border:1px solid #3a566a; background:#1d78b5; color:#fff;
   font-weight:700; font-size:12px; cursor:pointer; -webkit-tap-highlight-color:transparent;
 }
 .edit-photo-remove-btn{
-  padding:9px; border-radius:8px; border:1px solid var(--safety-red); background:transparent;
+  padding:9px; border-radius:var(--radius-sm); border:1px solid var(--safety-red); background:transparent;
   color:#ef8d83; font-weight:700; font-size:12px; cursor:pointer; -webkit-tap-highlight-color:transparent;
 }
 .lane-edit{border:0;background:transparent;color:#65b8ee;padding:0;font:inherit;text-decoration:underline;cursor:pointer;}
@@ -407,7 +415,7 @@ button {
   .category-camera-btn{
     display:inline-flex; align-items:center; justify-content:center;
     width:24px; height:24px; padding:0; flex-shrink:0;
-    border-radius:6px; border:1px solid #565c62; background:rgba(255,255,255,.06);
+    border-radius:var(--radius-xs); border:1px solid #565c62; background:rgba(255,255,255,.06);
     color:var(--line-white); font-size:12px; cursor:pointer; -webkit-tap-highlight-color:transparent;
   }
   .category-camera-btn:active{transform:scale(.92);}
@@ -419,14 +427,14 @@ button {
   #defect-section.gps-pending .defect-category{opacity:.35; pointer-events:none;}
   #defect-section.gps-pending .defect-gate{
     display:block; background:rgba(217,119,47,.14); border:1px solid var(--safety-orange);
-    color:#f0c199; font-size:12px; border-radius:8px; padding:9px 12px; margin-bottom:14px; line-height:1.5;
+    color:#f0c199; font-size:12px; border-radius:var(--radius-sm); padding:9px 12px; margin-bottom:14px; line-height:1.5;
   }
 
 
   /* Per-entry photo actions + status */
   .entry-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px;}
   .photo-view-btn,.photo-remove-btn{
-    display:inline-flex;align-items:center;gap:5px;padding:6px 9px;border-radius:6px;
+    display:inline-flex;align-items:center;gap:5px;padding:6px 9px;border-radius:var(--radius-xs);
     border:1px solid #565c62;background:rgba(255,255,255,.04);color:var(--line-white);
     font-size:11px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;
   }
@@ -450,7 +458,7 @@ button {
     background:linear-gradient(to bottom,rgba(0,0,0,.68),transparent);z-index:2;
   }
   .camera-close,.camera-shutter{border:0;cursor:pointer;-webkit-tap-highlight-color:transparent;}
-  .camera-close{background:rgba(0,0,0,.5);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:50%;width:44px;height:44px;padding:0;font-size:24px;line-height:1;}
+  .camera-close{background:rgba(0,0,0,.5);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:var(--radius-full);width:44px;height:44px;padding:0;font-size:24px;line-height:1;}
   .camera-info{
     position:absolute;left:0;right:0;bottom:0;padding:18px 18px calc(env(safe-area-inset-bottom) + 285px);
     background:linear-gradient(to top,rgba(0,0,0,.86),rgba(0,0,0,.52),transparent);
@@ -462,11 +470,11 @@ button {
   .camera-info .capture-time{font-size:14px;font-weight:700;margin-top:5px;color:#fff;}
   .camera-info .capture-meta{font-family:var(--mono);font-size:11px;line-height:1.55;color:#f2f2f2;margin-top:3px;}
   .camera-bottom{position:absolute;left:0;right:0;bottom:0;height:92px;z-index:3;display:flex;justify-content:center;align-items:center;padding-bottom:env(safe-area-inset-bottom);}
-  .camera-shutter{width:68px;height:68px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.5);box-shadow:0 0 0 3px rgba(0,0,0,.65);}
+  .camera-shutter{width:68px;height:68px;border-radius:var(--radius-full);background:#fff;border:5px solid rgba(255,255,255,.5);box-shadow:0 0 0 3px rgba(0,0,0,.65);}
   .camera-shutter:active{transform:scale(.92);}
   .camera-shutter:disabled{opacity:.5;}
   .camera-hint{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 1px);right:16px;color:#ddd;font-size:9px;font-family:var(--mono);z-index:4;}
-  .camera-error{position:absolute;left:18px;right:18px;top:50%;transform:translateY(-50%);padding:14px;border-radius:10px;background:rgba(193,57,43,.88);color:#fff;font-size:13px;line-height:1.45;z-index:5;display:none;}
+  .camera-error{position:absolute;left:18px;right:18px;top:50%;transform:translateY(-50%);padding:14px;border-radius:var(--radius-sm);background:rgba(193,57,43,.88);color:#fff;font-size:13px;line-height:1.45;z-index:5;display:none;}
   .camera-error.show{display:block;}
 
   /* Single/Continuous mode toggle, aligned inside the camera top bar. */
@@ -475,7 +483,7 @@ button {
   }
   .camera-mode-btn{
     display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;
-    padding:7px 12px; border-radius:20px; border:1px solid rgba(255,255,255,.35);
+    padding:7px 12px; border-radius:var(--radius-lg); border:1px solid rgba(255,255,255,.35);
     background:rgba(0,0,0,.5); color:#fff; font-size:11px; font-weight:700; letter-spacing:.3px;
     cursor:pointer; -webkit-tap-highlight-color:transparent;
   }
@@ -503,7 +511,7 @@ button {
   .continuous-lane-btn{
     --continuous-border-alpha: .6;
     --continuous-text-alpha: .6;
-    position:relative; min-height:88px; padding:26px 8px; border-radius:14px; border:3px solid; font-weight:800; font-size:22px;
+    position:relative; min-height:88px; padding:26px 8px; border-radius:var(--radius-md); border:3px solid; font-weight:800; font-size:22px;
     cursor:pointer; -webkit-tap-highlight-color:transparent; box-shadow:0 4px 14px rgba(0,0,0,.35);
     background:transparent;
     color:rgba(255,255,255,var(--continuous-text-alpha));
@@ -529,7 +537,7 @@ button {
   .camera-toast{
     position:absolute; left:50%; top:calc(env(safe-area-inset-top) + 60px); transform:translate(-50%,-8px);
     z-index:9; background:rgba(20,20,20,.92); color:#fff; font-weight:700; font-size:13px;
-    padding:9px 16px; border-radius:20px; opacity:0; pointer-events:none;
+    padding:9px 16px; border-radius:var(--radius-lg); opacity:0; pointer-events:none;
     transition:opacity .2s ease, transform .2s ease; white-space:nowrap;
   }
   .camera-toast.show{opacity:1; transform:translate(-50%,0);}
@@ -542,7 +550,7 @@ button {
      tap-to-focus either. */
   .camera-focus-ring{
     position:absolute; width:74px; height:74px; margin:-37px 0 0 -37px;
-    border:2px solid #fff; border-radius:6px; z-index:6; pointer-events:none;
+    border:2px solid #fff; border-radius:var(--radius-xs); z-index:6; pointer-events:none;
     box-shadow:0 0 0 1px rgba(0,0,0,.4); opacity:0; transform:scale(1.3);
     transition:opacity .15s ease, transform .15s ease;
   }
@@ -559,7 +567,7 @@ button {
     background:rgba(0,0,0,.55);
   }
   .camera-review-actions button{
-    flex:1; padding:14px; border-radius:10px; border:0; font-weight:700; font-size:15px;
+    flex:1; padding:14px; border-radius:var(--radius-sm); border:0; font-weight:700; font-size:15px;
     cursor:pointer; -webkit-tap-highlight-color:transparent;
   }
   .camera-retake-btn{background:rgba(255,255,255,.12); color:#fff; border:1px solid rgba(255,255,255,.35);}
@@ -568,24 +576,24 @@ button {
 
   /* Camera topbar controls (Close + custom-logo manager) */
   .camera-topbar-actions{display:flex; align-items:center; gap:8px;}
-  .camera-logo-btn{background:rgba(0,0,0,.5);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:8px 12px;font-size:13px;display:flex;align-items:center;gap:5px;}
-  .camera-logo-btn .dot{width:6px;height:6px;border-radius:50%;background:var(--line-yellow);display:none;}
+  .camera-logo-btn{background:rgba(0,0,0,.5);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:var(--radius-lg);padding:8px 12px;font-size:13px;display:flex;align-items:center;gap:5px;}
+  .camera-logo-btn .dot{width:6px;height:6px;border-radius:var(--radius-full);background:var(--line-yellow);display:none;}
   .camera-logo-btn.has-logo .dot{display:inline-block;}
 
   /* Logo manager modal — reuses .modal-backdrop/.lane-modal, adds its own bits */
   .logo-preview-box{
-    width:100%; min-height:100px; border:1px dashed #3a566a; border-radius:10px; background:#08131d;
+    width:100%; min-height:100px; border:1px dashed #3a566a; border-radius:var(--radius-sm); background:#08131d;
     display:flex; align-items:center; justify-content:center; padding:14px; margin-bottom:12px;
   }
   .logo-preview-box img{max-width:100%; max-height:90px; object-fit:contain;}
   .logo-preview-box .logo-empty{color:#5c6b76; font-size:12px; text-align:center; line-height:1.5;}
   .logo-upload-label{
     display:block; width:100%; box-sizing:border-box; text-align:center; padding:11px;
-    border-radius:8px; border:1px solid #3a566a; background:#1d78b5; color:#fff; font-weight:700;
+    border-radius:var(--radius-sm); border:1px solid #3a566a; background:#1d78b5; color:#fff; font-weight:700;
     font-size:14px; cursor:pointer; -webkit-tap-highlight-color:transparent;
   }
   .logo-remove-btn{
-    width:100%; margin-top:8px; padding:10px; border-radius:8px; border:1px solid var(--safety-red);
+    width:100%; margin-top:8px; padding:10px; border-radius:var(--radius-sm); border:1px solid var(--safety-red);
     background:transparent; color:#ef8d83; font-weight:700; font-size:13px; cursor:pointer;
   }
   .logo-hint{font-size:11px; color:#9aa0a6; margin-top:10px; line-height:1.5;}
@@ -599,12 +607,12 @@ button {
     bottom:calc(92px + env(safe-area-inset-bottom) + 14px);
     z-index:3; display:flex; flex-direction:column; gap:7px;
     background:rgba(0,0,0,.6); border:1px solid rgba(255,255,255,.28);
-    border-radius:10px; padding:9px 11px;
+    border-radius:var(--radius-sm); padding:9px 11px;
   }
   .camera-lane-picker .row{display:flex; align-items:center; gap:9px;}
   .camera-lane-picker label{font-size:11px; font-weight:800; color:#fff; letter-spacing:.6px; white-space:nowrap; text-transform:uppercase;}
   .camera-lane-picker select{
-    flex:1; padding:9px 28px 9px 10px; border-radius:7px; border:1px solid rgba(255,255,255,.35);
+    flex:1; padding:9px 28px 9px 10px; border-radius:var(--radius-sm); border:1px solid rgba(255,255,255,.35);
     background-color:rgba(255,255,255,.14); color:#fff; font-size:14px; font-weight:700;
     appearance:none; -webkit-appearance:none;
     background-image:url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
@@ -612,16 +620,16 @@ button {
   }
   .camera-lane-picker select option{color:#0a0a0a;}
   .camera-lane-picker input{
-    padding:9px 10px; border-radius:7px; border:1px solid rgba(255,255,255,.35);
+    padding:9px 10px; border-radius:var(--radius-sm); border:1px solid rgba(255,255,255,.35);
     background:rgba(255,255,255,.14); color:#fff; font-size:14px;
   }
   .camera-lane-picker input::placeholder{color:rgba(255,255,255,.65);}
 
   .photo-modal{align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.92);}
   .photo-card{width:min(920px,100%);max-height:100%;display:flex;flex-direction:column;gap:10px;}
-  #photo-preview{max-width:100%;max-height:78vh;object-fit:contain;border-radius:8px;background:#111;}
+  #photo-preview{max-width:100%;max-height:78vh;object-fit:contain;border-radius:var(--radius-sm);background:#111;}
   .photo-actions{display:flex;gap:8px;}
-  .photo-actions button,.photo-actions a{flex:1;text-align:center;padding:11px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;cursor:pointer;}
+  .photo-actions button,.photo-actions a{flex:1;text-align:center;padding:11px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;text-decoration:none;cursor:pointer;}
   #photo-close{background:transparent;border:1px solid #565c62;color:#fff;}
   #photo-download{background:var(--line-yellow);border:1px solid var(--line-yellow);color:#191c1f;}
   @media (max-width:600px){
@@ -635,7 +643,7 @@ button {
   header{
     background:linear-gradient(135deg,#242b31 0%,#1c2227 55%,#171b20 100%);
     border-bottom:0;
-    border-radius:0 0 24px 24px;
+    border-radius:0 0 var(--radius-lg) var(--radius-lg);
     box-shadow:0 10px 24px rgba(0,0,0,.28);
   }
   main{padding-top:8px;}
@@ -729,7 +737,7 @@ button {
   .photo-actions button,.photo-actions a,.camera-close,.camera-logo-btn{
     min-height:48px;border-radius:var(--radius-md);display:inline-flex;align-items:center;justify-content:center;gap:8px;
   }
-  .select-toggle-btn,.export-btn{border-radius:var(--radius-pill);padding-left:16px;padding-right:16px;}
+  .select-toggle-btn,.export-btn{border-radius:var(--radius-md);padding-left:16px;padding-right:16px;}
   .export-btn{min-height:42px;box-shadow:0 5px 14px rgba(0,0,0,.14);}
   .bulk-actions-bar{gap:var(--space-3);}
   .modal-actions{gap:var(--space-3);margin-top:var(--space-4);}
@@ -759,7 +767,7 @@ button {
     height:36px;min-height:36px;font-size:11px;
   }
   .camera-topbar .camera-close{
-    width:36px;min-width:36px;padding:0;border-radius:50%;
+    width:36px;min-width:36px;padding:0;border-radius:var(--radius-full);
   }
   @media (max-width:380px){
     .camera-topbar{padding-left:10px;padding-right:10px;gap:8px;}
@@ -804,7 +812,7 @@ button {
     main>.readout{display:contents;}
     main>.readout>.readout-main{
       grid-column:1;grid-row:2;background:var(--panel);border:1px solid #3a4046;
-      border-radius:10px;padding:14px 16px;align-self:stretch;
+      border-radius:var(--radius-sm);padding:14px 16px;align-self:stretch;
     }
     main>.readout>.bound-panel{
       grid-column:2;grid-row:1 / span 2;margin-top:10px;align-self:stretch;
@@ -827,7 +835,7 @@ button {
     #defect-section:not(.focused)>.defect-category[data-category="Others"]{order:4;}
     .category-label{font-size:15px;margin-bottom:8px;}
     .lane-btn-row{gap:8px;}
-    .lane-btn{padding:20px 4px;font-size:20px;min-height:72px;border-radius:10px;}
+    .lane-btn{padding:20px 4px;font-size:20px;min-height:72px;border-radius:var(--radius-sm);}
     #defect-section.focused .focused-category .lane-btn{padding:32px 8px;font-size:28px;}
     .kmpost-grid{width:100%;align-items:center;}
     .kmpost-current{padding-right:0;}
@@ -887,24 +895,24 @@ button {
   .top-shell{position:sticky;top:0;z-index:20;}
   header{
     position:relative;z-index:2;display:block;
-    min-height:0;padding:calc(env(safe-area-inset-top) + 16px) 16px 14px;
+    min-height:0;padding:calc(env(safe-area-inset-top) + 10px) 16px 9px;
     background:
       radial-gradient(circle at 16% 10%,rgba(31,112,158,.24),transparent 46%),
       linear-gradient(145deg,rgba(27,48,64,.98),rgba(15,27,38,.98));
     border:1px solid rgba(122,170,204,.16);border-top:0;
-    border-radius:0 0 30px 30px;
+    border-radius:0 0 var(--radius-lg) var(--radius-lg);
     box-shadow:0 12px 28px rgba(0,0,0,.30),inset 0 -1px rgba(170,211,238,.055);
   }
   .header-brand{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;}
-  .header-logo{width:auto;height:72px;max-width:min(55vw,430px);max-height:72px;object-fit:contain;object-position:center;flex:none;}
-  .header-copy{width:100%;align-items:center;text-align:center;margin-top:4px;}
+  .header-logo{width:auto;height:64px;max-width:min(50vw,390px);max-height:64px;object-fit:contain;object-position:center;flex:none;}
+  .header-copy{width:100%;align-items:center;text-align:center;margin-top:1px;}
   .header-copy .sub{font-family:var(--font-ui);font-size:12px;letter-spacing:.035em;color:#aeb4bc;max-width:min(92vw,480px);}
-  #storage-status:not([hidden]){margin-top:5px;color:#efc067;white-space:normal;}
+  #storage-status:not([hidden]){margin-top:2px;color:#efc067;white-space:normal;}
 
   .dataset-drawer{
     position:relative;z-index:1;margin:-20px auto 0;width:min(100%,560px);
     background:linear-gradient(180deg,rgba(30,41,49,.98),rgba(17,30,39,.98));
-    border:1px solid rgba(255,255,255,.04);border-top:0;border-radius:0 0 30px 30px;
+    border:1px solid rgba(255,255,255,.04);border-top:0;border-radius:0 0 var(--radius-lg) var(--radius-lg);
     box-shadow:0 12px 24px rgba(0,0,0,.28);overflow:hidden;
   }
   .dataset-drawer>summary{
@@ -913,24 +921,24 @@ button {
     letter-spacing:.035em;text-transform:uppercase;-webkit-tap-highlight-color:transparent;
   }
   .dataset-drawer>summary::-webkit-details-marker{display:none;}
-  .dataset-state-dot{width:9px;height:9px;flex:0 0 9px;border-radius:50%;background:#d39a26;box-shadow:0 0 0 3px rgba(211,154,38,.10),0 0 10px rgba(211,154,38,.65);}
+  .dataset-state-dot{width:9px;height:9px;flex:0 0 9px;border-radius:var(--radius-full);background:#d39a26;box-shadow:0 0 0 3px rgba(211,154,38,.10),0 0 10px rgba(211,154,38,.65);}
   .dataset-drawer.loaded .dataset-state-dot{background:#45e3a0;box-shadow:0 0 0 3px rgba(69,227,160,.12),0 0 11px rgba(69,227,160,.95);}
   .dataset-state-label{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .dataset-chevron{width:22px;height:22px;border:1px solid rgba(255,255,255,.38);border-radius:50%;position:relative;flex:0 0 22px;}
+  .dataset-chevron{width:22px;height:22px;border:1px solid rgba(255,255,255,.38);border-radius:var(--radius-full);position:relative;flex:0 0 22px;}
   .dataset-chevron::after{content:'';position:absolute;left:7px;top:5px;width:6px;height:6px;border-right:1.5px solid #dbe1e6;border-bottom:1.5px solid #dbe1e6;transform:rotate(45deg);transition:transform 180ms ease,top 180ms ease;}
   .dataset-drawer[open] .dataset-chevron::after{top:8px;transform:rotate(225deg);}
   .dataset-content{padding:0 14px 15px;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-  .dataset-panel{min-width:0;padding:12px 13px;border:1px solid rgba(255,255,255,.10);border-radius:14px;background:rgba(255,255,255,.035);}
+  .dataset-panel{min-width:0;padding:12px 13px;border:1px solid rgba(255,255,255,.10);border-radius:var(--radius-md);background:rgba(255,255,255,.035);}
   .dataset-panel-title{font-size:11px;font-weight:750;color:#f1f3f5;margin-bottom:5px;}
   .dataset-panel .calib-hint{min-height:34px;margin:0 0 9px;}
-  .dataset-panel .calib-add{margin:0;min-height:38px;width:100%;border-radius:10px;}
+  .dataset-panel .calib-add{margin:0;min-height:38px;width:100%;border-radius:var(--radius-sm);}
 
   main{padding-top:12px;}
   .readout{
     margin-top:6px;padding:14px 16px;gap:14px;
-    background:linear-gradient(135deg,rgba(39,39,53,.66),rgba(28,32,45,.53));
-    border:1px solid rgba(176,184,205,.22);border-radius:18px;
-    box-shadow:0 14px 32px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.035);
+    background:linear-gradient(180deg,rgba(30,41,49,.92),rgba(17,30,39,.92));
+    border:1px solid rgba(255,255,255,.10);border-radius:var(--radius-lg);
+    box-shadow:0 12px 24px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.035);
     backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   }
   .readout-main{grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);gap:10px 8px;padding:0;}
@@ -938,18 +946,18 @@ button {
   .readout-main .field .value{font-size:clamp(11px,3.4vw,16px);margin-top:2px;letter-spacing:.01em;}
   .readout-main .status{font-size:11px;margin-top:2px;}
   .bound-panel{
-    flex-basis:132px;padding:10px 12px;background:rgba(31,38,47,.50);
-    border-color:rgba(255,255,255,.16);border-radius:10px;box-shadow:none;
+    flex-basis:132px;padding:10px 12px;background:rgba(255,255,255,.035);
+    border-color:rgba(255,255,255,.10);border-radius:var(--radius-sm);box-shadow:none;
     backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
   }
   .bound-panel-label{font-size:12px;margin-bottom:8px;}
   .bound-toggle{gap:8px;}
-  button.bound-btn{min-height:48px;border-color:rgba(255,255,255,.18);background:rgba(47,55,64,.72);border-radius:12px;box-shadow:none;}
+  button.bound-btn{min-height:48px;border-color:rgba(255,255,255,.18);background:rgba(47,55,64,.72);border-radius:var(--radius-md);box-shadow:none;}
   button.bound-btn.active{background:linear-gradient(145deg,#ffc000,#f2ad00);border-color:#ffc000;box-shadow:0 9px 18px rgba(244,180,0,.18);}
 
   .kmpost{
     margin-top:12px;padding:17px 18px;
-    border:2px solid transparent;border-radius:20px;
+    border:2px solid transparent;border-radius:var(--radius-lg);
     background:
       linear-gradient(135deg,rgba(27,139,98,.92),rgba(23,102,82,.88)) padding-box,
       linear-gradient(125deg,rgba(210,255,236,.58),rgba(107,211,184,.28) 52%,rgba(235,255,248,.72)) border-box;
@@ -960,11 +968,25 @@ button {
   .kmpost .kmlabel{font-size:11px;}
   .kmpost .kmunit{font-size:12px;}
   .defect-focus-select,.select-toggle-btn{height:42px;min-height:42px;padding-top:6px;padding-bottom:6px;}
+  .defect-focus-select{
+    background-color:rgba(17,30,39,.98);
+    background-image:
+      url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239aa0a6' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"),
+      linear-gradient(180deg,rgba(30,41,49,.98),rgba(17,30,39,.98));
+    background-repeat:no-repeat,no-repeat;background-position:right 8px center,0 0;background-size:14px,100% 100%;
+    border-color:rgba(255,255,255,.14);box-shadow:0 7px 16px rgba(0,0,0,.20);
+  }
+  .category-camera-btn,.select-toggle-btn{
+    background:linear-gradient(180deg,rgba(30,41,49,.98),rgba(17,30,39,.98));
+    border-color:rgba(255,255,255,.14);color:#dfe4e8;
+    box-shadow:0 7px 16px rgba(0,0,0,.20);
+  }
+  .category-camera-btn:hover,.select-toggle-btn:hover{background:linear-gradient(180deg,rgba(36,49,58,.98),rgba(21,36,46,.98));}
   .lane-divider{display:none;}
 
   @media(max-width:600px){
-    header{min-height:0;padding:calc(env(safe-area-inset-top) + 4px) 12px 8px;}
-    .header-logo{width:auto;height:55px;max-width:42vw;max-height:55px;}
+    header{min-height:0;padding:env(safe-area-inset-top) 12px 5px;}
+    .header-logo{width:auto;height:48px;max-width:38vw;max-height:48px;}
     .header-copy .sub{font-size:9px;}
     .dataset-drawer{width:calc(100% - 20px);}
     .dataset-drawer>summary{padding-left:18px;padding-right:18px;}
@@ -985,13 +1007,146 @@ button {
     .header-copy{margin-top:0;}
     .dataset-drawer{width:min(calc(100% - 36px),1144px);}
     main>section.block:first-child{display:none;}
-    main>.readout>.readout-main{grid-row:1 / span 2;background:linear-gradient(135deg,rgba(39,39,53,.66),rgba(28,32,45,.53));border-color:rgba(176,184,205,.22);border-radius:18px;}
+    main>.readout>.readout-main{grid-row:1 / span 2;background:linear-gradient(135deg,rgba(39,39,53,.66),rgba(28,32,45,.53));border-color:rgba(176,184,205,.22);border-radius:var(--radius-lg);}
   }
   @media (prefers-reduced-motion:reduce){.dataset-chevron::after{transition:none;}}
+
+  /* ---------- Optional light mode ---------- */
+  .theme-toggle{
+    position:absolute;right:14px;top:calc(env(safe-area-inset-top) + 10px);z-index:3;
+    width:34px;height:34px;padding:0;display:inline-flex;align-items:center;justify-content:center;
+    border:1px solid rgba(170,211,238,.24);border-radius:var(--radius-full);
+    background:rgba(10,25,36,.54);color:#f3f7fa;box-shadow:0 5px 14px rgba(0,0,0,.18);
+    cursor:pointer;-webkit-tap-highlight-color:transparent;
+  }
+  .theme-toggle::before{content:'☀';font-size:16px;line-height:1;}
+  .theme-toggle:focus-visible{outline:3px solid rgba(244,180,0,.65);outline-offset:2px;}
+
+  html[data-theme="light"]{
+    color-scheme:light;
+    --asphalt:#f4f5f7;--asphalt-2:#eceff2;--panel:#fff;--panel-raised:#f7f8fa;--surface-soft:#eef1f3;
+    --line-white:#23272b;--text-muted:#696f74;--text-subtle:#858b90;
+    --border:rgba(32,42,49,.10);--border-strong:rgba(32,42,49,.18);
+    --shadow-card:0 7px 20px rgba(38,48,56,.09);
+  }
+  html[data-theme="light"],html[data-theme="light"] body{background:#f4f5f7;color:#23272b;}
+  html[data-theme="light"] body{
+    background:
+      radial-gradient(circle at 8% 28%,rgba(42,132,173,.055) 0,transparent 38%),
+      linear-gradient(180deg,#f7f8fa 0%,#f1f3f5 100%);
+    background-attachment:fixed;
+  }
+  html[data-theme="light"] header{
+    background:
+      radial-gradient(circle at 16% 10%,rgba(51,137,185,.30),transparent 46%),
+      linear-gradient(145deg,#1b4057,#102a3d);
+    border-color:rgba(151,203,235,.30);
+  }
+  html[data-theme="light"] header .sub{color:#c0ccd4;}
+  html[data-theme="light"] .theme-toggle{background:rgba(240,247,250,.14);border-color:rgba(220,239,250,.36);}
+  html[data-theme="light"] .theme-toggle::before{content:'☾';}
+  html[data-theme="light"] .dataset-drawer{
+    background:#fff;border-color:rgba(32,42,49,.10);border-radius:0 0 var(--radius-lg) var(--radius-lg);
+    box-shadow:0 7px 20px rgba(38,48,56,.10);
+  }
+  html[data-theme="light"] .dataset-drawer>summary{color:#30363b;}
+  html[data-theme="light"] .dataset-chevron{border-color:rgba(32,42,49,.24);}
+  html[data-theme="light"] .dataset-chevron::after{border-color:#687078;}
+  html[data-theme="light"] .dataset-panel{background:#f7f8fa;border-color:rgba(32,42,49,.09);border-radius:var(--radius-md);}
+  html[data-theme="light"] .dataset-panel-title{color:#30363b;}
+  html[data-theme="light"] .dataset-panel .calib-hint{color:#70777d;}
+  html[data-theme="light"] .dataset-panel .calib-add{
+    background:#fff;color:#30363b;border:1px solid rgba(32,42,49,.12);
+    box-shadow:0 4px 12px rgba(38,48,56,.08);
+  }
+  html[data-theme="light"] .dataset-panel .calib-add:hover{background:#fafbfc;}
+  html[data-theme="light"] .dataset-panel .calib-add:disabled{background:#f4f5f6;color:#7c8388;opacity:1;}
+  html[data-theme="light"] .readout{
+    background:#fff;border-color:rgba(32,42,49,.10);border-radius:var(--radius-lg);
+    box-shadow:0 7px 20px rgba(38,48,56,.09);
+  }
+  html[data-theme="light"] .readout-main .field .label{color:#696f74;}
+  html[data-theme="light"] .bound-panel{background:#f7f8fa;border-color:rgba(32,42,49,.10);border-radius:var(--radius-md);}
+  html[data-theme="light"] button.bound-btn{background:#fff;border-color:rgba(32,42,49,.16);color:#23272b;}
+  html[data-theme="light"] button.bound-btn.active{background:linear-gradient(145deg,#ffc000,#f2ad00);border-color:#e9a600;}
+  html[data-theme="light"] .kmpost{border-radius:var(--radius-lg);}
+  html[data-theme="light"] .kmpost{color:#f7fffb;}
+  html[data-theme="light"] .kmpost .kmlabel,html[data-theme="light"] .kmpost .kmunit,
+  html[data-theme="light"] h2{color:#555d63;}
+  html[data-theme="light"] .defect-focus-select{
+    color:#23272b;background-color:#fff;border-radius:var(--radius-lg);
+    background-image:
+      url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23556773' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"),
+      linear-gradient(#fff,#fff);
+    border-color:rgba(32,42,49,.12);box-shadow:0 7px 20px rgba(38,48,56,.09);
+  }
+  html[data-theme="light"] .category-camera-btn,html[data-theme="light"] .select-toggle-btn{
+    color:#30363b;background:#fff;border-radius:var(--radius-md);
+    border-color:rgba(32,42,49,.12);box-shadow:0 7px 20px rgba(38,48,56,.09);
+  }
+  html[data-theme="light"] .category-camera-btn:hover,html[data-theme="light"] .select-toggle-btn:hover{background:#fafbfc;}
+  html[data-theme="light"] .select-toggle-btn.active{background:var(--line-yellow);color:#191c1f;border-color:var(--line-yellow);}
+  /* Keep the left border's existing defect-type color in light mode. */
+  html[data-theme="light"] .log-entry{background:#fff;border-top-color:rgba(32,42,49,.10);border-right-color:rgba(32,42,49,.10);border-bottom-color:rgba(32,42,49,.10);border-radius:var(--radius-lg);box-shadow:0 7px 20px rgba(38,48,56,.09);}
+  html[data-theme="light"] .log-entry.selected{background:#fff5cf;}
+  html[data-theme="light"] .lane-btn.pothole,
+  html[data-theme="light"] .defect-btn.pothole,
+  html[data-theme="light"] #export-btn:not(:disabled){
+    background:#e8b323;color:#191c1f;box-shadow:0 3px 10px rgba(38,48,56,.10);
+  }
+  html[data-theme="light"] .lane-btn.pothole:active,
+  html[data-theme="light"] .defect-btn.pothole:active,
+  html[data-theme="light"] #export-btn:not(:disabled):active{box-shadow:0 2px 6px rgba(38,48,56,.10);}
+  html[data-theme="light"] .log-empty,html[data-theme="light"] .count-bar,
+  html[data-theme="light"] .log-entry .info .meta,html[data-theme="light"] .photo-status{color:#667985;}
+  html[data-theme="light"] .lane-modal{background:#fff;color:#23272b;border-color:rgba(32,42,49,.12);border-radius:var(--radius-lg);box-shadow:0 12px 30px rgba(38,48,56,.14);}
+  html[data-theme="light"] .edit-select,html[data-theme="light"] .lane-modal input{background:#f7f8fa;color:#23272b;border-color:rgba(32,42,49,.16);}
+  @media(max-width:600px){.theme-toggle{right:10px;top:env(safe-area-inset-top);width:32px;height:32px;}}
+  @media(prefers-reduced-motion:reduce){.theme-toggle{transition:none;}}
+
+  /* ---------- Inspection / map tabs ---------- */
+  body{padding-bottom:calc(56px + env(safe-area-inset-bottom));}
+  .app-view[hidden]{display:none!important;}
+  .map-view{height:calc(100dvh - 56px - env(safe-area-inset-bottom));min-height:420px;position:relative;background:#dce4e8;}
+  #osm-map{width:100%;height:100%;background:#dce4e8;}
+  .map-topbar{position:absolute;z-index:500;left:12px;right:12px;top:calc(env(safe-area-inset-top) + 10px);display:flex;align-items:center;gap:10px;padding:10px 11px 10px 14px;border:1px solid rgba(255,255,255,.16);border-radius:var(--radius-md);background:linear-gradient(180deg,rgba(30,41,49,.94),rgba(17,30,39,.94));color:#eef4f6;box-shadow:0 8px 22px rgba(0,0,0,.24);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
+  .map-topbar-copy{min-width:0;flex:1;}
+  .map-title{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
+  .map-status{margin-top:1px;font-size:10px;color:#b9c5cc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .map-locate-btn,.map-theme-toggle{width:38px;height:38px;flex:0 0 38px;padding:0;border:1px solid rgba(255,255,255,.22);border-radius:var(--radius-md);background:rgba(255,255,255,.07);color:#fff;display:grid;place-items:center;cursor:pointer;}
+  .map-locate-btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;}
+  .map-theme-toggle::before{content:'☀';font-size:18px;line-height:1;}
+  .entry-filters{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1.15fr) minmax(0,1fr) auto;align-items:end;gap:6px;margin:10px 0;font-size:11px;}
+  .entry-filters label{display:flex;flex-direction:column;gap:4px;font-size:inherit;min-width:0;}
+  .entry-filters input,.entry-filters select,.entry-filters button,.map-entry-controls input[type="date"],.map-entry-controls button{min-height:38px;max-width:100%;min-width:0;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--panel);color:var(--line-white);padding:6px 10px;font:inherit;}
+  .entry-filters button,.map-entry-controls button{cursor:pointer;}
+  .entry-filters :is(input,select,button){font-size:inherit;padding:6px 4px;min-width:0;width:100%;height:38px;}
+  .entry-filters button{white-space:nowrap;}
+  .entry-filters input::-webkit-date-and-time-value{min-width:0;text-align:left;}
+  .map-entry-controls{position:absolute;z-index:500;bottom:30px;left:12px;right:12px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px;border:1px solid var(--border-strong);border-radius:var(--radius-md);background:var(--panel);color:var(--line-white);font-size:12px;box-shadow:var(--shadow-card);}
+  .map-entry-controls label{display:flex;align-items:center;gap:6px;}
+  .map-entry-controls input[type="checkbox"]{width:18px;height:18px;accent-color:#df4242;}
+  .map-entry-controls input[type="date"]{width:140px;}
+  .map-entry-controls input:disabled{opacity:.55;}
+  .app-tab-bar{position:fixed;z-index:900;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,560px);height:calc(56px + env(safe-area-inset-bottom));padding:4px 12px env(safe-area-inset-bottom);display:grid;grid-template-columns:1fr 1fr;gap:8px;border:1px solid rgba(255,255,255,.10);border-bottom:0;border-radius:0;background:linear-gradient(180deg,rgba(27,39,48,.98),rgba(14,26,35,.99));box-shadow:0 -8px 24px rgba(0,0,0,.24);}
+  .app-tab-btn{min-height:44px;padding:3px 12px;border:0;border-radius:var(--radius-md);background:transparent;color:#98a7b0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10px;font-weight:700;cursor:pointer;}
+  .app-tab-btn svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+  .app-tab-btn.active{background:rgba(71,169,215,.14);color:#79cef4;}
+  html[data-theme="light"] .app-tab-bar{background:rgba(255,255,255,.98);border-color:rgba(32,42,49,.10);box-shadow:0 -7px 22px rgba(38,48,56,.11);}
+  html[data-theme="light"] .app-tab-btn{color:#747b80;}
+  html[data-theme="light"] .app-tab-btn.active{background:#eef7fb;color:#1683b6;}
+  html[data-theme="light"] .map-topbar{background:rgba(255,255,255,.95);color:#252a2e;border-color:rgba(32,42,49,.10);box-shadow:0 7px 20px rgba(38,48,56,.13);}
+  html[data-theme="light"] .map-status{color:#727a80;}
+  html[data-theme="light"] .map-locate-btn,html[data-theme="light"] .map-theme-toggle{background:#f4f6f7;color:#25343d;border-color:rgba(32,42,49,.12);}
+  html[data-theme="light"] .map-theme-toggle::before{content:'☾';}
+  @media(prefers-reduced-motion:reduce){.app-tab-btn{transition:none;}}
 </style>
+<link rel="stylesheet" href="radius-system.css">
+<link rel="stylesheet" href="sharing.css">
 </head>
 <body>
 
+<div class="app-view inspection-view" id="inspection-view" role="tabpanel" aria-labelledby="inspection-tab">
 <div class="top-shell">
   <header>
     <div class="header-brand">
@@ -1001,6 +1156,7 @@ button {
         <div class="sub" id="storage-status" hidden></div>
       </div>
     </div>
+    <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to light mode" title="Switch to light mode"></button>
   </header>
 </div>
   <details class="dataset-drawer" id="dataset-drawer">
@@ -1130,6 +1286,7 @@ button {
   <section class="block">
     <div class="log-header">
       <h2>Inspection log</h2>
+      <button type="button" class="select-toggle-btn" id="import-btn">Import</button>
       <button type="button" class="select-toggle-btn" id="select-toggle-btn">Select</button>
     </div>
     <div class="count-bar">
@@ -1143,6 +1300,23 @@ button {
         <button class="export-btn backup-btn" id="backup-btn" disabled>Export Photos ZIP</button>
       </div>
     </div>
+    <div class="entry-filters" aria-label="Inspection entry filters">
+      <label><input type="date" id="entry-filter-from" aria-label="From date"></label>
+      <span class="date-range-separator" aria-hidden="true">to</span>
+      <label><input type="date" id="entry-filter-to" aria-label="To date"></label>
+      <label><select id="entry-filter-type" aria-label="Defect type"><option value="">All defects</option></select></label>
+      <button type="button" id="entry-filter-clear">Clear filters</button>
+    </div>
+    <details class="sharing-filters">
+      <summary>Source / inspector filters</summary>
+      <div class="sharing-filter-fields">
+        <label>Source<select id="entry-filter-source"><option value="">All inspections</option><option value="mine">My inspections</option><option value="imported">Imported inspections</option></select></label>
+        <label>Inspector<select id="entry-filter-inspector"><option value="">All inspectors</option></select></label>
+      </div>
+    </details>
+    <div id="import-status" role="status"></div>
+    <button type="button" id="undo-import-btn" class="select-toggle-btn" hidden>Undo last import</button>
+    <input type="file" id="import-file" accept=".xlsx,.zip" hidden>
     <div class="bulk-actions-bar" id="bulk-actions-bar" style="display:none;">
       <button type="button" class="bulk-select-all-btn" id="bulk-select-all-btn">Select all</button>
       <button type="button" class="bulk-delete-btn" id="bulk-delete-btn" disabled>Delete selected (0)</button>
@@ -1151,8 +1325,55 @@ button {
   </section>
 
 </main>
+</div>
 
+<section class="app-view map-view" id="map-view" role="tabpanel" aria-labelledby="map-tab" hidden>
+  <div class="map-topbar">
+    <div class="map-topbar-copy">
+      <div class="map-title" id="map-km-station">KM --.---</div>
+      <div class="map-status" id="map-status">Waiting for GPS location…</div>
+    </div>
+    <button type="button" class="map-theme-toggle" id="map-theme-toggle" aria-label="Switch to light mode" title="Switch to light mode"></button>
+  </div>
+  <div id="osm-map" aria-label="OpenStreetMap showing the current inspection location"></div>
+  <div class="map-entry-controls" aria-label="Map entry display options">
+    <div class="map-floating-actions" role="group" aria-label="Map controls">
+      <button type="button" class="map-locate-btn" id="map-locate-btn" aria-label="Center map on current location" title="Center on current location">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><circle cx="12" cy="12" r="8"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path></svg>
+      </button>
+    </div>
+    <label><input type="checkbox" id="map-show-entries">Show entries</label>
+    <label><input type="date" id="map-entry-from" aria-label="From date" disabled></label>
+    <span class="date-range-separator" aria-hidden="true">to</span>
+    <label><input type="date" id="map-entry-to" aria-label="To date" disabled></label>
+    <details class="map-filter-menu" id="map-filter-menu">
+      <summary aria-label="Map entry filters" title="Filter entries"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16l-6 7v6l-4 2v-8z"/></svg></summary>
+      <div class="map-filter-options">
+        <label><select id="map-entry-type" aria-label="Defect type"><option value="">All defects</option></select></label>
+        <label>Source<select id="map-entry-source"><option value="">All inspections</option><option value="mine">My inspections</option><option value="imported">Imported inspections</option></select></label>
+        <label>Inspector<select id="map-entry-inspector"><option value="">All inspectors</option></select></label>
+        <button type="button" id="map-entry-clear">All dates</button>
+      </div>
+    </details>
+  </div>
+</section>
+
+<nav class="app-tab-bar" role="tablist" aria-label="KMTrack sections">
+  <button type="button" class="app-tab-btn active" id="inspection-tab" role="tab" aria-selected="true" aria-controls="inspection-view" data-app-view="inspection">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5h6M9 3h6v4H9z"></path><path d="M7 5H5v16h14V5h-2M8 11h8M8 15h8"></path></svg>
+    <span>Inspection</span>
+  </button>
+  <button type="button" class="app-tab-btn" id="map-tab" role="tab" aria-selected="false" aria-controls="map-view" data-app-view="map">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15"></path></svg>
+    <span>Map</span>
+  </button>
+</nav>
+
+<script src="vendor/leaflet/leaflet.js"></script>
 <script src="./swipe-actions.js"></script>
+<script src="./entry-filters.js"></script>
+<script src="./inspection-sharing.js"></script>
+<script src="./sharing-ui.js"></script>
 <script>
 class GeoKalmanFilter{
   constructor(){
@@ -1267,6 +1488,7 @@ const STORAGE_KEY_ENTRIES = 'nlex_inspection_entries_v1';
 const STORAGE_KEY_DATASET = 'nlex_network_dataset_v1';
 const STORAGE_KEY_BOUND = 'nlex_user_bound_v1';
 const STORAGE_KEY_SWIPE_PREVIEW = 'kmtrack_swipe_preview_v1';
+const STORAGE_KEY_THEME = 'kmtrack_theme_v1';
 let storageAvailable = true;
 let calibrationDatasetReady = false;
 let rampDatasetReady = false;
@@ -1307,6 +1529,7 @@ function loadFromStorage(){
       entries = (Array.isArray(parsed) ? parsed : [])
         .filter(e => e && typeof e === 'object' && typeof e.lat === 'number' && typeof e.lon === 'number')
         .map(e => ({
+          ...e,
           id: typeof e.id === 'string' && e.id ? e.id : (addedStableIds = true, newId()),
           type: typeof e.type === 'string' && e.type ? e.type : 'Others',
           timestamp: typeof e.timestamp === 'string' && e.timestamp ? e.timestamp : fullTimestamp(),
@@ -1330,9 +1553,10 @@ function loadFromStorage(){
 }
 
 function saveEntries(){
-  if(!storageAvailable) return;
+  if(!storageAvailable) return false;
   try{
     localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(entries));
+    return true;
   }catch(e){
     storageAvailable = false;
     console.error('Could not save entries', e);
@@ -1341,6 +1565,7 @@ function saveEntries(){
       el.hidden = false;
       el.textContent = '⚠ Save failed — storage blocked (check you\'re not in Private Browsing). Export now to avoid losing this entry.';
     }
+    return false;
   }
 }
 
@@ -1603,6 +1828,134 @@ tickClock();
 // ---------- Geolocation ----------
 const gpsStatus = document.getElementById('gps-status');
 
+let osmMap = null;
+let osmBaseLayer = null;
+let osmEntryLayer = null;
+let osmLocationMarker = null;
+let osmAccuracyCircle = null;
+let osmHasCenteredOnLocation = false;
+
+// CARTO browser basemap key: necessarily visible in tile requests. KMTrack use only.
+const CARTO_BASEMAP_KEY = 'cb1_2wsv_1_91c146c65b5204c948f23116';
+const MAP_BASEMAPS = {
+  light:{
+    url:'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    name:'CARTO Voyager'
+  },
+  dark:{
+    url:'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    name:'CARTO Dark Matter'
+  }
+};
+
+function updateOsmBasemap(){
+  if(!osmMap) return;
+  const theme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+  const basemap = MAP_BASEMAPS[theme];
+  if(osmBaseLayer) osmBaseLayer.remove();
+  osmBaseLayer = L.tileLayer(`${basemap.url}?key=${encodeURIComponent(CARTO_BASEMAP_KEY)}`,{
+    subdomains:'abcd',
+    maxZoom:20,
+    updateWhenIdle:true,
+    keepBuffer:2,
+    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>'
+  }).addTo(osmMap);
+  osmBaseLayer.bringToBack();
+}
+
+function initOsmMap(){
+  if(osmMap || typeof L === 'undefined') return;
+  osmMap = L.map('osm-map',{zoomControl:false,attributionControl:true}).setView([14.86,120.88],10);
+  updateOsmBasemap();
+  updateOsmLocation();
+  updateMapEntries();
+}
+
+function updateMapEntries(){
+  const show = document.getElementById('map-show-entries').checked;
+  const from = document.getElementById('map-entry-from');
+  const to = document.getElementById('map-entry-to');
+  const type = document.getElementById('map-entry-type');
+  from.disabled = !show;
+  to.disabled = !show;
+  from.max = to.value;
+  to.min = from.value;
+  if(!osmMap) return;
+  if(!osmEntryLayer) osmEntryLayer = L.layerGroup();
+  osmEntryLayer.clearLayers();
+  if(!show){ osmEntryLayer.remove(); return; }
+  osmEntryLayer.addTo(osmMap);
+  KMTrackEntryFilters.mapEntries(entries,from.value,to.value,type.value,document.getElementById('map-entry-source').value,document.getElementById('map-entry-inspector').value).forEach(entry => {
+    L.circleMarker([entry.lat,entry.lon],{
+      radius:5,color:'#b91c1c',weight:1,fillColor:'#ef4444',fillOpacity:1,interactive:false
+    }).addTo(osmEntryLayer);
+  });
+}
+document.getElementById('map-show-entries').addEventListener('change',updateMapEntries);
+document.getElementById('map-entry-from').addEventListener('change',updateMapEntries);
+document.getElementById('map-entry-to').addEventListener('change',updateMapEntries);
+document.getElementById('map-entry-type').addEventListener('change',updateMapEntries);
+document.addEventListener('click',event => {
+  const menu = document.getElementById('map-filter-menu');
+  if(!menu.contains(event.target)) menu.open = false;
+});
+document.getElementById('map-filter-menu').addEventListener('keydown',event => {
+  if(event.key === 'Escape'){
+    event.currentTarget.open = false;
+    event.currentTarget.querySelector('summary').focus();
+  }
+});
+document.getElementById('map-entry-clear').addEventListener('click',() => {
+  document.getElementById('map-entry-from').value = '';
+  document.getElementById('map-entry-to').value = '';
+  updateMapEntries();
+});
+
+function updateOsmLocation(forceCenter){
+  const status = document.getElementById('map-status');
+  if(!currentPos){
+    if(status) status.textContent = 'Waiting for GPS location…';
+    return;
+  }
+  const point = [currentPos.lat,currentPos.lon];
+  if(status) status.textContent = `${currentPos.lat.toFixed(6)}, ${currentPos.lon.toFixed(6)}${currentPos.acc ? ` · ±${Math.round(currentPos.acc)} m` : ''}`;
+  if(!osmMap) return;
+  if(!osmLocationMarker){
+    osmLocationMarker = L.circleMarker(point,{radius:8,color:'#fff',weight:3,fillColor:'#168fd0',fillOpacity:1,className:'map-location-marker'}).addTo(osmMap);
+    osmAccuracyCircle = L.circle(point,{radius:Math.max(currentPos.acc || 0,1),color:'#168fd0',weight:1,fillColor:'#168fd0',fillOpacity:.10,interactive:false}).addTo(osmMap);
+  }else{
+    osmLocationMarker.setLatLng(point);
+    osmAccuracyCircle.setLatLng(point).setRadius(Math.max(currentPos.acc || 0,1));
+  }
+  if(forceCenter || !osmHasCenteredOnLocation){
+    osmMap.setView(point,17,{animate:false});
+    osmHasCenteredOnLocation = true;
+  }
+}
+
+function showAppView(viewName){
+  const showMap = viewName === 'map';
+  document.getElementById('inspection-view').hidden = showMap;
+  document.getElementById('map-view').hidden = !showMap;
+  document.querySelectorAll('.app-tab-btn').forEach(button => {
+    const active = button.dataset.appView === viewName;
+    button.classList.toggle('active',active);
+    button.setAttribute('aria-selected',active ? 'true' : 'false');
+  });
+  if(showMap){
+    initOsmMap();
+    requestAnimationFrame(() => {
+      osmMap?.invalidateSize(false);
+      updateOsmLocation();
+    });
+  }
+}
+
+document.querySelectorAll('.app-tab-btn').forEach(button => {
+  button.addEventListener('click',() => showAppView(button.dataset.appView));
+});
+document.getElementById('map-locate-btn').addEventListener('click',() => updateOsmLocation(true));
+
 function haversineKm(lat1, lon1, lat2, lon2){
   const R = 6371;
   const dLat = (lat2-lat1) * Math.PI/180;
@@ -1660,8 +2013,13 @@ function kmToCsvNumber(km){
   return Math.round(Number(km)*1000);
 }
 
+function updateMapKmStation(){
+  document.getElementById('map-km-station').textContent = `KM ${document.getElementById('km-value').textContent}`;
+}
+
 function updateReadout(){
   if(!currentPos) return;
+  updateOsmLocation();
   document.getElementById('lat').textContent = currentPos.lat.toFixed(6);
   document.getElementById('lon').textContent = currentPos.lon.toFixed(6);
   document.getElementById('acc').textContent = currentPos.acc ? `±${currentPos.acc.toFixed(0)} m` : '--';
@@ -1672,6 +2030,7 @@ function updateReadout(){
 
   if(!result){
     kmEl.textContent = '--.---';
+    updateMapKmStation();
     tagEl.textContent = calibData.length ? '--' : 'dataset not loaded';
     tagEl.classList.remove('faroff');
     return;
@@ -1679,6 +2038,7 @@ function updateReadout(){
 
   const isOffMappedNetwork = result.distance > offNetworkThresholdKm(currentPos.acc);
   kmEl.textContent = isOffMappedNetwork ? '--.---' : formatKmStation(result.km);
+  updateMapKmStation();
   const displayBound = userBound || '?';
   if(isOffMappedNetwork){
     tagEl.textContent = `⚠ Off mapped network (~${Math.round(result.distance*1000)}m from ${result.expressway})`;
@@ -2911,7 +3271,47 @@ function applyContinuousLaneColors(type){
 
 // ---------- Multi-select delete mode ----------
 let selectMode = false;
-let selectedIndices = new Set();
+let selectedEntryIds = new Set();
+function getLogFilters(){
+  return {from:document.getElementById('entry-filter-from').value,to:document.getElementById('entry-filter-to').value,type:document.getElementById('entry-filter-type').value,source:document.getElementById('entry-filter-source').value,inspector:document.getElementById('entry-filter-inspector').value};
+}
+function visibleEntries(){ return KMTrackEntryFilters.filterEntries(entries,getLogFilters()); }
+function syncEntryFilterOptions(){
+  for(const id of ['entry-filter-type','map-entry-type']){
+  const select = document.getElementById(id);
+  const previous = select.value;
+  const types = [...new Set(entries.map(entry => entry.type).concat(previous || []))].sort();
+  select.replaceChildren(new Option('All defects',''),...types.map(type => new Option(type,type)));
+  select.value = previous;
+  }
+}
+function applyEntryFilters(){
+  const from = document.getElementById('entry-filter-from');
+  const to = document.getElementById('entry-filter-to');
+  from.max = to.value;
+  to.min = from.value;
+  selectedEntryIds.clear();
+  renderLog();
+}
+document.getElementById('entry-filter-from').addEventListener('change',applyEntryFilters);
+document.getElementById('entry-filter-to').addEventListener('change',applyEntryFilters);
+document.getElementById('entry-filter-type').addEventListener('change',applyEntryFilters);
+document.getElementById('entry-filter-clear').addEventListener('click',() => {
+  document.getElementById('entry-filter-from').value = '';
+  document.getElementById('entry-filter-to').value = '';
+  document.getElementById('entry-filter-type').value = '';
+  document.getElementById('entry-filter-source').value = '';
+  document.getElementById('entry-filter-inspector').value = '';
+  applyEntryFilters();
+});
+
+function entriesForExport(){
+  const scope = KMTrackEntryFilters.exportScope(entries,getLogFilters(),selectedEntryIds);
+  if(!scope.entries.length){ alert('No entries match the current filters.'); return null; }
+  if(scope.restricted && !confirm('Export filtered/selected entries?')) return null;
+  // Freeze one consistent export batch before any asynchronous workbook/photo work.
+  return JSON.parse(JSON.stringify(scope.entries));
+}
 let openSwipeEntryId = null;
 let swipePreviewChecked = false;
 let undoNotice = null;
@@ -2919,6 +3319,29 @@ let undoNotice = null;
 function hideSwipeUndo(){
   if(undoNotice){ undoNotice.remove(); undoNotice = null; }
 }
+
+function setTheme(theme){
+  const isLight = theme === 'light';
+  document.documentElement.toggleAttribute('data-theme', isLight);
+  if(isLight) document.documentElement.dataset.theme = 'light';
+  const toggles = [document.getElementById('theme-toggle'),document.getElementById('map-theme-toggle')];
+  const nextLabel = isLight ? 'Switch to dark mode' : 'Switch to light mode';
+  toggles.forEach(toggle => {
+    if(toggle){ toggle.setAttribute('aria-label', nextLabel); toggle.title = nextLabel; }
+  });
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  if(themeMeta) themeMeta.content = isLight ? '#19384c' : '#07131f';
+  updateOsmBasemap();
+}
+
+setTheme(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
+function toggleTheme(){
+  const nextTheme = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+  setTheme(nextTheme);
+  try{ localStorage.setItem(STORAGE_KEY_THEME, nextTheme); }catch(e){ /* theme preference is non-critical */ }
+}
+document.getElementById('theme-toggle').addEventListener('click',toggleTheme);
+document.getElementById('map-theme-toggle').addEventListener('click',toggleTheme);
 
 function showSwipeUndo(){
   hideSwipeUndo();
@@ -3037,14 +3460,16 @@ function updateBulkBar(){
   const delBtn = document.getElementById('bulk-delete-btn');
   const allBtn = document.getElementById('bulk-select-all-btn');
   bar.style.display = selectMode ? 'flex' : 'none';
-  delBtn.textContent = `Delete selected (${selectedIndices.size})`;
-  delBtn.disabled = selectedIndices.size === 0;
-  allBtn.textContent = (selectedIndices.size > 0 && selectedIndices.size === entries.length) ? 'Deselect all' : 'Select all';
+  delBtn.textContent = `Delete selected (${selectedEntryIds.size})`;
+  delBtn.disabled = selectedEntryIds.size === 0;
+  const visible = visibleEntries();
+  allBtn.disabled = visible.length === 0;
+  allBtn.textContent = visible.length && visible.every(entry => selectedEntryIds.has(entry.id)) ? 'Deselect all' : 'Select all';
 }
 
 function exitSelectMode(){
   selectMode = false;
-  selectedIndices.clear();
+  selectedEntryIds.clear();
   document.getElementById('select-toggle-btn').classList.remove('active');
   document.getElementById('select-toggle-btn').textContent = 'Select';
   updateBulkBar();
@@ -3052,11 +3477,19 @@ function exitSelectMode(){
 
 function renderLog(){
   openSwipeEntryId = null;
+  syncEntryFilterOptions();
+  syncSharingFilters();
+  const visible = visibleEntries();
+  const visibleIds = new Set(visible.map(entry => entry.id));
+  selectedEntryIds.forEach(id => { if(!visibleIds.has(id)) selectedEntryIds.delete(id); });
+  updateMapEntries();
   const list = document.getElementById('log-list');
   const exportBtn = document.getElementById('export-btn');
   const backupBtn = document.getElementById('backup-btn');
   document.getElementById('count-mini').textContent = entries.length;
-  document.getElementById('count-label').textContent = `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}`;
+  document.getElementById('count-label').textContent = Object.values(getLogFilters()).some(Boolean)
+    ? `${visible.length} of ${entries.length} entries`
+    : `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}`;
   document.getElementById('last-time').textContent = entries.length ? `last: ${entries[entries.length-1].timestamp.split(' ')[1]}` : '--';
 
   if(entries.length === 0){
@@ -3070,11 +3503,12 @@ function renderLog(){
   backupBtn.disabled = false;
 
   list.innerHTML = '';
-  entries.slice().reverse().forEach((e) => {
+  if(!visible.length) list.innerHTML = '<div class="log-empty">No entries match the current filters.</div>';
+  visible.slice().reverse().forEach((e) => {
     const realIdx = entries.indexOf(e);
     const div = document.createElement('div');
     const row = document.createElement('div');
-    const isSelected = selectedIndices.has(realIdx);
+    const isSelected = selectedEntryIds.has(e.id);
     div.className = 'log-entry ' + typeClass(e.type) + (selectMode ? ' select-mode' : '') + (isSelected ? ' selected' : '');
     div.dataset.idx = realIdx;
     if(!selectMode){
@@ -3090,7 +3524,7 @@ function renderLog(){
         <button type="button" class="photo-view-btn" data-idx="${realIdx}">View Photo</button>
         <button type="button" class="photo-remove-btn" data-idx="${realIdx}">Remove Photo</button>
       </div>
-      <div class="photo-status">Photo entry${e.photoTimestamp ? ' · '+e.photoTimestamp : ''}</div>
+      <div class="photo-status">Photo entry${e.photoTimestamp ? ' · '+xmlEscape(e.photoTimestamp) : ''}</div>
     ` : '';
 
     const checkboxHtml = selectMode
@@ -3099,13 +3533,14 @@ function renderLog(){
 
     div.innerHTML = `
       <div class="info">
-        <div class="type">${e.type}</div>
-        <div class="meta">${e.timestamp}<br>${e.lat.toFixed(6)}, ${e.lon.toFixed(6)} · km ${e.km !== null && e.km !== undefined ? formatKmStation(e.km) : 'n/a'}${e.expressway ? ` · ${e.expressway}${e.bound ? ' '+e.bound : ''}` : ''}${e.lane ? ` · Lane: ${e.lane}` : ' · Lane: —'}</div>
+        <div class="type">${xmlEscape(e.type)}</div>
+        ${e.importBatchId?`<div class="import-label">Imported · ${xmlEscape(e.inspector||e.importLabel||'Unnamed inspector')}</div>`:''}
+        <div class="meta">${xmlEscape(e.timestamp)}<br>${e.lat.toFixed(6)}, ${e.lon.toFixed(6)} · km ${e.km !== null && e.km !== undefined ? formatKmStation(e.km) : 'n/a'}${e.expressway ? ` · ${xmlEscape(e.expressway)}${e.bound ? ' '+xmlEscape(e.bound) : ''}` : ''}${e.lane ? ` · Lane: ${xmlEscape(e.lane)}` : ' · Lane: —'}</div>
         ${photoActionsHtml}
       </div>
       ${checkboxHtml}
     `;
-    row.innerHTML = `<button type="button" class="swipe-action edit" data-idx="${realIdx}" aria-label="Edit ${e.type} entry">Edit</button><button type="button" class="swipe-action delete" data-idx="${realIdx}" aria-label="Delete ${e.type} entry">Delete</button>`;
+    row.innerHTML = `<button type="button" class="swipe-action edit" data-idx="${realIdx}" aria-label="Edit ${xmlEscape(e.type)} entry">Edit</button><button type="button" class="swipe-action delete" data-idx="${realIdx}" aria-label="Delete ${xmlEscape(e.type)} entry">Delete</button>`;
     row.appendChild(div);
     list.appendChild(row);
   });
@@ -3134,7 +3569,7 @@ renderLog();
 
 document.getElementById('select-toggle-btn').addEventListener('click', () => {
   selectMode = !selectMode;
-  selectedIndices.clear();
+  selectedEntryIds.clear();
   const toggleBtn = document.getElementById('select-toggle-btn');
   toggleBtn.classList.toggle('active', selectMode);
   toggleBtn.textContent = selectMode ? 'Cancel' : 'Select';
@@ -3143,19 +3578,20 @@ document.getElementById('select-toggle-btn').addEventListener('click', () => {
 });
 
 document.getElementById('bulk-select-all-btn').addEventListener('click', () => {
-  if(selectedIndices.size === entries.length){
-    selectedIndices.clear();
+  const visible = visibleEntries();
+  if(visible.every(entry => selectedEntryIds.has(entry.id))){
+    selectedEntryIds.clear();
   } else {
-    entries.forEach((_, i) => selectedIndices.add(i));
+    visible.forEach(entry => selectedEntryIds.add(entry.id));
   }
   updateBulkBar();
   renderLog();
 });
 
 document.getElementById('bulk-delete-btn').addEventListener('click', async () => {
-  if(selectedIndices.size === 0) return;
-  if(!confirm(`Delete ${selectedIndices.size} selected ${selectedIndices.size === 1 ? 'entry' : 'entries'}? This cannot be undone.`)) return;
-  const idxs = Array.from(selectedIndices).sort((a, b) => b - a); // descending so splicing doesn't shift earlier indices
+  if(selectedEntryIds.size === 0) return;
+  if(!confirm(`Delete ${selectedEntryIds.size} selected ${selectedEntryIds.size === 1 ? 'entry' : 'entries'}? This cannot be undone.`)) return;
+  const idxs = entries.map((entry,index) => selectedEntryIds.has(entry.id) ? index : -1).filter(index => index >= 0).reverse();
   const photoIdsToDelete = [];
   idxs.forEach(idx => {
     const entry = entries[idx];
@@ -3179,7 +3615,8 @@ document.addEventListener('click', (e) => {
   if(card.dataset.suppressClick === '1') return;
   const idx = Number(card.dataset.idx);
   if(selectMode){
-    if(selectedIndices.has(idx)) selectedIndices.delete(idx); else selectedIndices.add(idx);
+    const id = entries[idx].id;
+    if(selectedEntryIds.has(id)) selectedEntryIds.delete(id); else selectedEntryIds.add(id);
     updateBulkBar();
     renderLog();
     return;
@@ -3594,12 +4031,12 @@ function excelColumnName(index){
   return name;
 }
 
-function inspectionWorkbookRows(){
-  return KMTrackSwipe.inspectionWorkbookRows(entries, toDMM, kmToCsvNumber);
+function inspectionWorkbookRows(exportEntries = entries){
+  return KMTrackSwipe.inspectionWorkbookRows(exportEntries, toDMM, kmToCsvNumber);
 }
 
-async function buildInspectionWorkbook(createdAt){
-  const rows=inspectionWorkbookRows();
+async function buildInspectionWorkbook(createdAt, exportEntries = entries){
+  const rows=inspectionWorkbookRows(exportEntries);
   const rowXml=rows.map((row,rowIndex)=>{
     const cells=row.map((value,colIndex)=>{
       const ref=`${excelColumnName(colIndex)}${rowIndex+1}`;
@@ -3620,6 +4057,7 @@ async function buildInspectionWorkbook(createdAt){
     {name:'docProps/core.xml',blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>KMTrack Inspection Log</dc:title><dc:creator>KMTrack</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">${createdAt.toISOString()}</dcterms:created></cp:coreProperties>`]),date:createdAt},
     {name:'docProps/app.xml',blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"><Application>KMTrack</Application></Properties>`]),date:createdAt}
   ];
+  await addSharingWorksheet(files,exportEntries,createdAt);
   const zip=await createStoredZip(files);
   return zip.slice(0,zip.size,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 }
@@ -3630,13 +4068,15 @@ function exportTimestamp(date){
 
 document.getElementById('export-btn').addEventListener('click', async () => {
   if(entries.length === 0) return;
+  const exportEntries = await prepareSharingExport();
+  if(!exportEntries) return;
   const d = new Date();
   const fname = `kmtrack_${exportTimestamp(d)}.xlsx`;
   const exportBtn = document.getElementById('export-btn');
   exportBtn.disabled = true;
   let url = null;
   try{
-    const blob = await buildInspectionWorkbook(d);
+    const blob = await buildInspectionWorkbook(d, exportEntries);
     url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -3725,6 +4165,8 @@ function safeBackupFilename(name,index){
 
 document.getElementById('backup-btn').addEventListener('click', async () => {
   if(entries.length===0) return;
+  const exportEntries = await prepareSharingExport();
+  if(!exportEntries) return;
   const button=document.getElementById('backup-btn');
   const csvButton=document.getElementById('export-btn');
   button.disabled=true; csvButton.disabled=true;
@@ -3734,16 +4176,16 @@ document.getElementById('backup-btn').addEventListener('click', async () => {
     const createdAt=new Date();
     const stamp=exportTimestamp(createdAt);
     const files=[
-      {name:`KMTrack_backup_${stamp}/inspection_log.xlsx`,blob:await buildInspectionWorkbook(createdAt),date:createdAt},
+      {name:`KMTrack_backup_${stamp}/inspection_log.xlsx`,blob:await buildInspectionWorkbook(createdAt,exportEntries),date:createdAt},
       {name:`KMTrack_backup_${stamp}/README.txt`,blob:new Blob(['KMTrack inspection backup\n\nThis archive contains the inspection Excel workbook, available stamped photos, and manifest.json.\nPhotos listed as missing in the manifest were referenced by the log but were not present in this browser storage at export time.\n'],{type:'text/plain;charset=utf-8'}),date:createdAt}
     ];
     const manifestEntries=[];
     let exportedPhotos=0; let missingPhotos=0;
-    for(let i=0;i<entries.length;i++){
-      const entry=entries[i];
+    for(let i=0;i<exportEntries.length;i++){
+      const entry=exportEntries[i];
       let archivePhotoPath=''; let photoAvailable=false;
       if(entry.photoId){
-        button.textContent=`Packing ${i+1}/${entries.length}…`;
+        button.textContent=`Packing ${i+1}/${exportEntries.length}…`;
         const photo=await getPhoto(entry.photoId);
         if(photo){
           archivePhotoPath=`KMTrack_backup_${stamp}/photos/${safeBackupFilename(entry.photoFilename,i)}`;
@@ -3751,11 +4193,11 @@ document.getElementById('backup-btn').addEventListener('click', async () => {
           photoAvailable=true; exportedPhotos++;
         }else missingPhotos++;
       }
-      const {id: internalId, ...exportEntry} = entry;
+      const exportEntry = entry;
       manifestEntries.push({...exportEntry,photoAvailable,archivePhotoPath});
       await new Promise(resolve=>setTimeout(resolve,0));
     }
-    const manifest={format:'KMTrack inspection backup',version:1,createdAt:createdAt.toISOString(),entryCount:entries.length,photoCount:exportedPhotos,missingPhotoCount:missingPhotos,entries:manifestEntries};
+    const manifest={format:'KMTrack inspection backup',version:2,createdAt:createdAt.toISOString(),entryCount:exportEntries.length,photoCount:exportedPhotos,missingPhotoCount:missingPhotos,entries:manifestEntries};
     files.push({name:`KMTrack_backup_${stamp}/manifest.json`,blob:new Blob([JSON.stringify(manifest,null,2)],{type:'application/json'}),date:createdAt});
     button.textContent='Building ZIP…';
     const zip=await createStoredZip(files);
@@ -3764,7 +4206,7 @@ document.getElementById('backup-btn').addEventListener('click', async () => {
     link.href=url; link.download=`KMTrack_backup_${stamp}.zip`;
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
     const note=missingPhotos ? ` ${missingPhotos} referenced photo(s) were missing and are identified in manifest.json.` : '';
-    alert(`Backup ready: ${entries.length} entries and ${exportedPhotos} photos.${note}`);
+    alert(`Backup ready: ${exportEntries.length} entries and ${exportedPhotos} photos.${note}`);
   }catch(err){
     alert(`Could not create the backup ZIP. ${err.message||err}`);
   }finally{

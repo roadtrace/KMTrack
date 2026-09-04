@@ -1,0 +1,3 @@
+# Local browser verification artifacts (not application assets).
+.playwright-cli/
+output/playwright/

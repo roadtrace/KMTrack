@@ -4,14 +4,22 @@
 // since the app already manages its own offline copy of that file and
 // the in-app "Reload dataset" button needs a real network attempt.
 
-const CACHE_VERSION = 'v71'; // bump this string whenever you deploy changes, to force an update
+const CACHE_VERSION = 'v104'; // bump this string whenever you deploy changes, to force an update
 const CACHE_NAME = `kmtrack-shell-${CACHE_VERSION}`;
 
 const APP_SHELL = [
   './',
   './index.html',
   './swipe-actions.js',
+  './entry-filters.js',
+  './inspection-sharing.js',
+  './sharing-ui.js',
+  './sharing.css',
+  './radius-system.css',
   './manifest.json',
+  './vendor/leaflet/leaflet.css',
+  './vendor/leaflet/leaflet.js',
+  './vendor/leaflet/LICENSE',
   './fonts/InterVariable.woff2',
   './KMTrack_logo.png',
   './KMTrack.png'
