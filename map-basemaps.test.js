@@ -11,6 +11,8 @@ test('map theme stays in the topbar and filter menu contains type and date reset
   const menu=html.match(/<details class="map-filter-menu"[\s\S]*?<\/details>/)[0];
   assert.match(menu,/id="map-entry-type"/);
   assert.match(menu,/id="map-entry-clear"/);
+  assert.match(menu,/id="map-entry-bound"/);
+  assert.match(html,/map-entry-clear'\)\.classList\.toggle\('active',Boolean\(days\.length\)\)/);
 });
 test('map defect type combines with inclusive dates without mutating entries',()=>{
   const {mapEntries}=require('./entry-filters.js');

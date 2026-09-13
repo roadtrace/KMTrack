@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="KMTrack">
 <meta name="theme-color" content="#07131f">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <script>
   try{
@@ -1132,6 +1132,7 @@ button {
   .app-tab-btn{min-height:44px;padding:3px 12px;border:0;border-radius:var(--radius-md);background:transparent;color:#98a7b0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10px;font-weight:700;cursor:pointer;}
   .app-tab-btn svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
   .app-tab-btn.active{background:rgba(71,169,215,.14);color:#79cef4;}
+  .app-tab-btn:focus-visible{outline:2px solid currentColor;outline-offset:2px;}
   html[data-theme="light"] .app-tab-bar{background:rgba(255,255,255,.98);border-color:rgba(32,42,49,.10);box-shadow:0 -7px 22px rgba(38,48,56,.11);}
   html[data-theme="light"] .app-tab-btn{color:#747b80;}
   html[data-theme="light"] .app-tab-btn.active{background:#eef7fb;color:#1683b6;}
@@ -1140,9 +1141,43 @@ button {
   html[data-theme="light"] .map-locate-btn,html[data-theme="light"] .map-theme-toggle{background:#f4f6f7;color:#25343d;border-color:rgba(32,42,49,.12);}
   html[data-theme="light"] .map-theme-toggle::before{content:'☾';}
   @media(prefers-reduced-motion:reduce){.app-tab-btn{transition:none;}}
+  /* Inspection accessibility: preserve the existing surfaces and category fills. */
+  .bound-hint,.bound-auto-status{color:var(--text-muted);}
+  html:not([data-theme="light"]) .status.err{color:#e47164;}
+  html[data-theme="light"] .bound-panel-label{color:var(--text-muted);}
+  html[data-theme="light"] #defect-section.gps-pending .defect-gate{color:#765300;}
+  .lane-btn.shoving{color:#191c1f;}
+  .haptic-label:has(input:focus-visible){outline:3px solid var(--line-yellow);outline-offset:2px;}
+  .lane-btn-row{grid-template-columns:repeat(5,minmax(0,1fr));}
+  .lane-btn{min-width:0;height:60px;min-height:60px;padding:10px 2px;}
+  .lane-btn.others-btn{font-size:9px;line-height:1.2;overflow-wrap:normal;}
+  .lane-btn.others-btn .others-sub{font-size:8px;line-height:1.2;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;}
+  #defect-section.focused .focused-category .lane-btn{height:auto;min-height:96px;}
+  #defect-section.focused .focused-category .lane-btn.others-btn{min-height:64px;}
+  .readout-main .field .label{white-space:normal;overflow-wrap:anywhere;font-size:11px;letter-spacing:.08em;}
+  .readout-main .field{min-width:0;}
+  .bound-auto-status,.dataset-drawer>summary,.app-tab-btn{font-size:11px;}
+  .header-copy .sub{font-size:11px;}
+  .category-label .category-sub{font-size:10px;}
+  .theme-toggle{width:44px;height:44px;}
+  .category-camera-btn{width:44px;height:44px;flex:0 0 44px;}
+  .defect-focus-select,.select-toggle-btn,.export-btn{height:auto;min-height:44px;}
+  .entry-filters :is(input,select,button){height:44px;min-height:44px;}
+  @media(max-width:360px){
+    .readout{flex-direction:column;}
+    .readout-main{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .bound-panel{flex-basis:auto;}
+    .bound-toggle{flex-direction:row;flex-wrap:wrap;}
+    .bound-toggle button.bound-btn{flex:1;}
+  }
+  @media(orientation:landscape) and (min-width:700px){
+    main>.readout>.bound-panel,main>.kmpost{margin-top:0;}
+  }
 </style>
 <link rel="stylesheet" href="radius-system.css">
 <link rel="stylesheet" href="sharing.css">
+<link rel="stylesheet" href="photo-viewer.css">
+<link rel="stylesheet" href="map-overlays.css">
 </head>
 <body>
 
@@ -1315,7 +1350,7 @@ button {
       </div>
     </details>
     <div id="import-status" role="status"></div>
-    <button type="button" id="undo-import-btn" class="select-toggle-btn" hidden>Undo last import</button>
+    <button type="button" id="import-history-btn" class="select-toggle-btn" hidden>Imported files</button>
     <input type="file" id="import-file" accept=".xlsx,.zip" hidden>
     <div class="bulk-actions-bar" id="bulk-actions-bar" style="display:none;">
       <button type="button" class="bulk-select-all-btn" id="bulk-select-all-btn">Select all</button>
@@ -1336,13 +1371,14 @@ button {
     <button type="button" class="map-theme-toggle" id="map-theme-toggle" aria-label="Switch to light mode" title="Switch to light mode"></button>
   </div>
   <div id="osm-map" aria-label="OpenStreetMap showing the current inspection location"></div>
+  <div id="map-bound-legend" class="map-bound-legend" aria-label="Map legend"></div>
   <div class="map-entry-controls" aria-label="Map entry display options">
     <div class="map-floating-actions" role="group" aria-label="Map controls">
       <button type="button" class="map-locate-btn" id="map-locate-btn" aria-label="Center map on current location" title="Center on current location">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><circle cx="12" cy="12" r="8"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path></svg>
       </button>
     </div>
-    <label><input type="checkbox" id="map-show-entries">Show entries</label>
+    <label><input type="checkbox" id="map-show-entries" checked>Show entries</label>
     <label><input type="date" id="map-entry-from" aria-label="From date" disabled></label>
     <span class="date-range-separator" aria-hidden="true">to</span>
     <label><input type="date" id="map-entry-to" aria-label="To date" disabled></label>
@@ -1352,6 +1388,7 @@ button {
         <label><select id="map-entry-type" aria-label="Defect type"><option value="">All defects</option></select></label>
         <label>Source<select id="map-entry-source"><option value="">All inspections</option><option value="mine">My inspections</option><option value="imported">Imported inspections</option></select></label>
         <label>Inspector<select id="map-entry-inspector"><option value="">All inspectors</option></select></label>
+        <label>Bound<select id="map-entry-bound"><option value="">All bounds</option><option value="NB">NB</option><option value="SB">SB</option><option value="EB">EB</option><option value="WB">WB</option><option value="Other">Other / unset</option></select></label>
         <button type="button" id="map-entry-clear">All dates</button>
       </div>
     </details>
@@ -1363,7 +1400,7 @@ button {
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5h6M9 3h6v4H9z"></path><path d="M7 5H5v16h14V5h-2M8 11h8M8 15h8"></path></svg>
     <span>Inspection</span>
   </button>
-  <button type="button" class="app-tab-btn" id="map-tab" role="tab" aria-selected="false" aria-controls="map-view" data-app-view="map">
+  <button type="button" class="app-tab-btn" id="map-tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="map-view" data-app-view="map">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15"></path></svg>
     <span>Map</span>
   </button>
@@ -1372,8 +1409,12 @@ button {
 <script src="vendor/leaflet/leaflet.js"></script>
 <script src="./swipe-actions.js"></script>
 <script src="./entry-filters.js"></script>
+<script src="./map-overlays.js"></script>
 <script src="./inspection-sharing.js"></script>
 <script src="./sharing-ui.js"></script>
+<script src="./log-controls.js"></script>
+<script src="./photo-zoom.js"></script>
+<script src="./photo-viewer.js"></script>
 <script>
 class GeoKalmanFilter{
   constructor(){
@@ -1831,6 +1872,8 @@ const gpsStatus = document.getElementById('gps-status');
 let osmMap = null;
 let osmBaseLayer = null;
 let osmEntryLayer = null;
+let osmLandmarkLayer = null;
+let supplementalMapLandmarks = [];
 let osmLocationMarker = null;
 let osmAccuracyCircle = null;
 let osmHasCenteredOnLocation = false;
@@ -1867,8 +1910,23 @@ function initOsmMap(){
   if(osmMap || typeof L === 'undefined') return;
   osmMap = L.map('osm-map',{zoomControl:false,attributionControl:true}).setView([14.86,120.88],10);
   updateOsmBasemap();
+  osmMap.on('moveend',updateMapEntries);
+  osmMap.on('zoomend',updateMapLandmarks);
+  updateMapLandmarks();
+  fetch('map-landmarks.json').then(r=>{if(!r.ok) throw new Error(r.status);return r.json();}).then(data=>{if(!Array.isArray(data.assets)) throw new Error('Invalid landmark dataset');supplementalMapLandmarks=data.assets;updateMapLandmarks();}).catch(err=>console.warn('Additional interchange markers unavailable',err));
   updateOsmLocation();
   updateMapEntries();
+}
+
+function updateMapLandmarks(){
+  if(!osmMap) return;
+  if(!osmLandmarkLayer) osmLandmarkLayer=L.layerGroup().addTo(osmMap);
+  KMTrackMap.renderLandmarks(osmMap,osmLandmarkLayer,supplementalMapLandmarks);
+}
+
+function openMapEntry(id){
+  const index=entries.findIndex(entry=>entry.id===id);
+  if(index>=0){ openEditModal(index); KMTrackMap.focusEditor(); }
 }
 
 function updateMapEntries(){
@@ -1876,6 +1934,8 @@ function updateMapEntries(){
   const from = document.getElementById('map-entry-from');
   const to = document.getElementById('map-entry-to');
   const type = document.getElementById('map-entry-type');
+  const mapFilterActive=Boolean(from.value||to.value||type.value||document.getElementById('map-entry-source').value||document.getElementById('map-entry-inspector').value||document.getElementById('map-entry-bound').value);
+  document.getElementById('map-filter-menu')?.classList?.toggle('filtered',mapFilterActive);
   from.disabled = !show;
   to.disabled = !show;
   from.max = to.value;
@@ -1883,18 +1943,17 @@ function updateMapEntries(){
   if(!osmMap) return;
   if(!osmEntryLayer) osmEntryLayer = L.layerGroup();
   osmEntryLayer.clearLayers();
-  if(!show){ osmEntryLayer.remove(); return; }
+  if(!show){ osmEntryLayer.remove(); KMTrackMap.legend([],false); return; }
   osmEntryLayer.addTo(osmMap);
-  KMTrackEntryFilters.mapEntries(entries,from.value,to.value,type.value,document.getElementById('map-entry-source').value,document.getElementById('map-entry-inspector').value).forEach(entry => {
-    L.circleMarker([entry.lat,entry.lon],{
-      radius:5,color:'#b91c1c',weight:1,fillColor:'#ef4444',fillOpacity:1,interactive:false
-    }).addTo(osmEntryLayer);
-  });
+  const visible=KMTrackEntryFilters.mapEntries(entries,from.value,to.value,type.value,document.getElementById('map-entry-source').value,document.getElementById('map-entry-inspector').value,document.getElementById('map-entry-bound').value);
+  KMTrackMap.legend(visible,true);
+  KMTrackMap.renderEntries(osmMap,osmEntryLayer,visible,openMapEntry,formatKmStation);
 }
 document.getElementById('map-show-entries').addEventListener('change',updateMapEntries);
 document.getElementById('map-entry-from').addEventListener('change',updateMapEntries);
 document.getElementById('map-entry-to').addEventListener('change',updateMapEntries);
 document.getElementById('map-entry-type').addEventListener('change',updateMapEntries);
+document.getElementById('map-entry-bound').addEventListener('change',updateMapEntries);
 document.addEventListener('click',event => {
   const menu = document.getElementById('map-filter-menu');
   if(!menu.contains(event.target)) menu.open = false;
@@ -1906,10 +1965,13 @@ document.getElementById('map-filter-menu').addEventListener('keydown',event => {
   }
 });
 document.getElementById('map-entry-clear').addEventListener('click',() => {
-  document.getElementById('map-entry-from').value = '';
-  document.getElementById('map-entry-to').value = '';
+  const days=entries.map(entry=>KMTrackEntryFilters.entryDay(entry)).filter(day=>/^\d{4}-\d{2}-\d{2}$/.test(day)).sort();
+  document.getElementById('map-entry-from').value = days[0]||'';
+  document.getElementById('map-entry-to').value = days.at(-1)||'';
+  document.getElementById('map-entry-clear').classList.toggle('active',Boolean(days.length));
   updateMapEntries();
 });
+for(const id of ['map-entry-from','map-entry-to']) document.getElementById(id).addEventListener('input',()=>document.getElementById('map-entry-clear').classList.remove('active'));
 
 function updateOsmLocation(forceCenter){
   const status = document.getElementById('map-status');
@@ -1941,6 +2003,7 @@ function showAppView(viewName){
     const active = button.dataset.appView === viewName;
     button.classList.toggle('active',active);
     button.setAttribute('aria-selected',active ? 'true' : 'false');
+    button.tabIndex = active ? 0 : -1;
   });
   if(showMap){
     initOsmMap();
@@ -1953,6 +2016,20 @@ function showAppView(viewName){
 
 document.querySelectorAll('.app-tab-btn').forEach(button => {
   button.addEventListener('click',() => showAppView(button.dataset.appView));
+  button.addEventListener('keydown',event => {
+    if(event.altKey || event.ctrlKey || event.metaKey) return;
+    const tabs = Array.from(document.querySelectorAll('.app-tab-btn'));
+    const index = tabs.indexOf(button);
+    let next;
+    if(event.key === 'ArrowRight') next = (index + 1) % tabs.length;
+    else if(event.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;
+    else if(event.key === 'Home') next = 0;
+    else if(event.key === 'End') next = tabs.length - 1;
+    else return;
+    event.preventDefault();
+    showAppView(tabs[next].dataset.appView);
+    tabs[next].focus();
+  });
 });
 document.getElementById('map-locate-btn').addEventListener('click',() => updateOsmLocation(true));
 
@@ -3161,6 +3238,7 @@ async function viewPhotoForEntry(index){
     const modal = document.getElementById('photo-modal');
     modal.classList.add('show');
     modal.setAttribute('aria-hidden','false');
+    requestAnimationFrame(() => document.getElementById('photo-preview').focus());
   }catch(err){
     alert('Could not open the saved photo: '+err.message);
   }
@@ -3459,7 +3537,7 @@ function updateBulkBar(){
   const bar = document.getElementById('bulk-actions-bar');
   const delBtn = document.getElementById('bulk-delete-btn');
   const allBtn = document.getElementById('bulk-select-all-btn');
-  bar.style.display = selectMode ? 'flex' : 'none';
+  bar.style.display = 'none';
   delBtn.textContent = `Delete selected (${selectedEntryIds.size})`;
   delBtn.disabled = selectedEntryIds.size === 0;
   const visible = visibleEntries();
@@ -3471,7 +3549,7 @@ function exitSelectMode(){
   selectMode = false;
   selectedEntryIds.clear();
   document.getElementById('select-toggle-btn').classList.remove('active');
-  document.getElementById('select-toggle-btn').textContent = 'Select';
+  document.getElementById('select-toggle-btn').setAttribute('aria-checked','false');
   updateBulkBar();
 }
 
@@ -3522,22 +3600,31 @@ function renderLog(){
     const photoActionsHtml = e.photoId ? `
       <div class="entry-actions">
         <button type="button" class="photo-view-btn" data-idx="${realIdx}">View Photo</button>
-        <button type="button" class="photo-remove-btn" data-idx="${realIdx}">Remove Photo</button>
       </div>
-      <div class="photo-status">Photo entry${e.photoTimestamp ? ' · '+xmlEscape(e.photoTimestamp) : ''}</div>
     ` : '';
 
     const checkboxHtml = selectMode
-      ? `<div class="entry-checkbox${isSelected ? ' checked' : ''}" data-idx="${realIdx}">${isSelected ? '✓' : ''}</div>`
+      ? `<button type="button" class="entry-checkbox${isSelected ? ' checked' : ''}" data-idx="${realIdx}" role="checkbox" aria-checked="${isSelected}" aria-label="Select ${xmlEscape(e.type)} entry from ${xmlEscape(e.timestamp)}">${isSelected ? '✓' : ''}</button>`
       : '';
 
+    const dateValue=new Date(String(e.timestamp).replace(' ','T'));
+    const shortDate=Number.isNaN(dateValue.getTime())
+      ? String(e.timestamp)
+      : dateValue.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true}).replace(' AM',' am').replace(' PM',' pm');
+    const importedBy=e.importBatchId ? (String(e.inspector||'').trim()||'Unknown') : '';
+    const displayType=String(e.type).startsWith('Cracks') ? 'Cracks' : e.type;
+    const laneValue=String(e.lane||'—');
+    const laneLabel=/^\d+$/.test(laneValue) ? `L${laneValue}` : laneValue;
     div.innerHTML = `
-      <div class="info">
-        <div class="type">${xmlEscape(e.type)}</div>
-        ${e.importBatchId?`<div class="import-label">Imported · ${xmlEscape(e.inspector||e.importLabel||'Unnamed inspector')}</div>`:''}
-        <div class="meta">${xmlEscape(e.timestamp)}<br>${e.lat.toFixed(6)}, ${e.lon.toFixed(6)} · km ${e.km !== null && e.km !== undefined ? formatKmStation(e.km) : 'n/a'}${e.expressway ? ` · ${xmlEscape(e.expressway)}${e.bound ? ' '+xmlEscape(e.bound) : ''}` : ''}${e.lane ? ` · Lane: ${xmlEscape(e.lane)}` : ' · Lane: —'}</div>
-        ${photoActionsHtml}
+      <div class="record-type"><span class="type">${xmlEscape(displayType)}</span>
+        ${importedBy?`<span class="import-label">(Imported - ${xmlEscape(importedBy)})</span>`:''}
       </div>
+      <time class="record-date" datetime="${xmlEscape(String(e.timestamp).replace(' ','T'))}" title="${xmlEscape(e.timestamp)}">${xmlEscape(shortDate)}</time>
+      <div class="record-context"><span class="record-road">${xmlEscape(e.expressway||'—')}</span>
+      <span class="record-km">KM ${e.km !== null && e.km !== undefined ? formatKmStation(e.km) : 'n/a'}</span>
+      <span class="record-bound">${xmlEscape(e.bound||'—')}</span>
+      <span class="record-lane">${xmlEscape(laneLabel)}</span></div>
+      ${e.photoId ? `<div class="record-photo-actions">${photoActionsHtml}</div>` : ''}
       ${checkboxHtml}
     `;
     row.innerHTML = `<button type="button" class="swipe-action edit" data-idx="${realIdx}" aria-label="Edit ${xmlEscape(e.type)} entry">Edit</button><button type="button" class="swipe-action delete" data-idx="${realIdx}" aria-label="Delete ${xmlEscape(e.type)} entry">Delete</button>`;
@@ -3568,12 +3655,13 @@ function renderLog(){
 renderLog();
 
 document.getElementById('select-toggle-btn').addEventListener('click', () => {
-  selectMode = !selectMode;
-  selectedEntryIds.clear();
-  const toggleBtn = document.getElementById('select-toggle-btn');
-  toggleBtn.classList.toggle('active', selectMode);
-  toggleBtn.textContent = selectMode ? 'Cancel' : 'Select';
-  updateBulkBar();
+  if(!selectMode){
+    selectedEntryIds.clear();
+    selectMode = true;
+    renderLog();
+    return;
+  }
+  exitSelectMode();
   renderLog();
 });
 
@@ -3614,11 +3702,13 @@ document.addEventListener('click', (e) => {
   if(!card || card.dataset.idx === undefined) return;
   if(card.dataset.suppressClick === '1') return;
   const idx = Number(card.dataset.idx);
-  if(selectMode){
+  const clickedCheckbox = e.target.closest('.entry-checkbox');
+  if(selectMode || clickedCheckbox){
     const id = entries[idx].id;
     if(selectedEntryIds.has(id)) selectedEntryIds.delete(id); else selectedEntryIds.add(id);
     updateBulkBar();
     renderLog();
+    document.querySelector(`.entry-checkbox[data-idx="${idx}"]`)?.focus({preventScroll:true});
     return;
   }
   openEditModal(idx);
@@ -3877,12 +3967,15 @@ let editPhotoObjectUrl = null;
 async function renderEditPhotoPreview(entry){
   const emptyEl = document.getElementById('edit-photo-empty');
   const imgEl = document.getElementById('edit-photo-thumb');
+  const thumbWrap = document.getElementById('edit-photo-thumb-wrap');
   const removeBtn = document.getElementById('edit-photo-remove-btn');
   const addBtn = document.getElementById('edit-photo-add-btn');
 
   if(editPhotoObjectUrl){ URL.revokeObjectURL(editPhotoObjectUrl); editPhotoObjectUrl = null; }
 
   if(!entry || !entry.photoId){
+    thumbWrap.tabIndex = -1;
+    thumbWrap.setAttribute('aria-disabled','true');
     imgEl.style.display = 'none';
     imgEl.src = '';
     emptyEl.style.display = 'flex';
@@ -3892,6 +3985,8 @@ async function renderEditPhotoPreview(entry){
   }
 
   addBtn.textContent = 'Change Photo';
+  thumbWrap.tabIndex = 0;
+  thumbWrap.removeAttribute('aria-disabled');
   removeBtn.style.display = 'block';
   try{
     const blob = await getPhoto(entry.photoId);
@@ -4327,9 +4422,12 @@ if('serviceWorker' in navigator){
   </div>
 </div>
 
-<div class="photo-modal" id="photo-modal" aria-hidden="true">
+<div class="photo-modal" id="photo-modal" role="dialog" aria-modal="true" aria-label="Inspection photo viewer" aria-hidden="true">
   <div class="photo-card">
-    <img id="photo-preview" alt="KMTrack inspection photo">
+    <div class="photo-stage" id="photo-stage"><img id="photo-preview" alt="KMTrack inspection photo" role="button" tabindex="0" aria-label="Open full-screen photo zoom" title="Tap for full-screen zoom"></div>
+    <div class="photo-zoom-controls" aria-label="Photo zoom controls">
+      <button id="photo-zoom-out" type="button" aria-label="Zoom out">−</button><output id="photo-zoom-level" aria-live="polite">100%</output><button id="photo-zoom-in" type="button" aria-label="Zoom in">+</button><button id="photo-zoom-reset" type="button">Reset</button><button id="photo-zoom-close" type="button" aria-label="Close full-screen photo">×</button>
+    </div>
     <div class="photo-actions">
       <button id="photo-close" type="button">Close</button>
       <a id="photo-download" href="#" download>Download Photo</a>

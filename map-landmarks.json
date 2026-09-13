@@ -1,0 +1,377 @@
+{
+  "source": "OpenStreetMap contributors",
+  "license": "ODbL-1.0",
+  "licenseUrl": "https://www.openstreetmap.org/copyright",
+  "retrieved": "2026-09-10",
+  "sourceTimestamp": "2026-05-31T22:37:44Z",
+  "assets": [
+    {
+      "name": "Lawang Bato Exit",
+      "network": "NLEX",
+      "kind": "exit",
+      "station": "17+209",
+      "lat": 14.7227249,
+      "lon": 120.9851428,
+      "positionMethod": "centroid of named OSM ramp junction nodes",
+      "sources": [
+        "https://www.openstreetmap.org/node/672567920",
+        "https://www.openstreetmap.org/node/5338801855"
+      ]
+    },
+    {
+      "name": "Libtong Exit",
+      "network": "NLEX",
+      "kind": "exit",
+      "station": "19+550",
+      "lat": 14.7415633,
+      "lon": 120.975027,
+      "positionMethod": "OSM ramp junction node",
+      "sources": [
+        "https://www.openstreetmap.org/node/4956838331"
+      ]
+    },
+    {
+      "name": "Pandayan Exit",
+      "network": "NLEX",
+      "kind": "exit",
+      "station": "21+209",
+      "lat": 14.7546278,
+      "lon": 120.9677865,
+      "positionMethod": "OSM ramp junction node",
+      "sources": [
+        "https://www.openstreetmap.org/node/4956838330"
+      ]
+    },
+    {
+      "name": "F. Raymundo Exit",
+      "network": "NLEX",
+      "kind": "exit",
+      "station": "21+075",
+      "lat": 14.7536835,
+      "lon": 120.9684823,
+      "positionMethod": "OSM ramp junction node",
+      "sources": [
+        "https://www.openstreetmap.org/node/11411450429"
+      ]
+    },
+    {
+      "name": "Tambubong Exit",
+      "network": "NLEX",
+      "kind": "exit",
+      "station": "28+475",
+      "lat": 14.8129526,
+      "lon": 120.9364616,
+      "positionMethod": "OSM ramp junction node",
+      "sources": [
+        "https://www.openstreetmap.org/node/7025129275"
+      ]
+    },
+    {
+      "name": "Santo Tomas Exit",
+      "network": "NLEX",
+      "kind": "exit",
+      "station": "61+431",
+      "lat": 15.0226107,
+      "lon": 120.7251646,
+      "positionMethod": "OSM ramp junction node",
+      "sources": [
+        "https://www.openstreetmap.org/node/10947662390"
+      ]
+    },
+    {
+      "name": "Tipo Interchange",
+      "network": "SCTEX",
+      "kind": "interchange",
+      "station": "143+821",
+      "lat": 14.8412981,
+      "lon": 120.3519855,
+      "positionMethod": "OSM ramp junction node",
+      "sources": [
+        "https://www.openstreetmap.org/node/277538916"
+      ]
+    },
+    {
+      "name": "Dinalupihan Interchange",
+      "network": "SCTEX",
+      "kind": "interchange",
+      "station": "131+970",
+      "lat": 14.8569849,
+      "lon": 120.4534097,
+      "positionMethod": "centroid of named OSM ramp junction nodes",
+      "sources": [
+        "https://www.openstreetmap.org/node/417246198",
+        "https://www.openstreetmap.org/node/602437249"
+      ]
+    },
+    {
+      "name": "Floridablanca Interchange",
+      "network": "SCTEX",
+      "kind": "interchange",
+      "station": "113+551",
+      "lat": 15.0186655,
+      "lon": 120.4734155,
+      "positionMethod": "centroid of named OSM ramp junction nodes",
+      "sources": [
+        "https://www.openstreetmap.org/node/642934237",
+        "https://www.openstreetmap.org/node/642979321"
+      ]
+    },
+    {
+      "name": "Porac Interchange",
+      "network": "SCTEX",
+      "kind": "interchange",
+      "station": "99+828",
+      "lat": 15.1245538,
+      "lon": 120.5093369,
+      "positionMethod": "centroid of named OSM ramp junction nodes",
+      "sources": [
+        "https://www.openstreetmap.org/node/642888281",
+        "https://www.openstreetmap.org/node/642888617"
+      ]
+    },
+    {
+      "name": "Montclair Interchange",
+      "network": "SCTEX",
+      "kind": "interchange",
+      "station": "97+092",
+      "lat": 15.1469204,
+      "lon": 120.5199184,
+      "positionMethod": "centroid of named OSM ramp junction nodes",
+      "sources": [
+        "https://www.openstreetmap.org/node/1127756290",
+        "https://www.openstreetmap.org/node/8408247438"
+      ]
+    },
+    {
+      "name": "Clark South Interchange",
+      "network": "SCTEX",
+      "kind": "interchange",
+      "station": "90+029",
+      "lat": 15.1800331,
+      "lon": 120.5700361,
+      "positionMethod": "centroid of named OSM ramp junction nodes",
+      "sources": [
+        "https://www.openstreetmap.org/node/393763485",
+        "https://www.openstreetmap.org/node/393763487"
+      ]
+    },
+    {
+      "name": "Clark Logistics Interchange",
+      "network": "SCTEX",
+      "kind": "interchange",
+      "station": "88+168",
+      "lat": 15.1958303,
+      "lon": 120.5756538,
+      "positionMethod": "centroid of named OSM ramp junction nodes",
+      "sources": [
+        "https://www.openstreetmap.org/node/316185828",
+        "https://www.openstreetmap.org/node/322805370",
+        "https://www.openstreetmap.org/node/322809291"
+      ]
+    },
+    {
+      "name": "Mabiga Interchange",
+      "network": "SCTEX",
+      "kind": "interchange",
+      "station": "87+090",
+      "lat": 15.1974559,
+      "lon": 120.5824908,
+      "positionMethod": "centroid of named OSM ramp junction nodes",
+      "sources": [
+        "https://www.openstreetmap.org/node/316163118",
+        "https://www.openstreetmap.org/node/6789112461"
+      ]
+    },
+    {
+      "name": "Clark North Interchange",
+      "network": "SCTEX",
+      "kind": "interchange",
+      "station": "91+933",
+      "lat": 15.2320357,
+      "lon": 120.5679637,
+      "positionMethod": "centroid of named OSM ramp junction nodes",
+      "sources": [
+        "https://www.openstreetmap.org/node/966465089",
+        "https://www.openstreetmap.org/node/966465235"
+      ]
+    },
+    {
+      "name": "Dolores Interchange",
+      "network": "SCTEX",
+      "kind": "interchange",
+      "station": "93+290",
+      "lat": 15.2421911,
+      "lon": 120.5722355,
+      "positionMethod": "OSM ramp junction node",
+      "sources": [
+        "https://www.openstreetmap.org/node/678240183"
+      ]
+    },
+    {
+      "name": "New Clark City Interchange",
+      "network": "SCTEX",
+      "kind": "interchange",
+      "station": "100+012",
+      "lat": 15.2886154,
+      "lon": 120.6067868,
+      "positionMethod": "centroid of named OSM ramp junction nodes",
+      "sources": [
+        "https://www.openstreetmap.org/node/322805600",
+        "https://www.openstreetmap.org/node/6171086268"
+      ]
+    },
+    {
+      "name": "Concepcion Interchange",
+      "network": "SCTEX",
+      "kind": "interchange",
+      "station": "103+669",
+      "lat": 15.3171102,
+      "lon": 120.6237841,
+      "positionMethod": "centroid of named OSM ramp junction nodes",
+      "sources": [
+        "https://www.openstreetmap.org/node/1127590973",
+        "https://www.openstreetmap.org/node/1127591025"
+      ]
+    },
+    {
+      "name": "Hacienda Luisita Interchange",
+      "network": "SCTEX",
+      "kind": "interchange",
+      "station": "117+771",
+      "lat": 15.4341188,
+      "lon": 120.6661164,
+      "positionMethod": "OSM ramp junction node",
+      "sources": [
+        "https://www.openstreetmap.org/node/446063348"
+      ]
+    },
+    {
+      "name": "Tarlac City / CLLEX Interchange",
+      "network": "SCTEX",
+      "kind": "interchange",
+      "station": "122+510",
+      "lat": 15.4754136,
+      "lon": 120.6790442,
+      "positionMethod": "centroid of named OSM ramp junction nodes",
+      "sources": [
+        "https://www.openstreetmap.org/node/322806206",
+        "https://www.openstreetmap.org/node/5157875800",
+        "https://www.openstreetmap.org/node/5157875816"
+      ]
+    },
+    {
+      "name": "Karuhatan Interchange",
+      "network": "NLEX Harbor Link",
+      "kind": "interchange",
+      "station": "14+970",
+      "lat": 14.6894768,
+      "lon": 120.9745836,
+      "positionMethod": "centroid of named OSM ramp junction nodes",
+      "sources": [
+        "https://www.openstreetmap.org/node/2467283727",
+        "https://www.openstreetmap.org/node/2731098293"
+      ]
+    },
+    {
+      "name": "R10 Ramp",
+      "network": "NLEX Harbor Link",
+      "kind": "exit",
+      "station": "7+082",
+      "lat": 14.6384137,
+      "lon": 120.9563009,
+      "positionMethod": "OSM ramp junction node",
+      "sources": [
+        "https://www.openstreetmap.org/node/5842745284"
+      ]
+    },
+    {
+      "name": "Malabon Exit",
+      "network": "NLEX Harbor Link",
+      "kind": "exit",
+      "station": "8+745",
+      "lat": 14.645175,
+      "lon": 120.9683831,
+      "positionMethod": "OSM ramp junction node",
+      "sources": [
+        "https://www.openstreetmap.org/node/5842745413"
+      ]
+    },
+    {
+      "name": "Caloocan Interchange",
+      "network": "NLEX Connector",
+      "kind": "interchange",
+      "station": "9+609",
+      "lat": 14.6447911,
+      "lon": 120.9750438,
+      "positionMethod": "named central OSM motorway junction node",
+      "sources": [
+        "https://www.openstreetmap.org/node/5551735872"
+      ]
+    },
+    {
+      "name": "C-3 Road Exit",
+      "network": "NLEX Connector",
+      "kind": "exit",
+      "station": "9+730",
+      "lat": 14.6327845,
+      "lon": 120.9766664,
+      "positionMethod": "named OSM C-3 motorway junction node",
+      "sources": [
+        "https://www.openstreetmap.org/node/5534878494"
+      ]
+    },
+    {
+      "name": "España Exit",
+      "network": "NLEX Connector",
+      "kind": "exit",
+      "station": "14+609",
+      "lat": 14.6123922,
+      "lon": 120.9969646,
+      "positionMethod": "centroid of named OSM ramp junction nodes",
+      "sources": [
+        "https://www.openstreetmap.org/node/7490997016",
+        "https://www.openstreetmap.org/node/7490997070"
+      ]
+    },
+    {
+      "name": "Magsaysay Exit",
+      "network": "NLEX Connector",
+      "kind": "exit",
+      "station": "15+956",
+      "lat": 14.6035079,
+      "lon": 121.0055537,
+      "positionMethod": "OSM ramp junction node",
+      "sources": [
+        "https://www.openstreetmap.org/node/9355059204"
+      ]
+    },
+    {
+      "name": "Mindanao Exit",
+      "network": "NLEX Harbor Link",
+      "kind": "exit",
+      "station": "20+407",
+      "lat": 14.69349725,
+      "lon": 121.02188255,
+      "positionMethod": "center of the two OSM ramp connections to Mindanao Avenue",
+      "sources": [
+        "https://www.openstreetmap.org/node/614537554",
+        "https://www.openstreetmap.org/node/5345286212"
+      ],
+      "retrieved": "2026-09-10"
+    },
+    {
+      "name": "Lingunan Exit",
+      "network": "NLEX",
+      "kind": "exit",
+      "station": "17+190",
+      "lat": 14.7220661,
+      "lon": 120.9841986,
+      "positionMethod": "OSM Lingunan Exit ramp connection",
+      "sources": [
+        "https://www.openstreetmap.org/node/5338801845",
+        "https://www.openstreetmap.org/way/789156068"
+      ],
+      "retrieved": "2026-09-10"
+    }
+  ]
+}

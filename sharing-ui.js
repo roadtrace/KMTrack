@@ -17,8 +17,42 @@ function syncSharingFilters(){
       select.value=previous;
     }
   }
-  const undo=document.getElementById('undo-import-btn');
-  if(undo) undo.hidden=!batches.size;
+  const history=document.getElementById('import-history-btn');
+  if(history) history.hidden=!batches.size;
+}
+
+function importedBatches(){
+  const batches=new Map();
+  for(const entry of entries){
+    if(!entry.importBatchId) continue;
+    if(!batches.has(entry.importBatchId)) batches.set(entry.importBatchId,{id:entry.importBatchId,label:entry.importLabel||'Imported file',importedAt:entry.importedAt||'',entries:[]});
+    batches.get(entry.importBatchId).entries.push(entry);
+  }
+  return [...batches.values()].sort((a,b)=>String(b.importedAt).localeCompare(String(a.importedAt)));
+}
+
+async function deleteImportedBatch(batchId){
+  const batch=importedBatches().find(item=>item.id===batchId);
+  if(!batch) return false;
+  if(!confirm(`Delete imported file “${batch.label}”? This removes its ${batch.entries.length} remaining entries and photos. Your own inspections are kept.`)) return false;
+  const before=entries;
+  entries=entries.filter(entry=>entry.importBatchId!==batchId);
+  if(!saveEntries()){entries=before;throw Error('Could not delete this imported file. Entries have been kept.');}
+  if(typeof deletionController!=='undefined' && deletionController.getPending()?.entry.importBatchId===batchId) deletionController.finalizePending();
+  selectedEntryIds.clear();renderLog();updateMapEntries();
+  for(const entry of batch.entries){
+    if(entry.photoId&&!entries.some(other=>other.photoId===entry.photoId)){await deletePhoto(entry.photoId);await deletePhoto(entry.photoId+':raw');}
+  }
+  document.getElementById('import-status').textContent=`Deleted imported file: ${batch.label}.`;
+  return true;
+}
+
+function renameImportedBatchInspector(batchId,name){
+  const clean=String(name||'').trim();
+  const before=entries;
+  entries=entries.map(entry=>entry.importBatchId===batchId?{...entry,inspector:clean}:entry);
+  if(!saveEntries()){entries=before;throw Error('Could not save the inspector name.');}
+  renderLog();updateMapEntries();
 }
 async function prepareSharingExport(){
   if(sharingBusy) return null;
@@ -118,8 +152,18 @@ document.addEventListener('DOMContentLoaded',()=>{
       <h2 id="import-title">Review import</h2><p id="import-summary"></p>
       <label>Batch label<input id="import-label" maxlength="160"></label>
       <div id="import-inspectors"></div><p id="import-warnings"></p>
-      <p>Existing entries are never replaced. Identical entries and conflicting IDs are skipped. Undo last import remains available after reopening the app.</p>
+      <p>Existing entries are never replaced. Identical entries and conflicting IDs are skipped. Imported files remain manageable after reopening the app.</p>
       <div class="sharing-dialog-actions"><button id="import-cancel" type="button">Cancel</button><button id="import-confirm" type="button">Import entries</button></div>
+    </dialog>
+    <dialog class="sharing-dialog import-history-dialog" id="import-history-dialog" aria-labelledby="import-history-title">
+      <h2 id="import-history-title">Imported files</h2><div id="import-history-list" class="import-history-list"></div>
+      <form method="dialog" class="sharing-dialog-actions"><button>Close</button></form>
+    </dialog>
+    <dialog class="sharing-dialog import-detail-dialog" id="import-detail-dialog" aria-labelledby="import-detail-title">
+      <h2 id="import-detail-title">Imported file</h2>
+      <dl class="import-detail-list"><div><dt>Filename</dt><dd id="import-detail-name"></dd></div><div><dt>Date in file</dt><dd id="import-detail-date"></dd></div><div><dt>Imported</dt><dd id="import-detail-imported"></dd></div><div><dt>Entries</dt><dd id="import-detail-count"></dd></div></dl>
+      <label>Inspector name<input id="import-detail-inspector" maxlength="100" autocomplete="name"></label>
+      <div class="sharing-dialog-actions import-detail-actions"><button id="import-detail-delete" type="button">Delete import</button><button id="import-detail-back" type="button">Back</button><button id="import-detail-save" type="button">Save</button></div>
     </dialog>`;
   document.body.append(host);
   for(const field of ['source','inspector']){
@@ -163,9 +207,40 @@ document.addEventListener('DOMContentLoaded',()=>{
     }catch(error){document.getElementById('import-warnings').textContent=error.message;}
     finally{sharingBusy=false;confirmButton.disabled=false;cancelButton.disabled=false;}
   });
-  document.getElementById('undo-import-btn').addEventListener('click',async()=>{
+  const historyDialog=document.getElementById('import-history-dialog'),detailDialog=document.getElementById('import-detail-dialog');
+  let activeBatchId='';
+  function renderImportHistory(){
+    const list=document.getElementById('import-history-list');list.replaceChildren();
+    for(const batch of importedBatches()){
+      const button=document.createElement('button');button.type='button';button.className='import-history-item';
+      const inspectors=[...new Set(batch.entries.map(entry=>String(entry.inspector||'').trim()).filter(Boolean))];
+      const date=batch.importedAt?new Date(batch.importedAt).toLocaleString():'Import date unavailable';
+      const title=document.createElement('strong');title.textContent=batch.label;
+      const meta=document.createElement('span');meta.textContent=`${batch.entries.length} ${batch.entries.length===1?'entry':'entries'} · ${inspectors.join(', ')||'Unknown inspector'} · ${date}`;
+      button.append(title,meta);button.addEventListener('click',()=>openImportDetails(batch.id));list.append(button);
+    }
+    if(!list.children.length){const empty=document.createElement('p');empty.textContent='No imported files remain.';list.append(empty);}
+  }
+  function openImportDetails(batchId){
+    const batch=importedBatches().find(item=>item.id===batchId);if(!batch)return;
+    activeBatchId=batchId;
+    const days=batch.entries.map(entry=>String(entry.timestamp||'').slice(0,10)).filter(Boolean).sort();
+    const inspectors=[...new Set(batch.entries.map(entry=>String(entry.inspector||'').trim()).filter(Boolean))];
+    document.getElementById('import-detail-name').textContent=batch.label;
+    document.getElementById('import-detail-date').textContent=!days.length?'Unavailable':days[0]===days.at(-1)?days[0]:`${days[0]} to ${days.at(-1)}`;
+    document.getElementById('import-detail-imported').textContent=batch.importedAt?new Date(batch.importedAt).toLocaleString():'Unavailable';
+    document.getElementById('import-detail-count').textContent=String(batch.entries.length);
+    document.getElementById('import-detail-inspector').value=inspectors.length===1?inspectors[0]:'';
+    historyDialog.close();detailDialog.showModal();
+  }
+  document.getElementById('import-history-btn').addEventListener('click',()=>{renderImportHistory();historyDialog.showModal();});
+  document.getElementById('import-detail-back').addEventListener('click',()=>{detailDialog.close();renderImportHistory();historyDialog.showModal();});
+  document.getElementById('import-detail-save').addEventListener('click',()=>{
+    try{renameImportedBatchInspector(activeBatchId,document.getElementById('import-detail-inspector').value);detailDialog.close();document.getElementById('import-status').textContent='Inspector name updated.';}catch(error){alert(error.message);}
+  });
+  document.getElementById('import-detail-delete').addEventListener('click',async()=>{
     if(sharingBusy)return;sharingBusy=true;
-    try{await undoSharedImport();}catch(error){alert(error.message);}finally{sharingBusy=false;}
+    try{if(await deleteImportedBatch(activeBatchId)){detailDialog.close();activeBatchId='';}}catch(error){alert(error.message);}finally{sharingBusy=false;}
   });
   syncSharingFilters();
 });

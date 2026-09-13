@@ -1,4 +1,6 @@
-.log-header h2{flex:1;}
+.log-header h2{flex:1;display:flex;align-items:center;gap:2px;min-width:0;}
+.log-count-badge{display:inline-grid;place-items:center;align-self:center;box-sizing:border-box;min-width:24px;height:24px;padding:0 6px;border-radius:var(--radius-full);background:linear-gradient(145deg,#ef6267,#c93e49);color:#fff;font:800 11px/1 var(--font-ui);letter-spacing:0;box-shadow:0 0 4px rgba(239,82,91,.72),0 0 9px rgba(239,82,91,.32);font-variant-numeric:tabular-nums;transform:translate(-1px,-9px);}
+.count-bar[hidden]{display:none!important;}
 .sharing-filters{font-size:12px;margin:8px 0 12px;}
 .sharing-filters summary{cursor:pointer;min-height:32px;align-content:center;}
 .sharing-filter-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
@@ -15,7 +17,158 @@
 .sharing-dialog button:disabled{opacity:.5;cursor:default;}
 .import-label{font-size:11px;color:var(--text-muted);margin-top:4px;overflow-wrap:anywhere;}
 #import-status{font-size:12px;margin:8px 0;overflow-wrap:anywhere;}
-#undo-import-btn[hidden]{display:none;}
+#import-history-btn[hidden]{display:none;}
 html:root .map-filter-options{flex-direction:column;align-items:stretch;max-height:50dvh;overflow:auto;}
 .map-filter-options label{flex:none;}
 .map-filter-options button{align-self:flex-end;}
+.map-filter-options #map-entry-clear.active{background:var(--line-yellow);border-color:var(--line-yellow);color:#173044;font-weight:700;}
+
+/* Compact log actions share the existing panel and safety-color vocabulary. */
+.log-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+.log-toolbar h2{flex:1 1 140px;}
+.log-toolbar svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.log-filter-menu summary svg{width:16px;height:16px;fill:currentColor;stroke:none;}
+html:root #export-menu-btn{background:var(--safety-green);color:#fff;border-radius:var(--radius-lg);}
+.log-toolbar #import-btn{border-radius:var(--radius-lg);}
+.log-selection-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0 12px;}
+.log-selection-row .sharing-filters{flex:1 1 170px;margin:0;}
+.log-selection-row #import-history-btn{font-size:11px;}
+#selection-count{font-size:12px;color:var(--text-muted);}
+html:root #select-toggle-btn{flex:0 0 auto;width:auto;height:44px;min-height:44px;padding:0 16px;border-radius:var(--radius-md);font-size:12px;border:1px solid var(--border-strong);}
+html:root .entry-checkbox{width:44px;height:44px;flex:0 0 44px;min-height:44px;border-radius:var(--radius-sm);font-size:20px;cursor:pointer;}
+.log-entry .info .meta{white-space:normal;overflow-wrap:anywhere;font-size:11px;}
+#bulk-select-all-btn[hidden]{display:none!important;}
+.log-toolbar button:disabled{opacity:.5;cursor:default;}
+html:root .log-date-filters{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) 44px;}
+.log-filter-menu{position:relative;}
+.log-filter-menu summary{list-style:none;width:44px;height:44px;display:grid;place-items:center;cursor:pointer;background:var(--panel);border:1px solid var(--border-strong);border-radius:var(--radius-md);}
+.log-filter-menu summary::-webkit-details-marker{display:none;}
+.log-filter-menu.filtered summary{color:var(--line-yellow);border-color:var(--line-yellow);}
+.log-filter-options{position:absolute;right:0;top:calc(100% + 8px);z-index:25;width:220px;max-width:calc(100vw - 28px);padding:12px;background:var(--panel);border:1px solid var(--border-strong);border-radius:var(--radius-md);box-shadow:var(--shadow-card);display:grid;gap:8px;}
+.export-format-options{display:grid;gap:10px;margin:16px 0;}
+html:root .export-format-options .export-btn{width:100%;min-height:64px;padding:12px;border-radius:var(--radius-sm);display:flex;flex-direction:column;align-items:flex-start;gap:4px;background:var(--panel-raised);color:var(--line-white);border:1px solid var(--border-strong);text-align:left;}
+.export-format-options .export-btn::before{content:none;}
+.export-format-options span{font-size:12px;font-weight:400;white-space:normal;}
+.export-format-dialog form{display:flex;justify-content:flex-end;}
+@media(max-width:360px){.log-toolbar h2{flex-basis:100%;}.log-toolbar>button{flex:1;}}
+
+/* Reference-matched log cards: two compact information lines, independent
+   rounded panels, and selection controls on the trailing edge. */
+.log-toolbar #import-history-btn{flex:0 0 44px;width:44px;min-height:44px;padding:0;border-radius:var(--radius-md);}
+.import-history-list{display:grid;gap:8px;margin:12px 0;max-height:55dvh;overflow:auto;}
+.import-history-item{display:grid;gap:4px;width:100%;padding:10px 12px;text-align:left;}
+.import-history-item strong{overflow-wrap:anywhere;}
+.import-history-item span{font-size:11px;line-height:1.4;color:var(--text-muted);overflow-wrap:anywhere;}
+.import-detail-list{display:grid;gap:8px;margin:12px 0;}
+.import-detail-list div{display:grid;grid-template-columns:88px minmax(0,1fr);gap:8px;}
+.import-detail-list dt{font-size:11px;font-weight:700;color:var(--text-muted);}
+.import-detail-list dd{margin:0;font-size:13px;overflow-wrap:anywhere;}
+.import-detail-actions{flex-wrap:wrap;}
+html:root #import-detail-delete{margin-right:auto;background:var(--safety-red);color:#fff;border-color:transparent;}
+.log-result-count{margin:7px 0 8px;font-size:12px;font-weight:650;color:var(--line-white);}
+.log-filter-options{width:280px;max-height:60dvh;overflow:auto;}
+.log-filter-options .sharing-filter-fields{grid-template-columns:1fr;margin:0;}
+.log-filter-options label{font-size:12px;gap:5px;}
+.log-filter-options label:has(#entry-filter-type)::before{content:'Defect type';}
+.inspection-record-list{display:grid;gap:6px;}
+html:root .inspection-record-list .swipe-row{margin:0;border-radius:var(--radius-lg);}
+html:root .inspection-record-list .log-entry{
+ display:grid;grid-template-columns:minmax(0,1fr) auto auto;grid-template-rows:auto auto;
+ gap:5px 10px;align-items:center;min-height:82px;margin:0;padding:10px 12px;
+ border:1px solid var(--border);border-left:4px solid var(--line-yellow);border-radius:var(--radius-lg);
+ background:var(--panel);box-shadow:0 5px 16px rgba(0,0,0,.12);
+}
+html:root .inspection-record-list .log-entry.shoving{border-left-color:var(--safety-orange);}
+html:root .inspection-record-list .log-entry.cracks{border-left-color:#c9c9c9;}
+html:root .inspection-record-list .log-entry.other{border-left-color:#c1707a;}
+.inspection-record-list .record-type{grid-column:1;grid-row:1;display:flex;align-items:baseline;gap:8px;min-width:0;overflow-wrap:anywhere;}
+.inspection-record-list .record-type .type{font-size:15px;font-weight:800;line-height:1.2;color:var(--line-white);}
+.inspection-record-list .import-label{display:inline;margin:0;font-size:12px;font-weight:400;color:var(--text-muted);}
+.inspection-record-list :is(.record-road,.record-km,.record-bound,.record-lane,.record-date){min-width:0;font-size:12px;color:var(--text-muted);overflow-wrap:anywhere;}
+.inspection-record-list .record-date{grid-column:2;grid-row:1;white-space:nowrap;font-variant-numeric:tabular-nums;}
+.inspection-record-list .record-km{font-variant-numeric:tabular-nums;}
+.record-context{grid-column:1;grid-row:2;display:flex;flex-wrap:wrap;gap:2px 5px;align-items:baseline;min-width:0;}
+.record-context>span:not(:last-child)::after{content:' ·';margin-left:5px;}
+.record-photo-actions{grid-column:2;grid-row:2;justify-self:end;}
+.record-photo-actions .entry-actions{margin:0;}
+.record-photo-actions .photo-view-btn{min-height:32px;padding:5px 8px;font-size:10px;}
+.inspection-record-list .entry-checkbox{grid-column:3;grid-row:1 / 3;align-self:center;}
+.inspection-record-list .log-entry:not(:has(.record-photo-actions)) .record-context{grid-column:1 / 3;}
+.log-action-footer{position:sticky;bottom:calc(56px + env(safe-area-inset-bottom));z-index:15;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:center;gap:8px;padding:8px;margin-top:10px;border:1px solid var(--border-strong);border-radius:var(--radius-lg);background:var(--panel);box-shadow:var(--shadow-card);}
+.log-action-footer #selection-count{grid-column:1 / -1;}
+.log-action-footer button{width:100%;min-width:0;min-height:44px;height:44px;padding:0 10px;font-size:12px;}
+html:root .log-action-footer :is(#select-toggle-btn,#export-menu-btn,#bulk-select-all-btn,#bulk-delete-btn){
+ appearance:none;box-sizing:border-box;border:1px solid transparent;border-radius:var(--radius-sm);box-shadow:none;
+}
+html:root .log-action-footer #select-toggle-btn:not(.active){border-color:var(--border-strong);}
+.log-action-footer #select-toggle-btn,.log-action-footer #export-menu-btn{grid-row:2;}
+.log-action-footer #bulk-select-all-btn,.log-action-footer #bulk-delete-btn{grid-row:3;}
+html:root .log-action-footer #select-toggle-btn.active{background:var(--line-yellow);color:#191c1f;border-color:transparent;}
+.log-action-footer.selection-mode #bulk-select-all-btn,.log-action-footer.selection-mode #bulk-delete-btn{grid-row:2;}
+.log-action-footer.selection-mode #select-toggle-btn,.log-action-footer.selection-mode #export-menu-btn{grid-row:3;}
+.log-action-footer svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.log-action-footer #bulk-delete-btn{padding:0 10px;font:600 12px var(--font-ui);background:var(--safety-red);color:#fff;cursor:pointer;}
+.log-action-footer [hidden],#bulk-actions-bar[hidden]{display:none!important;}
+
+.inspection-record-list,.inspection-record-list .log-entry{scroll-margin-top:140px;scroll-margin-bottom:calc(190px + env(safe-area-inset-bottom));}
+
+/* KMTrack Shared selection control: rounded visible checkbox inside an
+   unchanged 44px touch target. */
+html:root .entry-checkbox{
+ position:relative;display:grid;place-items:center;width:44px;height:44px;min-height:44px;padding:0;
+ background:transparent;border:0;box-shadow:none;font-size:0;color:transparent;
+}
+html:root .entry-checkbox::before{
+ content:'';width:28px;height:28px;box-sizing:border-box;border:2px solid #67737c;
+ border-radius:8px;background:transparent;pointer-events:none;
+}
+html:root .entry-checkbox[aria-checked="true"]::before{
+ background:#1a3c34;border-color:#2dd4a0;
+}
+html:root .entry-checkbox[aria-checked="true"]::after{
+ content:'';position:absolute;left:50%;top:50%;width:16px;height:16px;background:#173044;
+ -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.25 4.25L19 7' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+ mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.25 4.25L19 7' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+ transform:translate(-50%,-50%);pointer-events:none;
+}
+html:root .entry-checkbox:focus-visible{outline:none;}
+html:root .entry-checkbox:focus-visible::before{outline:2px solid var(--line-yellow);outline-offset:2px;}
+/* Selection follows the supplied reference: warm yellow ring and checkmark. */
+html:root .inspection-record-list .log-entry.selected{outline:2px solid var(--line-yellow);outline-offset:-2px;}
+html:root .entry-checkbox[aria-checked="true"]::before{background:var(--line-yellow);border-color:var(--line-yellow);}
+html:root .entry-checkbox[aria-checked="true"]::after{background:#173044;}
+html:root[data-theme="light"] .log-result-count{color:var(--line-white);}
+html:root[data-theme="light"] .inspection-record-list .swipe-row,
+html:root[data-theme="light"] .inspection-record-list .log-entry{border-radius:var(--radius-lg);}
+
+/* Keep a full tap target while the visible bridge filter stays compact and
+   aligned with the Nearby Bridge heading. */
+html:root .bridge-filter-toggle{
+ right:6px;top:4px;width:44px;height:44px;padding:0;border:0;background:transparent;box-shadow:none;
+}
+html:root .bridge-filter-toggle::before{
+ width:28px;height:28px;border:1px solid rgba(255,255,255,.34);border-radius:var(--radius-sm);
+ background:rgba(0,0,0,.18) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M4 5h16l-6 7v6l-4 2v-8z'/%3E%3C/svg%3E") center / 13px 13px no-repeat;
+ -webkit-mask:none;mask:none;
+}
+html:root .bridge-filter-toggle.filtered::before{
+ border-color:var(--line-yellow);
+ background:rgba(0,0,0,.18) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23f4b400' d='M4 5h16l-6 7v6l-4 2v-8z'/%3E%3C/svg%3E") center / 13px 13px no-repeat;
+ box-shadow:0 0 6px rgba(244,180,0,.38);
+}
+html:root .bridge-filter-toggle.filtered::after{display:none;}
+html:root .bridge-filter-menu{top:52px;}
+
+html:root :is(.log-filter-menu,.map-filter-menu).filtered > summary{
+ color:var(--line-yellow);border-color:var(--line-yellow);box-shadow:0 0 6px rgba(244,180,0,.38);
+}
+html:root .map-filter-menu > summary svg{width:16px;height:16px;}
+
+@media(max-width:430px){
+ html:root .log-date-filters{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) 44px;gap:4px;}
+ html:root .inspection-record-list .log-entry{grid-template-columns:minmax(0,1fr) auto auto;gap:5px 7px;padding:9px 10px;}
+ .inspection-record-list .record-type{gap:6px;}
+ .inspection-record-list .record-type .type{font-size:14px;}
+ .inspection-record-list .import-label,.inspection-record-list :is(.record-road,.record-km,.record-bound,.record-lane,.record-date){font-size:11px;}
+ .record-photo-actions .photo-view-btn{padding:4px 6px;}
+}

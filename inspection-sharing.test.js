@@ -11,7 +11,7 @@ function context(){
     saveEntries(){if(state.failSave)return false;state.saved=JSON.stringify(ctx.entries);return true;},
     async putPhoto(id,blob){if(state.failPhoto)throw Error('photo quota');photos.set(id,blob);},async deletePhoto(id){photos.delete(id);}
   });
-  for(const name of ['commitSharedImport','undoSharedImport'])vm.runInContext(fn(ui,name),ctx);
+  for(const name of ['importedBatches','deleteImportedBatch','renameImportedBatchInspector','commitSharedImport','undoSharedImport'])vm.runInContext(fn(ui,name),ctx);
   return {ctx,state,photos};
 }
 test('validates imports, preserves zero coordinates and rejects bad dates/coordinates',()=>{
@@ -75,6 +75,19 @@ test('photo/persistence failures roll back imports without changing existing rec
 test('Undo persistence failure keeps all imported entries and photos',async()=>{
   const {ctx,state}=context();await ctx.commitSharedImport([row],{label:'Test',inspectors:new Map()});
   state.failSave=true;await assert.rejects(ctx.undoSharedImport());assert.equal(ctx.entries.length,2);
+});
+test('import history renames and deletes one complete batch without touching own entries',async()=>{
+  const {ctx,photos}=context();
+  await ctx.commitSharedImport([{...row,id:'colleague-a',photoFile:{blob:async()=>new Blob([new Uint8Array([255,216,255,0])])}},{...row,id:'colleague-b',timestamp:'2026-09-05 11:00:00'}],{label:'team.xlsx',inspectors:new Map()});
+  const batch=ctx.importedBatches()[0];
+  ctx.renameImportedBatchInspector(batch.id,'Ana');
+  assert.deepEqual(ctx.entries.filter(entry=>entry.importBatchId===batch.id).map(entry=>entry.inspector),['Ana','Ana']);
+  assert.equal(ctx.entries.find(entry=>entry.id==='mine').inspector,'');
+  assert.equal(await ctx.deleteImportedBatch(batch.id),true);
+  assert.equal(ctx.entries.length,1);assert.equal(ctx.entries[0].id,'mine');assert.equal(photos.size,0);
+});
+test('import history UI exposes file metadata, inspector editing and batch deletion',()=>{
+  for(const expected of ['import-history-dialog','import-detail-name','import-detail-date','import-detail-imported','import-detail-inspector','import-detail-delete']) assert.match(ui,new RegExp(expected));
 });
 test('ZIP reads original KMTrack manifests and rejects corrupt or unsafe archives',async()=>{
   const ctx=vm.createContext({Blob,TextEncoder,Uint8Array,Uint32Array,DataView,Date});
