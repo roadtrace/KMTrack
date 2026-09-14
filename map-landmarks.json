@@ -260,6 +260,236 @@
       ]
     },
     {
+      "name": "Paso de Blas (Valenzuela) Interchange",
+      "network": "NLEX",
+      "kind": "interchange",
+      "station": "15+392",
+      "lat": 14.708389631,
+      "lon": 120.992842577,
+      "positionMethod": "KMTrack interchange asset location",
+      "sources": [
+        "KMTrack bridge asset dataset"
+      ]
+    },
+    {
+      "name": "Meycauayan Interchange",
+      "network": "NLEX",
+      "kind": "interchange",
+      "station": "20+128",
+      "lat": 14.746300978,
+      "lon": 120.972376845,
+      "positionMethod": "KMTrack interchange asset location",
+      "sources": [
+        "KMTrack bridge asset dataset"
+      ]
+    },
+    {
+      "name": "Marilao Interchange",
+      "network": "NLEX",
+      "kind": "interchange",
+      "station": "23+317",
+      "lat": 14.771701397,
+      "lon": 120.958662648,
+      "positionMethod": "KMTrack interchange asset location",
+      "sources": [
+        "KMTrack bridge asset dataset"
+      ]
+    },
+    {
+      "name": "Philippine Arena Interchange",
+      "network": "NLEX",
+      "kind": "interchange",
+      "station": "25+187",
+      "lat": 14.793794997,
+      "lon": 120.946759586,
+      "positionMethod": "KMTrack interchange asset location",
+      "sources": [
+        "KMTrack bridge asset dataset"
+      ]
+    },
+    {
+      "name": "Bocaue Interchange",
+      "network": "NLEX",
+      "kind": "interchange",
+      "station": "27+746",
+      "lat": 14.807169566,
+      "lon": 120.939492292,
+      "positionMethod": "KMTrack interchange asset location",
+      "sources": [
+        "KMTrack bridge asset dataset"
+      ]
+    },
+    {
+      "name": "Burol (Tabang Spur Overpass) Interchange",
+      "network": "NLEX",
+      "kind": "interchange",
+      "station": "32+482",
+      "to": "32+880",
+      "lat": 14.833751126,
+      "lon": 120.901927705,
+      "positionMethod": "KMTrack interchange asset location",
+      "sources": [
+        "KMTrack bridge asset dataset"
+      ]
+    },
+    {
+      "name": "Balagtas Interchange (Plaridel By-pass)",
+      "network": "NLEX",
+      "kind": "interchange",
+      "station": "33+360",
+      "lat": 14.83585435,
+      "lon": 120.898038726,
+      "positionMethod": "KMTrack interchange asset location",
+      "sources": [
+        "KMTrack bridge asset dataset"
+      ]
+    },
+    {
+      "name": "Guiguinto Interchange",
+      "network": "NLEX",
+      "kind": "interchange",
+      "station": "37+000",
+      "lat": 14.838634185,
+      "lon": 120.86242385,
+      "positionMethod": "KMTrack interchange asset location",
+      "sources": [
+        "KMTrack bridge asset dataset"
+      ]
+    },
+    {
+      "name": "Santa Rita Interchange",
+      "network": "NLEX",
+      "kind": "interchange",
+      "station": "38+518",
+      "lat": 14.862355794,
+      "lon": 120.858736124,
+      "positionMethod": "KMTrack interchange asset location",
+      "sources": [
+        "KMTrack bridge asset dataset"
+      ]
+    },
+    {
+      "name": "San Simon Interchange",
+      "network": "NLEX",
+      "kind": "interchange",
+      "station": "56+976",
+      "lat": 14.990344505,
+      "lon": 120.74986148,
+      "positionMethod": "KMTrack interchange asset location",
+      "sources": [
+        "KMTrack bridge asset dataset"
+      ]
+    },
+    {
+      "name": "San Fernando Interchange",
+      "network": "NLEX",
+      "kind": "interchange",
+      "station": "65+836",
+      "lat": 15.049359693,
+      "lon": 120.695044909,
+      "positionMethod": "KMTrack interchange asset location",
+      "sources": [
+        "KMTrack bridge asset dataset"
+      ]
+    },
+    {
+      "name": "Pulilan Interchange",
+      "network": "NLEX",
+      "kind": "interchange",
+      "station": "45+358",
+      "to": "45+418",
+      "lat": 14.908223558,
+      "lon": 120.817195271,
+      "positionMethod": "KMTrack interchange asset location",
+      "sources": [
+        "KMTrack bridge asset dataset"
+      ]
+    },
+    {
+      "name": "Sindalan/Mexico Interchange",
+      "network": "NLEX",
+      "kind": "interchange",
+      "station": "72+925",
+      "lat": 15.105258135,
+      "lon": 120.663492923,
+      "positionMethod": "KMTrack interchange asset location",
+      "sources": [
+        "KMTrack bridge asset dataset"
+      ]
+    },
+    {
+      "name": "Angeles Interchange",
+      "network": "NLEX",
+      "kind": "interchange",
+      "station": "81+342",
+      "lat": 15.163341153,
+      "lon": 120.613272539,
+      "positionMethod": "KMTrack interchange asset location",
+      "sources": [
+        "KMTrack bridge asset dataset"
+      ]
+    },
+    {
+      "name": "Dau Interchange",
+      "network": "NLEX",
+      "kind": "interchange",
+      "station": "83+353",
+      "lat": 15.179469629,
+      "lon": 120.60401725,
+      "positionMethod": "KMTrack interchange asset location",
+      "sources": [
+        "KMTrack bridge asset dataset"
+      ]
+    },
+    {
+      "name": "SCTEX Spur (NLE) Interchange",
+      "network": "NLEX",
+      "kind": "interchange",
+      "station": "85+560",
+      "lat": 15.1978494,
+      "lon": 120.5967394,
+      "positionMethod": "KMTrack interchange asset location",
+      "sources": [
+        "KMTrack bridge asset dataset"
+      ]
+    },
+    {
+      "name": "Sta. Ines Interchange",
+      "network": "NLEX",
+      "kind": "interchange",
+      "station": "88+652",
+      "lat": 15.223988178,
+      "lon": 120.58671986,
+      "positionMethod": "KMTrack interchange asset location",
+      "sources": [
+        "KMTrack bridge asset dataset"
+      ]
+    },
+    {
+      "name": "Balintawak Interchange",
+      "network": "NLEX",
+      "kind": "interchange",
+      "station": "9+560",
+      "lat": 14.657331232,
+      "lon": 121.000164918,
+      "positionMethod": "KMTrack interchange asset location",
+      "sources": [
+        "KMTrack bridge asset dataset"
+      ]
+    },
+    {
+      "name": "Harbor Link (Smart Connect) Interchange",
+      "network": "NLEX Harbor Link",
+      "kind": "interchange",
+      "station": "13+565",
+      "lat": 14.693437707,
+      "lon": 121.000374271,
+      "positionMethod": "KMTrack interchange asset location",
+      "sources": [
+        "KMTrack bridge asset dataset"
+      ]
+    },
+    {
       "name": "Karuhatan Interchange",
       "network": "NLEX Harbor Link",
       "kind": "interchange",

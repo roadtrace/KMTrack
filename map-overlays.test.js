@@ -18,6 +18,17 @@ test('landmark catalog uses requested names, removals and authoritative Caloocan
   for(const removed of ['General T. de Leon Exit','Parada Exit','Libis Baesa Exit']) assert.ok(!names.includes(removed));
   assert.ok(names.includes('Mindanao Exit'));assert.ok(!names.includes('Mindanao Avenue Interchange'));
   assert.ok(names.includes('R10 Ramp'));assert.ok(!names.includes('Navotas Exit'));
+  assert.ok(names.includes('Harbor Link (Smart Connect) Interchange'));
+  for(const interchange of [
+    'Balintawak Interchange','Paso de Blas (Valenzuela) Interchange','Meycauayan Interchange',
+    'Marilao Interchange','Philippine Arena Interchange','Bocaue Interchange',
+    'Burol (Tabang Spur Overpass) Interchange','Balagtas Interchange (Plaridel By-pass)',
+    'Guiguinto Interchange','Santa Rita Interchange','Pulilan Interchange','San Simon Interchange',
+    'San Fernando Interchange','Sindalan/Mexico Interchange','Angeles Interchange',
+    'Dau Interchange','SCTEX Spur (NLE) Interchange','Sta. Ines Interchange'
+  ]) assert.ok(names.includes(interchange),interchange);
+  const smartConnect=assets.find(asset=>asset.name==='Harbor Link (Smart Connect) Interchange');
+  assert.deepEqual([smartConnect.network,smartConnect.kind,smartConnect.station],['NLEX Harbor Link','interchange','13+565']);
   const caloocan=assets.find(asset=>asset.name==='Caloocan Interchange'),c3=assets.find(asset=>asset.name==='C-3 Road Exit');
   assert.deepEqual([caloocan.lat,caloocan.lon],[14.6447911,120.9750438]);
   assert.deepEqual([c3.lat,c3.lon],[14.6327845,120.9766664]);
