@@ -9,3 +9,6 @@ output/playwright/
 
 # Local agent tooling brain (not application assets).
 .dshwolf/
+
+# Local brand review renders (not application assets).
+mark-review/

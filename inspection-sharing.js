@@ -1,7 +1,7 @@
 (function(root,factory){
   const api=factory();
   if(typeof module==='object' && module.exports) module.exports=api;
-  if(root) root.KMTrackSharing=api;
+  if(root) root.SPOTITSharing=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
   const MAX_BYTES=250*1024*1024, MAX_ENTRIES=10000;
@@ -9,7 +9,7 @@
    * Node — so the lane rule and the sync fields cannot drift from the app. */
   const entryModel=(function(){
     try{ if(typeof module==='object'&&module.exports) return require('./entry-model.js'); }catch(e){ /* browser */ }
-    if(typeof KMTrackEntry!=='undefined') return KMTrackEntry;
+    if(typeof SPOTITEntry!=='undefined') return SPOTITEntry;
     return null;
   })();
   const SYNC_STATUS=(entryModel&&entryModel.SYNC_STATUS)||{PENDING:'pending'};
@@ -103,7 +103,7 @@
         if(method===8){
           let stream;
           try{stream=new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));}
-          catch{throw Error('This browser cannot read compressed Excel files. Use an original KMTrack export or a newer browser.');}
+          catch{throw Error('This browser cannot read compressed Excel files. Use an original SPOT IT export or a newer browser.');}
           const reader=stream.getReader(),parts=[];let length=0;
           while(true){const {done,value}=await reader.read();if(done) break;length+=value.length;if(length>expanded){await reader.cancel();throw Error('Invalid expanded ZIP size.');}parts.push(value);}
           data=new Uint8Array(await new Blob(parts).arrayBuffer());
@@ -153,7 +153,7 @@
     return photos;
   }
   async function readWorkbook(files){
-    if(!files.has('xl/worksheets/sheet1.xml')) throw Error('Not a KMTrack workbook.');
+    if(!files.has('xl/worksheets/sheet1.xml')) throw Error('Not a SPOT IT workbook.');
     const strings=files.has('xl/sharedStrings.xml')?[...parseXml(await (await files.get('xl/sharedStrings.xml').blob()).text()).getElementsByTagName('si')].map(n=>n.textContent):[];
     async function rows(path){
       const doc=parseXml(await (await files.get(path).blob()).text());
@@ -171,9 +171,9 @@
     const embeddedPhotos=await readWorkbookPhotos(files);
     const all=await rows('xl/worksheets/sheet1.xml'),headers=all.shift();
     const expected=['Type of Defect','Timestamp','Latitude','Longitude','Latitude (DMM)','Longitude (DMM)','Expressway','Direction','Lane','Km Station','Photo','Photo Filename'];
-    if(!headers||expected.some((v,i)=>headers[i]!==v)) throw Error('Please choose a KMTrack inspection workbook with its original columns.');
-    if(headers[12]&&headers[12]!=='Interchange / Exit') throw Error('Please choose a KMTrack inspection workbook with its original columns.');
-    if(headers[13]&&headers[13]!=='Interchange Segment') throw Error('Please choose a KMTrack inspection workbook with its original columns.');
+    if(!headers||expected.some((v,i)=>headers[i]!==v)) throw Error('Please choose a SPOT IT inspection workbook with its original columns.');
+    if(headers[12]&&headers[12]!=='Interchange / Exit') throw Error('Please choose a SPOT IT inspection workbook with its original columns.');
+    if(headers[13]&&headers[13]!=='Interchange Segment') throw Error('Please choose a SPOT IT inspection workbook with its original columns.');
     const records=all.filter(row=>row.some(Boolean)).map(row=>{
       if(row[2]===''||row[3]===''||row[2]==null||row[3]==null) throw Error('Workbook has missing coordinates.');
       return normalize({type:row[0],timestamp:row[1],lat:Number(row[2]),lon:Number(row[3]),expressway:row[6]||'',bound:row[7]||'',lane:row[8]||'',km:row[9]?Number(row[9])/1000:null,photoFilename:row[11]||'',interchange:row[12]||'',interchangeSegment:row[13]||''});
@@ -185,7 +185,7 @@
         return metadata.slice(1).map((row,i)=>{
           const full=normalize(JSON.parse(row[4]));
           if((embeddedPhotos.has(i+2)||!records[i].photoFilename||records[i].photoFilename==='#VALUE!')&&full.photoFilename) records[i].photoFilename=full.photoFilename;
-          if(fingerprint(full)!==fingerprint(records[i])) throw Error('Inspection rows were edited after export. Please use an original KMTrack export.');
+          if(fingerprint(full)!==fingerprint(records[i])) throw Error('Inspection rows were edited after export. Please use an original SPOT IT export.');
           full.photoFile=embeddedPhotos.get(i+2)||null;
           full.photoAvailable=!!full.photoFile;
           return full;
@@ -198,12 +198,12 @@
     const files=await readZip(file),manifests=[...files.keys()].filter(name=>/(^|\/)manifest\.json$/.test(name));
     let rows,hasPhotos=false;
     if(/\.zip$/i.test(file.name)){
-      if(manifests.length!==1) throw Error('Choose a KMTrack Photos ZIP containing one manifest.');
+      if(manifests.length!==1) throw Error('Choose a SPOT IT Photos ZIP containing one manifest.');
       const manifest=JSON.parse(await (await files.get(manifests[0]).blob()).text());
       if(manifest.format!=='KMTrack inspection backup'||![1,2].includes(manifest.version)||!Array.isArray(manifest.entries)) throw Error('Unsupported inspection backup.');
       rows=manifest.entries;hasPhotos=true;
     }else if(/\.xlsx$/i.test(file.name)){rows=await readWorkbook(files);hasPhotos=rows.some(row=>row.photoFile);}
-    else throw Error('Choose a KMTrack .xlsx or Photos .zip file.');
+    else throw Error('Choose a SPOT IT .xlsx or Photos .zip file.');
     if(!rows.length||rows.length>MAX_ENTRIES) throw Error('Import must contain 1–10,000 entries.');
     const valid=[],issues=[];let missingPhotos=0;
     for(let i=0;i<rows.length;i++){

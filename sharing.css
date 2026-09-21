@@ -112,7 +112,7 @@ html:root .log-action-footer #select-toggle-btn.active{background:var(--line-yel
 
 .inspection-record-list,.inspection-record-list .log-entry{scroll-margin-top:140px;scroll-margin-bottom:calc(190px + env(safe-area-inset-bottom));}
 
-/* KMTrack Shared selection control: rounded visible checkbox inside an
+/* SPOT IT Shared selection control: rounded visible checkbox inside an
    unchanged 44px touch target.
 
    BOTH pseudo-elements are absolutely positioned and centred the same way. They

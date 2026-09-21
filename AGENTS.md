@@ -1,4 +1,4 @@
-# KMTrack project guidance
+# SPOT IT project guidance
 
 ## Protect the function
 

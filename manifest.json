@@ -1,6 +1,6 @@
 {
-  "name": "KMTrack — Road Inspection Log",
-  "short_name": "KMTrack",
+  "name": "SPOT IT — Road Inspection Log",
+  "short_name": "SPOTIT",
   "description": "Live GPS road inspection logger with km-station tracking for the NLEX network.",
   "start_url": "./index.html",
   "scope": "./",
@@ -9,8 +9,8 @@
   "background_color": "#07131f",
   "theme_color": "#07131f",
   "icons": [
-    { "src": "kmtrack-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "kmtrack-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "kmtrack-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "spotit-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "spotit-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "spotit-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

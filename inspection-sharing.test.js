@@ -6,7 +6,7 @@ const row={id:'stable',type:'Potholes',timestamp:'2026-09-04 10:30:00',lat:14.7,
 function fn(source,name){const n=source.indexOf(`function ${name}(`);return source.slice(source.slice(n-6,n)==='async '?n-6:n,source.indexOf('\n}',n)+2);}
 function context(){
   const photos=new Map(),state={saved:'',failSave:false,failPhoto:false,count:0};
-  const ctx=vm.createContext({entries:[{...row,id:'mine',timestamp:'2026-09-01 10:00:00',inspector:''}],storageAvailable:true,KMTrackSharing:sharing,Blob,Uint8Array,Map,Set,Date,
+  const ctx=vm.createContext({entries:[{...row,id:'mine',timestamp:'2026-09-01 10:00:00',inspector:''}],storageAvailable:true,SPOTITSharing:sharing,Blob,Uint8Array,Map,Set,Date,
     newId:()=>`generated-${++state.count}`,selectedEntryIds:new Set(),renderLog(){},updateMapEntries(){},confirm:()=>true,document:{getElementById:()=>({textContent:''})},
     saveEntries(){if(state.failSave)return false;state.saved=JSON.stringify(ctx.entries);return true;},
     async putPhoto(id,blob){if(state.failPhoto)throw Error('photo quota');photos.set(id,blob);},async deletePhoto(id){photos.delete(id);}
@@ -34,7 +34,7 @@ test('export dialog cancellation does not save or attribute entries; confirmatio
   for(const choice of ['cancel','export']){
     const stored=new Map(),original=[{...row,inspector:''},{...row,id:'colleague',importBatchId:'batch'}];
     let dialog;
-    const ctx=vm.createContext({sharingBusy:false,entries:structuredClone(original),KMTrackSharing:sharing,
+    const ctx=vm.createContext({sharingBusy:false,entries:structuredClone(original),SPOTITSharing:sharing,
       entriesForExport:()=>structuredClone(original),localStorage:{getItem:key=>stored.get(key),setItem:(key,value)=>stored.set(key,value)},
       document:{getElementById:id=>id==='export-name-dialog'?dialog:{value:'Moise'}},renderLog(){},alert(){},saveEntries:()=>true});
     const input={value:''};
@@ -89,7 +89,7 @@ test('import history renames and deletes one complete batch without touching own
 test('import history UI exposes file metadata, inspector editing and batch deletion',()=>{
   for(const expected of ['import-history-dialog','import-detail-name','import-detail-date','import-detail-imported','import-detail-inspector','import-detail-delete']) assert.match(ui,new RegExp(expected));
 });
-test('ZIP reads original KMTrack manifests and rejects corrupt or unsafe archives',async()=>{
+test('ZIP reads original SPOTIT manifests and rejects corrupt or unsafe archives',async()=>{
   const ctx=vm.createContext({Blob,TextEncoder,Uint8Array,Uint32Array,DataView,Date});
   vm.runInContext(html.slice(html.indexOf('const ZIP_CRC_TABLE ='),html.indexOf('function safeBackupFilename(')),ctx);
   const manifest={format:'KMTrack inspection backup',version:1,entries:[row]};

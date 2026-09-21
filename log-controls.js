@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   document.querySelector('.export-actions')?.remove();
   exportMenu.addEventListener('click',()=>{
-    const scope = KMTrackEntryFilters.exportScope(entries,getLogFilters(),selectedEntryIds);
+    const scope = SPOTITEntryFilters.exportScope(entries,getLogFilters(),selectedEntryIds);
     const kind = selectedEntryIds.size ? 'selected' : Object.values(getLogFilters()).some(Boolean) ? 'filtered' : 'saved';
     document.getElementById('export-scope').textContent = `Export ${scope.entries.length} ${kind} ${scope.entries.length === 1 ? 'entry' : 'entries'}.`;
     dialog.showModal();

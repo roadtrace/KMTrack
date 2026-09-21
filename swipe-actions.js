@@ -1,7 +1,7 @@
 (function(root, factory){
   const api = factory();
   if(typeof module === 'object' && module.exports) module.exports = api;
-  if(root) root.KMTrackSwipe = api;
+  if(root) root.SPOTITSwipe = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function(){
   'use strict';
 
@@ -32,7 +32,7 @@
 
   function inspectionWorkbookRows(entries, toDMM, kmToCsvNumber){
     return [
-      /* The first 14 columns are the original KMTrack contract and must never be
+      /* The first 14 columns are the original SPOTIT contract and must never be
        * reordered or removed: inspection-sharing.js validates them on import and
        * older workbooks have to keep importing. New columns are appended only. */
       ['Type of Defect','Timestamp','Latitude','Longitude','Latitude (DMM)','Longitude (DMM)','Expressway','Direction','Lane','Km Station','Photo','Photo Filename','Interchange / Exit','Interchange Segment','Lane Number','Lane (Other)'],

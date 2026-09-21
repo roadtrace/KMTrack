@@ -209,7 +209,7 @@ test('the local foundation uses the reference light and dark palette without add
   assert.match(design,/--radius-card:14px/);
   assert.match(design,/--radius-control:10px/);
   assert.match(design,/--ds-space-1:4px/);
-  assert.doesNotMatch(html,/@workspace\/kmtrack-design-system|tailwindcss/);
+  assert.doesNotMatch(html,/@workspace\/spotit-design-system|tailwindcss/);
 });
 
 test('export buttons stay in the DOM so the export dialog can adopt them',()=>{

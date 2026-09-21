@@ -1,4 +1,4 @@
-/* KMTrack entry model — the single source of truth for the inspection record.
+/* SPOT IT entry model — the single source of truth for the inspection record.
  *
  * Loaded before the app script and before the sharing module, so the schema
  * cannot drift between creation, migration, import and export.
@@ -11,7 +11,7 @@
 (function(root,factory){
   const api=factory();
   if(typeof module==='object' && module.exports) module.exports=api;
-  if(root) root.KMTrackEntry=api;
+  if(root) root.SPOTITEntry=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
 

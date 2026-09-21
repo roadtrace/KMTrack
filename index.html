@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="KMTrack">
+<meta name="apple-mobile-web-app-title" content="SPOT IT">
 <meta name="theme-color" content="#07131f">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -13,11 +13,11 @@
     if(localStorage.getItem('kmtrack_theme_v1') === 'light') document.documentElement.dataset.theme = 'light';
   }catch(e){ /* theme preference is non-critical */ }
 </script>
-<link rel="icon" type="image/svg+xml" href="kmtrack-mark.svg">
-<link rel="apple-touch-icon" href="kmtrack-apple-touch-icon.png">
+<link rel="icon" type="image/svg+xml" href="spotit-mark.svg">
+<link rel="apple-touch-icon" href="spotit-apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
-<title>KMTrack — Road Inspection Log</title>
+<title>SPOT IT — Road Inspection Log</title>
 <style>
   @font-face{
     font-family:'Inter';
@@ -375,7 +375,7 @@
   .export-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end;}
   .backup-btn{background:var(--safety-green);color:#fff;}
 
-/* KMTrack adaptive header */
+/* SPOT IT adaptive header */
 header{display:flex;align-items:center;gap:12px;}
 .header-brand{display:flex;align-items:center;width:100%;min-width:0;}
 .header-logo{display:block;width:auto;height:72px;max-width:min(55vw,430px);object-fit:contain;object-position:left center;flex:0 1 auto;}
@@ -426,7 +426,7 @@ header{display:flex;align-items:center;gap:12px;}
 .lane-save.danger{background:var(--safety-red);}
 
 
-/* Fast KMTrack button press feedback */
+/* Fast SPOT IT button press feedback */
 .defect-btn {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -1190,8 +1190,8 @@ button {
 <div class="top-shell">
   <header>
     <div class="header-brand">
-      <img class="header-logo" src="kmtrack-mark.svg" alt="">
-      <span class="header-wordmark" id="header-wordmark">KM<span class="header-track">TRACK</span></span>
+      <img class="header-logo" src="spotit-mark.svg" alt="">
+      <span class="header-wordmark" id="header-wordmark"><span class="header-brand-name">SPOT</span> <span class="header-brand-accent">IT</span></span>
       <div class="header-context" id="header-map-context" hidden>
         <div class="map-title" id="map-km-station">KM --.---</div>
         <div class="map-status" id="map-status">Waiting for GPS location…</div>
@@ -1477,7 +1477,7 @@ button {
   <div class="ds-view-head">
     <span class="eyebrow">Local data control</span>
     <h2>Data tools</h2>
-    <p>KMTrack keeps field data on this device until you choose to export it.</p>
+    <p>SPOT IT keeps field data on this device until you choose to export it.</p>
   </div>
 
   <section class="tool-card">
@@ -1515,7 +1515,7 @@ button {
       <span class="tool-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"></rect><path d="M12 18h.01"></path></svg></span>
       <div class="tool-copy">
         <h3>Installability</h3>
-        <p>For a faster field launch, add KMTrack to your home screen from the browser menu. Keep location permission set to Allow while using.</p>
+        <p>For a faster field launch, add SPOT IT to your home screen from the browser menu. Keep location permission set to Allow while using.</p>
       </div>
     </div>
     <div class="tool-body">
@@ -1572,7 +1572,7 @@ button {
       <svg class="setting-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"></path><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"></path><circle cx="12" cy="12" r="2"></circle><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"></path><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"></path></svg>
       <div class="setting-copy">
         <h3>Connection &amp; status</h3>
-        <p>Live GPS comes from this browser. Road matching only uses the network datasets on this device; KMTrack never substitutes a guessed corridor.</p>
+        <p>Live GPS comes from this browser. Road matching only uses the network datasets on this device; SPOT IT never substitutes a guessed corridor.</p>
         <div class="setting-pills">
           <span class="status-pill status-fresh" id="storage-pill"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg><span id="storage-pill-text">Local storage active</span></span>
           <span class="status-pill status-warn" id="tiles-pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m2 2 20 20"></path><path d="M5.782 5.782A7 7 0 0 0 9 19h8.5a4.5 4.5 0 0 0 1.307-.193"></path><path d="M21.532 16.5A4.5 4.5 0 0 0 17.5 10h-1.79A7.008 7.008 0 0 0 10 5.07"></path></svg><span id="tiles-pill-text">Map tiles unavailable</span></span>
@@ -1583,7 +1583,7 @@ button {
   </section>
 </section>
 
-<nav class="app-tab-bar" role="tablist" aria-label="KMTrack sections">
+<nav class="app-tab-bar" role="tablist" aria-label="SPOT IT sections">
   <button type="button" class="app-tab-btn active" id="inspection-tab" role="tab" aria-selected="true" aria-controls="inspection-view" data-app-view="inspection">
     <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="2" x2="5" y1="12" y2="12"></line><line x1="19" x2="22" y1="12" y2="12"></line><line x1="12" x2="12" y1="2" y2="5"></line><line x1="12" x2="12" y1="19" y2="22"></line><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="3"></circle></svg>
     <span>Capture</span>
@@ -1645,7 +1645,7 @@ class GeoKalmanFilter{
   }
 }
 const gpsFilter = new GeoKalmanFilter();
-const locationResolver = KMTrackLocation.createResolver();
+const locationResolver = SPOTITLocation.createResolver();
 
 let currentPos = null; // {lat, lon, acc, timestamp, fresh}; coordinates are Kalman-smoothed
 let currentResolvedLocation = null;
@@ -1775,7 +1775,7 @@ function testStorageWritable(){
 // A queue with no transport: ready() is false, so nothing is ever sent. The
 // Supabase client is added later by passing `{transport}` here — the entry
 // model, the queue and the indicator all stay unchanged.
-const syncQueue = KMTrackSync.createQueue({});
+const syncQueue = SPOTITSync.createQueue({});
 
 /* The indicator speaks in six states, most actionable first. Every one is read
  * from real data: `navigator.onLine` and the queue's own summary of the records.
@@ -1807,7 +1807,7 @@ function updateSyncStatus(){
   const menu = document.getElementById('sync-menu');
   const text = document.getElementById('sync-status-text');
   if(!menu || !text) return;
-  const counts = KMTrackSync.summary(entries);
+  const counts = SPOTITSync.summary(entries);
   const online = navigator.onLine !== false;
   const ready = syncQueue.ready();
   const state = syncState(counts, online, ready, syncInFlight);
@@ -1923,12 +1923,12 @@ function loadFromStorage(){
     const savedEntries = localStorage.getItem(STORAGE_KEY_ENTRIES);
     if(savedEntries){
       const parsed = JSON.parse(savedEntries);
-      // KMTrackEntry owns the record shape. normalizeAll drops malformed rows
+      // SPOTITEntry owns the record shape. normalizeAll drops malformed rows
       // (as before) and backfills every field added since v1 — photo metadata,
       // the structured lane pair, the permanent UUID, created_at/updated_at and
       // sync_status — so existing logs keep loading without alteration.
       const before = Array.isArray(parsed) ? parsed : [];
-      entries = KMTrackEntry.normalizeAll(before);
+      entries = SPOTITEntry.normalizeAll(before);
       // Only rewrite when the migration actually changed something.
       if(JSON.stringify(entries) !== JSON.stringify(before)){
         localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(entries));
@@ -1966,7 +1966,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
     if(isIOS && !isStandalone){
       el.hidden = false;
-      el.textContent = 'For more reliable storage, add KMTrack to your Home Screen.';
+      el.textContent = 'For more reliable storage, add SPOT IT to your Home Screen.';
     }else{
       el.hidden = true;
     }
@@ -2536,7 +2536,7 @@ let osmLocationMarker = null;
 let osmAccuracyCircle = null;
 let osmHasCenteredOnLocation = false;
 
-// CARTO browser basemap key: necessarily visible in tile requests. KMTrack use only.
+// CARTO browser basemap key: necessarily visible in tile requests. SPOT IT use only.
 const CARTO_BASEMAP_KEY = 'cb1_2wsv_1_91c146c65b5204c948f23116';
 const MAP_BASEMAPS = {
   light:{
@@ -2561,20 +2561,20 @@ let syncVectorCamera = null;
 function ensureMapTilerSdk(){
   if(mapTilerSdkPromise) return mapTilerSdkPromise;
   mapTilerSdkPromise = new Promise((resolve, reject) => {
-    if(typeof KMTrackMapConfig === 'undefined' || typeof L === 'undefined'){
+    if(typeof SPOTITMapConfig === 'undefined' || typeof L === 'undefined'){
       reject(new Error('MapTiler configuration unavailable'));
       return;
     }
     if(window.maptilersdk && L.maptilerLayer){ resolve(); return; }
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = KMTrackMapConfig.sdkCssPath;
+    link.href = SPOTITMapConfig.sdkCssPath;
     document.head.append(link);
     const sdk = document.createElement('script');
-    sdk.src = KMTrackMapConfig.sdkPath;
+    sdk.src = SPOTITMapConfig.sdkPath;
     sdk.onload = () => {
       const plugin = document.createElement('script');
-      plugin.src = KMTrackMapConfig.leafletPluginPath;
+      plugin.src = SPOTITMapConfig.leafletPluginPath;
       plugin.onload = () => L.maptilerLayer ? resolve() : reject(new Error('MapTiler Leaflet layer unavailable'));
       plugin.onerror = () => reject(new Error('MapTiler Leaflet plugin failed to load'));
       document.head.append(plugin);
@@ -2625,8 +2625,8 @@ function updateOsmBasemap(){
     if(!osmMap || document.documentElement.dataset.theme === 'light') return;
     clearBasemaps();
     const layer = L.maptilerLayer({
-      style: KMTrackMapConfig.styleUrl,
-      apiKey: KMTrackMapConfig.apiKey,
+      style: SPOTITMapConfig.styleUrl,
+      apiKey: SPOTITMapConfig.apiKey,
       /* Leaflet owns every gesture. The plugin already defaults this to false;
        * it is set explicitly so the intent is obvious — MapLibre must not run
        * its own drag/zoom handlers on top of Leaflet's. */
@@ -2756,12 +2756,12 @@ function initOsmMap(){
 function updateMapLandmarks(){
   if(!osmMap) return;
   if(!osmLandmarkLayer) osmLandmarkLayer=L.layerGroup().addTo(osmMap);
-  KMTrackMap.renderLandmarks(osmMap,osmLandmarkLayer,[...bridgeData,...supplementalMapLandmarks]);
+  SPOTITMap.renderLandmarks(osmMap,osmLandmarkLayer,[...bridgeData,...supplementalMapLandmarks]);
 }
 
 function openMapEntry(id){
   const index=entries.findIndex(entry=>entry.id===id);
-  if(index>=0){ openEditModal(index); KMTrackMap.focusEditor(); }
+  if(index>=0){ openEditModal(index); SPOTITMap.focusEditor(); }
 }
 
 function updateMapEntries(){
@@ -2778,11 +2778,11 @@ function updateMapEntries(){
   if(!osmMap) return;
   if(!osmEntryLayer) osmEntryLayer = L.layerGroup();
   osmEntryLayer.clearLayers();
-  if(!show){ osmEntryLayer.remove(); KMTrackMap.legend([],false); return; }
+  if(!show){ osmEntryLayer.remove(); SPOTITMap.legend([],false); return; }
   osmEntryLayer.addTo(osmMap);
-  const visible=KMTrackEntryFilters.mapEntries(entries,from.value,to.value,type.value,document.getElementById('map-entry-source').value,document.getElementById('map-entry-inspector').value,document.getElementById('map-entry-bound').value);
-  KMTrackMap.legend(visible,true);
-  KMTrackMap.renderEntries(osmMap,osmEntryLayer,visible,openMapEntry,formatKmStation);
+  const visible=SPOTITEntryFilters.mapEntries(entries,from.value,to.value,type.value,document.getElementById('map-entry-source').value,document.getElementById('map-entry-inspector').value,document.getElementById('map-entry-bound').value);
+  SPOTITMap.legend(visible,true);
+  SPOTITMap.renderEntries(osmMap,osmEntryLayer,visible,openMapEntry,formatKmStation);
 }
 document.getElementById('map-show-entries').addEventListener('change',updateMapEntries);
 document.getElementById('map-entry-from').addEventListener('change',updateMapEntries);
@@ -2800,7 +2800,7 @@ document.getElementById('map-filter-menu').addEventListener('keydown',event => {
   }
 });
 document.getElementById('map-entry-clear').addEventListener('click',() => {
-  const days=entries.map(entry=>KMTrackEntryFilters.entryDay(entry)).filter(day=>/^\d{4}-\d{2}-\d{2}$/.test(day)).sort();
+  const days=entries.map(entry=>SPOTITEntryFilters.entryDay(entry)).filter(day=>/^\d{4}-\d{2}-\d{2}$/.test(day)).sort();
   document.getElementById('map-entry-from').value = days[0]||'';
   document.getElementById('map-entry-to').value = days.at(-1)||'';
   document.getElementById('map-entry-clear').classList.toggle('active',Boolean(days.length));
@@ -2861,7 +2861,7 @@ function mountLogRegister(viewName){
   }
 }
 
-/* The header is global. On the map it trades the "KMTRACK" wordmark for the live
+/* The header is global. On the map it trades the "SPOT IT" wordmark for the live
    station / coordinates / accuracy that used to sit in the map's own topbar;
    every other tab shows the wordmark. The elements themselves never move, so
    `updateOsmLocation()` and the station writers keep working untouched. */
@@ -2979,11 +2979,11 @@ function computeCorridorCandidates(lat,lon){
 }
 
 function corridorDepartureThresholdKm(accuracyMeters){
-  return KMTrackLocation.corridorDepartureThresholdKm(accuracyMeters);
+  return SPOTITLocation.corridorDepartureThresholdKm(accuracyMeters);
 }
 
 function isInterchangeLocationMode(resolution=currentResolvedLocation,position=currentPos){
-  return !!position&&KMTrackLocation.isInterchangeMode(resolution,position.acc);
+  return !!position&&SPOTITLocation.isInterchangeMode(resolution,position.acc);
 }
 
 function interchangeSegmentLabel(resolution=currentResolvedLocation){
@@ -3374,7 +3374,7 @@ function logDefect(type, lane){
 
   const snapshot=resolvedEntrySnapshot();
 
-  entries.push(KMTrackEntry.createEntry({
+  entries.push(SPOTITEntry.createEntry({
     type,
     timestamp: fullTimestamp(),
     ...snapshot,
@@ -3565,7 +3565,7 @@ function getCameraSnapshot(type){
 
 async function requestCameraStream(){
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    throw new Error('Camera access is not available in this browser. Open KMTrack through HTTPS and allow Camera permission.');
+    throw new Error('Camera access is not available in this browser. Open SPOT IT through HTTPS and allow Camera permission.');
   }
   // Prefer the rear/environment camera; fall back progressively for devices
   // that reject a strict facingMode constraint.
@@ -3764,7 +3764,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // ---------- Custom inspection-photo logo (user-supplied, replaces the old
-// hard-coded KMTrack.png stamp) ----------
+// hard-coded prior-identity stamp) ----------
 // Stored as a resized data URL in localStorage, so it's small enough to
 // persist and survives across app restarts. It stays in effect for every
 // photo captured until the user uploads a different one or removes it.
@@ -4002,7 +4002,7 @@ async function buildStampedPhotoBlob(entry){
   }
 
   const stamp = captureDate;
-  const filename = `KMTrack_${entry.type.replace(/[^a-z0-9]+/gi,'_')}_${stamp.getFullYear()}${pad(stamp.getMonth()+1)}${pad(stamp.getDate())}_${pad(stamp.getHours())}${pad(stamp.getMinutes())}${pad(stamp.getSeconds())}.jpg`;
+  const filename = `SpotIt_${entry.type.replace(/[^a-z0-9]+/gi,'_')}_${stamp.getFullYear()}${pad(stamp.getMonth()+1)}${pad(stamp.getDate())}_${pad(stamp.getHours())}${pad(stamp.getMinutes())}${pad(stamp.getSeconds())}.jpg`;
   return { blob, filename, stamp, rawBlob };
 }
 
@@ -4068,7 +4068,7 @@ async function captureContinuousLane(laneValue){
     const cb = label.querySelector('.continuous-lane-trigger');
     if(cb) cb.disabled = true;
   });
-  KMTrackEntry.setLane(cameraDraftEntry, laneValue);
+  SPOTITEntry.setLane(cameraDraftEntry, laneValue);
   updateCameraOverlay(cameraDraftEntry);
   try{
     const result = await buildStampedPhotoBlob(cameraDraftEntry);
@@ -4076,7 +4076,7 @@ async function captureContinuousLane(laneValue){
     const photoId = newId();
     await putPhoto(photoId, result.blob);
     await putPhoto(photoId + ':raw', result.rawBlob);
-    entries.push(KMTrackEntry.createEntry({
+    entries.push(SPOTITEntry.createEntry({
       ...cameraDraftEntry,
       timestamp: fullTimestamp(),
       inspector: inspectorName,
@@ -4202,7 +4202,7 @@ async function saveCapturedPhoto(){
       const entry = entries[idx];
       const oldPhotoId = entry ? entry.photoId : '';
       if(entry){
-        KMTrackEntry.setLane(entry, cameraDraftEntry.lane || entry.lane);
+        SPOTITEntry.setLane(entry, cameraDraftEntry.lane || entry.lane);
         entry.photoId = photoId;
         entry.photoFilename = pendingCaptureFilename;
         entry.photoTimestamp = formatPhotoDate(pendingCaptureStamp);
@@ -4217,7 +4217,7 @@ async function saveCapturedPhoto(){
         await deletePhoto(oldPhotoId + ':raw');
       }
     } else {
-      entries.push(KMTrackEntry.createEntry({
+      entries.push(SPOTITEntry.createEntry({
         ...cameraDraftEntry,
         timestamp: fullTimestamp(),
         inspector: inspectorName,
@@ -4272,7 +4272,7 @@ async function viewPhotoForEntry(index){
     document.getElementById('photo-preview').src = activePhotoObjectUrl;
     const download = document.getElementById('photo-download');
     download.href = activePhotoObjectUrl;
-    download.download = entry.photoFilename || 'KMTrack_inspection.jpg';
+    download.download = entry.photoFilename || 'SpotIt_inspection.jpg';
     const modal = document.getElementById('photo-modal');
     modal.classList.add('show');
     modal.setAttribute('aria-hidden','false');
@@ -4396,7 +4396,7 @@ function visibleEntries(){
   // active Log-tab filter applied here would show a subset the user cannot clear
   // from that tab, with a count that silently disagrees with the title.
   if(logRegisterView === 'inspection') return entries;
-  return KMTrackEntryFilters.filterEntries(entries,getLogFilters());
+  return SPOTITEntryFilters.filterEntries(entries,getLogFilters());
 }
 function syncEntryFilterOptions(){
   for(const id of ['entry-filter-type','map-entry-type']){
@@ -4428,7 +4428,7 @@ document.getElementById('entry-filter-clear').addEventListener('click',() => {
 });
 
 function entriesForExport(){
-  const scope = KMTrackEntryFilters.exportScope(entries,getLogFilters(),selectedEntryIds);
+  const scope = SPOTITEntryFilters.exportScope(entries,getLogFilters(),selectedEntryIds);
   if(!scope.entries.length){ alert('No entries match the current filters.'); return null; }
   if(scope.restricted && !confirm('Export filtered/selected entries?')) return null;
   // Freeze one consistent export batch before any asynchronous workbook/photo work.
@@ -4566,7 +4566,7 @@ function showSwipeUndo(){
   undoNotice = notice;
 }
 
-const deletionController = KMTrackSwipe.createDeletionController({
+const deletionController = SPOTITSwipe.createDeletionController({
   getEntries: () => entries,
   persist: saveEntries,
   render: renderLog,
@@ -4616,7 +4616,7 @@ function wireSwipeRows(list){
       closeOpenSwipe(entryId);
       pointerId = e.pointerId;
       startX = lastX = e.clientX; startY = e.clientY;
-      baseOffset = openSwipeEntryId === entryId ? (card.style.transform.includes('-') ? -KMTrackSwipe.REVEAL_WIDTH_PX : KMTrackSwipe.REVEAL_WIDTH_PX) : 0;
+      baseOffset = openSwipeEntryId === entryId ? (card.style.transform.includes('-') ? -SPOTITSwipe.REVEAL_WIDTH_PX : SPOTITSwipe.REVEAL_WIDTH_PX) : 0;
       intent = '';
     });
     row.addEventListener('pointermove', e => {
@@ -4632,7 +4632,7 @@ function wireSwipeRows(list){
       }
       if(intent !== 'horizontal') return;
       e.preventDefault();
-      setSwipeOffset(row, KMTrackSwipe.resistedOffset(baseOffset + dx));
+      setSwipeOffset(row, SPOTITSwipe.resistedOffset(baseOffset + dx));
     });
     const finish = e => {
       if(e.pointerId !== pointerId) return;
@@ -4642,16 +4642,16 @@ function wireSwipeRows(list){
       card.dataset.suppressClick = '1';
       setTimeout(() => delete card.dataset.suppressClick, 0);
       const rawOffset = baseOffset + dx;
-      const decision = KMTrackSwipe.releaseDecision(rawOffset, row.getBoundingClientRect().width);
+      const decision = SPOTITSwipe.releaseDecision(rawOffset, row.getBoundingClientRect().width);
       const idx = Number(card.dataset.idx);
       if(decision === 'edit'){
         openSwipeEntryId = null; row.classList.remove('swipe-open'); setSwipeOffset(row, 0); openEditModal(idx);
       }else if(decision === 'delete'){
         openSwipeEntryId = null; deletionController.remove(idx, true);
       }else if(decision === 'reveal-edit'){
-        closeOpenSwipe(entryId); openSwipeEntryId = entryId; row.classList.add('swipe-open'); setSwipeOffset(row, KMTrackSwipe.REVEAL_WIDTH_PX);
+        closeOpenSwipe(entryId); openSwipeEntryId = entryId; row.classList.add('swipe-open'); setSwipeOffset(row, SPOTITSwipe.REVEAL_WIDTH_PX);
       }else if(decision === 'reveal-delete'){
-        closeOpenSwipe(entryId); openSwipeEntryId = entryId; row.classList.add('swipe-open'); setSwipeOffset(row, -KMTrackSwipe.REVEAL_WIDTH_PX);
+        closeOpenSwipe(entryId); openSwipeEntryId = entryId; row.classList.add('swipe-open'); setSwipeOffset(row, -SPOTITSwipe.REVEAL_WIDTH_PX);
       }else{
         openSwipeEntryId = null; row.classList.remove('swipe-open'); setSwipeOffset(row, 0);
       }
@@ -5023,7 +5023,7 @@ function updateCameraDraftLane(){
   if(!cameraDraftEntry) return;
   const selVal = document.getElementById('camera-lane-select').value;
   const othersVal = document.getElementById('camera-lane-others-input').value.trim();
-  KMTrackEntry.setLane(cameraDraftEntry, selVal === 'Others' ? othersVal : selVal);
+  SPOTITEntry.setLane(cameraDraftEntry, selVal === 'Others' ? othersVal : selVal);
   updateCameraOverlay(cameraDraftEntry);
 }
 
@@ -5235,11 +5235,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const boundOthersVal = document.getElementById('edit-bound-others-input').value.trim();
     const entry = entries[editingEntryIndex];
     entry.type = defectVal;
-    KMTrackEntry.setLane(entry, laneSelVal === 'Others' ? laneOthersVal : laneSelVal);
+    SPOTITEntry.setLane(entry, laneSelVal === 'Others' ? laneOthersVal : laneSelVal);
     entry.km = kmResult.km;
     entry.expressway = expresswaySelVal === 'Others' ? expresswayOthersVal : expresswaySelVal;
     entry.bound = boundSelVal === 'Others' ? boundOthersVal : boundSelVal;
-    KMTrackEntry.touch(entry);
+    SPOTITEntry.touch(entry);
     saveEntries();
     renderLog();
     closeEditModal();
@@ -5281,7 +5281,7 @@ function excelColumnName(index){
 }
 
 function inspectionWorkbookRows(exportEntries = entries){
-  return KMTrackSwipe.inspectionWorkbookRows(exportEntries, toDMM, kmToCsvNumber);
+  return SPOTITSwipe.inspectionWorkbookRows(exportEntries, toDMM, kmToCsvNumber);
 }
 
 async function collectWorkbookPhotos(exportEntries){
@@ -5346,8 +5346,8 @@ async function buildInspectionWorkbook(createdAt, exportEntries = entries, inclu
     {name:'xl/_rels/workbook.xml.rels',blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`]),date:createdAt},
     {name:'xl/styles.xml',blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="1"><numFmt numFmtId="164" formatCode="0+000"/></numFmts><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><color rgb="FF191C1F"/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFF4B400"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"><alignment horizontal="center" vertical="center"/></xf></cellStyleXfs><cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf><xf numFmtId="2" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`]),date:createdAt},
     {name:'xl/worksheets/sheet1.xml',blob:new Blob([sheet]),date:createdAt},
-    {name:'docProps/core.xml',blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>KMTrack Inspection Log</dc:title><dc:creator>KMTrack</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">${createdAt.toISOString()}</dcterms:created></cp:coreProperties>`]),date:createdAt},
-    {name:'docProps/app.xml',blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"><Application>KMTrack</Application></Properties>`]),date:createdAt}
+    {name:'docProps/core.xml',blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>SPOT IT Inspection Log</dc:title><dc:creator>SPOT IT</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">${createdAt.toISOString()}</dcterms:created></cp:coreProperties>`]),date:createdAt},
+    {name:'docProps/app.xml',blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"><Application>SPOT IT</Application></Properties>`]),date:createdAt}
   ];
   addInCellPhotoParts(files,photos,createdAt);
   await addSharingWorksheet(files,exportEntries,createdAt);
@@ -5472,7 +5472,7 @@ document.getElementById('backup-btn').addEventListener('click', async () => {
     const workbook=await buildInspectionWorkbook(createdAt,exportEntries,true);
     url=URL.createObjectURL(workbook);
     const link=document.createElement('a');
-    link.href=url; link.download=`KMTrack_with_photos_${stamp}.xlsx`;
+    link.href=url; link.download=`SpotIt_with_photos_${stamp}.xlsx`;
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
     alert(`Workbook ready: ${exportEntries.length} entries. Available photos are embedded in their cells; missing photos are left blank.`);
   }catch(err){
@@ -5597,7 +5597,7 @@ if('serviceWorker' in navigator){
 
 <div class="photo-modal" id="photo-modal" role="dialog" aria-modal="true" aria-label="Inspection photo viewer" aria-hidden="true">
   <div class="photo-card">
-    <div class="photo-stage" id="photo-stage"><img id="photo-preview" alt="KMTrack inspection photo" role="button" tabindex="0" aria-label="Open full-screen photo zoom" title="Tap for full-screen zoom"></div>
+    <div class="photo-stage" id="photo-stage"><img id="photo-preview" alt="SPOT IT inspection photo" role="button" tabindex="0" aria-label="Open full-screen photo zoom" title="Tap for full-screen zoom"></div>
     <div class="photo-zoom-controls" aria-label="Photo zoom controls">
       <button id="photo-zoom-out" type="button" aria-label="Zoom out">−</button><output id="photo-zoom-level" aria-live="polite">100%</output><button id="photo-zoom-in" type="button" aria-label="Zoom in">+</button><button id="photo-zoom-reset" type="button">Reset</button><button id="photo-zoom-close" type="button" aria-label="Close full-screen photo">×</button>
     </div>

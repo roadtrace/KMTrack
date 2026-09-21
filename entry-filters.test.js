@@ -40,7 +40,7 @@ function harness(){
   };
   const state = {downloads:[],prompts:[],alerts:[],photos:[],accept:true};
   const context = vm.createContext({
-    entries:structuredClone(fixtures),selectedEntryIds:new Set(),KMTrackEntryFilters:filters,KMTrackSwipe:swipe,
+    entries:structuredClone(fixtures),selectedEntryIds:new Set(),SPOTITEntryFilters:filters,SPOTITSwipe:swipe,
     document:{getElementById:control,createElement:()=>({click(){}}),body:{appendChild(){},removeChild(){}}},
     confirm:message=>{state.prompts.push(message);return state.accept;},alert:message=>state.alerts.push(message),
     URL:{createObjectURL:blob=>{state.downloads.push(blob);return 'blob:test';},revokeObjectURL(){}},
@@ -160,7 +160,7 @@ test('map toggle passes filtered entries to interactive overlays, refreshes and 
     layerGroup:()=>({markers:[],clearLayers(){this.markers=[];},remove(){this.visible=false;},addTo(){this.visible=true;return this;}}),
     circleMarker:(point,options)=>({addTo(layer){layer.markers.push({point,options});}})
   };
-  context.KMTrackMap={legend(){},renderEntries(map,layer,rows,onOpen){layer.markers=rows.map(entry=>({entry,onOpen}));}};
+  context.SPOTITMap={legend(){},renderEntries(map,layer,rows,onOpen){layer.markers=rows.map(entry=>({entry,onOpen}));}};
   context.openMapEntry=()=>{};context.formatKmStation=String;
   vm.runInContext(source('updateMapEntries'),context);
   context.updateMapEntries();

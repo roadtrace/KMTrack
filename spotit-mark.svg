@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" role="img" aria-label="SPOT IT"><title>SPOT IT</title>
+  <rect width="1024" height="1024" rx="277" fill="#FFBE00"/>
+
+  <!-- Outer focus brackets.
+
+       The corner fillet is 36, not the supplied 124. With the arms centred at
+       145, a fillet only stays clear of the tile's rx=277 corner while
+       a + f(1+sqrt2) <= 277 - margin, which caps f at 46. The supplied 124 ran
+       the bracket's arc straight through the tile corner, leaving no amber
+       between them. At 36 the bracket follows the rounded corner with an even
+       margin instead of crossing it. -->
+  <path d="M145 275V181Q145 145 181 145H275"
+        fill="none" stroke="#12263D" stroke-width="62"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M749 145H843Q879 145 879 181V275"
+        fill="none" stroke="#12263D" stroke-width="62"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M145 749V843Q145 879 181 879H275"
+        fill="none" stroke="#12263D" stroke-width="62"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M749 879H843Q879 879 879 843V749"
+        fill="none" stroke="#12263D" stroke-width="62"
+        stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Clean circular target ring -->
+  <circle cx="512" cy="512" r="224"
+          fill="none" stroke="#12263D" stroke-width="56"/>
+
+  <!-- Cardinal tabs: terminate exactly at the ring's outer edge -->
+  <path d="M478 263V116
+           A34 34 0 0 1 546 116V263Z" fill="#12263D"/>
+  <path d="M478 761V908
+           A34 34 0 0 0 546 908V761Z" fill="#12263D"/>
+  <path d="M263 478H116
+           A34 34 0 0 0 116 546H263Z" fill="#12263D"/>
+  <path d="M761 478H908
+           A34 34 0 0 1 908 546H761Z" fill="#12263D"/>
+
+  <!-- Perspective roadway -->
+  <path d="M455 366H569L682 548
+           Q620 638 558 658
+           L548 611H476L466 658
+           Q404 638 342 548Z"
+        fill="#12263D"/>
+
+  <!-- Road center markings -->
+  <path d="M497 383H527L532 422H492Z
+           M489 438H535L541 490H483Z
+           M478 511H546L556 582H468Z"
+        fill="#FFBE00"/>
+</svg>

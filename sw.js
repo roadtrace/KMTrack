@@ -1,11 +1,11 @@
-// Road Trace — service worker
+// SPOT IT — service worker
 // Caches the app shell (HTML, icons, logo) so the app itself opens with
 // zero network. calibration.json is handled separately (network-first)
 // since the app already manages its own offline copy of that file and
 // the in-app "Reload dataset" button needs a real network attempt.
 
-const CACHE_VERSION = 'v191'; // bump this string whenever you deploy changes, to force an update
-const CACHE_NAME = `kmtrack-shell-${CACHE_VERSION}`;
+const CACHE_VERSION = 'v194'; // bump this string whenever you deploy changes, to force an update
+const CACHE_NAME = `spotit-shell-${CACHE_VERSION}`;
 
 const APP_SHELL = [
   './',
@@ -41,12 +41,12 @@ const APP_SHELL = [
   './fonts/DMMono-400-latinext.woff2',
   './fonts/DMMono-500-latin.woff2',
   './fonts/DMMono-500-latinext.woff2',
-  './kmtrack-mark.svg',
-  './kmtrack-logo-on-dark.svg',
-  './kmtrack-logo-on-light.svg',
-  './kmtrack-icon-192.png',
-  './kmtrack-icon-512.png',
-  './kmtrack-apple-touch-icon.png',
+  './spotit-mark.svg',
+  './spotit-logo-on-dark.svg',
+  './spotit-logo-on-light.svg',
+  './spotit-icon-192.png',
+  './spotit-icon-512.png',
+  './spotit-apple-touch-icon.png',
   './KMTrack_logo.png',
   './KMTrack.png'
 ];

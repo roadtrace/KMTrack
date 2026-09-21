@@ -1,4 +1,4 @@
-# KMTrack engineering notes
+# SPOT IT engineering notes
 
 **This is not a design spec, and there is no frozen visual baseline.** Redesign
 freely — see `AGENTS.md`. What follows is here because it cost real time to
@@ -94,7 +94,7 @@ It sits **before the view containers**, so `showAppView()` toggling `hidden` on 
 view cannot hide it. It carries the brand, an `Off network` pill and a refresh
 button.
 
-Its values are copied literally from the reference (`artifacts/kmtrack/src/
+Its values are copied literally from the reference (`artifacts/spotit/src/
 App.tsx` + `src/index.css`) rather than inferred from a screenshot: header
 `bg-[hsl(var(--background)/.93)]` + `border-b border-[hsl(var(--border))]` +
 `px-4 py-3 backdrop-blur`, `.status-pill .status-bad` for the pill, and
@@ -103,7 +103,7 @@ carry the reference's exact hsl values**, so none of it is hard-coded.
 
 The brand is the **mark plus a text wordmark** (`KM` in `--ds-fg`, `TRACK` in
 `--ds-primary`), matching the reference's `Brand`. The outlined lockups
-(`kmtrack-logo-on-dark.svg`, `-on-light.svg`) are unused by the shell now and
+(`spotit-logo-on-dark.svg`, `-on-light.svg`) are unused by the shell now and
 exist only as brand assets.
 - **The map swaps the wordmark for its station and status in place.**
   `#map-km-station` and `#map-status` were *moved* into the header rather than

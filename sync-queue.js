@@ -1,4 +1,4 @@
-/* KMTrack sync queue — the seam a future Supabase backend plugs into.
+/* SPOTIT sync queue — the seam a future Supabase backend plugs into.
  *
  * This file deliberately contains NO network code, no Supabase import and no
  * auth. It decides *what* would be uploaded, in what order, and records the
@@ -12,7 +12,7 @@
 (function(root,factory){
   const api=factory(root);
   if(typeof module==='object' && module.exports) module.exports=api;
-  if(root) root.KMTrackSync=api;
+  if(root) root.SPOTITSync=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(root){
   'use strict';
 
@@ -22,7 +22,7 @@
     try{
       if(typeof module==='object' && module.exports) return require('./entry-model.js').SYNC_STATUS;
     }catch(e){ /* fall through */ }
-    if(root && root.KMTrackEntry && root.KMTrackEntry.SYNC_STATUS) return root.KMTrackEntry.SYNC_STATUS;
+    if(root && root.SPOTITEntry && root.SPOTITEntry.SYNC_STATUS) return root.SPOTITEntry.SYNC_STATUS;
     return {PENDING:'pending',SYNCED:'synced',FAILED:'failed'};
   }
   const STATUS=resolveStatus();

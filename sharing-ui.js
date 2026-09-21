@@ -68,7 +68,7 @@ async function prepareSharingExport(){
     if(dialog.returnValue!=='export') return null;
     const name=input.value.trim();
     try{localStorage.setItem('kmtrack_inspector_name_v1',name);}catch{/* Export still works when remembering preferences is blocked. */}
-    const result=KMTrackSharing.forExport(snapshot,name);
+    const result=SPOTITSharing.forExport(snapshot,name);
     // Attribute only this device's unnamed entries, never colleagues' records.
     const named=new Map(result.filter(e=>!e.importBatchId&&e.inspector).map(e=>[e.id,e.inspector]));
     const before=entries;
@@ -97,7 +97,7 @@ async function addSharingWorksheet(files,rows,createdAt){
 // A failed photo write never leaves a partially imported set of entries.
 async function commitSharedImport(rows,{label,inspectors}){
   if(!storageAvailable) throw Error('Device storage is unavailable. Import cancelled.');
-  const plan=KMTrackSharing.planImport(entries,rows);
+  const plan=SPOTITSharing.planImport(entries,rows);
   if(!plan.added.length) throw Error('There are no new, non-conflicting entries to import.');
   const batchId=newId(),added=[],photoIds=[];
   try{
@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     const file=fileInput.files[0];fileInput.value='';if(!file||sharingBusy)return;
     sharingBusy=true;document.getElementById('import-status').textContent='Reading inspection file…';
     try{
-      const data=await KMTrackSharing.readImport(file),plan=KMTrackSharing.planImport(entries,data.rows);
+      const data=await SPOTITSharing.readImport(file),plan=SPOTITSharing.planImport(entries,data.rows);
       preview=data;
       document.getElementById('import-label').value=file.name;
       const days=data.rows.map(e=>e.timestamp.slice(0,10)).sort();

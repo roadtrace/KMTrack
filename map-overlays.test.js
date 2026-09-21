@@ -31,7 +31,7 @@ test('landmark titles append their authoritative station without redundant KM te
 test('map detail opening uses stable IDs after reorder or deletion',()=>{
   const html=fs.readFileSync(require.resolve('./index.html'),'utf8');
   const fn=html.match(/function openMapEntry\(id\)\{[\s\S]*?\n\}/)[0];
-  const opened=[],context=vm.createContext({entries:[{id:'b'},{id:'a'}],openEditModal:i=>opened.push(i),KMTrackMap:{focusEditor(){}}});
+  const opened=[],context=vm.createContext({entries:[{id:'b'},{id:'a'}],openEditModal:i=>opened.push(i),SPOTITMap:{focusEditor(){}}});
   vm.runInContext(fn,context);context.openMapEntry('a');context.entries.shift();context.openMapEntry('a');context.openMapEntry('deleted');
   assert.deepEqual(opened,[1,0]);
 });

@@ -1,7 +1,7 @@
 (function(root,factory){
   const api=factory();
   if(typeof module==='object' && module.exports) module.exports=api;
-  if(root) root.KMTrackMap=api;
+  if(root) root.SPOTITMap=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
   const BOUNDS={NB:'#00b9f2',SB:'#ef4444',EB:'#f4b400',WB:'#b18cff',Other:'#a7b0b8'};

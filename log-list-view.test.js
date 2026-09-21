@@ -145,7 +145,7 @@ test('the Capture card has no filter row, and ignores the Log tab filters', () =
   // ...and the data follows suit, so a filter set on the Log tab cannot leave
   // this card showing a subset the user has no way to clear from here.
   assert.match(html, /function visibleEntries\(\)\{[\s\S]{0,320}?if\(logRegisterView === 'inspection'\) return entries;/);
-  assert.match(html, /if\(logRegisterView === 'inspection'\) return entries;[\s\S]{0,160}?KMTrackEntryFilters\.filterEntries\(entries,getLogFilters\(\)\)/);
+  assert.match(html, /if\(logRegisterView === 'inspection'\) return entries;[\s\S]{0,160}?SPOTITEntryFilters\.filterEntries\(entries,getLogFilters\(\)\)/);
 });
 
 test('the card resets only the non-left edges, preserving per-defect colours', () => {

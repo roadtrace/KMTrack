@@ -17,9 +17,14 @@ test('the header is global, not inside the Capture view', () => {
 });
 
 test('the header carries the mark, a two-tone wordmark, the sync control and reload', () => {
-  assert.match(html, /class="header-logo" src="kmtrack-mark\.svg"/);
-  // Reference Brand: "KM" in the foreground, "TRACK" in --primary.
-  assert.match(html, /id="header-wordmark">KM<span class="header-track">TRACK<\/span></);
+  assert.match(html, /class="header-logo" src="spotit-mark\.svg"/);
+  // One artwork serves both themes: the mark's own amber tile keeps the navy
+  // reticle legible on the dark bar and on the paper surface alike, so there is
+  // no theme swap and no second asset to keep in sync.
+  assert.doesNotMatch(html, /header-logo-light/);
+  assert.doesNotMatch(design, /header-logo-light/);
+  // Reference Brand: "SPOT" in the foreground, "IT" in the brand accent.
+  assert.match(html, /id="header-wordmark"><span class="header-brand-name">SPOT<\/span> <span class="header-brand-accent">IT<\/span></);
   // The sync indicator is the header's state control and opens its own panel.
   assert.match(html, /class="sync-menu" id="sync-menu"/);
   assert.match(html, /id="sync-status-text" role="status"/);
@@ -32,26 +37,28 @@ test('the header carries the mark, a two-tone wordmark, the sync control and rel
 });
 
 test('the header uses the shared surface and control values', () => {
-  // No speculation: these are read straight from the reference's App.tsx +
-  // index.css. The header FOLLOWS the theme (bg is --background at 93%).
-  const bar = design.slice(design.indexOf('html:root .top-shell header{'), design.indexOf('html:root .top-shell header{') + 700);
+  // TRACE structure: a square, solid band closed by a saturated accent rule.
+  // The app keeps its own dark surface rather than the dashboard's blue.
+  const bar = design.slice(design.indexOf('html:root .top-shell header{'), design.indexOf('html:root .top-shell header{') + 800);
   assert.match(bar, /justify-content:space-between/);
-  assert.match(bar, /background:color-mix\(in srgb, var\(--ds-bg\) 93%, transparent\)/);
-  assert.match(bar, /border-bottom:1px solid var\(--ds-border\)/);
+  assert.match(bar, /background:var\(--ds-bg\)/);
+  assert.match(bar, /border-bottom:2px solid var\(--brand-accent\)/);
   assert.match(bar, /padding:12px 16px/);
   assert.match(bar, /padding-top:max\(12px, env\(safe-area-inset-top\)\)/);
   // The inline navy gradient, rounded corners and shadow must all be reset.
   assert.match(bar, /border-radius:0/);
   assert.match(bar, /box-shadow:none/);
-  // Brand: 40px tile, 12px gap, 17px wordmark at -.05em with --primary on "TRACK".
-  assert.match(design, /\.header-logo\{[\s\S]{0,120}?width:40px/);
+  // Brand: 40px square mark, 12px gap, 18px uppercase two-tone wordmark.
+  assert.match(design, /\.header-logo\{[\s\S]{0,200}?width:40px/);
   assert.match(design, /\.header-brand\{[\s\S]{0,420}?gap:12px/);
-  const word = design.slice(design.indexOf('.header-wordmark{'), design.indexOf('.header-wordmark{') + 300);
-  assert.match(word, /font-size:17px/);
+  const word = design.slice(design.indexOf('.header-wordmark{'), design.indexOf('.header-wordmark{') + 340);
+  assert.match(word, /font-size:18px/);
   assert.match(word, /font-weight:700/);
-  assert.match(word, /letter-spacing:-\.05em/);
+  assert.match(word, /letter-spacing:-\.01em/);
   assert.match(word, /color:var\(--ds-fg\)/);
-  assert.match(design, /\.header-track\{color:var\(--ds-primary\);\}/);
+  assert.match(design, /\.header-brand-accent\{color:var\(--brand-accent\);\}/);
+  // The accent is a brand token taken from the mark's amber, not --primary.
+  assert.match(design, /--brand-accent:\s*#FFBE00/);
   // StatusPill contract: fully rounded, 11px bold, holding the 44px control
   // height so the whole pill is a valid touch target.
   const pill = design.slice(design.indexOf('.sync-menu > summary{'), design.indexOf('.sync-menu > summary{') + 600);
@@ -145,7 +152,7 @@ test('the indicator distinguishes all six sync states from real data', () => {
   assert.match(html, /synced: \{tone:'fresh',/);
   assert.match(html, /local:  \{tone:'neutral',/);
   // Counts come from the queue's own summary, never a parallel counter.
-  assert.match(html, /KMTrackSync\.summary\(entries\)/);
+  assert.match(html, /SPOTITSync\.summary\(entries\)/);
   for(const id of ['sync-total','sync-pending','sync-synced','sync-failed']){
     assert.match(html, new RegExp(`id="${id}"`));
   }

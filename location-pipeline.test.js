@@ -88,8 +88,8 @@ test('stale GPS blocks both defect and camera capture; a fresh confirmed fix sha
     OFF_NETWORK_KM: 0.08,
     currentPos: { lat: 15, lon: 120.7, acc: 8, fresh: false },
     currentResolvedLocation: { saveAllowed: true, result: { km: 80.125, expressway: 'NLEX', distance: 0.005 } },
-    KMTrackLocation: { isInterchangeMode: () => false },
-    userBound: 'NB', entries: [], KMTrackEntry: entryModel, inspectorName: 'Inspector',
+    SPOTITLocation: { isInterchangeMode: () => false },
+    userBound: 'NB', entries: [], SPOTITEntry: entryModel, inspectorName: 'Inspector',
     fullTimestamp: () => '2026-09-20 10:00:00', saveEntries: () => {}, renderLog: () => {},
     alert: message => alerts.push(message)
   });
@@ -120,7 +120,7 @@ test('local storage migrates legacy rows once and reports a failed save without 
   const warning = { hidden: true, textContent: '' };
   const app = context(['testStorageWritable', 'loadFromStorage', 'saveEntries'], {
     localStorage: storage, STORAGE_KEY_ENTRIES: 'nlex_inspection_entries_v1',
-    STORAGE_KEY_BOUND: 'nlex_user_bound_v1', KMTrackEntry: entryModel,
+    STORAGE_KEY_BOUND: 'nlex_user_bound_v1', SPOTITEntry: entryModel,
     storageAvailable: false, entries: [], userBound: '',
     document: { getElementById: () => warning }
   });

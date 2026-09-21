@@ -88,8 +88,8 @@ test('dark uses the MapTiler vector style — not a raster tile layer, not an if
   assert.match(html,/dark_all/);
   assert.match(html,/addRasterBasemap\('dark'\)/);
   assert.match(html,/L\.maptilerLayer\(\{/);
-  assert.match(html,/style: KMTrackMapConfig\.styleUrl/);
-  assert.match(html,/apiKey: KMTrackMapConfig\.apiKey/);
+  assert.match(html,/style: SPOTITMapConfig\.styleUrl/);
+  assert.match(html,/apiKey: SPOTITMapConfig\.apiKey/);
   // The GL container is pinned to the viewport from the plugin's `move` handler.
   // Its default 32ms throttle is outrun by a 60-120Hz drag, so the canvas drifted
   // with the map pane and snapped back — the basemap lurched while the markers

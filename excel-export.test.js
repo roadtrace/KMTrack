@@ -28,10 +28,10 @@ test('Sharing Details stays centered and photo workbooks use rich values rather 
 test('photo export and import advertise and preserve one native-photo workbook',()=>{
   assert.match(controls,/Excel with photos/);
   assert.match(controls,/Native in-cell photos for offline viewing/);
-  assert.match(html,/KMTrack_with_photos_\$\{stamp\}\.xlsx/);
+  assert.match(html,/SpotIt_with_photos_\$\{stamp\}\.xlsx/);
   assert.match(importer,/async function readWorkbookPhotos\(files\)/);
   assert.match(importer,/photoFile=embeddedPhotos\.get\(i\+2\)\|\|null/);
-  assert.match(importer,/Choose a KMTrack \.xlsx or Photos \.zip file/);
+  assert.match(importer,/Choose a SPOT IT \.xlsx or Photos \.zip file/);
 });
 
 test('resolved interchange names persist through Excel export and import',()=>{

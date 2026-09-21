@@ -1,4 +1,4 @@
-/* KMTrack — MapTiler browser configuration.
+/* SPOT IT — MapTiler browser configuration.
  *
  * The API key is a PUBLIC browser key: it is necessarily visible in the tile
  * requests the browser makes, exactly like the CARTO key it sits beside. It is
@@ -33,6 +33,6 @@
   };
 
   if(typeof module === 'object' && module.exports) module.exports = config;
-  if(root) root.KMTrackMapConfig = config;
+  if(root) root.SPOTITMapConfig = config;
 
 })(typeof globalThis !== 'undefined' ? globalThis : this);

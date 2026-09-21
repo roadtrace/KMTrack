@@ -1,5 +1,5 @@
 /* ==========================================================================
-   KMTrack Design System
+   SPOT IT Design System
    --------------------------------------------------------------------------
    Field-instrument visual language: amber for action, teal for verification,
    navy evidence surfaces, mono values for anything that must be exact.
@@ -90,6 +90,12 @@
   --ds-ring:          #fab80f;
   --ds-shadow:        0 10px 32px rgba(5,10,15,.34);
   --ds-shadow-sm:     0 8px 24px rgba(5,10,15,.22);
+
+  /* SPOT IT brand accent: the amber ground of the supplied mark (#FFBE00).
+     Used for the header's closing rule and the second half of the wordmark,
+     the way the TRACE dashboard marks its own header. Deliberately separate
+     from --ds-primary so retuning the action colour never moves the brand. */
+  --brand-accent:     #FFBE00;
 
   --ds-space-1:4px;
   --ds-space-2:8px;
@@ -854,10 +860,11 @@ html:root .top-shell header{
      edge on a 320px screen. */
   position:relative;
   border:0;
-  border-bottom:1px solid var(--ds-border);
-  background:color-mix(in srgb, var(--ds-bg) 93%, transparent);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
+  /* TRACE header structure: a square, solid band closed by a saturated accent
+     rule on its lower edge. The app keeps its own dark surface rather than the
+     dashboard's blue, so only the structure is borrowed. */
+  border-bottom:2px solid var(--brand-accent);
+  background:var(--ds-bg);
   border-radius:0;
   box-shadow:none;
   padding:12px 16px;
@@ -876,6 +883,10 @@ html:root .top-shell header{
   min-width:0;
   flex:0 1 auto;
 }
+/* The mark sits in a fixed 40px slot so the lockup's optical centre holds
+   whether the wordmark is showing or the map has swapped in the station. No
+   corner radius is set here: the artwork carries the original logo's own
+   proportional radius, and the PNG icons inherit it too. */
 .header-logo{
   width:40px;
   height:40px;
@@ -883,19 +894,26 @@ html:root .top-shell header{
   flex:0 0 40px;
   object-position:left center;
 }
+/* The mark carries its own amber tile, so one artwork serves both themes: the
+   navy reticle and the amber ground both hold on the dark and paper surfaces.
+   No theme swap, and no second asset to keep in sync. */
 /* Reference Brand: `text-[17px] font-bold leading-none tracking-[-.05em]` with
-   the second half in --primary. The header follows the theme, so this is
-   token-driven rather than hard-coded white. */
-.header-wordmark{
+   the second half in the accent. The header follows the theme, so this is
+   token-driven rather than hard-coded white. TRACE sets its wordmark as an
+   uppercase two-tone name, which "SPOT IT" picks up directly. */.header-wordmark{
   font-family:var(--font-heading);
-  font-size:17px;
+  font-size:18px;
   font-weight:700;
   line-height:1;
-  letter-spacing:-.05em;
+  /* A touch tighter than the UI default but looser than the old single-word
+     "KMTrack" tile: "SPOT" and "IT" have to read as two words. */
+  letter-spacing:-.01em;
+  text-transform:uppercase;
   color:var(--ds-fg);
   white-space:nowrap;
 }
-.header-track{color:var(--ds-primary);}
+.header-brand-name{color:var(--ds-fg);}
+.header-brand-accent{color:var(--brand-accent);}
 .header-wordmark[hidden]{display:none;}
 .header-context{
   display:flex;
