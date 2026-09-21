@@ -113,30 +113,38 @@ html:root .log-action-footer #select-toggle-btn.active{background:var(--line-yel
 .inspection-record-list,.inspection-record-list .log-entry{scroll-margin-top:140px;scroll-margin-bottom:calc(190px + env(safe-area-inset-bottom));}
 
 /* KMTrack Shared selection control: rounded visible checkbox inside an
-   unchanged 44px touch target. */
+   unchanged 44px touch target.
+
+   BOTH pseudo-elements are absolutely positioned and centred the same way. They
+   used to be mixed — the box centred by `place-items:center` on a grid, the
+   check by absolute positioning — and the box drifted 4px UP the moment the
+   check appeared. Verified by pixel bounds: the box is 28x28 in both states but
+   its centre moved from y=22 to y=18. */
 html:root .entry-checkbox{
- position:relative;display:grid;place-items:center;width:44px;height:44px;min-height:44px;padding:0;
+ position:relative;display:block;width:44px;height:44px;min-height:44px;padding:0;
  background:transparent;border:0;box-shadow:none;font-size:0;color:transparent;
 }
 html:root .entry-checkbox::before{
- content:'';width:28px;height:28px;box-sizing:border-box;border:2px solid #67737c;
- border-radius:8px;background:transparent;pointer-events:none;
+ content:'';position:absolute;left:50%;top:50%;width:28px;height:28px;box-sizing:border-box;
+ transform:translate(-50%,-50%);
+ border:2px solid #67737c;border-radius:8px;background:transparent;pointer-events:none;
 }
 html:root .entry-checkbox[aria-checked="true"]::before{
- background:#1a3c34;border-color:#2dd4a0;
+ background:var(--line-yellow);border-color:var(--line-yellow);
 }
+/* The reference's own icon language: lucide's Check, stroke-based with round
+   caps and joins, drawn through a mask so the ink can be a theme colour. */
 html:root .entry-checkbox[aria-checked="true"]::after{
  content:'';position:absolute;left:50%;top:50%;width:16px;height:16px;background:#173044;
- -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.25 4.25L19 7' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
- mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.25 4.25L19 7' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
- transform:translate(-50%,-50%);pointer-events:none;
+ transform:translate(-50%,-50%);
+ -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 6 9 17l-5-5' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+ mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 6 9 17l-5-5' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+ pointer-events:none;
 }
 html:root .entry-checkbox:focus-visible{outline:none;}
 html:root .entry-checkbox:focus-visible::before{outline:2px solid var(--line-yellow);outline-offset:2px;}
 /* Selection follows the supplied reference: warm yellow ring and checkmark. */
 html:root .inspection-record-list .log-entry.selected{outline:2px solid var(--line-yellow);outline-offset:-2px;}
-html:root .entry-checkbox[aria-checked="true"]::before{background:var(--line-yellow);border-color:var(--line-yellow);}
-html:root .entry-checkbox[aria-checked="true"]::after{background:#173044;}
 html:root[data-theme="light"] .log-result-count{color:var(--line-white);}
 html:root[data-theme="light"] .inspection-record-list .swipe-row,
 html:root[data-theme="light"] .inspection-record-list .log-entry{border-radius:var(--radius-lg);}

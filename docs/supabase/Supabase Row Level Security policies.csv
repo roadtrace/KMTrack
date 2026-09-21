@@ -1,0 +1,9 @@
+schemaname,tablename,policyname,permissive,roles,cmd,qual,with_check
+public,inspections,Administrators can view all inspections,PERMISSIVE,{authenticated},SELECT,is_admin(),null
+public,inspections,Approved users can create own team inspections,PERMISSIVE,{authenticated},INSERT,null,((user_id = auth.uid()) AND (team = current_user_team()))
+public,inspections,Approved users can view team inspections,PERMISSIVE,{authenticated},SELECT,(team = current_user_team()),null
+public,inspections,Inspectors can update own inspections,PERMISSIVE,{authenticated},UPDATE,((user_id = auth.uid()) AND (team = current_user_team())),((user_id = auth.uid()) AND (team = current_user_team()))
+public,inspections,Supervisors can update team inspections,PERMISSIVE,{authenticated},UPDATE,(is_supervisor() AND (team = current_user_team())),(is_supervisor() AND (team = current_user_team()))
+public,profiles,Administrators can update profiles,PERMISSIVE,{authenticated},UPDATE,is_admin(),is_admin()
+public,profiles,Administrators can view all profiles,PERMISSIVE,{authenticated},SELECT,is_admin(),null
+public,profiles,Users can view own profile,PERMISSIVE,{authenticated},SELECT,(auth.uid() = id),null

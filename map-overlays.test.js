@@ -18,17 +18,6 @@ test('landmark catalog uses requested names, removals and authoritative Caloocan
   for(const removed of ['General T. de Leon Exit','Parada Exit','Libis Baesa Exit']) assert.ok(!names.includes(removed));
   assert.ok(names.includes('Mindanao Exit'));assert.ok(!names.includes('Mindanao Avenue Interchange'));
   assert.ok(names.includes('R10 Ramp'));assert.ok(!names.includes('Navotas Exit'));
-  assert.ok(names.includes('Harbor Link (Smart Connect) Interchange'));
-  for(const interchange of [
-    'Balintawak Interchange','Paso de Blas (Valenzuela) Interchange','Meycauayan Interchange',
-    'Marilao Interchange','Philippine Arena Interchange','Bocaue Interchange',
-    'Burol (Tabang Spur Overpass) Interchange','Balagtas Interchange (Plaridel By-pass)',
-    'Guiguinto Interchange','Santa Rita Interchange','Pulilan Interchange','San Simon Interchange',
-    'San Fernando Interchange','Sindalan/Mexico Interchange','Angeles Interchange',
-    'Dau Interchange','SCTEX Spur (NLE) Interchange','Sta. Ines Interchange'
-  ]) assert.ok(names.includes(interchange),interchange);
-  const smartConnect=assets.find(asset=>asset.name==='Harbor Link (Smart Connect) Interchange');
-  assert.deepEqual([smartConnect.network,smartConnect.kind,smartConnect.station],['NLEX Harbor Link','interchange','13+565']);
   const caloocan=assets.find(asset=>asset.name==='Caloocan Interchange'),c3=assets.find(asset=>asset.name==='C-3 Road Exit');
   assert.deepEqual([caloocan.lat,caloocan.lon],[14.6447911,120.9750438]);
   assert.deepEqual([c3.lat,c3.lon],[14.6327845,120.9766664]);
@@ -54,6 +43,23 @@ test('supplemental map data covers all requested networks with finite sourced lo
   for(const a of data.assets){assert.ok(Number.isFinite(a.lat)&&a.lat>14&&a.lat<16);assert.ok(Number.isFinite(a.lon)&&a.lon>120&&a.lon<122);assert.ok(a.sources.length);}
   const sw=fs.readFileSync(require.resolve('./sw.js'),'utf8');
   for(const file of ['map-overlays.js','map-overlays.css','map-landmarks.json'])assert.ok(sw.includes("'./"+file+"'"));
+});
+
+test('supplied NLEX interchange lines preserve identifiers, names and offline coverage',()=>{
+  const data=require('./interchanges.json');
+  assert.equal(data.crs,'EPSG:4326');assert.equal(data.matchRadiusMeters,50);
+  assert.equal(data.ramps.length,448);
+  assert.equal(new Set(data.ramps.map(row=>row.seg_id)).size,448);
+  assert.equal(new Set(data.ramps.map(row=>row.site_id)).size,21);
+  assert.equal(data.ramps.filter(row=>row.from_node||row.to_node).length,0);
+  assert.equal(data.ramps.filter(row=>row.level).length,1);
+  for(const row of data.ramps){
+    assert.ok(row.seg_id&&row.site_id&&row.name);assert.equal(row.interchange,row.name);
+    assert.ok(row.points.length>=2);assert.ok(row.points.every(point=>Number.isFinite(point.lat)&&Number.isFinite(point.lon)));
+  }
+  const html=fs.readFileSync(require.resolve('./index.html'),'utf8');
+  const sw=fs.readFileSync(require.resolve('./sw.js'),'utf8');
+  assert.match(html,/fetch\('interchanges\.json'/);assert.ok(sw.includes("'./interchanges.json'"));
 });
 
 test('overlapping dot hit areas resolve to the closest geographic point rather than DOM order',()=>{

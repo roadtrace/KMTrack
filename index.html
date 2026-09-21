@@ -13,7 +13,8 @@
     if(localStorage.getItem('kmtrack_theme_v1') === 'light') document.documentElement.dataset.theme = 'light';
   }catch(e){ /* theme preference is non-critical */ }
 </script>
-<link rel="apple-touch-icon" href="KMTrack_logo.png">
+<link rel="icon" type="image/svg+xml" href="kmtrack-mark.svg">
+<link rel="apple-touch-icon" href="kmtrack-apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 <title>KMTrack — Road Inspection Log</title>
@@ -118,14 +119,44 @@
     border:3px solid var(--line-white);
     border-radius:var(--radius-xs);
     padding:12px 14px;
-    text-align:center;
+    text-align:left;
     position:relative;
   }
-  .kmpost-grid{display:flex;justify-content:center;align-items:center;width:100%;}
-  .kmpost-current{min-width:0;width:100%;padding-right:0;text-align:center;}
+  .kmpost-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:stretch;}
+  .kmpost-current{min-width:0;padding-right:2px;}
   .kmpost .kmlabel{font-size:11px; letter-spacing:2px; font-weight:700; color:#dff5e6;}
   .kmpost .kmvalue{font-family:var(--mono); font-size:clamp(27px,8vw,34px); font-weight:700; line-height:1.1; margin-top:2px; white-space:nowrap;}
   .kmpost .kmunit{font-size:12px; color:#dff5e6;}
+  .nearby-asset{
+    min-width:0;border-left:1px solid rgba(255,255,255,.45);padding-left:14px;
+    display:flex;flex-direction:column;justify-content:center;
+  }
+  .nearby-asset-name{font-size:15px;font-weight:800;line-height:1.25;margin-top:5px;overflow-wrap:anywhere;}
+  .nearby-asset-station{font-family:var(--mono);font-size:13px;font-weight:700;color:#fff;margin-top:5px;}
+  .nearby-asset-distance{font-size:10px;color:#dff5e6;margin-top:4px;}
+  .nearby-asset .kmlabel{padding-right:34px;}
+  .bridge-filter-toggle{
+    position:absolute;right:12px;top:11px;z-index:3;width:32px;height:32px;padding:0;
+    display:inline-flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);
+    border:1px solid rgba(255,255,255,.34);background:rgba(0,0,0,.18);color:#fff;
+    cursor:pointer;-webkit-tap-highlight-color:transparent;
+  }
+  .bridge-filter-toggle::before{
+    content:'';width:15px;height:15px;background:currentColor;
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M3 5a1 1 0 0 1 1-1h16a1 1 0 0 1 .78 1.63L14 14.01V19a1 1 0 0 1-.55.89l-3 1.5A1 1 0 0 1 9 20.5v-6.49L3.22 6.63A1 1 0 0 1 3 5Z'/%3E%3C/svg%3E") center/contain no-repeat;
+    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M3 5a1 1 0 0 1 1-1h16a1 1 0 0 1 .78 1.63L14 14.01V19a1 1 0 0 1-.55.89l-3 1.5A1 1 0 0 1 9 20.5v-6.49L3.22 6.63A1 1 0 0 1 3 5Z'/%3E%3C/svg%3E") center/contain no-repeat;
+  }
+  .bridge-filter-toggle.filtered::after{content:'';position:absolute;right:5px;top:5px;width:6px;height:6px;border-radius:var(--radius-full);background:var(--line-yellow);box-shadow:0 0 7px rgba(244,180,0,.8);}
+  .bridge-filter-menu{
+    position:absolute;right:12px;top:49px;bottom:12px;z-index:12;width:min(250px,calc(100% - 24px));max-height:none;overflow:auto;
+    padding:8px;border:1px solid rgba(255,255,255,.16);border-radius:var(--radius-md);
+    background:linear-gradient(180deg,rgba(30,41,49,.99),rgba(17,30,39,.99));
+    box-shadow:0 16px 34px rgba(0,0,0,.34);color:#eef4f6;
+  }
+  .bridge-filter-title{padding:5px 8px 7px;font-size:10px;font-weight:750;letter-spacing:.10em;text-transform:uppercase;color:#aebbc3;}
+  .bridge-filter-option{width:100%;min-height:38px;padding:8px 10px;border:0;border-radius:var(--radius-sm);background:transparent;color:inherit;text-align:left;font-size:12px;font-weight:650;cursor:pointer;}
+  .bridge-filter-option:hover{background:rgba(255,255,255,.08);}
+  .bridge-filter-option.selected{background:rgba(244,180,0,.16);color:#ffd35a;}
   .kmpost .segment-tag{
     margin-top:10px; display:inline-block; background:rgba(0,0,0,0.25);
     padding:5px 12px; border-radius:var(--radius-lg); font-size:12px; font-weight:700;
@@ -138,8 +169,14 @@
     letter-spacing:0.3px; line-height:1.4;
   }
   .kmpost .ramp-tag.show{display:inline-block;}
+  .kmpost.interchange-mode .kmvalue{font-size:clamp(18px,5.6vw,26px);line-height:1.18;white-space:normal;margin-top:8px;}
+  .kmpost.interchange-mode .kmunit{margin-top:8px;font-weight:700;color:#fff;}
   @media (max-width:380px){
     .kmpost{padding:11px 12px;}
+    .kmpost-grid{gap:10px;}
+    .nearby-asset{padding-left:10px;}
+    .nearby-asset-name{font-size:13px;}
+    .nearby-asset-station{font-size:11px;}
   }
 
   /* Bound (direction) toggle — now a compact side panel inside .readout,
@@ -676,6 +713,7 @@ button {
   .readout-main .field .value,
   .readout-main .status,
   .kmpost .kmvalue,
+  .nearby-asset-station,
   header .sub,
   .log-entry .info .meta,
   .photo-status,
@@ -696,8 +734,9 @@ button {
   }
   .readout-main .status{font-weight:500;}
   .kmpost .kmvalue{font-weight:760;letter-spacing:-.035em;}
+  .nearby-asset-station{font-weight:700;letter-spacing:.01em;}
   .kmpost .kmlabel{letter-spacing:.12em;}
-  .kmpost .kmunit{color:rgba(240,255,246,.82);}
+  .kmpost .kmunit,.nearby-asset-distance{color:rgba(240,255,246,.82);}
   .bound-hint,.bound-auto-status,.log-empty{color:var(--text-subtle);}
   .category-label .category-sub,.calib-hint,.count-bar,.log-entry .info .meta,.edit-field-label,.logo-hint{color:var(--text-muted);}
 
@@ -794,7 +833,7 @@ button {
     .export-btn{width:100%;min-width:0;padding-left:10px;padding-right:10px;}
   }
 
-  /* Landscape dashboard: calibration/GPS, direction, and KM card form
+  /* Landscape dashboard: calibration/GPS, direction, and KM/asset cards form
      one clean top row; the large defect controls span the full width below. */
   @media (orientation:landscape) and (min-width:700px){
     body{padding-bottom:24px;}
@@ -837,11 +876,15 @@ button {
     .lane-btn-row{gap:8px;}
     .lane-btn{padding:20px 4px;font-size:20px;min-height:72px;border-radius:var(--radius-sm);}
     #defect-section.focused .focused-category .lane-btn{padding:32px 8px;font-size:28px;}
-    .kmpost-grid{width:100%;align-items:center;}
-    .kmpost-current{padding-right:0;}
+    .kmpost-grid{width:100%;gap:22px;align-items:center;}
+    .kmpost-current{padding-right:8px;}
     .kmpost .kmlabel{font-size:13px;letter-spacing:2.2px;}
     .kmpost .kmvalue{font-size:clamp(40px,5vw,58px);margin-top:8px;}
     .kmpost .kmunit{font-size:14px;margin-top:6px;}
+    .nearby-asset{padding-left:22px;min-height:160px;}
+    .nearby-asset-name{font-size:clamp(19px,2.1vw,24px);line-height:1.2;margin-top:10px;}
+    .nearby-asset-station{font-size:17px;margin-top:12px;}
+    .nearby-asset-distance{font-size:13px;margin-top:8px;}
     .kmpost .segment-tag,.kmpost .ramp-tag.show{align-self:flex-start;font-size:14px;margin-top:12px;padding:7px 14px;}
     .lane-modal{width:min(620px,92vw);max-height:calc(100vh - 24px);overflow:auto;}
 
@@ -875,9 +918,14 @@ button {
     main>.readout>.readout-main{padding:12px;gap:8px 10px;}
     main>.readout>.bound-panel{padding:12px 10px;}
     main>.kmpost{padding:18px 16px;}
+    .kmpost-grid{gap:14px;}
     .kmpost .kmlabel{font-size:10px;letter-spacing:1.5px;}
     .kmpost .kmvalue{font-size:34px;}
     .kmpost .kmunit{font-size:11px;}
+    .nearby-asset{padding-left:14px;min-height:130px;}
+    .nearby-asset-name{font-size:16px;}
+    .nearby-asset-station{font-size:13px;margin-top:8px;}
+    .nearby-asset-distance{font-size:10px;margin-top:6px;}
     .kmpost .segment-tag,.kmpost .ramp-tag.show{font-size:11px;margin-top:8px;padding:5px 10px;}
     .lane-btn{min-height:64px;padding:17px 3px;font-size:18px;}
   }
@@ -909,29 +957,6 @@ button {
   .header-copy .sub{font-family:var(--font-ui);font-size:12px;letter-spacing:.035em;color:#aeb4bc;max-width:min(92vw,480px);}
   #storage-status:not([hidden]){margin-top:2px;color:#efc067;white-space:normal;}
 
-  .dataset-drawer{
-    position:relative;z-index:1;margin:-20px auto 0;width:min(100%,560px);
-    background:linear-gradient(180deg,rgba(30,41,49,.98),rgba(17,30,39,.98));
-    border:1px solid rgba(255,255,255,.04);border-top:0;border-radius:0 0 var(--radius-lg) var(--radius-lg);
-    box-shadow:0 12px 24px rgba(0,0,0,.28);overflow:hidden;
-  }
-  .dataset-drawer>summary{
-    min-height:48px;padding:20px 22px 5px;display:flex;align-items:center;gap:11px;
-    cursor:pointer;list-style:none;color:#dfe4e8;font-size:10px;font-weight:750;
-    letter-spacing:.035em;text-transform:uppercase;-webkit-tap-highlight-color:transparent;
-  }
-  .dataset-drawer>summary::-webkit-details-marker{display:none;}
-  .dataset-state-dot{width:9px;height:9px;flex:0 0 9px;border-radius:var(--radius-full);background:#d39a26;box-shadow:0 0 0 3px rgba(211,154,38,.10),0 0 10px rgba(211,154,38,.65);}
-  .dataset-drawer.loaded .dataset-state-dot{background:#45e3a0;box-shadow:0 0 0 3px rgba(69,227,160,.12),0 0 11px rgba(69,227,160,.95);}
-  .dataset-state-label{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .dataset-chevron{width:22px;height:22px;border:1px solid rgba(255,255,255,.38);border-radius:var(--radius-full);position:relative;flex:0 0 22px;}
-  .dataset-chevron::after{content:'';position:absolute;left:7px;top:5px;width:6px;height:6px;border-right:1.5px solid #dbe1e6;border-bottom:1.5px solid #dbe1e6;transform:rotate(45deg);transition:transform 180ms ease,top 180ms ease;}
-  .dataset-drawer[open] .dataset-chevron::after{top:8px;transform:rotate(225deg);}
-  .dataset-content{padding:0 14px 15px;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-  .dataset-panel{min-width:0;padding:12px 13px;border:1px solid rgba(255,255,255,.10);border-radius:var(--radius-md);background:rgba(255,255,255,.035);}
-  .dataset-panel-title{font-size:11px;font-weight:750;color:#f1f3f5;margin-bottom:5px;}
-  .dataset-panel .calib-hint{min-height:34px;margin:0 0 9px;}
-  .dataset-panel .calib-add{margin:0;min-height:38px;width:100%;border-radius:var(--radius-sm);}
 
   main{padding-top:12px;}
   .readout{
@@ -967,6 +992,7 @@ button {
   .kmpost .kmvalue{font-size:clamp(34px,10vw,44px);}
   .kmpost .kmlabel{font-size:11px;}
   .kmpost .kmunit{font-size:12px;}
+  .nearby-asset{border-left-color:rgba(230,255,246,.52);}
   .defect-focus-select,.select-toggle-btn{height:42px;min-height:42px;padding-top:6px;padding-bottom:6px;}
   .defect-focus-select{
     background-color:rgba(17,30,39,.98);
@@ -986,17 +1012,14 @@ button {
 
   @media(max-width:600px){
     header{min-height:0;padding:env(safe-area-inset-top) 12px 5px;}
-    .header-logo{width:auto;height:48px;max-width:38vw;max-height:48px;}
+    .header-logo{width:auto;height:48px;max-width:54vw;max-height:48px;}
     .header-copy .sub{font-size:9px;}
-    .dataset-drawer{width:calc(100% - 20px);}
-    .dataset-drawer>summary{padding-left:18px;padding-right:18px;}
     .readout{padding:14px 16px;gap:14px;}
     .readout-main{gap:10px 8px;}
     .bound-panel{flex-basis:132px;padding:10px 12px;}
     button.bound-btn{min-height:48px;}
   }
   @media(max-width:390px){
-    .dataset-content{grid-template-columns:1fr;}
     .readout{padding:12px;gap:10px;}
     .readout-main .field .value{font-size:12px;letter-spacing:.01em;}
     .bound-panel{flex-basis:112px;padding:9px;}
@@ -1005,7 +1028,6 @@ button {
     header{min-height:0;padding:calc(env(safe-area-inset-top) + 8px) 18px 9px;}
     .header-logo{height:58px;width:auto;max-height:58px;}
     .header-copy{margin-top:0;}
-    .dataset-drawer{width:min(calc(100% - 36px),1144px);}
     main>section.block:first-child{display:none;}
     main>.readout>.readout-main{grid-row:1 / span 2;background:linear-gradient(135deg,rgba(39,39,53,.66),rgba(28,32,45,.53));border-color:rgba(176,184,205,.22);border-radius:var(--radius-lg);}
   }
@@ -1045,22 +1067,6 @@ button {
   html[data-theme="light"] header .sub{color:#c0ccd4;}
   html[data-theme="light"] .theme-toggle{background:rgba(240,247,250,.14);border-color:rgba(220,239,250,.36);}
   html[data-theme="light"] .theme-toggle::before{content:'☾';}
-  html[data-theme="light"] .dataset-drawer{
-    background:#fff;border-color:rgba(32,42,49,.10);border-radius:0 0 var(--radius-lg) var(--radius-lg);
-    box-shadow:0 7px 20px rgba(38,48,56,.10);
-  }
-  html[data-theme="light"] .dataset-drawer>summary{color:#30363b;}
-  html[data-theme="light"] .dataset-chevron{border-color:rgba(32,42,49,.24);}
-  html[data-theme="light"] .dataset-chevron::after{border-color:#687078;}
-  html[data-theme="light"] .dataset-panel{background:#f7f8fa;border-color:rgba(32,42,49,.09);border-radius:var(--radius-md);}
-  html[data-theme="light"] .dataset-panel-title{color:#30363b;}
-  html[data-theme="light"] .dataset-panel .calib-hint{color:#70777d;}
-  html[data-theme="light"] .dataset-panel .calib-add{
-    background:#fff;color:#30363b;border:1px solid rgba(32,42,49,.12);
-    box-shadow:0 4px 12px rgba(38,48,56,.08);
-  }
-  html[data-theme="light"] .dataset-panel .calib-add:hover{background:#fafbfc;}
-  html[data-theme="light"] .dataset-panel .calib-add:disabled{background:#f4f5f6;color:#7c8388;opacity:1;}
   html[data-theme="light"] .readout{
     background:#fff;border-color:rgba(32,42,49,.10);border-radius:var(--radius-lg);
     box-shadow:0 7px 20px rgba(38,48,56,.09);
@@ -1070,8 +1076,14 @@ button {
   html[data-theme="light"] button.bound-btn{background:#fff;border-color:rgba(32,42,49,.16);color:#23272b;}
   html[data-theme="light"] button.bound-btn.active{background:linear-gradient(145deg,#ffc000,#f2ad00);border-color:#e9a600;}
   html[data-theme="light"] .kmpost{border-radius:var(--radius-lg);}
+  html[data-theme="light"] .bridge-filter-toggle{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.48);}
+  html[data-theme="light"] .bridge-filter-menu{background:#fff;color:#30363b;border-color:rgba(32,42,49,.10);box-shadow:0 12px 28px rgba(38,48,56,.18);}
+  html[data-theme="light"] .bridge-filter-title{color:#737a80;}
+  html[data-theme="light"] .bridge-filter-option:hover{background:#f3f5f6;}
+  html[data-theme="light"] .bridge-filter-option.selected{background:#fff2ce;color:#765300;}
   html[data-theme="light"] .kmpost{color:#f7fffb;}
   html[data-theme="light"] .kmpost .kmlabel,html[data-theme="light"] .kmpost .kmunit,
+  html[data-theme="light"] .nearby-asset-distance{color:rgba(245,255,250,.86);}
   html[data-theme="light"] h2{color:#555d63;}
   html[data-theme="light"] .defect-focus-select{
     color:#23272b;background-color:#fff;border-radius:var(--radius-lg);
@@ -1105,9 +1117,9 @@ button {
   @media(prefers-reduced-motion:reduce){.theme-toggle{transition:none;}}
 
   /* ---------- Inspection / map tabs ---------- */
-  body{padding-bottom:calc(56px + env(safe-area-inset-bottom));}
+  body{padding-bottom:var(--app-nav-h);}
   .app-view[hidden]{display:none!important;}
-  .map-view{height:calc(100dvh - 56px - env(safe-area-inset-bottom));min-height:420px;position:relative;background:#dce4e8;}
+  .map-view{position:relative;background:#dce4e8;}
   #osm-map{width:100%;height:100%;background:#dce4e8;}
   .map-topbar{position:absolute;z-index:500;left:12px;right:12px;top:calc(env(safe-area-inset-top) + 10px);display:flex;align-items:center;gap:10px;padding:10px 11px 10px 14px;border:1px solid rgba(255,255,255,.16);border-radius:var(--radius-md);background:linear-gradient(180deg,rgba(30,41,49,.94),rgba(17,30,39,.94));color:#eef4f6;box-shadow:0 8px 22px rgba(0,0,0,.24);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
   .map-topbar-copy{min-width:0;flex:1;}
@@ -1128,19 +1140,10 @@ button {
   .map-entry-controls input[type="checkbox"]{width:18px;height:18px;accent-color:#df4242;}
   .map-entry-controls input[type="date"]{width:140px;}
   .map-entry-controls input:disabled{opacity:.55;}
-  .app-tab-bar{position:fixed;z-index:900;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,560px);height:calc(56px + env(safe-area-inset-bottom));padding:4px 12px env(safe-area-inset-bottom);display:grid;grid-template-columns:1fr 1fr;gap:8px;border:1px solid rgba(255,255,255,.10);border-bottom:0;border-radius:0;background:linear-gradient(180deg,rgba(27,39,48,.98),rgba(14,26,35,.99));box-shadow:0 -8px 24px rgba(0,0,0,.24);}
-  .app-tab-btn{min-height:44px;padding:3px 12px;border:0;border-radius:var(--radius-md);background:transparent;color:#98a7b0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10px;font-weight:700;cursor:pointer;}
-  .app-tab-btn svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
-  .app-tab-btn.active{background:rgba(71,169,215,.14);color:#79cef4;}
-  .app-tab-btn:focus-visible{outline:2px solid currentColor;outline-offset:2px;}
-  html[data-theme="light"] .app-tab-bar{background:rgba(255,255,255,.98);border-color:rgba(32,42,49,.10);box-shadow:0 -7px 22px rgba(38,48,56,.11);}
-  html[data-theme="light"] .app-tab-btn{color:#747b80;}
-  html[data-theme="light"] .app-tab-btn.active{background:#eef7fb;color:#1683b6;}
   html[data-theme="light"] .map-topbar{background:rgba(255,255,255,.95);color:#252a2e;border-color:rgba(32,42,49,.10);box-shadow:0 7px 20px rgba(38,48,56,.13);}
   html[data-theme="light"] .map-status{color:#727a80;}
   html[data-theme="light"] .map-locate-btn,html[data-theme="light"] .map-theme-toggle{background:#f4f6f7;color:#25343d;border-color:rgba(32,42,49,.12);}
   html[data-theme="light"] .map-theme-toggle::before{content:'☾';}
-  @media(prefers-reduced-motion:reduce){.app-tab-btn{transition:none;}}
   /* Inspection accessibility: preserve the existing surfaces and category fills. */
   .bound-hint,.bound-auto-status{color:var(--text-muted);}
   html:not([data-theme="light"]) .status.err{color:#e47164;}
@@ -1156,10 +1159,12 @@ button {
   #defect-section.focused .focused-category .lane-btn.others-btn{min-height:64px;}
   .readout-main .field .label{white-space:normal;overflow-wrap:anywhere;font-size:11px;letter-spacing:.08em;}
   .readout-main .field{min-width:0;}
-  .bound-auto-status,.dataset-drawer>summary,.app-tab-btn{font-size:11px;}
+  .bound-auto-status,.app-tab-btn{font-size:11px;}
   .header-copy .sub{font-size:11px;}
   .category-label .category-sub{font-size:10px;}
   .theme-toggle{width:44px;height:44px;}
+  .bridge-filter-toggle{width:44px;height:44px;}
+  .bridge-filter-menu{top:61px;}
   .category-camera-btn{width:44px;height:44px;flex:0 0 44px;}
   .defect-focus-select,.select-toggle-btn,.export-btn{height:auto;min-height:44px;}
   .entry-filters :is(input,select,button){height:44px;min-height:44px;}
@@ -1178,84 +1183,133 @@ button {
 <link rel="stylesheet" href="sharing.css">
 <link rel="stylesheet" href="photo-viewer.css">
 <link rel="stylesheet" href="map-overlays.css">
+<link rel="stylesheet" href="design-system.css">
 </head>
 <body>
 
-<div class="app-view inspection-view" id="inspection-view" role="tabpanel" aria-labelledby="inspection-tab">
 <div class="top-shell">
   <header>
     <div class="header-brand">
-      <img class="header-logo" src="KMTrack.png" alt="KMTrack">
-      <div class="header-copy">
-        <div class="sub" id="clock">-- -- --</div>
-        <div class="sub" id="storage-status" hidden></div>
+      <img class="header-logo" src="kmtrack-mark.svg" alt="">
+      <span class="header-wordmark" id="header-wordmark">KM<span class="header-track">TRACK</span></span>
+      <div class="header-context" id="header-map-context" hidden>
+        <div class="map-title" id="map-km-station">KM --.---</div>
+        <div class="map-status" id="map-status">Waiting for GPS location…</div>
       </div>
     </div>
-    <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to light mode" title="Switch to light mode"></button>
+    <div class="header-actions">
+      <!-- Sync status is the one always-present state control. Tapping it opens
+           the detail panel; the two actions inside are deliberately separate, so
+           "Sync now" never navigates. -->
+      <details class="sync-menu" id="sync-menu">
+        <summary class="sync-pill" id="sync-pill">
+          <span class="sync-dot" aria-hidden="true"></span>
+          <span class="sync-pill-text" id="sync-status-text" role="status">Saved locally</span>
+        </summary>
+        <div class="sync-panel" role="group" aria-label="Synchronization">
+          <div class="sync-panel-head">
+            <span class="sync-dot" aria-hidden="true"></span>
+            <div class="sync-panel-copy">
+              <span class="sync-panel-title" id="sync-panel-title">Saved locally</span>
+              <span class="sync-panel-sub" id="sync-panel-sub">&nbsp;</span>
+            </div>
+          </div>
+          <dl class="sync-counts">
+            <div><dt>Records</dt><dd id="sync-total">0</dd></div>
+            <div><dt>Pending</dt><dd id="sync-pending">0</dd></div>
+            <div><dt>Synced</dt><dd id="sync-synced">0</dd></div>
+            <div><dt>Failed</dt><dd id="sync-failed">0</dd></div>
+          </dl>
+          <div class="sync-actions">
+            <button type="button" class="ds-btn ds-btn-primary" id="sync-now-btn">Sync now</button>
+            <button type="button" class="ds-btn ds-btn-quiet" id="reload-app-btn">Reload app</button>
+          </div>
+          <p class="sync-note" id="sync-note"></p>
+        </div>
+      </details>
+      <button type="button" class="header-refresh" id="net-refresh" aria-label="Reload app" title="Reload app"></button>
+    </div>
   </header>
 </div>
-  <details class="dataset-drawer" id="dataset-drawer">
-    <summary>
-      <span class="dataset-state-dot" aria-hidden="true"></span>
-      <span class="dataset-state-label" id="dataset-state-label">Loading network data</span>
-      <span class="dataset-chevron" aria-hidden="true"></span>
-    </summary>
-    <div class="dataset-content">
-      <div class="dataset-panel">
-        <div class="dataset-panel-title">Network calibration data</div>
-        <div class="calib-hint" id="calib-status">Loading NLEX network alignment...</div>
-        <button class="calib-add" id="calib-reload">Reload dataset</button>
-      </div>
-      <div class="dataset-panel">
-        <div class="dataset-panel-title">Interchange / ramp data</div>
-        <div class="calib-hint" id="ramp-status">Loading interchange/ramp dataset...</div>
-        <button class="calib-add" id="ramp-reload">Reload dataset</button>
-      </div>
-    </div>
-  </details>
 
+<div class="app-view inspection-view" id="inspection-view" role="tabpanel" aria-labelledby="inspection-tab">
+<div class="capture-session-bar">
+  <span>Live inspection</span>
+  <span aria-hidden="true">/</span>
+  <time id="capture-session-time"></time>
+</div>
 <main>
 
-  <div class="readout">
-    <div class="readout-main">
-      <div class="field">
-        <div class="label">Latitude</div>
-        <div class="value" id="lat">--</div>
+  <section class="kmpost instrument-panel" id="instrument-panel" aria-label="Location and road match">
+    <!-- 1. Status. ONE pill carries the tone; #gps-status is the single short
+         secondary line. Both are written by the existing GPS writers. -->
+    <div class="instrument-head">
+      <span class="gps-chip" id="gps-chip" data-state="checking">
+        <span class="gps-dot" aria-hidden="true"></span>
+        <span id="gps-chip-text">Acquiring device location</span>
+      </span>
+      <div class="instrument-accuracy">
+        <span>Accuracy</span>
+        <strong id="acc">--</strong>
       </div>
-      <div class="field">
-        <div class="label">Longitude</div>
-        <div class="value" id="lon">--</div>
-      </div>
-      <div class="field">
-        <div class="label">Accuracy</div>
-        <div class="value" id="acc">--</div>
-      </div>
-      <div class="field">
-        <div class="label">Points logged</div>
-        <div class="value" id="count-mini">0</div>
-      </div>
-      <div class="status warn" id="gps-status">Requesting GPS permission...</div>
     </div>
-    <div class="bound-panel">
-      <div class="bound-panel-label">Bound</div>
-      <div class="bound-toggle" id="bound-toggle">
-        <span class="bound-hint" id="bound-hint">detecting segment...</span>
-      </div>
-      <div class="bound-auto-status" id="bound-auto-status"></div>
-    </div>
-  </div>
 
-  <div class="kmpost">
-    <div class="kmpost-grid">
-      <div class="kmpost-current">
-        <div class="kmlabel">CURRENT KM STATION</div>
-        <div class="kmvalue" id="km-value">--.---</div>
-        <div class="kmunit">kilometers (interpolated)</div>
-      </div>
+    <!-- 2. Road identity and bound, then 3. the station. -->
+    <div class="instrument-station">
+      <span class="segment-tag" id="segment-tag">--</span>
+      <div class="kmvalue" id="km-value">--.---</div>
+      <div class="station-caption" id="current-location-label">Station</div>
+      <div class="instrument-nearby" id="instrument-nearby" hidden></div>
     </div>
-    <div class="segment-tag" id="segment-tag">--</div>
-    <div class="ramp-tag" id="ramp-tag"></div>
-  </div>
+
+    <!-- 4. Secondary engineering detail, collapsed by default. -->
+    <details class="instrument-details" id="instrument-details">
+      <summary>
+        <span class="instrument-details-label">Location details</span>
+        <span class="dataset-chevron" aria-hidden="true"></span>
+      </summary>
+      <div class="instrument-details-body">
+        <div class="status warn" id="gps-status" hidden>Requesting GPS permission...</div>
+        <div class="instrument-metrics">
+          <div class="metric metric-wide">
+            <div class="kmlabel"><span>Direction status</span></div>
+            <div class="bound-toggle" id="bound-toggle"><span class="bound-hint">Detecting direction…</span></div>
+            <div class="bound-auto-status" id="bound-auto-status"></div>
+          </div>
+        </div>
+
+        <div class="instrument-interchange">
+          <svg class="metric-icon interchange-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="16" y="16" width="6" height="6" rx="1"></rect><rect x="2" y="16" width="6" height="6" rx="1"></rect><rect x="9" y="2" width="6" height="6" rx="1"></rect><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"></path><path d="M12 12V8"></path></svg>
+          <span>Interchange identity</span>
+          <strong class="ramp-tag" id="ramp-tag"></strong>
+        </div>
+
+        <div class="nearby-asset" aria-live="polite">
+          <div class="nearby-asset-body">
+            <div class="kmlabel">Nearby bridge</div>
+            <div class="nearby-asset-name" id="nearby-asset-name">Loading bridge data...</div>
+            <div class="nearby-asset-meta">
+              <span class="nearby-asset-station" id="nearby-asset-station">--</span>
+              <span class="nearby-asset-distance" id="nearby-asset-distance"></span>
+            </div>
+          </div>
+          <button type="button" class="bridge-filter-toggle" id="bridge-filter-toggle" aria-label="Filter bridges by classification" aria-haspopup="true" aria-expanded="false" title="Filter bridges by classification">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+          </button>
+          <div class="bridge-filter-menu" id="bridge-filter-menu" role="menu" hidden>
+            <div class="bridge-filter-title">Bridge classification</div>
+            <div id="bridge-filter-options"></div>
+          </div>
+        </div>
+
+        <div class="instrument-foot">
+          <span class="coordinate-value"><span id="lat">--</span><span aria-hidden="true">, </span><span id="lon">--</span></span>
+          <span class="foot-separator" aria-hidden="true">·</span>
+          <span class="foot-saved" id="clock-saved">0 saved</span>
+        </div>
+      </div>
+    </details>
+  </section>
 
   <section class="block gps-pending" id="defect-section">
     <div class="defect-header">
@@ -1277,7 +1331,7 @@ button {
         <label class="lane-btn pothole haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Potholes" data-lane="2">2</label>
         <label class="lane-btn pothole haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Potholes" data-lane="3">3</label>
         <label class="lane-btn pothole haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Potholes" data-lane="4">4</label>
-        <label class="lane-btn pothole others-btn haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Potholes" data-lane="Others">Others<span class="others-sub">(i.e., Shoulder/acce/dece/etc.)</span></label>
+        <label class="lane-btn pothole others-btn haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Potholes" data-lane="Others">Other location / lane<span class="others-sub">(i.e., Shoulder/acce/dece/etc.)</span></label>
       </div>
     </div>
 
@@ -1288,7 +1342,7 @@ button {
         <label class="lane-btn shoving haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Shoving" data-lane="2">2</label>
         <label class="lane-btn shoving haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Shoving" data-lane="3">3</label>
         <label class="lane-btn shoving haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Shoving" data-lane="4">4</label>
-        <label class="lane-btn shoving others-btn haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Shoving" data-lane="Others">Others<span class="others-sub">(i.e., Shoulder/acce/dece/etc.)</span></label>
+        <label class="lane-btn shoving others-btn haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Shoving" data-lane="Others">Other location / lane<span class="others-sub">(i.e., Shoulder/acce/dece/etc.)</span></label>
       </div>
     </div>
 
@@ -1299,7 +1353,7 @@ button {
         <label class="lane-btn cracks haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Cracks (width>25 mm)" data-lane="2">2</label>
         <label class="lane-btn cracks haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Cracks (width>25 mm)" data-lane="3">3</label>
         <label class="lane-btn cracks haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Cracks (width>25 mm)" data-lane="4">4</label>
-        <label class="lane-btn cracks others-btn haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Cracks (width>25 mm)" data-lane="Others">Others<span class="others-sub">(i.e., Shoulder/acce/dece/etc.)</span></label>
+        <label class="lane-btn cracks others-btn haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Cracks (width>25 mm)" data-lane="Others">Other location / lane<span class="others-sub">(i.e., Shoulder/acce/dece/etc.)</span></label>
       </div>
     </div>
 
@@ -1310,7 +1364,7 @@ button {
         <label class="lane-btn other haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Others" data-lane="2">2</label>
         <label class="lane-btn other haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Others" data-lane="3">3</label>
         <label class="lane-btn other haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Others" data-lane="4">4</label>
-        <label class="lane-btn other others-btn haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Others" data-lane="Others">Others<span class="others-sub">(i.e., Shoulder/acce/dece/etc.)</span></label>
+        <label class="lane-btn other others-btn haptic-label"><input type="checkbox" switch class="lane-log-trigger" data-defect="Others" data-lane="Others">Other location / lane<span class="others-sub">(i.e., Shoulder/acce/dece/etc.)</span></label>
       </div>
     </div>
 
@@ -1318,10 +1372,10 @@ button {
 
   <div class="lane-divider"></div>
 
-  <section class="block">
+  <div id="log-host-inspection">
+  <section class="block" id="log-register">
     <div class="log-header">
-      <h2>Inspection log</h2>
-      <button type="button" class="select-toggle-btn" id="import-btn">Import</button>
+      <h2>Today's record</h2>
       <button type="button" class="select-toggle-btn" id="select-toggle-btn">Select</button>
     </div>
     <div class="count-bar">
@@ -1332,7 +1386,7 @@ button {
       </div>
       <div class="export-actions">
         <button class="export-btn" id="export-btn" disabled>Export Excel</button>
-        <button class="export-btn backup-btn" id="backup-btn" disabled>Export Photos ZIP</button>
+        <button class="export-btn backup-btn" id="backup-btn" disabled>Export Excel with Photos</button>
       </div>
     </div>
     <div class="entry-filters" aria-label="Inspection entry filters">
@@ -1349,27 +1403,18 @@ button {
         <label>Inspector<select id="entry-filter-inspector"><option value="">All inspectors</option></select></label>
       </div>
     </details>
-    <div id="import-status" role="status"></div>
-    <button type="button" id="import-history-btn" class="select-toggle-btn" hidden>Imported files</button>
-    <input type="file" id="import-file" accept=".xlsx,.zip" hidden>
     <div class="bulk-actions-bar" id="bulk-actions-bar" style="display:none;">
       <button type="button" class="bulk-select-all-btn" id="bulk-select-all-btn">Select all</button>
       <button type="button" class="bulk-delete-btn" id="bulk-delete-btn" disabled>Delete selected (0)</button>
     </div>
     <div id="log-list"><div class="log-empty">No defects logged yet</div></div>
   </section>
+  </div>
 
 </main>
 </div>
 
 <section class="app-view map-view" id="map-view" role="tabpanel" aria-labelledby="map-tab" hidden>
-  <div class="map-topbar">
-    <div class="map-topbar-copy">
-      <div class="map-title" id="map-km-station">KM --.---</div>
-      <div class="map-status" id="map-status">Waiting for GPS location…</div>
-    </div>
-    <button type="button" class="map-theme-toggle" id="map-theme-toggle" aria-label="Switch to light mode" title="Switch to light mode"></button>
-  </div>
   <div id="osm-map" aria-label="OpenStreetMap showing the current inspection location"></div>
   <div id="map-bound-legend" class="map-bound-legend" aria-label="Map legend"></div>
   <div class="map-entry-controls" aria-label="Map entry display options">
@@ -1395,17 +1440,175 @@ button {
   </div>
 </section>
 
+<section class="app-view log-view" id="log-view" role="tabpanel" aria-labelledby="log-tab" hidden>
+  <div class="ds-view-head">
+    <div class="log-head-row">
+      <h2>Inspection log</h2>
+      <span class="ds-chip">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M12 11h4"></path><path d="M12 16h4"></path><path d="M8 11h.01"></path><path d="M8 16h.01"></path></svg>
+        <span id="log-records-chip" role="status">0 records</span>
+      </span>
+    </div>
+  </div>
+
+  <div class="log-data-row">
+    <div class="ds-row" id="log-import-actions">
+      <button type="button" class="ds-btn ds-btn-primary" id="import-btn">Import</button>
+      <input type="file" id="import-file" accept=".xlsx,.zip" hidden>
+    </div>
+    <div class="ds-row log-bulk-actions" id="log-bulk-actions" hidden></div>
+  </div>
+
+  <div class="log-hint-row">
+    <p class="log-data-hint">Import .xlsx exports or Photos .zip archives.</p>
+    <button type="button" id="import-history-btn" class="ds-btn ds-btn-quiet" hidden>Imported files</button>
+  </div>
+
+  <div class="log-data-row">
+    <div class="ds-row" id="log-export-actions"></div>
+    <div class="ds-row log-select-actions" id="log-select-actions"></div>
+  </div>
+  <div id="import-status" role="status"></div>
+
+  <div id="log-host-log"></div>
+</section>
+
+<section class="app-view tools-view" id="tools-view" role="tabpanel" aria-labelledby="tools-tab" hidden>
+  <div class="ds-view-head">
+    <span class="eyebrow">Local data control</span>
+    <h2>Data tools</h2>
+    <p>KMTrack keeps field data on this device until you choose to export it.</p>
+  </div>
+
+  <section class="tool-card">
+    <div class="tool-head">
+      <span class="tool-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="19" r="3"></circle><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"></path><circle cx="18" cy="5" r="3"></circle></svg></span>
+      <div class="tool-copy">
+        <h3>Alignment &amp; calibration</h3>
+        <p>Stationing and bridge matching read from the network datasets held on this device.</p>
+      </div>
+    </div>
+    <div class="tool-body">
+      <details class="dataset-drawer" id="dataset-drawer">
+        <summary>
+          <span class="dataset-summary-copy"><strong>Network data</strong><span class="dataset-state-label" id="dataset-state-label" aria-live="polite">Checking datasets…</span></span>
+          <span class="dataset-chevron" aria-hidden="true"></span>
+        </summary>
+        <div class="dataset-content">
+          <div class="dataset-panel">
+            <div class="dataset-panel-heading"><h4 class="dataset-panel-title">Stationing alignment</h4><span class="dataset-badge" id="calib-badge">Checking</span></div>
+            <div class="calib-hint" id="calib-status" data-state="loading">Loading NLEX network alignment...</div>
+            <button class="ds-btn ds-btn-quiet" id="calib-reload" aria-label="Reload stationing alignment">Reload</button>
+          </div>
+          <div class="dataset-panel">
+            <div class="dataset-panel-heading"><h4 class="dataset-panel-title">Interchange lines</h4><span class="dataset-badge" id="ramp-badge">Checking</span></div>
+            <div class="calib-hint" id="ramp-status" data-state="loading">Loading interchange line dataset...</div>
+            <button class="ds-btn ds-btn-quiet" id="ramp-reload" aria-label="Reload interchange lines">Reload</button>
+          </div>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section class="tool-card">
+    <div class="tool-head">
+      <span class="tool-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"></rect><path d="M12 18h.01"></path></svg></span>
+      <div class="tool-copy">
+        <h3>Installability</h3>
+        <p>For a faster field launch, add KMTrack to your home screen from the browser menu. Keep location permission set to Allow while using.</p>
+      </div>
+    </div>
+    <div class="tool-body">
+      <div class="tool-note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>Works offline with local storage</div>
+    </div>
+  </section>
+</section>
+
+<section class="app-view settings-view" id="settings-view" role="tabpanel" aria-labelledby="settings-tab" hidden>
+  <div class="ds-view-head">
+    <span class="eyebrow">Instrument configuration</span>
+    <h2>Settings</h2>
+    <p>Make the instrument match your inspection protocol.</p>
+  </div>
+
+  <section class="settings-panel">
+    <div class="setting-head">
+      <svg class="setting-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path></svg>
+      <div class="setting-copy">
+        <h3>Inspector identity</h3>
+        <p>Saved with every new capture on this device.</p>
+        <input id="inspector-input" class="setting-field" type="text" autocomplete="off" placeholder="e.g. M. Santos / Team 04">
+      </div>
+    </div>
+  </section>
+
+  <section class="settings-panel">
+    <div class="setting-head">
+      <svg class="setting-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 14 4-4"></path><path d="M3.34 19a10 10 0 1 1 17.32 0"></path></svg>
+      <div class="setting-copy">
+        <h3>Location confidence</h3>
+        <p>The instrument holds a capture until it has confirmed the road. Current alignment: <span id="settings-alignment-count">0</span> points.</p>
+        <dl class="setting-readouts">
+          <div><dt>Current accuracy</dt><dd id="settings-accuracy">--</dd></div>
+          <div><dt>Last fix</dt><dd id="settings-fix-age">--</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="settings-panel">
+    <div class="setting-row">
+      <span class="setting-tile" id="appearance-tile"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg></span>
+      <div class="setting-copy">
+        <h3>Appearance</h3>
+        <p>Use the mode that stays legible in the cab.</p>
+      </div>
+      <button type="button" class="switch" id="theme-toggle" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode"><span class="switch-knob" aria-hidden="true"></span></button>
+    </div>
+  </section>
+
+  <section class="settings-panel">
+    <div class="setting-head">
+      <svg class="setting-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"></path><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"></path><circle cx="12" cy="12" r="2"></circle><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"></path><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"></path></svg>
+      <div class="setting-copy">
+        <h3>Connection &amp; status</h3>
+        <p>Live GPS comes from this browser. Road matching only uses the network datasets on this device; KMTrack never substitutes a guessed corridor.</p>
+        <div class="setting-pills">
+          <span class="status-pill status-fresh" id="storage-pill"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg><span id="storage-pill-text">Local storage active</span></span>
+          <span class="status-pill status-warn" id="tiles-pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m2 2 20 20"></path><path d="M5.782 5.782A7 7 0 0 0 9 19h8.5a4.5 4.5 0 0 0 1.307-.193"></path><path d="M21.532 16.5A4.5 4.5 0 0 0 17.5 10h-1.79A7.008 7.008 0 0 0 10 5.07"></path></svg><span id="tiles-pill-text">Map tiles unavailable</span></span>
+        </div>
+        <div class="ds-status-line"><span id="storage-status" hidden></span></div>
+      </div>
+    </div>
+  </section>
+</section>
+
 <nav class="app-tab-bar" role="tablist" aria-label="KMTrack sections">
   <button type="button" class="app-tab-btn active" id="inspection-tab" role="tab" aria-selected="true" aria-controls="inspection-view" data-app-view="inspection">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5h6M9 3h6v4H9z"></path><path d="M7 5H5v16h14V5h-2M8 11h8M8 15h8"></path></svg>
-    <span>Inspection</span>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="2" x2="5" y1="12" y2="12"></line><line x1="19" x2="22" y1="12" y2="12"></line><line x1="12" x2="12" y1="2" y2="5"></line><line x1="12" x2="12" y1="19" y2="22"></line><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+    <span>Capture</span>
+  </button>
+  <button type="button" class="app-tab-btn" id="log-tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="log-view" data-app-view="log">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M12 11h4"></path><path d="M12 16h4"></path><path d="M8 11h.01"></path><path d="M8 16h.01"></path></svg>
+    <span>Log</span>
   </button>
   <button type="button" class="app-tab-btn" id="map-tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="map-view" data-app-view="map">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15"></path></svg>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"></path><path d="M15 5.764v15"></path><path d="M9 3.236v15"></path></svg>
     <span>Map</span>
+  </button>
+  <button type="button" class="app-tab-btn" id="tools-tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="tools-view" data-app-view="tools">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5V19A9 3 0 0 0 21 19V5"></path><path d="M3 12A9 3 0 0 0 21 12"></path></svg>
+    <span>Tools</span>
+  </button>
+  <button type="button" class="app-tab-btn" id="settings-tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="settings-view" data-app-view="settings">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+    <span>Settings</span>
   </button>
 </nav>
 
+<script src="./entry-model.js"></script>
+<script src="./sync-queue.js"></script>
+<script src="./map-config.js"></script>
 <script src="vendor/leaflet/leaflet.js"></script>
 <script src="./swipe-actions.js"></script>
 <script src="./entry-filters.js"></script>
@@ -1415,6 +1618,7 @@ button {
 <script src="./log-controls.js"></script>
 <script src="./photo-zoom.js"></script>
 <script src="./photo-viewer.js"></script>
+<script src="./location-resolver.js"></script>
 <script>
 class GeoKalmanFilter{
   constructor(){
@@ -1441,13 +1645,17 @@ class GeoKalmanFilter{
   }
 }
 const gpsFilter = new GeoKalmanFilter();
+const locationResolver = KMTrackLocation.createResolver();
 
-let currentPos = null; // {lat, lon, acc}; coordinates are Kalman-smoothed
+let currentPos = null; // {lat, lon, acc, timestamp, fresh}; coordinates are Kalman-smoothed
+let currentResolvedLocation = null;
+let gpsFreshnessTimer = null;
+let gpsPermissionDenied = false;
+const GPS_FRESH_MS = 12000;
 let calibData = [];    // {e, b, k, lat, lon} — loaded from the NLEX network dataset
 let entries = [];      // {id, type, timestamp, lat, lon, km, expressway, bound, lane, photoId, photoFilename, photoTimestamp}
 let expresswayBounds = {}; // { "NLEX": ["NB","SB"], "C3-R10 RAMP": ["EB","WB"], ... }
 let userBound = null;      // manually selected direction, e.g. "NB"
-let currentExpressway = null; // last detected corridor, used to know which bound pair to show
 
 // ---------- Photo storage (IndexedDB) ----------
 // Photos are stored separately from the localStorage entry log — a JPEG per
@@ -1538,10 +1746,18 @@ function updateDatasetDrawerState(){
   const drawer = document.getElementById('dataset-drawer');
   const label = document.getElementById('dataset-state-label');
   if(!drawer || !label) return;
-  drawer.classList.toggle('loaded', calibrationDatasetReady);
-  label.textContent = calibrationDatasetReady && rampDatasetReady
-    ? 'Network + ramp data loaded'
-    : calibrationDatasetReady ? 'Network data loaded' : 'Loading network data';
+  const states = ['calib', 'ramp'].map(id => {
+    const state = document.getElementById(id + '-status').dataset.state;
+    const badge = document.getElementById(id + '-badge');
+    badge.dataset.state = state;
+    badge.textContent = { loading:'Checking', ready:'Ready', cached:'Stored copy', error:'Unavailable' }[state];
+    return state;
+  });
+  const readyCount = states.filter(state => state === 'ready' || state === 'cached').length;
+  label.textContent = states.includes('loading') ? 'Checking datasets…'
+    : readyCount === 0 ? 'Network data unavailable'
+    : readyCount === 1 ? '1 of 2 sources available'
+    : states.includes('cached') ? 'Available on this device' : 'Both sources ready';
 }
 
 function testStorageWritable(){
@@ -1555,6 +1771,151 @@ function testStorageWritable(){
   }
 }
 
+// ---------- Sync seam (no backend yet) ----------
+// A queue with no transport: ready() is false, so nothing is ever sent. The
+// Supabase client is added later by passing `{transport}` here — the entry
+// model, the queue and the indicator all stay unchanged.
+const syncQueue = KMTrackSync.createQueue({});
+
+/* The indicator speaks in six states, most actionable first. Every one is read
+ * from real data: `navigator.onLine` and the queue's own summary of the records.
+ * A running sync outranks everything; only when there is nothing to do do the
+ * quieter states show. */
+let syncInFlight = false;
+
+function syncState(counts, online, ready, syncing){
+  if(syncing) return 'syncing';
+  if(counts.failed > 0) return 'failed';
+  if(ready && counts.pending > 0) return 'pending';
+  if(!online) return 'offline';
+  if(counts.total > 0 && counts.pending === 0 && counts.failed === 0) return 'synced';
+  return 'local';
+}
+
+/* Tone follows the design system's StatusPill vocabulary: warn = caution/held,
+ * bad = failure/blocked, fresh = verified, neutral = merely informative. */
+const SYNC_COPY = {
+  syncing:{tone:'warn',    pill:'Syncing…',      title:'Syncing',           sub:'Uploading records now.'},
+  failed: {tone:'bad',     pill:'{n} failed',    title:'Sync failed',       sub:'{n} record(s) need retrying.'},
+  pending:{tone:'warn',    pill:'{n} pending',   title:'Waiting to upload', sub:'{n} record(s) not on the server yet.'},
+  offline:{tone:'bad',     pill:'Off network',   title:'Off network',       sub:'Records are safe on this device.'},
+  synced: {tone:'fresh',   pill:'All synced',    title:'All synced',        sub:'Every record is on the server.'},
+  local:  {tone:'neutral', pill:'Saved locally', title:'Saved locally',     sub:'Records are stored on this device.'}
+};
+
+function updateSyncStatus(){
+  const menu = document.getElementById('sync-menu');
+  const text = document.getElementById('sync-status-text');
+  if(!menu || !text) return;
+  const counts = KMTrackSync.summary(entries);
+  const online = navigator.onLine !== false;
+  const ready = syncQueue.ready();
+  const state = syncState(counts, online, ready, syncInFlight);
+  const copy = SYNC_COPY[state];
+  const fill = value => String(value).replace('{n}', counts.failed || counts.pending);
+
+  menu.dataset.syncState = state;
+  text.textContent = fill(copy.pill);
+  const title = document.getElementById('sync-panel-title');
+  const sub = document.getElementById('sync-panel-sub');
+  if(title) title.textContent = fill(copy.title);
+  if(sub) sub.textContent = fill(copy.sub);
+
+  const set = (id, value) => { const el = document.getElementById(id); if(el) el.textContent = String(value); };
+  set('sync-total', counts.total);
+  set('sync-pending', counts.pending);
+  set('sync-synced', counts.synced);
+  set('sync-failed', counts.failed);
+
+  const now = document.getElementById('sync-now-btn');
+  if(now){
+    now.disabled = syncInFlight || !ready;
+    now.textContent = syncInFlight ? 'Syncing…' : 'Sync now';
+  }
+  const note = document.getElementById('sync-note');
+  if(note){
+    note.textContent = ready
+      ? (syncInFlight ? 'Uploading…' : 'Uploads are keyed to each record\'s own ID, so a retry cannot duplicate one.')
+      : 'Cloud sync is not configured yet, so records stay on this device. Sync now becomes available once it is.';
+  }
+}
+
+/* Sync only. Deliberately does NOT navigate — a page reload must never be a side
+ * effect of syncing. */
+async function syncNow(){
+  if(syncInFlight) return;
+  syncInFlight = true;
+  updateSyncStatus();
+  try{
+    const result = await syncQueue.drain(entries);
+    if(result && result.ok && (result.uploaded || result.failed)) saveEntries();
+  }catch(e){
+    // The queue never throws; this is a backstop so a tap can never break the UI.
+    console.warn('Sync failed', e);
+  }finally{
+    syncInFlight = false;
+  }
+  updateSyncStatus();
+}
+
+// ---------- Header: connection status + reload ----------
+// Connectivity needs no separate pill: the indicator reports it as the offline
+// state, so the two can never disagree.
+function updateNetStatus(){
+  updateSyncStatus();
+  // The Settings status pills report the same connection state.
+  updateStatusPills();
+}
+
+/* Reload only — the recovery action, kept separate from syncing. Flushes the
+ * queue first so an in-flight upload is not cut off by the navigation. */
+async function reloadApp(){
+  const button = document.getElementById('net-refresh');
+  if(button) button.disabled = true;
+  try{
+    const result = await syncQueue.drain(entries);
+    if(result && result.ok && (result.uploaded || result.failed)) saveEntries();
+  }catch(e){
+    console.warn('Reload drain failed', e);
+  }
+  /* Everything durable is already in local storage, so nothing is lost — but
+   * this does discard in-memory state, so an open camera draft is not preserved.
+   * The active tab and map position ARE restored; see restoreActiveView(). */
+  window.location.reload();
+}
+
+window.addEventListener('online', updateNetStatus);
+window.addEventListener('offline', updateNetStatus);
+document.getElementById('net-refresh').addEventListener('click', reloadApp);
+document.getElementById('sync-now-btn').addEventListener('click', syncNow);
+document.getElementById('reload-app-btn').addEventListener('click', reloadApp);
+/* Choosing an action closes the panel, and so does tapping away from it. */
+document.getElementById('sync-menu').addEventListener('click', event => {
+  if(event.target.closest('.sync-actions')) event.currentTarget.removeAttribute('open');
+});
+document.addEventListener('click', event => {
+  const menu = document.getElementById('sync-menu');
+  if(menu && menu.open && !menu.contains(event.target)) menu.removeAttribute('open');
+});
+updateNetStatus();
+
+/* The map fills the viewport minus the tab tray and the header. The header is
+   global now, and its height moves with the safe-area inset and the logo, so it
+   is measured into --app-header-h rather than hard-coded in the stylesheet. */
+function syncHeaderHeight(){
+  const bar = document.querySelector('.top-shell header');
+  if(!bar) return;
+  document.documentElement.style.setProperty('--app-header-h', `${bar.offsetHeight}px`);
+}
+window.addEventListener('resize', syncHeaderHeight);
+window.addEventListener('orientationchange', syncHeaderHeight);
+window.addEventListener('load', syncHeaderHeight);
+if(typeof ResizeObserver !== 'undefined'){
+  const header = document.querySelector('.top-shell header');
+  if(header) new ResizeObserver(syncHeaderHeight).observe(header);
+}
+syncHeaderHeight();
+
 function loadFromStorage(){
   storageAvailable = testStorageWritable();
   if(!storageAvailable) return;
@@ -1562,29 +1923,16 @@ function loadFromStorage(){
     const savedEntries = localStorage.getItem(STORAGE_KEY_ENTRIES);
     if(savedEntries){
       const parsed = JSON.parse(savedEntries);
-      // Normalize: guard against a corrupted/non-array save, drop any
-      // malformed entries, and backfill fields introduced after some
-      // entries were already saved (photoId/photoFilename/photoTimestamp),
-      // so older logs don't break the photo UI or CSV export.
-      let addedStableIds = false;
-      entries = (Array.isArray(parsed) ? parsed : [])
-        .filter(e => e && typeof e === 'object' && typeof e.lat === 'number' && typeof e.lon === 'number')
-        .map(e => ({
-          ...e,
-          id: typeof e.id === 'string' && e.id ? e.id : (addedStableIds = true, newId()),
-          type: typeof e.type === 'string' && e.type ? e.type : 'Others',
-          timestamp: typeof e.timestamp === 'string' && e.timestamp ? e.timestamp : fullTimestamp(),
-          lat: e.lat,
-          lon: e.lon,
-          km: (e.km === null || typeof e.km === 'number') ? e.km : null,
-          expressway: typeof e.expressway === 'string' ? e.expressway : '',
-          bound: typeof e.bound === 'string' ? e.bound : '',
-          lane: typeof e.lane === 'string' ? e.lane : '',
-          photoId: typeof e.photoId === 'string' ? e.photoId : '',
-          photoFilename: typeof e.photoFilename === 'string' ? e.photoFilename : '',
-          photoTimestamp: typeof e.photoTimestamp === 'string' ? e.photoTimestamp : ''
-        }));
-      if(addedStableIds) localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(entries));
+      // KMTrackEntry owns the record shape. normalizeAll drops malformed rows
+      // (as before) and backfills every field added since v1 — photo metadata,
+      // the structured lane pair, the permanent UUID, created_at/updated_at and
+      // sync_status — so existing logs keep loading without alteration.
+      const before = Array.isArray(parsed) ? parsed : [];
+      entries = KMTrackEntry.normalizeAll(before);
+      // Only rewrite when the migration actually changed something.
+      if(JSON.stringify(entries) !== JSON.stringify(before)){
+        localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(entries));
+      }
     }
     const savedBound = localStorage.getItem(STORAGE_KEY_BOUND);
     if(savedBound) userBound = savedBound;
@@ -1693,6 +2041,8 @@ function nearestFrom(indices,lat,lon,skipIdx=-1){
 
 async function loadCalibrationDataset(forceNetwork){
   const statusEl = document.getElementById('calib-status');
+  statusEl.dataset.state = 'loading';
+  updateDatasetDrawerState();
   try{
     if(!forceNetwork){
       const cached = localStorage.getItem(STORAGE_KEY_DATASET);
@@ -1701,6 +2051,7 @@ async function loadCalibrationDataset(forceNetwork){
         buildExpresswayBoundsMap();
         buildSpatialIndex();
         calibrationDatasetReady = calibData.length > 0;
+        statusEl.dataset.state = calibrationDatasetReady ? 'cached' : 'error';
         statusEl.textContent = `Loaded ${calibData.length.toLocaleString()} points from on-device cache (works offline).`;
         updateDatasetDrawerState();
         return;
@@ -1714,10 +2065,12 @@ async function loadCalibrationDataset(forceNetwork){
     buildExpresswayBoundsMap();
     buildSpatialIndex();
     calibrationDatasetReady = calibData.length > 0;
+    statusEl.dataset.state = calibrationDatasetReady ? 'ready' : 'error';
     try{ localStorage.setItem(STORAGE_KEY_DATASET, text); }catch(e){ /* dataset too big for storage quota; still usable this session */ }
     statusEl.textContent = `Loaded ${calibData.length.toLocaleString()} points from NLEX network dataset (cached for offline use).`;
   }catch(err){
     calibrationDatasetReady = calibData.length > 0;
+    statusEl.dataset.state = calibrationDatasetReady ? 'cached' : 'error';
     statusEl.textContent = calibData.length
       ? `Using ${calibData.length.toLocaleString()} previously cached points — couldn't refresh (${err.message}).`
       : `Could not load network dataset (${err.message}). Km station will show as unavailable.`;
@@ -1735,15 +2088,15 @@ window.addEventListener('online', () => {
   if(!calibData.length) loadCalibrationDataset(true);
 });
 
-// ---------- Interchange / ramp name lookup (additive layer) ----------
+// ---------- Interchange name lookup (additive layer) ----------
 // Deliberately kept separate from calibData/corridorIndex above: those
 // exist to interpolate a continuous km-station along the mainline, and
 // ramp points are not part of that continuous line (they fork off it).
 // Mixing them in would corrupt the km interpolation. This is a second,
-// independent dataset that only ever answers "am I near a named ramp?" —
+// independent dataset that only ever answers "am I near a named interchange line?" —
 // it never feeds km-station math, defect logging, or CSV export.
-const STORAGE_KEY_RAMPS = 'nlex_ramp_dataset_v1';
-let rampData = [];           // [{name, interchange, points:[{lat,lon}]}]
+const STORAGE_KEY_RAMPS = 'nlex_interchange_dataset_v2';
+let rampData = [];           // [{seg_id,site_id,name,interchange,points:[{lat,lon}]}]
 let rampPointIndex = [];     // flattened: [{lat,lon,rampIdx}] — one entry per point, across all ramps
 let rampGrid = new Map();    // same grid-bucket trick as spatialGrid, over rampPointIndex
 let rampMatchRadiusKm = 0.05; // default 50 m; a loaded dataset's matchRadiusMeters can override this
@@ -1763,8 +2116,17 @@ function sanitizeRampData(raw){
   const clean = raw.filter(r => r && typeof r.name === 'string' && r.name.trim()
     && Array.isArray(r.points) && r.points.length > 0
   ).map(r => ({
+    seg_id: typeof r.seg_id === 'string' ? r.seg_id.trim() : '',
+    site_id: typeof r.site_id === 'string' ? r.site_id.trim() : '',
     name: r.name.trim(),
     interchange: typeof r.interchange === 'string' ? r.interchange.trim() : '',
+    ramp: typeof r.ramp === 'string' ? r.ramp.trim() : '',
+    seg_type: typeof r.seg_type === 'string' ? r.seg_type.trim() : '',
+    bound: typeof r.bound === 'string' ? r.bound.trim() : '',
+    travel: typeof r.travel === 'string' ? r.travel.trim() : '',
+    level: typeof r.level === 'string' ? r.level.trim() : '',
+    from_node: typeof r.from_node === 'string' ? r.from_node.trim() : '',
+    to_node: typeof r.to_node === 'string' ? r.to_node.trim() : '',
     points: r.points.filter(p => p && Number.isFinite(p.lat) && Number.isFinite(p.lon))
   })).filter(r => r.points.length > 0);
   if(clean.length !== raw.length){
@@ -1814,6 +2176,8 @@ function nearestRamp(lat, lon){
 
 async function loadRampDataset(forceNetwork){
   const statusEl = document.getElementById('ramp-status');
+  statusEl.dataset.state = 'loading';
+  updateDatasetDrawerState();
   try{
     if(!forceNetwork){
       const cached = localStorage.getItem(STORAGE_KEY_RAMPS);
@@ -1821,25 +2185,30 @@ async function loadRampDataset(forceNetwork){
         rampData = sanitizeRampData(JSON.parse(cached));
         buildRampIndex();
         rampDatasetReady = rampData.length > 0;
-        statusEl.textContent = `Loaded ${rampData.length.toLocaleString()} ramp(s) from on-device cache (works offline).`;
+        statusEl.dataset.state = rampDatasetReady ? 'cached' : 'error';
+        const siteCount = new Set(rampData.map(r => r.site_id || r.interchange || r.name)).size;
+        statusEl.textContent = `Loaded ${rampData.length.toLocaleString()} line(s) for ${siteCount.toLocaleString()} interchange/exit site(s) from on-device cache.`;
         updateDatasetDrawerState();
         return;
       }
     }
-    statusEl.textContent = 'Downloading interchange/ramp dataset...';
-    const res = await fetch('ramps.json', { cache: 'no-store' });
+    statusEl.textContent = 'Loading interchange line dataset...';
+    const res = await fetch('interchanges.json', { cache: 'no-store' });
     if(!res.ok) throw new Error('HTTP ' + res.status);
     const text = await res.text();
     rampData = sanitizeRampData(JSON.parse(text));
     buildRampIndex();
     rampDatasetReady = rampData.length > 0;
+    statusEl.dataset.state = rampDatasetReady ? 'ready' : 'error';
     try{ localStorage.setItem(STORAGE_KEY_RAMPS, text); }catch(e){ /* dataset too big for storage quota; still usable this session */ }
-    statusEl.textContent = `Loaded ${rampData.length.toLocaleString()} ramp(s) from interchange/ramp dataset (cached for offline use).`;
+    const siteCount = new Set(rampData.map(r => r.site_id || r.interchange || r.name)).size;
+    statusEl.textContent = `Loaded ${rampData.length.toLocaleString()} line(s) for ${siteCount.toLocaleString()} interchange/exit site(s) (cached for offline use).`;
   }catch(err){
     rampDatasetReady = rampData.length > 0;
+    statusEl.dataset.state = rampDatasetReady ? 'cached' : 'error';
     statusEl.textContent = rampData.length
-      ? `Using ${rampData.length.toLocaleString()} previously cached ramp(s) — couldn't refresh (${err.message}).`
-      : `Could not load ramp dataset (${err.message}). Ramp names will show as unavailable.`;
+      ? `Using ${rampData.length.toLocaleString()} previously cached interchange line(s) — couldn't refresh (${err.message}).`
+      : `Could not load interchange dataset (${err.message}). Interchange names will show as unavailable.`;
   }finally{
     updateDatasetDrawerState();
   }
@@ -1851,17 +2220,306 @@ window.addEventListener('online', () => {
   if(!rampData.length) loadRampDataset(true);
 });
 
+// ---------- Nearby NLEX bridge / asset lookup ----------
+// Kept separate from the calibration points: this layer identifies an asset
+// for the live display but never changes KM interpolation or logged defects.
+let bridgeData = [];
+let bridgeApproachRadiusKm = 1;
+const STORAGE_KEY_BRIDGE_CLASSIFICATION = 'kmtrack_bridge_classification_v1';
+let selectedBridgeClassification = '';
+try{ selectedBridgeClassification = localStorage.getItem(STORAGE_KEY_BRIDGE_CLASSIFICATION) || ''; }catch(e){ /* non-critical */ }
+
+function parseBridgeStation(value){
+  if(typeof value !== 'string') return null;
+  const match = value.trim().match(/^(\d+)\+(\d{1,3})$/);
+  if(!match) return null; // Letter-prefixed/suffixed stations belong to spurs/segments.
+  return Number(match[1]) + Number(match[2]) / 1000;
+}
+
+function sanitizeBridgeData(raw){
+  if(raw && Number.isFinite(raw.approachRadiusMeters) && raw.approachRadiusMeters > 0){
+    bridgeApproachRadiusKm = raw.approachRadiusMeters / 1000;
+  }
+  const assets = raw && Array.isArray(raw.assets) ? raw.assets : (Array.isArray(raw) ? raw : []);
+  return assets.filter(asset => asset && typeof asset.name === 'string' && asset.name.trim()
+    && Number.isFinite(asset.lat) && Number.isFinite(asset.lon)
+  ).map(asset => {
+    const name = asset.name.trim();
+    const directionMatch = name.match(/\s*\((NB|SB|EB|WB)\)\s*$/i);
+    return {
+      name,
+      displayName: name.replace(/\s*\((NB|SB|EB|WB)\)\s*$/i, '').trim(),
+      direction: directionMatch ? directionMatch[1].toUpperCase() : '',
+      classification: typeof asset.classification === 'string' ? asset.classification.trim() : '',
+      from: typeof asset.from === 'string' ? asset.from.trim() : '',
+      to: typeof asset.to === 'string' ? asset.to.trim() : '',
+      lat: asset.lat,
+      lon: asset.lon
+    };
+  });
+}
+
+function bridgeMatchesClassification(asset){
+  return !selectedBridgeClassification || asset.classification === selectedBridgeClassification;
+}
+
+function renderBridgeClassificationMenu(){
+  const optionsEl = document.getElementById('bridge-filter-options');
+  const toggle = document.getElementById('bridge-filter-toggle');
+  if(!optionsEl || !toggle) return;
+  const classifications = [...new Set(bridgeData.map(asset => asset.classification).filter(Boolean))]
+    .sort((a,b) => a.localeCompare(b));
+  if(selectedBridgeClassification && !classifications.includes(selectedBridgeClassification)){
+    selectedBridgeClassification = '';
+    try{ localStorage.removeItem(STORAGE_KEY_BRIDGE_CLASSIFICATION); }catch(e){ /* non-critical */ }
+  }
+  optionsEl.replaceChildren();
+  ['', ...classifications].forEach(value => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'bridge-filter-option' + (value === selectedBridgeClassification ? ' selected' : '');
+    button.setAttribute('role','menuitemradio');
+    button.setAttribute('aria-checked',value === selectedBridgeClassification ? 'true' : 'false');
+    button.dataset.classification = value;
+    button.textContent = value || 'All classifications';
+    optionsEl.appendChild(button);
+  });
+  const currentLabel = selectedBridgeClassification || 'All classifications';
+  toggle.classList.toggle('filtered',Boolean(selectedBridgeClassification));
+  toggle.setAttribute('aria-label',`Bridge classification: ${currentLabel}`);
+  toggle.title = `Bridge classification: ${currentLabel}`;
+}
+
+function closeBridgeClassificationMenu(){
+  const menu = document.getElementById('bridge-filter-menu');
+  const toggle = document.getElementById('bridge-filter-toggle');
+  if(menu) menu.hidden = true;
+  if(toggle) toggle.setAttribute('aria-expanded','false');
+}
+
+function bridgeStationLabel(asset){
+  if(!asset.from) return 'KM station unavailable';
+  if(asset.to && asset.to !== asset.from) return `KM ${asset.from} to ${asset.to}`;
+  return `KM ${asset.from}`;
+}
+
+function nearestBridgeAsset(lat, lon, currentKm, expressway){
+  if(!bridgeData.length) return null;
+  const canUseMainlineKm = String(expressway || '').trim().toUpperCase() === 'NLEX'
+    && Number.isFinite(currentKm);
+  let best = null;
+
+  for(const asset of bridgeData){
+    if(!bridgeMatchesClassification(asset)) continue;
+    const geoDistanceKm = haversineKm(lat, lon, asset.lat, asset.lon);
+    const fromKm = parseBridgeStation(asset.from);
+    const toKm = parseBridgeStation(asset.to);
+    let stationDistanceKm = Infinity;
+    let withinStationRange = false;
+
+    if(canUseMainlineKm && fromKm !== null){
+      const startKm = Math.min(fromKm, toKm === null ? fromKm : toKm);
+      const endKm = Math.max(fromKm, toKm === null ? fromKm : toKm);
+      stationDistanceKm = currentKm < startKm ? startKm - currentKm
+        : currentKm > endKm ? currentKm - endKm : 0;
+      withinStationRange = stationDistanceKm === 0 && toKm !== null;
+    }
+
+    const distanceKm = Math.min(geoDistanceKm, stationDistanceKm);
+    if(distanceKm > bridgeApproachRadiusKm) continue;
+
+    // Prefer the current carriageway when the sheet has separate NB/SB rows,
+    // without excluding direction-neutral assets such as overpasses.
+    const boundPenalty = asset.direction && userBound && asset.direction !== userBound ? 0.2 : 0;
+    const score = distanceKm + boundPenalty;
+    if(!best || score < best.score){
+      best = { asset, distanceKm, withinStationRange, score };
+    }
+  }
+  return best;
+}
+
+// On the NLEX mainline, keep showing the bridge currently being traversed;
+// as soon as its station range is passed, advance immediately to the closest
+// bridge ahead in the selected/detected direction. There is deliberately no
+// 1 km cutoff in this mode—the inspector should always know what comes next.
+// If KM/direction is unavailable, retain the geographic nearby fallback.
+function bridgeForDirectionOfTravel(lat, lon, currentKm, expressway, bound){
+  const normalizedExpressway = String(expressway || '').trim().toUpperCase();
+  const normalizedBound = String(bound || '').trim().toUpperCase();
+  const canFindAhead = normalizedExpressway === 'NLEX'
+    && Number.isFinite(currentKm)
+    && (normalizedBound === 'NB' || normalizedBound === 'SB');
+
+  if(!canFindAhead){
+    const nearby = nearestBridgeAsset(lat, lon, currentKm, expressway);
+    return nearby ? { ...nearby, mode:'nearby' } : null;
+  }
+
+  let best = null;
+  for(const asset of bridgeData){
+    if(!bridgeMatchesClassification(asset)) continue;
+    // Direction-neutral crossings/overpasses apply to both carriageways;
+    // explicitly tagged NB/SB rows only apply to their matching direction.
+    if(asset.direction && asset.direction !== normalizedBound) continue;
+
+    const fromKm = parseBridgeStation(asset.from);
+    const toKm = parseBridgeStation(asset.to);
+    if(fromKm === null) continue;
+    const startKm = Math.min(fromKm, toKm === null ? fromKm : toKm);
+    const endKm = Math.max(fromKm, toKm === null ? fromKm : toKm);
+    const withinStationRange = currentKm >= startKm && currentKm <= endKm;
+    let distanceKm;
+
+    if(normalizedBound === 'NB'){
+      if(currentKm > endKm) continue;
+      distanceKm = withinStationRange ? 0 : Math.max(0, startKm - currentKm);
+    }else{
+      if(currentKm < startKm) continue;
+      distanceKm = withinStationRange ? 0 : Math.max(0, currentKm - endKm);
+    }
+
+    // Prefer a direction-specific record when it coincides with a neutral
+    // crossing, then use distance to select the next bridge ahead.
+    const score = distanceKm + (asset.direction ? 0 : 0.0001);
+    if(!best || score < best.score){
+      best = { asset, distanceKm, withinStationRange, score, mode:'ahead' };
+    }
+  }
+  return best;
+}
+
+function updateBridgeReadout(lat, lon, kmResult, isOffMappedNetwork){
+  const nameEl = document.getElementById('nearby-asset-name');
+  const stationEl = document.getElementById('nearby-asset-station');
+  const distanceEl = document.getElementById('nearby-asset-distance');
+  if(!nameEl || !stationEl || !distanceEl) return;
+
+  if(!bridgeData.length){
+    nameEl.textContent = 'Bridge data unavailable';
+    stationEl.textContent = '--';
+    distanceEl.textContent = '';
+    updateInstrumentNearbySummary();
+    return;
+  }
+
+  const match = bridgeForDirectionOfTravel(
+    lat,
+    lon,
+    kmResult && !isOffMappedNetwork ? kmResult.km : null,
+    kmResult && !isOffMappedNetwork ? kmResult.expressway : '',
+    userBound || (kmResult && !isOffMappedNetwork ? kmResult.bound : '')
+  );
+  if(!match){
+    const filteredType = selectedBridgeClassification ? selectedBridgeClassification.toLowerCase() : 'bridge';
+    nameEl.textContent = kmResult && !isOffMappedNetwork ? `No upcoming ${filteredType}` : `No nearby ${filteredType}`;
+    stationEl.textContent = '--';
+    distanceEl.textContent = kmResult && !isOffMappedNetwork
+      ? 'No further bridge found in this direction'
+      : `Nothing within ${Math.round(bridgeApproachRadiusKm * 1000)} m`;
+    updateInstrumentNearbySummary();
+    return;
+  }
+
+  nameEl.textContent = match.asset.displayName;
+  stationEl.textContent = bridgeStationLabel(match.asset);
+  distanceEl.textContent = match.withinStationRange
+    ? 'Currently within this bridge range'
+    : `Approximately ${Math.max(0, Math.round(match.distanceKm * 1000))} m ${match.mode === 'ahead' ? 'ahead' : 'away'}`;
+  updateInstrumentNearbySummary();
+}
+
+async function loadBridgeDataset(){
+  try{
+    const response = await fetch('bridges.json', { cache: 'no-store' });
+    if(!response.ok) throw new Error('HTTP ' + response.status);
+    bridgeData = sanitizeBridgeData(await response.json());
+    updateMapLandmarks();
+    if(!bridgeData.length) throw new Error('no valid records');
+    renderBridgeClassificationMenu();
+    if(currentPos){
+      updateReadout();
+    } else {
+      document.getElementById('nearby-asset-name').textContent = 'Waiting for GPS location';
+      document.getElementById('nearby-asset-station').textContent = '--';
+      document.getElementById('nearby-asset-distance').textContent = '';
+    }
+  }catch(err){
+    bridgeData = [];
+    console.error('Could not load bridge / asset dataset', err);
+    if(currentPos){
+      updateReadout();
+    } else {
+      document.getElementById('nearby-asset-name').textContent = 'Bridge data unavailable';
+      document.getElementById('nearby-asset-station').textContent = '--';
+      document.getElementById('nearby-asset-distance').textContent = '';
+    }
+  }
+}
+loadBridgeDataset();
+
+// The bridge dropdown is an overlay, so it may leave the instrument card — but
+// it must never run past the defect buttons below. Crop it to the space that is
+// actually free, leave a gap, and let the rest scroll.
+const BRIDGE_MENU_GAP = 16;
+function fitBridgeFilterMenu(){
+  const menu = document.getElementById('bridge-filter-menu');
+  const firstLaneRow = document.querySelector('#defect-section .lane-btn-row');
+  if(!menu || !firstLaneRow || menu.hidden) return;
+  menu.style.maxHeight = 'none';
+  const top = menu.getBoundingClientRect().top;
+  const limit = firstLaneRow.getBoundingClientRect().top - BRIDGE_MENU_GAP;
+  const natural = menu.scrollHeight;
+  const available = Math.floor(limit - top);
+  menu.style.maxHeight = `${Math.min(natural, available)}px`;
+  menu.style.overflowY = natural > available ? 'auto' : 'hidden';
+}
+window.addEventListener('resize', fitBridgeFilterMenu);
+
+document.getElementById('bridge-filter-toggle').addEventListener('click', (event) => {
+  event.stopPropagation();
+  const menu = document.getElementById('bridge-filter-menu');
+  const willOpen = menu.hidden;
+  menu.hidden = !willOpen;
+  event.currentTarget.setAttribute('aria-expanded',willOpen ? 'true' : 'false');
+  if(willOpen){
+    fitBridgeFilterMenu();
+    menu.querySelector('.selected')?.focus();
+  }
+});
+document.getElementById('bridge-filter-options').addEventListener('click', (event) => {
+  const option = event.target.closest('.bridge-filter-option');
+  if(!option) return;
+  selectedBridgeClassification = option.dataset.classification || '';
+  try{ localStorage.setItem(STORAGE_KEY_BRIDGE_CLASSIFICATION,selectedBridgeClassification); }catch(e){ /* non-critical */ }
+  renderBridgeClassificationMenu();
+  closeBridgeClassificationMenu();
+  if(currentPos) updateReadout();
+});
+document.addEventListener('click', (event) => {
+  if(!event.target.closest('.bridge-filter-menu') && !event.target.closest('.bridge-filter-toggle')) closeBridgeClassificationMenu();
+});
+document.addEventListener('keydown', (event) => {
+  if(event.key === 'Escape') closeBridgeClassificationMenu();
+});
+
 // ---------- Clock ----------
 function tickClock(){
   const now = new Date();
-  const dateText = now.toLocaleDateString('en-GB', {
-    day:'2-digit', month:'short', year:'numeric'
+  const dateText = now.toLocaleDateString('en-US', {
+    weekday:'long', month:'short', day:'numeric'
   });
   const timeText = now.toLocaleTimeString('en-US', {
     hour:'numeric', minute:'2-digit', hour12:true
   });
-  const savedText = storageAvailable ? `${entries.length} saved` : 'storage blocked';
-  document.getElementById('clock').textContent = `${dateText} · ${timeText} · ${savedText}`;
+  const sessionTime = document.getElementById('capture-session-time');
+  if(sessionTime){
+    sessionTime.dateTime = now.toISOString();
+    sessionTime.textContent = `${dateText} ${timeText}`;
+  }
+  const saved = document.getElementById('clock-saved');
+  if(saved) saved.textContent = `${entries.length} saved`;
+  updateConfidenceReadouts();
 }
 setInterval(tickClock, 1000);
 tickClock();
@@ -1891,11 +2549,44 @@ const MAP_BASEMAPS = {
   }
 };
 
-function updateOsmBasemap(){
-  if(!osmMap) return;
-  const theme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+// Dark mode uses the published MapTiler VECTOR style through the official
+// Leaflet integration (`L.maptilerLayer`), never an iframe and never
+// style.json handed to L.tileLayer. Light mode keeps the CARTO raster
+// untouched. The SDK, its stylesheet and the plugin are vendored and fetched
+// on demand, because the SDK is ~1.4 MB and only dark mode needs it.
+let osmVectorLayer = null;
+let mapTilerSdkPromise = null;
+let syncVectorCamera = null;
+
+function ensureMapTilerSdk(){
+  if(mapTilerSdkPromise) return mapTilerSdkPromise;
+  mapTilerSdkPromise = new Promise((resolve, reject) => {
+    if(typeof KMTrackMapConfig === 'undefined' || typeof L === 'undefined'){
+      reject(new Error('MapTiler configuration unavailable'));
+      return;
+    }
+    if(window.maptilersdk && L.maptilerLayer){ resolve(); return; }
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = KMTrackMapConfig.sdkCssPath;
+    document.head.append(link);
+    const sdk = document.createElement('script');
+    sdk.src = KMTrackMapConfig.sdkPath;
+    sdk.onload = () => {
+      const plugin = document.createElement('script');
+      plugin.src = KMTrackMapConfig.leafletPluginPath;
+      plugin.onload = () => L.maptilerLayer ? resolve() : reject(new Error('MapTiler Leaflet layer unavailable'));
+      plugin.onerror = () => reject(new Error('MapTiler Leaflet plugin failed to load'));
+      document.head.append(plugin);
+    };
+    sdk.onerror = () => reject(new Error('MapTiler SDK failed to load'));
+    document.head.append(sdk);
+  });
+  return mapTilerSdkPromise;
+}
+
+function addRasterBasemap(theme){
   const basemap = MAP_BASEMAPS[theme];
-  if(osmBaseLayer) osmBaseLayer.remove();
   osmBaseLayer = L.tileLayer(`${basemap.url}?key=${encodeURIComponent(CARTO_BASEMAP_KEY)}`,{
     subdomains:'abcd',
     maxZoom:20,
@@ -1906,12 +2597,156 @@ function updateOsmBasemap(){
   osmBaseLayer.bringToBack();
 }
 
+function clearBasemaps(){
+  if(syncVectorCamera && osmMap){
+    osmMap.off('move', syncVectorCamera);
+    osmMap.off('zoom', syncVectorCamera);
+  }
+  syncVectorCamera = null;
+  if(osmBaseLayer){ osmBaseLayer.remove(); osmBaseLayer = null; }
+  if(osmVectorLayer){ osmVectorLayer.remove(); osmVectorLayer = null; }
+}
+
+/* Nothing here touches the map's view: adding or removing a Leaflet layer leaves
+ * the center and zoom alone, so switching themes preserves both. */
+function updateOsmBasemap(){
+  if(!osmMap) return;
+  const theme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+
+  clearBasemaps();
+
+  if(theme !== 'dark'){
+    addRasterBasemap(theme);
+    return;
+  }
+
+  ensureMapTilerSdk().then(() => {
+    // The theme may have flipped again while the SDK was loading.
+    if(!osmMap || document.documentElement.dataset.theme === 'light') return;
+    clearBasemaps();
+    const layer = L.maptilerLayer({
+      style: KMTrackMapConfig.styleUrl,
+      apiKey: KMTrackMapConfig.apiKey,
+      /* Leaflet owns every gesture. The plugin already defaults this to false;
+       * it is set explicitly so the intent is obvious — MapLibre must not run
+       * its own drag/zoom handlers on top of Leaflet's. */
+      interactive: false,
+      /* Keep the GL container pinned to the viewport on EVERY frame.
+       *
+       * The plugin's default is 32ms, which a 60-120Hz drag outruns: the canvas
+       * then drifts along with the map pane and snaps back each time the
+       * throttled handler finally runs, so the basemap visibly lurches while the
+       * markers glide — dark mode only, because the light raster is a pane child
+       * and needs no re-pinning. 0 collapses the throttle into a per-tick
+       * coalescer, so it stays in step at any refresh rate. Measured before the
+       * fix: the container occupied 4 different screen positions over 30 frames. */
+      updateInterval: 0
+    }).addTo(osmMap);
+    osmVectorLayer = layer;
+    /* Drive the GL camera from Leaflet.
+     *
+     * The vendored plugin (v1.0.0) predates this SDK. Its _transformGL() assigns
+     * `transform.center` directly, which MapLibre 5 recomputes and discards — so
+     * the basemap stayed at its opening position while Leaflet panned its panes,
+     * and the markers slid across a frozen map as if they were a detached layer
+     * floating above it. `jumpTo` is the supported API and is idempotent, so this
+     * stays harmless if a future plugin release fixes the sync itself.
+     *
+     * No bringToBack() either: that is a GridLayer/Path method, not an L.Layer
+     * one, and this is a plain L.Layer. It is unnecessary — the plugin renders
+     * into the tile pane (z-index 200) and Leaflet's overlay pane is 400. */
+    syncVectorCamera = () => {
+      const gl = layer._maptilerMap;
+      if(!gl || osmVectorLayer !== layer || !osmMap) return;
+      gl.jumpTo({ center: osmMap.getCenter(), zoom: osmMap.getZoom() - 1 });
+    };
+    osmMap.on('move', syncVectorCamera);
+    osmMap.on('zoom', syncVectorCamera);
+    syncVectorCamera();
+    /* The plugin adds the MapTiler + OpenStreetMap attribution itself, but it
+     * does not report basemap failures. If the style never arrives — offline, or
+     * the key refused — fall back to the raster dark basemap rather than leaving
+     * the map blank. A later theme switch retries the vector style. */
+    const vectorMap = layer._maptilerMap;
+    if(vectorMap && typeof vectorMap.once === 'function'){
+      let vectorReady = false;
+      vectorMap.once('load', () => { vectorReady = true; });
+      window.setTimeout(() => {
+        if(vectorReady || !osmMap || osmVectorLayer !== layer) return;
+        if(document.documentElement.dataset.theme === 'light') return;
+        console.warn('MapTiler style did not load; using the raster dark basemap');
+        clearBasemaps();
+        addRasterBasemap('dark');
+      }, 8000);
+    }
+  }).catch((error) => {
+    // Offline, or the SDK could not load. Fall back to the raster dark basemap
+    // so the map still renders instead of going blank.
+    console.warn('MapTiler basemap unavailable', error);
+    if(!osmMap || document.documentElement.dataset.theme === 'light') return;
+    clearBasemaps();
+    addRasterBasemap('dark');
+  });
+}
+
+/* Reload continuity. The header refresh reloads the page, which would otherwise
+ * dump the inspector back on Capture and reset the map — so recovery would cost
+ * them their place. Both are remembered for the SESSION only, so a fresh launch
+ * still starts clean. An in-progress camera draft is deliberately NOT restored:
+ * resurrecting a half-taken photo is exactly the state worth losing. */
+const STORAGE_KEY_ACTIVE_VIEW = 'kmtrack_active_view_v1';
+const STORAGE_KEY_MAP_VIEW = 'kmtrack_map_view_v1';
+
+function rememberActiveView(viewName){
+  try{ sessionStorage.setItem(STORAGE_KEY_ACTIVE_VIEW, viewName); }catch(e){ /* non-critical */ }
+}
+
+function restoreActiveView(){
+  let view = null;
+  try{ view = sessionStorage.getItem(STORAGE_KEY_ACTIVE_VIEW); }catch(e){ /* non-critical */ }
+  if(view && APP_VIEW_IDS[view]) showAppView(view);
+}
+
+function loadMapView(){
+  try{
+    const parsed = JSON.parse(sessionStorage.getItem(STORAGE_KEY_MAP_VIEW) || 'null');
+    if(!parsed) return null;
+    const {lat,lng,zoom} = parsed;
+    if(!Number.isFinite(lat) || !Number.isFinite(lng) || !Number.isFinite(zoom)) return null;
+    return {lat,lng,zoom};
+  }catch(e){ return null; }
+}
+
+function rememberMapView(){
+  if(!osmMap) return;
+  try{
+    const center = osmMap.getCenter();
+    sessionStorage.setItem(STORAGE_KEY_MAP_VIEW, JSON.stringify({lat:center.lat,lng:center.lng,zoom:osmMap.getZoom()}));
+  }catch(e){ /* non-critical */ }
+}
+
+/* Re-assert the remembered view. The map is first created while its tab may
+ * still be hidden, so it has no real size yet and `setView` lands a few metres
+ * off; this runs again once the pane has been measured. Idempotent — the view is
+ * saved on every moveend, so it is a no-op on a normal tab switch. */
+function applySavedMapView(){
+  const saved = loadMapView();
+  if(osmMap && saved) osmMap.setView([saved.lat,saved.lng], saved.zoom, {animate:false});
+}
+
 function initOsmMap(){
   if(osmMap || typeof L === 'undefined') return;
-  osmMap = L.map('osm-map',{zoomControl:false,attributionControl:true}).setView([14.86,120.88],10);
+  const saved = loadMapView();
+  osmMap = L.map('osm-map',{zoomControl:false,attributionControl:true})
+    .setView(saved ? [saved.lat,saved.lng] : [14.86,120.88], saved ? saved.zoom : 10);
+  // A restored view must not be yanked onto the current fix — that would discard
+  // exactly the position the reload was meant to preserve.
+  if(saved) osmHasCenteredOnLocation = true;
   updateOsmBasemap();
   osmMap.on('moveend',updateMapEntries);
   osmMap.on('zoomend',updateMapLandmarks);
+  osmMap.on('moveend',rememberMapView);
+  osmMap.on('zoomend',rememberMapView);
   updateMapLandmarks();
   fetch('map-landmarks.json').then(r=>{if(!r.ok) throw new Error(r.status);return r.json();}).then(data=>{if(!Array.isArray(data.assets)) throw new Error('Invalid landmark dataset');supplementalMapLandmarks=data.assets;updateMapLandmarks();}).catch(err=>console.warn('Additional interchange markers unavailable',err));
   updateOsmLocation();
@@ -1921,7 +2756,7 @@ function initOsmMap(){
 function updateMapLandmarks(){
   if(!osmMap) return;
   if(!osmLandmarkLayer) osmLandmarkLayer=L.layerGroup().addTo(osmMap);
-  KMTrackMap.renderLandmarks(osmMap,osmLandmarkLayer,supplementalMapLandmarks);
+  KMTrackMap.renderLandmarks(osmMap,osmLandmarkLayer,[...bridgeData,...supplementalMapLandmarks]);
 }
 
 function openMapEntry(id){
@@ -1995,20 +2830,72 @@ function updateOsmLocation(forceCenter){
   }
 }
 
+const APP_VIEW_IDS = {
+  inspection:'inspection-view',
+  log:'log-view',
+  map:'map-view',
+  tools:'tools-view',
+  settings:'settings-view'
+};
+
+// The register is ONE DOM node shared by the Capture and Log tabs. It is
+// re-parented on tab switch rather than duplicated, so its rows, selection
+// state, swipe handlers and MutationObservers are never forked.
+//
+// The two tabs show different AMOUNTS of it: Capture shows only the newest few
+// (enough to delete a mistake on the spot), Log shows the full register and owns
+// the search. The cap is applied per-mount in renderLog(), not by a second list.
+const CAPTURE_RECENT_LIMIT = 10;
+let logRegisterView = 'inspection';
+
+function mountLogRegister(viewName){
+  if(viewName !== 'log' && viewName !== 'inspection') return;
+  const block = document.getElementById('log-register');
+  const host = document.getElementById(viewName === 'log' ? 'log-host-log' : 'log-host-inspection');
+  const moved = !!(block && host && block.parentElement !== host);
+  if(moved) host.appendChild(block);
+  if(moved || logRegisterView !== viewName){
+    logRegisterView = viewName;
+    // Re-render so this mount gets the right amount of list.
+    renderLog();
+  }
+}
+
+/* The header is global. On the map it trades the "KMTRACK" wordmark for the live
+   station / coordinates / accuracy that used to sit in the map's own topbar;
+   every other tab shows the wordmark. The elements themselves never move, so
+   `updateOsmLocation()` and the station writers keep working untouched. */
+function syncHeaderContext(viewName){
+  const wordmark = document.getElementById('header-wordmark');
+  const context = document.getElementById('header-map-context');
+  if(!wordmark || !context) return;
+  const isMap = viewName === 'map';
+  wordmark.hidden = isMap;
+  context.hidden = !isMap;
+}
+
 function showAppView(viewName){
-  const showMap = viewName === 'map';
-  document.getElementById('inspection-view').hidden = showMap;
-  document.getElementById('map-view').hidden = !showMap;
+  // Remembered so a page reload — the header refresh — comes back to this view.
+  rememberActiveView(viewName);
+  Object.keys(APP_VIEW_IDS).forEach(name => {
+    const view = document.getElementById(APP_VIEW_IDS[name]);
+    if(view) view.hidden = name !== viewName;
+  });
+  mountLogRegister(viewName);
+  syncHeaderContext(viewName);
+  // The footer fit is skipped while this view is hidden, so re-check it on show.
   document.querySelectorAll('.app-tab-btn').forEach(button => {
     const active = button.dataset.appView === viewName;
     button.classList.toggle('active',active);
     button.setAttribute('aria-selected',active ? 'true' : 'false');
     button.tabIndex = active ? 0 : -1;
   });
-  if(showMap){
+  if(viewName === 'map'){
     initOsmMap();
     requestAnimationFrame(() => {
       osmMap?.invalidateSize(false);
+      // Now that the pane has a size, re-assert the remembered view exactly.
+      applySavedMapView();
       updateOsmLocation();
     });
   }
@@ -2055,11 +2942,13 @@ function offNetworkThresholdKm(accuracyMeters){
   return Math.min(OFF_NETWORK_KM + bufferKm, 0.35);
 }
 
-function computeKmStation(lat, lon){
+function computeKmStation(lat, lon, expressway=''){
   if(calibData.length<1) return null;
-  let candidates=[];
-  for(const r of [1,2,4,8]){ candidates=nearbyIndices(lat,lon,r); if(candidates.length) break; }
-  if(!candidates.length) candidates=calibData.map((_,i)=>i);
+  let candidates=nearbyIndices(lat,lon,4);
+  if(expressway) candidates=candidates.filter(i=>calibData[i].e===expressway);
+  if(!candidates.length){
+    candidates=calibData.map((point,index)=>(!expressway||point.e===expressway)?index:-1).filter(index=>index>=0);
+  }
 
   let first=nearestFrom(candidates,lat,lon);
   if(!first) return null;
@@ -2080,6 +2969,72 @@ function computeKmStation(lat, lon){
   return {km,expressway:best.e,bound:best.b,distance:first.dist};
 }
 
+function computeCorridorCandidates(lat,lon){
+  const local=nearbyIndices(lat,lon,4);
+  const corridors=new Set(local.map(index=>calibData[index].e));
+  const confirmed=locationResolver.state().confirmedCorridor;
+  if(confirmed) corridors.add(confirmed);
+  if(!corridors.size) for(const point of calibData) corridors.add(point.e);
+  return [...corridors].map(expressway=>computeKmStation(lat,lon,expressway)).filter(Boolean);
+}
+
+function corridorDepartureThresholdKm(accuracyMeters){
+  return KMTrackLocation.corridorDepartureThresholdKm(accuracyMeters);
+}
+
+function isInterchangeLocationMode(resolution=currentResolvedLocation,position=currentPos){
+  return !!position&&KMTrackLocation.isInterchangeMode(resolution,position.acc);
+}
+
+function interchangeSegmentLabel(resolution=currentResolvedLocation){
+  return resolution?.interchange?.segment||'Ramp / interchange roadway';
+}
+
+function resolvedLocationCanSave(){
+  if(!currentPos||!currentPos.fresh||!currentResolvedLocation?.saveAllowed) return false;
+  const result=currentResolvedLocation.result;
+  return !!result&&(isInterchangeLocationMode()||result.distance<=offNetworkThresholdKm(currentPos.acc));
+}
+
+function resolvedEntrySnapshot(){
+  if(!resolvedLocationCanSave()) return null;
+  const result=currentResolvedLocation.result;
+  const interchangeMode=isInterchangeLocationMode();
+  return {
+    lat:currentPos.lat,lon:currentPos.lon,
+    km:interchangeMode?null:result.km,
+    expressway:result.expressway,
+    bound:userBound||'',
+    interchange:interchangeMode?currentResolvedLocation.interchange.name:'',
+    interchangeSegment:interchangeMode?interchangeSegmentLabel():''
+  };
+}
+
+function setGpsCaptureReady(ready){
+  const section=document.getElementById('defect-section');
+  if(section) section.classList.toggle('gps-pending',!ready);
+}
+
+function resolveFreshLocation(speedMs){
+  if(!currentPos) return null;
+  currentResolvedLocation=locationResolver.resolve({
+    lat:currentPos.lat,lon:currentPos.lon,accuracy:currentPos.acc,timestamp:currentPos.timestamp,
+    speed:speedMs,candidates:computeCorridorCandidates(currentPos.lat,currentPos.lon),
+    interchange:nearestRamp(currentPos.lat,currentPos.lon)
+  });
+  setGpsCaptureReady(resolvedLocationCanSave());
+  return currentResolvedLocation;
+}
+
+function markGpsUncertain(message){
+  if(currentPos) currentPos.fresh=false;
+  currentResolvedLocation=locationResolver.markStale(message);
+  gpsStatus.textContent=message;
+  gpsStatus.className='status warn';
+  setGpsCaptureReady(false);
+  updateReadout();
+}
+
 function formatKmStation(km){
   if(km===null || km===undefined || !Number.isFinite(Number(km))) return '--.---';
   const meters=Math.round(Number(km)*1000);
@@ -2094,6 +3049,45 @@ function updateMapKmStation(){
   document.getElementById('map-km-station').textContent = `KM ${document.getElementById('km-value').textContent}`;
 }
 
+/* ---------- GPS confidence ----------
+ * The panel's single claim about the location, and the only place it is decided.
+ * Copy is the design system's own wording for these states. Every branch reads
+ * the resolver's state, so the chip cannot disagree with the road match, and a
+ * stale or unconfirmed fix can never read as fresh. Nothing here touches the
+ * capture safeguards — those stay in resolvedLocationCanSave() and
+ * setGpsCaptureReady(). */
+const GPS_CONFIDENCE = {
+  fresh:'Location verified',
+  held:'Road match held',
+  stale:'Last reading is stale',
+  'off-network':'No honest road match',
+  permission:'Location permission needed',
+  checking:'Acquiring device location',
+  unsupported:'Location unavailable'
+};
+
+function gpsConfidenceState(isOffMappedNetwork, resolution){
+  if(!navigator.geolocation) return 'unsupported';
+  if(!currentPos) return gpsPermissionDenied ? 'permission' : 'checking';
+  if(!currentPos.fresh) return 'stale';
+  if(!resolution || !resolution.confirmed) return 'checking';
+  if(resolution.uncertain) return 'held';
+  if(isOffMappedNetwork) return 'off-network';
+  return 'fresh';
+}
+
+function updateGpsConfidence(isOffMappedNetwork, resolution){
+  const panel = document.getElementById('instrument-panel');
+  const chip = document.getElementById('gps-chip');
+  const text = document.getElementById('gps-chip-text');
+  if(!panel || !chip || !text) return;
+  const state = gpsConfidenceState(isOffMappedNetwork, resolution);
+  chip.dataset.state = state;
+  text.textContent = GPS_CONFIDENCE[state];
+  // Dresses the station readout too: a stale or held match must not look live.
+  panel.dataset.gpsState = state;
+}
+
 function updateReadout(){
   if(!currentPos) return;
   updateOsmLocation();
@@ -2101,36 +3095,62 @@ function updateReadout(){
   document.getElementById('lon').textContent = currentPos.lon.toFixed(6);
   document.getElementById('acc').textContent = currentPos.acc ? `±${currentPos.acc.toFixed(0)} m` : '--';
 
-  const result = computeKmStation(currentPos.lat, currentPos.lon);
+  const resolution=currentResolvedLocation;
+  const result=resolution?.result||null;
   const kmEl = document.getElementById('km-value');
   const tagEl = document.getElementById('segment-tag');
+  const post=kmEl.closest('.kmpost');
+  const locationLabel=document.getElementById('current-location-label');
 
   if(!result){
     kmEl.textContent = '--.---';
     updateMapKmStation();
     tagEl.textContent = calibData.length ? '--' : 'dataset not loaded';
     tagEl.classList.remove('faroff');
+    post.classList.remove('interchange-mode');
+    locationLabel.textContent='Station';
+    updateRampReadout(null);
+    updateBridgeReadout(currentPos.lat, currentPos.lon, null, true);
     return;
   }
 
   const isOffMappedNetwork = result.distance > offNetworkThresholdKm(currentPos.acc);
-  kmEl.textContent = isOffMappedNetwork ? '--.---' : formatKmStation(result.km);
-  updateMapKmStation();
+  const interchangeMode=isInterchangeLocationMode(resolution,currentPos);
+  post.classList.toggle('interchange-mode',interchangeMode);
+  locationLabel.textContent=interchangeMode?'Location':'Station';
+  kmEl.textContent = interchangeMode?resolution.interchange.name:(isOffMappedNetwork?'--.---':formatKmStation(result.km));
+  document.getElementById('map-km-station').textContent=interchangeMode?resolution.interchange.name:`KM ${kmEl.textContent}`;
   const displayBound = userBound || '?';
-  if(isOffMappedNetwork){
+  if(!currentPos.fresh){
+    tagEl.textContent = `⚠ GPS uncertain — holding ${result.expressway}`;
+    tagEl.classList.add('faroff');
+  } else if(!resolution.confirmed){
+    tagEl.textContent = `⚠ Confirming road — ${result.expressway}`;
+    tagEl.classList.add('faroff');
+  } else if(interchangeMode){
+    tagEl.textContent = `${result.expressway} · ${displayBound}`;
+    tagEl.classList.remove('faroff');
+  } else if(isOffMappedNetwork){
     tagEl.textContent = `⚠ Off mapped network (~${Math.round(result.distance*1000)}m from ${result.expressway})`;
+    tagEl.classList.add('faroff');
+  } else if(resolution.uncertain){
+    tagEl.textContent = `⚠ ${result.expressway} retained — ${resolution.reason.toLowerCase()}`;
     tagEl.classList.add('faroff');
   } else {
     tagEl.textContent = `${result.expressway} · ${displayBound}`;
     tagEl.classList.remove('faroff');
   }
-  if(!isOffMappedNetwork){
+  if(currentPos.fresh&&resolution.confirmed&&!isOffMappedNetwork){
     detectBoundFromTrend(result.expressway, result.km);
   }
+  updateBridgeReadout(currentPos.lat, currentPos.lon, result, isOffMappedNetwork&&!interchangeMode);
   renderBoundToggle(result.expressway);
   updateBoundAutoStatus(result.expressway);
-  updateRampReadout(currentPos.lat, currentPos.lon);
+  updateRampReadout(interchangeMode?null:resolution.interchange);
   refreshCameraDraftFromLiveGPS();
+  // One call, from the same scope that just computed the road match, so the chip
+  // can never be derived from anything else.
+  updateGpsConfidence(isOffMappedNetwork, resolution);
 }
 
 // Keeps the in-camera overlay (and, since it edits cameraDraftEntry directly,
@@ -2146,29 +3166,43 @@ function refreshCameraDraftFromLiveGPS(){
   if(!cameraDraftEntry || cameraEditTargetIndex !== null) return;
   if(!cameraModal || !cameraModal.classList.contains('show')) return;
   if(pendingCaptureBlob) return;
-  if(!currentPos) return;
-  const result = computeKmStation(currentPos.lat, currentPos.lon);
-  const isOffMappedNetwork = !result || result.distance > offNetworkThresholdKm(currentPos.acc);
-  cameraDraftEntry.lat = currentPos.lat;
-  cameraDraftEntry.lon = currentPos.lon;
-  cameraDraftEntry.km = isOffMappedNetwork ? null : result.km;
-  cameraDraftEntry.expressway = isOffMappedNetwork ? '' : result.expressway;
-  cameraDraftEntry.bound = isOffMappedNetwork ? '' : (userBound || '');
+  if(!resolvedLocationCanSave()) return;
+  const snapshot=resolvedEntrySnapshot();
+  if(!snapshot) return;
+  Object.assign(cameraDraftEntry,snapshot);
   updateCameraOverlay(cameraDraftEntry);
 }
 
-function updateRampReadout(lat, lon){
+function updateRampReadout(interchange){
   const rampEl = document.getElementById('ramp-tag');
-  const match = nearestRamp(lat, lon);
-  if(!match){
+  if(!interchange){
     rampEl.classList.remove('show');
     rampEl.textContent = '';
+    updateInstrumentNearbySummary();
     return;
   }
-  rampEl.textContent = match.ramp.interchange
-    ? `⤴ ${match.ramp.interchange} — ${match.ramp.name}`
-    : `⤴ ${match.ramp.name}`;
+  rampEl.textContent = interchange.name;
   rampEl.classList.add('show');
+  updateInstrumentNearbySummary();
+}
+
+function updateInstrumentNearbySummary(){
+  const summary = document.getElementById('instrument-nearby');
+  const rampEl = document.getElementById('ramp-tag');
+  const bridgeName = document.getElementById('nearby-asset-name');
+  const bridgeStation = document.getElementById('nearby-asset-station');
+  if(!summary) return;
+  let text = '';
+  if(rampEl && rampEl.classList.contains('show') && rampEl.textContent.trim()){
+    text = `Near ${rampEl.textContent.trim()}`;
+  } else if(bridgeName && bridgeStation){
+    const name = bridgeName.textContent.trim();
+    const station = bridgeStation.textContent.trim();
+    const unavailable = /^(loading|waiting|bridge data unavailable|no upcoming|no nearby)/i.test(name);
+    if(name && !unavailable) text = station && station !== '--' ? `${name} · ${station}` : name;
+  }
+  summary.textContent = text;
+  summary.hidden = !text;
 }
 
 // ---------- Direction (bound) auto-detection ----------
@@ -2229,11 +3263,11 @@ function updateBoundAutoStatus(expressway){
   if(!options || options.length === 0){ el.textContent = ''; return; }
   const mapping = EXPRESSWAY_BOUND_BY_TREND[(expressway || '').trim().toUpperCase()];
   if(!mapping){
-    el.textContent = 'No auto-detect data for this segment — set manually.';
+    el.textContent = 'Automatic direction detection is unavailable for this segment.';
   } else if(!trendEstablished){
     el.textContent = 'Determining direction of travel…';
   } else {
-    el.textContent = 'Auto-detected from direction of travel — tap to override.';
+    el.textContent = 'Auto-detected from direction of travel.';
   }
 }
 
@@ -2246,59 +3280,75 @@ function saveBound(){
 function renderBoundToggle(expressway){
   const wrap = document.getElementById('bound-toggle');
   const options = expresswayBounds[expressway];
+  if(!wrap) return;
   if(!options || options.length === 0){
-    wrap.innerHTML = '<span class="bound-hint">no direction data for this segment</span>';
+    wrap.innerHTML = '<span class="bound-hint">No direction data for this segment</span>';
     return;
   }
-  // Only rebuild the buttons if the segment (and thus its option pair) changed
-  if(currentExpressway === expressway && wrap.querySelectorAll('.bound-btn').length === options.length) {
-    // just refresh active state
-    wrap.querySelectorAll('.bound-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.bound === userBound);
-    });
-    return;
-  }
-  currentExpressway = expressway;
   // The direction picked on the previous corridor may not be a valid
   // option here (e.g. it was "NB" on NLEX and the vehicle just entered a
   // ramp with only EB/WB) — don't let it silently attach to this corridor.
-  if(userBound && !options.includes(userBound)){
+  if(options && userBound && !options.includes(userBound)){
     userBound = null;
     saveBound();
   }
-  wrap.innerHTML = '';
-  options.forEach(opt => {
-    const btn = document.createElement('button');
-    btn.className = 'bound-btn' + (opt === userBound ? ' active' : '');
-    btn.textContent = opt;
-    btn.dataset.bound = opt;
-    btn.addEventListener('click', () => {
-      userBound = opt;
-      saveBound();
-      wrap.querySelectorAll('.bound-btn').forEach(b => b.classList.toggle('active', b.dataset.bound === userBound));
-    });
-    wrap.appendChild(btn);
+  const signature = options.join('|');
+  if(wrap.dataset.options !== signature){
+    wrap.dataset.options = signature;
+    wrap.replaceChildren(...options.map(opt => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'bound-btn';
+      btn.textContent = opt;
+      btn.dataset.bound = opt;
+      btn.addEventListener('click', () => {
+        userBound = opt;
+        saveBound();
+        renderBoundToggle(expressway);
+      });
+      return btn;
+    }));
+  }
+  wrap.querySelectorAll('.bound-btn').forEach(btn => {
+    const active = btn.dataset.bound === userBound;
+    btn.classList.toggle('active', active);
+    btn.setAttribute('aria-pressed', String(active));
   });
 }
 
 if(navigator.geolocation){
   navigator.geolocation.watchPosition(
     (pos) => {
-      const firstFix = !currentPos;
+      const receivedAt=Date.now();
+      const fixTimestamp=Number.isFinite(pos.timestamp)?pos.timestamp:receivedAt;
+      if(receivedAt-fixTimestamp>GPS_FRESH_MS){
+        markGpsUncertain('GPS uncertain — received an old location fix');
+        return;
+      }
+      if(currentPos&&fixTimestamp<=currentPos.timestamp) return;
       const speedMs = (typeof pos.coords.speed === 'number' && pos.coords.speed >= 0) ? pos.coords.speed : null;
       const smoothed = gpsFilter.process(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy, pos.timestamp, speedMs);
-      currentPos = { lat: smoothed.lat, lon: smoothed.lon, acc: pos.coords.accuracy };
-      gpsStatus.textContent = 'GPS locked — updating live';
-      gpsStatus.className = 'status ok';
-      if(firstFix){
-        const section = document.getElementById('defect-section');
-        if(section) section.classList.remove('gps-pending');
-      }
+      currentPos = { lat: smoothed.lat, lon: smoothed.lon, acc: pos.coords.accuracy, timestamp:fixTimestamp, fresh:true };
+      const resolution=resolveFreshLocation(speedMs);
+      gpsStatus.textContent = resolution?.confirmed
+        ? (resolution.uncertain?'GPS locked — road retained while connection is confirmed':'GPS locked — updating live')
+        : 'GPS locked — confirming road';
+      gpsStatus.className = resolution?.confirmed&&!resolution.uncertain?'status ok':'status warn';
+      clearTimeout(gpsFreshnessTimer);
+      gpsFreshnessTimer=setTimeout(()=>markGpsUncertain('GPS signal delayed — holding the last confirmed road'),GPS_FRESH_MS);
       updateReadout();
     },
     (err) => {
-      gpsStatus.textContent = 'GPS error: ' + err.message;
-      gpsStatus.className = 'status err';
+      // 1 === PERMISSION_DENIED. The panel needs to tell "not allowed" apart
+      // from "no fix yet", so the state comes from here rather than the message.
+      gpsPermissionDenied = !!err && err.code === 1;
+      if(currentPos) markGpsUncertain('GPS signal lost — holding the last confirmed road');
+      else {
+        gpsStatus.textContent = 'GPS error: ' + err.message;
+        gpsStatus.className = 'status err';
+        setGpsCaptureReady(false);
+      }
+      updateGpsConfidence();
     },
     { enableHighAccuracy:true, maximumAge:1000, timeout:10000 }
   );
@@ -2317,32 +3367,23 @@ function fullTimestamp(){
 
 function logDefect(type, lane){
   lane = lane || '';
-  if(!currentPos){
-    alert('Waiting for GPS fix — please allow location access and wait a moment.');
+  if(!resolvedLocationCanSave()){
+    alert(currentPos ? 'GPS is uncertain or the road is not confirmed yet. Wait for a fresh, confirmed location before saving.' : 'Waiting for GPS fix — please allow location access and wait a moment.');
     return;
   }
 
-  const result = computeKmStation(currentPos.lat, currentPos.lon);
+  const snapshot=resolvedEntrySnapshot();
 
-  // Use the exact same off-network rule as the live KM display.
-  // If the vehicle is off the mapped network, do NOT save the nearest
-  // calibration point's KM, expressway, or bound into the defect entry.
-  const isOffMappedNetwork = !result || result.distance > offNetworkThresholdKm(currentPos.acc);
-
-  entries.push({
-    id: newId(),
+  entries.push(KMTrackEntry.createEntry({
     type,
     timestamp: fullTimestamp(),
-    lat: currentPos.lat,
-    lon: currentPos.lon,
-    km: isOffMappedNetwork ? null : result.km,
-    expressway: isOffMappedNetwork ? '' : result.expressway,
-    bound: isOffMappedNetwork ? '' : (userBound || ''),
+    ...snapshot,
     lane,
+    inspector: inspectorName,
     photoId: '',
     photoFilename: '',
     photoTimestamp: ''
-  });
+  }));
 
   saveEntries();
   renderLog();
@@ -2488,7 +3529,9 @@ function currentEntryCameraData(entry){
   // "Others" value, etc.) are shown as-is.
   const rawLane = entry.lane || '';
   const lane = /^[1-4]$/.test(rawLane) ? `L${rawLane}` : (rawLane || '—');
-  const location = entry.expressway ? `${entry.expressway}${entry.bound ? ' · '+entry.bound : ''}` : 'North Luzon Expressway';
+  const location = entry.expressway
+    ? `${entry.expressway}${entry.bound ? ' · '+entry.bound : ''}${entry.interchange ? ' · '+entry.interchange : ''}${entry.interchangeSegment ? ' · '+entry.interchangeSegment : ''}`
+    : 'North Luzon Expressway';
   return { kmText, direction, lane, location };
 }
 
@@ -2500,7 +3543,7 @@ function formatCoordinate(value, positive, negative){
 function updateCameraOverlay(entry){
   const data = currentEntryCameraData(entry);
   cameraTimeEl.textContent = formatPhotoDate(new Date());
-  const station = data.kmText ? `KM ${data.kmText}` : 'OFF MAPPED NETWORK';
+  const station = data.kmText ? `KM ${data.kmText}` : entry.interchange ? (entry.interchangeSegment||'INTERCHANGE ROADWAY') : 'OFF MAPPED NETWORK';
   cameraMetaEl.textContent = `${station} · ${data.direction} · ${data.lane} · ${formatCoordinate(entry.lat,'N','S')}, ${formatCoordinate(entry.lon,'E','W')}`;
 }
 
@@ -2508,19 +3551,14 @@ function updateCameraOverlay(entry){
 // instead of pushing it to entries[] — the photo entry is only committed
 // once a photo is actually captured.
 function getCameraSnapshot(type){
-  if(!currentPos){
-    alert('Waiting for GPS fix — please allow location access and wait a moment.');
+  if(!resolvedLocationCanSave()){
+    alert(currentPos ? 'GPS is uncertain or the road is not confirmed yet. Wait for a fresh, confirmed location before taking a photo.' : 'Waiting for GPS fix — please allow location access and wait a moment.');
     return null;
   }
-  const result = computeKmStation(currentPos.lat, currentPos.lon);
-  const isOffMappedNetwork = !result || result.distance > offNetworkThresholdKm(currentPos.acc);
+  const snapshot=resolvedEntrySnapshot();
   return {
     type,
-    lat: currentPos.lat,
-    lon: currentPos.lon,
-    km: isOffMappedNetwork ? null : result.km,
-    expressway: isOffMappedNetwork ? '' : result.expressway,
-    bound: isOffMappedNetwork ? '' : (userBound || ''),
+    ...snapshot,
     lane: ''
   };
 }
@@ -2619,7 +3657,7 @@ async function openCameraForEntryPhoto(index){
   cameraEditTargetIndex = index;
   cameraDraftEntry = {
     type: entry.type, lat: entry.lat, lon: entry.lon,
-    km: entry.km, expressway: entry.expressway, bound: entry.bound,
+    km: entry.km, expressway: entry.expressway, interchange:entry.interchange||'', interchangeSegment:entry.interchangeSegment||'', bound: entry.bound,
     lane: entry.lane || ''
   };
   cameraErrorEl.classList.remove('show');
@@ -2848,7 +3886,7 @@ async function drawStampBand(ctx, w, h, entry, dateLineText){
   const maxTextW = w - contentX - edgePad;
 
   const data = currentEntryCameraData(entry);
-  const kmText = data.kmText ? `KM ${data.kmText}` : 'OFF MAPPED NETWORK';
+  const kmText = data.kmText ? `KM ${data.kmText}` : entry.interchange ? (entry.interchangeSegment||'INTERCHANGE ROADWAY') : 'OFF MAPPED NETWORK';
 
   const logo = await loadCameraLogo();
   const logoGap = Math.round(14*scale);
@@ -3030,7 +4068,7 @@ async function captureContinuousLane(laneValue){
     const cb = label.querySelector('.continuous-lane-trigger');
     if(cb) cb.disabled = true;
   });
-  cameraDraftEntry.lane = laneValue;
+  KMTrackEntry.setLane(cameraDraftEntry, laneValue);
   updateCameraOverlay(cameraDraftEntry);
   try{
     const result = await buildStampedPhotoBlob(cameraDraftEntry);
@@ -3038,14 +4076,14 @@ async function captureContinuousLane(laneValue){
     const photoId = newId();
     await putPhoto(photoId, result.blob);
     await putPhoto(photoId + ':raw', result.rawBlob);
-    entries.push({
+    entries.push(KMTrackEntry.createEntry({
       ...cameraDraftEntry,
-      id: newId(),
       timestamp: fullTimestamp(),
+      inspector: inspectorName,
       photoId,
       photoFilename: result.filename,
       photoTimestamp: formatPhotoDate(result.stamp)
-    });
+    }));
     saveEntries();
     playConfirmSound();
     renderLog();
@@ -3164,7 +4202,7 @@ async function saveCapturedPhoto(){
       const entry = entries[idx];
       const oldPhotoId = entry ? entry.photoId : '';
       if(entry){
-        entry.lane = cameraDraftEntry.lane || entry.lane;
+        KMTrackEntry.setLane(entry, cameraDraftEntry.lane || entry.lane);
         entry.photoId = photoId;
         entry.photoFilename = pendingCaptureFilename;
         entry.photoTimestamp = formatPhotoDate(pendingCaptureStamp);
@@ -3179,14 +4217,14 @@ async function saveCapturedPhoto(){
         await deletePhoto(oldPhotoId + ':raw');
       }
     } else {
-      entries.push({
+      entries.push(KMTrackEntry.createEntry({
         ...cameraDraftEntry,
-        id: newId(),
         timestamp: fullTimestamp(),
+        inspector: inspectorName,
         photoId,
         photoFilename: pendingCaptureFilename,
         photoTimestamp: formatPhotoDate(pendingCaptureStamp)
-      });
+      }));
       saveEntries();
       playConfirmSound();
       clearCaptureReview();
@@ -3353,7 +4391,13 @@ let selectedEntryIds = new Set();
 function getLogFilters(){
   return {from:document.getElementById('entry-filter-from').value,to:document.getElementById('entry-filter-to').value,type:document.getElementById('entry-filter-type').value,source:document.getElementById('entry-filter-source').value,inspector:document.getElementById('entry-filter-inspector').value};
 }
-function visibleEntries(){ return KMTrackEntryFilters.filterEntries(entries,getLogFilters()); }
+function visibleEntries(){
+  // The Capture card has no filter row, so it shows every record. Leaving an
+  // active Log-tab filter applied here would show a subset the user cannot clear
+  // from that tab, with a count that silently disagrees with the title.
+  if(logRegisterView === 'inspection') return entries;
+  return KMTrackEntryFilters.filterEntries(entries,getLogFilters());
+}
 function syncEntryFilterOptions(){
   for(const id of ['entry-filter-type','map-entry-type']){
   const select = document.getElementById(id);
@@ -3398,15 +4442,28 @@ function hideSwipeUndo(){
   if(undoNotice){ undoNotice.remove(); undoNotice = null; }
 }
 
+// The Appearance tile glyph, matching the reference's Sun/Moon swap. Declared
+// before setTheme() runs — a `const` declared later would be in its dead zone.
+const SETTING_SUN_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>';
+const SETTING_MOON_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>';
+
 function setTheme(theme){
   const isLight = theme === 'light';
   document.documentElement.toggleAttribute('data-theme', isLight);
   if(isLight) document.documentElement.dataset.theme = 'light';
-  const toggles = [document.getElementById('theme-toggle'),document.getElementById('map-theme-toggle')];
+  // The map tab no longer carries its own theme control; it follows the app.
+  const toggles = [document.getElementById('theme-toggle')];
   const nextLabel = isLight ? 'Switch to dark mode' : 'Switch to light mode';
   toggles.forEach(toggle => {
-    if(toggle){ toggle.setAttribute('aria-label', nextLabel); toggle.title = nextLabel; }
+    if(toggle){
+      toggle.setAttribute('aria-label', nextLabel);
+      toggle.title = nextLabel;
+      // The Appearance control is a real switch now, not a floating glyph button.
+      toggle.setAttribute('aria-checked', isLight ? 'false' : 'true');
+    }
   });
+  const appearanceTile = document.getElementById('appearance-tile');
+  if(appearanceTile) appearanceTile.innerHTML = isLight ? SETTING_SUN_ICON : SETTING_MOON_ICON;
   const themeMeta = document.querySelector('meta[name="theme-color"]');
   if(themeMeta) themeMeta.content = isLight ? '#19384c' : '#07131f';
   updateOsmBasemap();
@@ -3419,7 +4476,83 @@ function toggleTheme(){
   try{ localStorage.setItem(STORAGE_KEY_THEME, nextTheme); }catch(e){ /* theme preference is non-critical */ }
 }
 document.getElementById('theme-toggle').addEventListener('click',toggleTheme);
-document.getElementById('map-theme-toggle').addEventListener('click',toggleTheme);
+
+// ---------- Settings: inspector identity ----------
+// Records already carried an `inspector` field with no way to set a default.
+// This is that default: stored on the device and stamped on every new capture.
+const STORAGE_KEY_INSPECTOR = 'kmtrack_inspector_v1';
+let inspectorName = '';
+try{ inspectorName = localStorage.getItem(STORAGE_KEY_INSPECTOR) || ''; }catch(e){ /* non-critical */ }
+
+function setInspectorName(value){
+  inspectorName = String(value || '').trim();
+  try{
+    if(inspectorName) localStorage.setItem(STORAGE_KEY_INSPECTOR, inspectorName);
+    else localStorage.removeItem(STORAGE_KEY_INSPECTOR);
+  }catch(e){ /* non-critical */ }
+  syncInspectorFilterOptions();
+}
+
+/* The Inspector filter is built from the entries, so the current identity has to
+   be added explicitly — otherwise a freshly-named device shows no option until
+   its first capture. */
+function syncInspectorFilterOptions(){
+  const select = document.getElementById('entry-filter-inspector');
+  if(!select) return;
+  const previous = select.value;
+  const names = [...new Set(
+    entries.map(entry => String(entry.inspector || '').trim()).filter(Boolean)
+      .concat(inspectorName ? [inspectorName] : [])
+  )].sort();
+  select.replaceChildren(new Option('All inspectors',''), ...names.map(name => new Option(name,name)));
+  select.value = names.includes(previous) ? previous : '';
+}
+
+/* ---------- Settings: live read-outs ---------- */
+/* Read-only. The instrument's own freshness logic decides when a capture is
+   held, so these numbers are reported rather than configured. */
+function updateConfidenceReadouts(){
+  const count = document.getElementById('settings-alignment-count');
+  const accuracy = document.getElementById('settings-accuracy');
+  const age = document.getElementById('settings-fix-age');
+  if(count) count.textContent = (Array.isArray(calibData) ? calibData.length : 0).toLocaleString('en-US');
+  if(accuracy) accuracy.textContent = (currentPos && Number.isFinite(currentPos.acc)) ? `±${Math.round(currentPos.acc)} m` : '--';
+  if(age){
+    const stamp = currentPos && Number(currentPos.timestamp);
+    age.textContent = stamp ? `${Math.max(0, Math.round((Date.now() - stamp) / 1000))} s ago` : '--';
+  }
+  // The Capture panel reports the same age, in the collapsed detail section.
+  const fixAge = document.getElementById('fix-age');
+  if(fixAge){
+    const stamp = currentPos && Number(currentPos.timestamp);
+    fixAge.textContent = stamp ? `${Math.max(0, Math.round((Date.now() - stamp) / 1000))} s` : '--';
+  }
+}
+
+function updateStatusPills(){
+  const storagePill = document.getElementById('storage-pill');
+  const storageText = document.getElementById('storage-pill-text');
+  const tilesPill = document.getElementById('tiles-pill');
+  const tilesText = document.getElementById('tiles-pill-text');
+  if(storagePill && storageText){
+    const ok = storageAvailable !== false;
+    storagePill.classList.toggle('status-fresh', ok);
+    storagePill.classList.toggle('status-warn', !ok);
+    storageText.textContent = ok ? 'Local storage active' : 'Local storage blocked';
+  }
+  if(tilesPill && tilesText){
+    const online = navigator.onLine !== false;
+    tilesPill.classList.toggle('status-fresh', online);
+    tilesPill.classList.toggle('status-warn', !online);
+    tilesText.textContent = online ? 'Map tiles available' : 'Map tiles unavailable';
+  }
+}
+
+document.getElementById('inspector-input').value = inspectorName;
+document.getElementById('inspector-input').addEventListener('input', event => setInspectorName(event.target.value));
+syncInspectorFilterOptions();
+updateConfidenceReadouts();
+updateStatusPills();
 
 function showSwipeUndo(){
   hideSwipeUndo();
@@ -3556,6 +4689,7 @@ function exitSelectMode(){
 function renderLog(){
   openSwipeEntryId = null;
   syncEntryFilterOptions();
+  syncInspectorFilterOptions();
   syncSharingFilters();
   const visible = visibleEntries();
   const visibleIds = new Set(visible.map(entry => entry.id));
@@ -3564,7 +4698,8 @@ function renderLog(){
   const list = document.getElementById('log-list');
   const exportBtn = document.getElementById('export-btn');
   const backupBtn = document.getElementById('backup-btn');
-  document.getElementById('count-mini').textContent = entries.length;
+  const countMini = document.getElementById('count-mini');
+  if(countMini) countMini.textContent = entries.length;
   document.getElementById('count-label').textContent = Object.values(getLogFilters()).some(Boolean)
     ? `${visible.length} of ${entries.length} entries`
     : `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}`;
@@ -3580,9 +4715,13 @@ function renderLog(){
   exportBtn.disabled = false;
   backupBtn.disabled = false;
 
+  /* Capture shows the newest few only; the Log tab shows the whole register.
+   * `visible` stays the source of truth for every count. */
+  const capped = logRegisterView === 'inspection';
+  const shown = capped ? visible.slice(-CAPTURE_RECENT_LIMIT) : visible;
   list.innerHTML = '';
   if(!visible.length) list.innerHTML = '<div class="log-empty">No entries match the current filters.</div>';
-  visible.slice().reverse().forEach((e) => {
+  shown.slice().reverse().forEach((e) => {
     const realIdx = entries.indexOf(e);
     const div = document.createElement('div');
     const row = document.createElement('div');
@@ -3621,7 +4760,7 @@ function renderLog(){
       </div>
       <time class="record-date" datetime="${xmlEscape(String(e.timestamp).replace(' ','T'))}" title="${xmlEscape(e.timestamp)}">${xmlEscape(shortDate)}</time>
       <div class="record-context"><span class="record-road">${xmlEscape(e.expressway||'—')}</span>
-      <span class="record-km">KM ${e.km !== null && e.km !== undefined ? formatKmStation(e.km) : 'n/a'}</span>
+      ${e.interchange&&e.km==null?`<span class="record-km">${xmlEscape(e.interchange)}</span>${e.interchangeSegment?`<span class="record-km">${xmlEscape(e.interchangeSegment)}</span>`:''}`:`<span class="record-km">KM ${e.km !== null && e.km !== undefined ? formatKmStation(e.km) : 'n/a'}</span>`}
       <span class="record-bound">${xmlEscape(e.bound||'—')}</span>
       <span class="record-lane">${xmlEscape(laneLabel)}</span></div>
       ${e.photoId ? `<div class="record-photo-actions">${photoActionsHtml}</div>` : ''}
@@ -3631,6 +4770,14 @@ function renderLog(){
     row.appendChild(div);
     list.appendChild(row);
   });
+  if(capped && visible.length > shown.length){
+    const more = document.createElement('button');
+    more.type = 'button';
+    more.className = 'log-view-all';
+    more.textContent = `View all ${visible.length} entries`;
+    more.addEventListener('click', () => showAppView('log'));
+    list.appendChild(more);
+  }
   list.querySelectorAll('.photo-view-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -3651,8 +4798,14 @@ function renderLog(){
   }));
   wireSwipeRows(list);
   if(selectMode) updateBulkBar();
+  updateSyncStatus();
 }
 renderLog();
+
+/* Reopen whatever tab this session was last on. Runs after the initial render
+ * so everything a view needs already exists; if it restores the map it also
+ * re-creates the map at its remembered position. */
+restoreActiveView();
 
 document.getElementById('select-toggle-btn').addEventListener('click', () => {
   if(!selectMode){
@@ -3870,7 +5023,7 @@ function updateCameraDraftLane(){
   if(!cameraDraftEntry) return;
   const selVal = document.getElementById('camera-lane-select').value;
   const othersVal = document.getElementById('camera-lane-others-input').value.trim();
-  cameraDraftEntry.lane = selVal === 'Others' ? othersVal : selVal;
+  KMTrackEntry.setLane(cameraDraftEntry, selVal === 'Others' ? othersVal : selVal);
   updateCameraOverlay(cameraDraftEntry);
 }
 
@@ -4082,10 +5235,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const boundOthersVal = document.getElementById('edit-bound-others-input').value.trim();
     const entry = entries[editingEntryIndex];
     entry.type = defectVal;
-    entry.lane = laneSelVal === 'Others' ? laneOthersVal : laneSelVal;
+    KMTrackEntry.setLane(entry, laneSelVal === 'Others' ? laneOthersVal : laneSelVal);
     entry.km = kmResult.km;
     entry.expressway = expresswaySelVal === 'Others' ? expresswayOthersVal : expresswaySelVal;
     entry.bound = boundSelVal === 'Others' ? boundOthersVal : boundSelVal;
+    KMTrackEntry.touch(entry);
     saveEntries();
     renderLog();
     closeEditModal();
@@ -4130,28 +5284,72 @@ function inspectionWorkbookRows(exportEntries = entries){
   return KMTrackSwipe.inspectionWorkbookRows(exportEntries, toDMM, kmToCsvNumber);
 }
 
-async function buildInspectionWorkbook(createdAt, exportEntries = entries){
+async function collectWorkbookPhotos(exportEntries){
+  const photos=[];
+  for(let entryIndex=0;entryIndex<exportEntries.length;entryIndex++){
+    const entry=exportEntries[entryIndex];
+    if(!entry.photoId) continue;
+    const blob=await getPhoto(entry.photoId);
+    if(!blob) continue;
+    const signature=new Uint8Array(await blob.slice(0,12).arrayBuffer());
+    const jpeg=signature[0]===255&&signature[1]===216&&signature[2]===255;
+    const png=signature[0]===137&&signature[1]===80&&signature[2]===78&&signature[3]===71;
+    if(!jpeg&&!png) continue;
+    photos.push({entryIndex,blob:blob.slice(0,blob.size,jpeg?'image/jpeg':'image/png'),extension:jpeg?'jpeg':'png'});
+  }
+  return photos;
+}
+
+function addInCellPhotoParts(files,photos,createdAt){
+  if(!photos.length) return;
+  const contentTypes=files.find(file=>file.name==='[Content_Types].xml');
+  const workbookRels=files.find(file=>file.name==='xl/_rels/workbook.xml.rels');
+  contentTypes.blob=new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">${[...new Set(photos.map(photo=>photo.extension))].map(extension=>`<Default Extension="${extension}" ContentType="image/${extension==='jpeg'?'jpeg':'png'}"/>`).join('')}<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/><Override PartName="/xl/metadata.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheetMetadata+xml"/><Override PartName="/xl/richData/richValueRel.xml" ContentType="application/vnd.ms-excel.richvaluerel+xml"/><Override PartName="/xl/richData/rdrichvalue.xml" ContentType="application/vnd.ms-excel.rdrichvalue+xml"/><Override PartName="/xl/richData/rdrichvaluestructure.xml" ContentType="application/vnd.ms-excel.rdrichvaluestructure+xml"/><Override PartName="/xl/richData/rdRichValueTypes.xml" ContentType="application/vnd.ms-excel.rdrichvaluetypes+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/><Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/></Types>`]);
+  workbookRels.blob=new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sheetMetadata" Target="metadata.xml"/><Relationship Id="rId5" Type="http://schemas.microsoft.com/office/2022/10/relationships/richValueRel" Target="richData/richValueRel.xml"/><Relationship Id="rId6" Type="http://schemas.microsoft.com/office/2017/06/relationships/rdRichValue" Target="richData/rdrichvalue.xml"/><Relationship Id="rId7" Type="http://schemas.microsoft.com/office/2017/06/relationships/rdRichValueStructure" Target="richData/rdrichvaluestructure.xml"/><Relationship Id="rId8" Type="http://schemas.microsoft.com/office/2017/06/relationships/rdRichValueTypes" Target="richData/rdRichValueTypes.xml"/></Relationships>`]);
+  const future=photos.map((_,index)=>`<bk><extLst><ext uri="{3e2802c4-a4d2-4d8b-9148-e3be6c30e623}"><xlrd:rvb i="${index}"/></ext></extLst></bk>`).join('');
+  const metadata=photos.map((_,index)=>`<bk><rc t="1" v="${index}"/></bk>`).join('');
+  files.push(
+    {name:'xl/metadata.xml',date:createdAt,blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><metadata xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:xlrd="http://schemas.microsoft.com/office/spreadsheetml/2017/richdata"><metadataTypes count="1"><metadataType name="XLRICHVALUE" minSupportedVersion="120000" copy="1" pasteAll="1" pasteValues="1" merge="1" splitFirst="1" rowColShift="1" clearFormats="1" clearComments="1" assign="1" coerce="1"/></metadataTypes><futureMetadata name="XLRICHVALUE" count="${photos.length}">${future}</futureMetadata><valueMetadata count="${photos.length}">${metadata}</valueMetadata></metadata>`])},
+    {name:'xl/richData/richValueRel.xml',date:createdAt,blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><richValueRels xmlns="http://schemas.microsoft.com/office/spreadsheetml/2022/richvaluerel" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">${photos.map((_,index)=>`<rel r:id="rId${index+1}"/>`).join('')}</richValueRels>`])},
+    {name:'xl/richData/rdrichvalue.xml',date:createdAt,blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><rvData xmlns="http://schemas.microsoft.com/office/spreadsheetml/2017/richdata" count="${photos.length}">${photos.map((_,index)=>`<rv s="0"><v>${index}</v><v>5</v></rv>`).join('')}</rvData>`])},
+    {name:'xl/richData/rdrichvaluestructure.xml',date:createdAt,blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><rvStructures xmlns="http://schemas.microsoft.com/office/spreadsheetml/2017/richdata" count="1"><s t="_localImage"><k n="_rvRel:LocalImageIdentifier" t="i"/><k n="CalcOrigin" t="i"/></s></rvStructures>`])},
+    {name:'xl/richData/rdRichValueTypes.xml',date:createdAt,blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><rvTypesInfo xmlns="http://schemas.microsoft.com/office/spreadsheetml/2017/richdata2" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="x" xmlns:x="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><global><keyFlags><key name="_Self"><flag name="ExcludeFromFile" value="1"/><flag name="ExcludeFromCalcComparison" value="1"/></key><key name="_DisplayString"><flag name="ExcludeFromCalcComparison" value="1"/></key><key name="_Flags"><flag name="ExcludeFromCalcComparison" value="1"/></key><key name="_Format"><flag name="ExcludeFromCalcComparison" value="1"/></key><key name="_SubLabel"><flag name="ExcludeFromCalcComparison" value="1"/></key><key name="_Attribution"><flag name="ExcludeFromCalcComparison" value="1"/></key><key name="_Icon"><flag name="ExcludeFromCalcComparison" value="1"/></key><key name="_Display"><flag name="ExcludeFromCalcComparison" value="1"/></key><key name="_CanonicalPropertyNames"><flag name="ExcludeFromCalcComparison" value="1"/></key><key name="_ClassificationId"><flag name="ExcludeFromCalcComparison" value="1"/></key></keyFlags></global></rvTypesInfo>`])},
+    {name:'xl/richData/_rels/richValueRel.xml.rels',date:createdAt,blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${photos.map((photo,index)=>`<Relationship Id="rId${index+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/image${index+1}.${photo.extension}"/>`).join('')}</Relationships>`])},
+    ...photos.map((photo,index)=>({name:`xl/media/image${index+1}.${photo.extension}`,date:createdAt,blob:photo.blob}))
+  );
+}
+
+async function buildInspectionWorkbook(createdAt, exportEntries = entries, includePhotos = false){
   const rows=inspectionWorkbookRows(exportEntries);
+  const photos=includePhotos?await collectWorkbookPhotos(exportEntries):[];
+  const photoByEntry=new Map(photos.map((photo,index)=>[photo.entryIndex,index]));
   const rowXml=rows.map((row,rowIndex)=>{
     const cells=row.map((value,colIndex)=>{
       const ref=`${excelColumnName(colIndex)}${rowIndex+1}`;
+      if(includePhotos&&rowIndex>0&&colIndex===10){
+        const richIndex=photoByEntry.get(rowIndex-1);
+        return richIndex===undefined?`<c r="${ref}" s="0"/>`:`<c r="${ref}" s="0" t="e" vm="${richIndex+1}"><v>#VALUE!</v></c>`;
+      }
+      if(colIndex===9&&(value===''||value===null||value===undefined)) return `<c r="${ref}" s="3"/>`;
       if(typeof value==='number'&&Number.isFinite(value)) return `<c r="${ref}" s="${colIndex===2||colIndex===3?2:colIndex===9?3:0}"><v>${value}</v></c>`;
       const style=rowIndex===0?' s="1"':'';
       return `<c r="${ref}" t="inlineStr"${style}><is><t xml:space="preserve">${xmlEscape(value)}</t></is></c>`;
     }).join('');
-    return `<row r="${rowIndex+1}">${cells}</row>`;
+    const photoHeight=includePhotos&&rowIndex>0&&photoByEntry.has(rowIndex-1)?' ht="75" customHeight="1"':'';
+    return `<row r="${rowIndex+1}"${photoHeight}>${cells}</row>`;
   }).join('');
-  const sheet=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><dimension ref="A1:L${rows.length}"/><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols><col min="1" max="1" width="28" customWidth="1"/><col min="2" max="2" width="21" customWidth="1"/><col min="3" max="6" width="18" customWidth="1"/><col min="7" max="9" width="17" customWidth="1"/><col min="10" max="11" width="13" customWidth="1"/><col min="12" max="12" width="42" customWidth="1"/></cols><sheetData>${rowXml}</sheetData><autoFilter ref="A1:L${rows.length}"/></worksheet>`;
+  const sheet=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><dimension ref="A1:N${rows.length}"/><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols><col min="1" max="1" width="28" customWidth="1"/><col min="2" max="2" width="21" customWidth="1"/><col min="3" max="6" width="18" customWidth="1"/><col min="7" max="9" width="17" customWidth="1"/><col min="10" max="11" width="13" customWidth="1"/><col min="12" max="12" width="42" customWidth="1"/><col min="13" max="14" width="42" customWidth="1"/></cols><sheetData>${rowXml}</sheetData><autoFilter ref="A1:N${rows.length}"/></worksheet>`;
   const files=[
     {name:'[Content_Types].xml',blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/><Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/></Types>`]),date:createdAt},
     {name:'_rels/.rels',blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/></Relationships>`]),date:createdAt},
     {name:'xl/workbook.xml',blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Inspection Log" sheetId="1" r:id="rId1"/></sheets></workbook>`]),date:createdAt},
     {name:'xl/_rels/workbook.xml.rels',blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`]),date:createdAt},
-    {name:'xl/styles.xml',blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><color rgb="FF191C1F"/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFF4B400"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/><xf numFmtId="2" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="4" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`]),date:createdAt},
+    {name:'xl/styles.xml',blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="1"><numFmt numFmtId="164" formatCode="0+000"/></numFmts><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><color rgb="FF191C1F"/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFF4B400"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"><alignment horizontal="center" vertical="center"/></xf></cellStyleXfs><cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf><xf numFmtId="2" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`]),date:createdAt},
     {name:'xl/worksheets/sheet1.xml',blob:new Blob([sheet]),date:createdAt},
     {name:'docProps/core.xml',blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>KMTrack Inspection Log</dc:title><dc:creator>KMTrack</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">${createdAt.toISOString()}</dcterms:created></cp:coreProperties>`]),date:createdAt},
     {name:'docProps/app.xml',blob:new Blob([`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"><Application>KMTrack</Application></Properties>`]),date:createdAt}
   ];
+  addInCellPhotoParts(files,photos,createdAt);
   await addSharingWorksheet(files,exportEntries,createdAt);
   const zip=await createStoredZip(files);
   return zip.slice(0,zip.size,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -4187,10 +5385,9 @@ document.getElementById('export-btn').addEventListener('click', async () => {
   }
 });
 
-// ---------- Complete local backup (uncompressed ZIP, no external library) ----------
-// ZIP "store" mode keeps the already-compressed JPEGs as-is, avoiding a large
-// dependency and needless recompression. Each photo is read once for its CRC,
-// then the original Blob is appended directly to the archive.
+// ---------- Stored ZIP package writer ----------
+// XLSX and legacy photo-backup files are ZIP packages. Store mode keeps already
+// compressed JPEGs as-is and avoids a large runtime dependency.
 const ZIP_CRC_TABLE = (() => {
   const table = new Uint32Array(256);
   for(let n=0;n<256;n++){
@@ -4258,6 +5455,7 @@ function safeBackupFilename(name,index){
   return `${String(index+1).padStart(4,'0')}_${cleaned||'inspection_photo.jpg'}`;
 }
 
+// Native Excel Place in Cell photo export. Legacy photo ZIPs remain importable.
 document.getElementById('backup-btn').addEventListener('click', async () => {
   if(entries.length===0) return;
   const exportEntries = await prepareSharingExport();
@@ -4270,40 +5468,15 @@ document.getElementById('backup-btn').addEventListener('click', async () => {
   try{
     const createdAt=new Date();
     const stamp=exportTimestamp(createdAt);
-    const files=[
-      {name:`KMTrack_backup_${stamp}/inspection_log.xlsx`,blob:await buildInspectionWorkbook(createdAt,exportEntries),date:createdAt},
-      {name:`KMTrack_backup_${stamp}/README.txt`,blob:new Blob(['KMTrack inspection backup\n\nThis archive contains the inspection Excel workbook, available stamped photos, and manifest.json.\nPhotos listed as missing in the manifest were referenced by the log but were not present in this browser storage at export time.\n'],{type:'text/plain;charset=utf-8'}),date:createdAt}
-    ];
-    const manifestEntries=[];
-    let exportedPhotos=0; let missingPhotos=0;
-    for(let i=0;i<exportEntries.length;i++){
-      const entry=exportEntries[i];
-      let archivePhotoPath=''; let photoAvailable=false;
-      if(entry.photoId){
-        button.textContent=`Packing ${i+1}/${exportEntries.length}…`;
-        const photo=await getPhoto(entry.photoId);
-        if(photo){
-          archivePhotoPath=`KMTrack_backup_${stamp}/photos/${safeBackupFilename(entry.photoFilename,i)}`;
-          files.push({name:archivePhotoPath,blob:photo,date:createdAt});
-          photoAvailable=true; exportedPhotos++;
-        }else missingPhotos++;
-      }
-      const exportEntry = entry;
-      manifestEntries.push({...exportEntry,photoAvailable,archivePhotoPath});
-      await new Promise(resolve=>setTimeout(resolve,0));
-    }
-    const manifest={format:'KMTrack inspection backup',version:2,createdAt:createdAt.toISOString(),entryCount:exportEntries.length,photoCount:exportedPhotos,missingPhotoCount:missingPhotos,entries:manifestEntries};
-    files.push({name:`KMTrack_backup_${stamp}/manifest.json`,blob:new Blob([JSON.stringify(manifest,null,2)],{type:'application/json'}),date:createdAt});
-    button.textContent='Building ZIP…';
-    const zip=await createStoredZip(files);
-    url=URL.createObjectURL(zip);
+    button.textContent='Embedding photos…';
+    const workbook=await buildInspectionWorkbook(createdAt,exportEntries,true);
+    url=URL.createObjectURL(workbook);
     const link=document.createElement('a');
-    link.href=url; link.download=`KMTrack_backup_${stamp}.zip`;
+    link.href=url; link.download=`KMTrack_with_photos_${stamp}.xlsx`;
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
-    const note=missingPhotos ? ` ${missingPhotos} referenced photo(s) were missing and are identified in manifest.json.` : '';
-    alert(`Backup ready: ${exportEntries.length} entries and ${exportedPhotos} photos.${note}`);
+    alert(`Workbook ready: ${exportEntries.length} entries. Available photos are embedded in their cells; missing photos are left blank.`);
   }catch(err){
-    alert(`Could not create the backup ZIP. ${err.message||err}`);
+    alert(`Could not create the workbook with photos. ${err.message||err}`);
   }finally{
     if(url) URL.revokeObjectURL(url);
     button.textContent=originalLabel;

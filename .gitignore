@@ -6,3 +6,6 @@ output/playwright/
 .impeccable/config.local.json
 .impeccable/hook.cache.json
 .claude/settings.local.json
+
+# Local agent tooling brain (not application assets).
+.dshwolf/

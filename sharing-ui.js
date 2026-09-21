@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       document.getElementById('import-label').value=file.name;
       const days=data.rows.map(e=>e.timestamp.slice(0,10)).sort();
       document.getElementById('import-summary').textContent=`${file.name}: ${plan.added.length} new entries; ${plan.duplicates} duplicates; ${plan.conflicts.length} conflicts; ${data.issues.length} invalid. ${plan.added.filter(e=>e.photoFile).length} available photos. Dates: ${days[0]||'—'} to ${days.at(-1)||'—'}.`;
-      document.getElementById('import-warnings').textContent=[data.missingPhotos?`${data.missingPhotos} referenced photos are unavailable in this file. Excel imports do not contain photo images.`:'',...data.issues.slice(0,5),...plan.conflicts.slice(0,5).map(e=>`Conflict skipped: ${e.type} · ${e.timestamp}`)].filter(Boolean).join('\n');
+      document.getElementById('import-warnings').textContent=[data.missingPhotos?`${data.missingPhotos} referenced photos are unavailable in this file.`:'',...data.issues.slice(0,5),...plan.conflicts.slice(0,5).map(e=>`Conflict skipped: ${e.type} · ${e.timestamp}`)].filter(Boolean).join('\n');
       const names=document.getElementById('import-inspectors');names.replaceChildren();
       for(const name of new Set(data.rows.map(e=>e.inspector||''))){
         const label=document.createElement('label');label.textContent=name?`Inspector: ${name}`:'Inspector for unnamed entries (optional)';

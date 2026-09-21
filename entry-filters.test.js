@@ -44,11 +44,11 @@ function harness(){
     document:{getElementById:control,createElement:()=>({click(){}}),body:{appendChild(){},removeChild(){}}},
     confirm:message=>{state.prompts.push(message);return state.accept;},alert:message=>state.alerts.push(message),
     URL:{createObjectURL:blob=>{state.downloads.push(blob);return 'blob:test';},revokeObjectURL(){}},
-    getPhoto:async id=>{state.photos.push(id);return new Blob([id]);},
+    getPhoto:async id=>{state.photos.push(id);return new Blob([new Uint8Array([255,216,255,224]),id],{type:'image/jpeg'});},
     setTimeout:fn=>fn(),Blob,TextEncoder,Uint8Array,Uint32Array,DataView,Date,
     pad:value=>String(value).padStart(2,'0')
   });
-  for(const name of ['getLogFilters','entriesForExport','toDMM','kmToCsvNumber','xmlEscape','excelColumnName','inspectionWorkbookRows','buildInspectionWorkbook','addSharingWorksheet','exportTimestamp','safeBackupFilename']){
+  for(const name of ['getLogFilters','entriesForExport','toDMM','kmToCsvNumber','xmlEscape','excelColumnName','inspectionWorkbookRows','collectWorkbookPhotos','addInCellPhotoParts','buildInspectionWorkbook','addSharingWorksheet','exportTimestamp','safeBackupFilename']){
     vm.runInContext(source(name),context);
   }
   context.prepareSharingExport=async()=>context.entriesForExport();
@@ -121,20 +121,20 @@ test('Excel handler exports all without confirmation and filtered/selected rows 
   await control('export-btn').click();
   assert.equal(state.prompts.length,0);
   const all=await unzip(state.downloads[0]);
-  assert.match(all['xl/worksheets/sheet1.xml'].toString(),/A1:L4/);
+  assert.match(all['xl/worksheets/sheet1.xml'].toString(),/A1:N4/);
   control('entry-filter-from').value='2026-09-03';
     control('entry-filter-to').value='2026-09-03';
   context.selectedEntryIds.add('b');
   await control('export-btn').click();
   const subset=await unzip(state.downloads[1]);
   const sheet=subset['xl/worksheets/sheet1.xml'].toString();
-  assert.match(sheet,/A1:L2/);
+  assert.match(sheet,/A1:N2/);
   assert.match(sheet,/Cracks/);
   assert.doesNotMatch(sheet,/Potholes/);
   assert.equal(subset['xl/styles.xml'].toString(),all['xl/styles.xml'].toString());
   assert.deepEqual(state.prompts,['Export filtered/selected entries?']);
 });
-test('ZIP workbook, photos and manifest use one filtered snapshot across async work',async()=>{
+test('photo workbook embeds native cell images using one filtered snapshot',async()=>{
   const {control,state,context}=harness();
   control('entry-filter-from').value='2026-09-03';
     control('entry-filter-to').value='2026-09-03';
@@ -142,16 +142,16 @@ test('ZIP workbook, photos and manifest use one filtered snapshot across async w
   context.getPhoto=async id=>{ context.entries.splice(0); return original(id); };
   await control('backup-btn').click();
   assert.deepEqual(state.photos,['photo-a','photo-b']);
-  const zip=await unzip(state.downloads[0]);
-  const find=suffix=>zip[Object.keys(zip).find(name=>name.endsWith(suffix))];
-  const manifest=JSON.parse(find('/manifest.json'));
-  assert.equal(manifest.entryCount,2);
-  assert.equal(manifest.photoCount,2);
-  assert.deepEqual(manifest.entries.map(entry=>entry.type),['Potholes','Cracks']);
-  assert.deepEqual(manifest.entries.map(entry=>entry.id),['a','b']);
-  assert.equal(manifest.version,2);
-  const workbook=await unzip(new Blob([find('/inspection_log.xlsx')]));
-  assert.match(workbook['xl/worksheets/sheet1.xml'].toString(),/A1:L3/);
+  const workbook=await unzip(state.downloads[0]);
+  assert.match(workbook['xl/worksheets/sheet1.xml'].toString(),/A1:N3/);
+  assert.match(workbook['xl/worksheets/sheet1.xml'].toString(),/<c r="K2" s="0" t="e" vm="1"><v>#VALUE!<\/v><\/c>/);
+  assert.match(workbook['xl/worksheets/sheet1.xml'].toString(),/<c r="K3" s="0" t="e" vm="2"><v>#VALUE!<\/v><\/c>/);
+  assert.ok(workbook['xl/metadata.xml']);
+  assert.ok(workbook['xl/richData/rdrichvalue.xml']);
+  assert.ok(workbook['xl/richData/richValueRel.xml']);
+  assert.ok(workbook['xl/richData/_rels/richValueRel.xml.rels']);
+  assert.ok(workbook['xl/media/image1.jpeg']);
+  assert.ok(workbook['xl/media/image2.jpeg']);
 });
 test('map toggle passes filtered entries to interactive overlays, refreshes and hides',()=>{
   const {control,context}=harness();

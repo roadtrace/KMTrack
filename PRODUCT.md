@@ -40,7 +40,7 @@ KMTrack turns a device's live location into road-network inspection context—in
 ## Brand Commitments
 
 - Product name: KMTrack.
-- Preserve the existing road-marking logo assets and the established light/dark gradient identity, translucent panels, and safety-color accents.
+- Preserve the current brand identity: the amber/navy instrument palette, the KMTrack mark and lockup (`kmtrack-mark.svg`, `kmtrack-logo-on-dark.svg`, `kmtrack-logo-on-light.svg`), and safety-color accents. The pre-2026-09-17 marks `KMTrack.png` and `KMTrack_logo.png` are retained but no longer used.
 - Preserve the restored corner treatment: existing curved panels, a rectangular bottom navigation tray, and rounded selected-tab highlights.
 - Interface language should be direct, compact, and practical for field work.
 
@@ -49,9 +49,10 @@ KMTrack turns a device's live location into road-network inspection context—in
 - Existing production interface and behavior: `index.html` and its companion CSS/JavaScript modules.
 - PWA identity and platform description: `manifest.json`.
 - Network and structure datasets: `calibration.json` and `bridges.json`.
-- Product marks: `KMTrack.png` and `KMTrack_logo.png`.
+- Product marks: `kmtrack-mark.svg` and the two `kmtrack-logo-on-*.svg` lockups, plus the PWA icon PNGs. `KMTrack.png` and `KMTrack_logo.png` are retained as prior-identity assets.
 - Import/export contract and operational limits: `SHARING.md`.
-- UI constraints approved through prior iteration: `AGENTS.md` and `BORDER_RADIUS_RULES.md`.
+- Working rules and process: `AGENTS.md`. There is no design baseline to
+  preserve, and no separate radius rules file — both were retired on 2026-09-18.
 - No testimonials, performance benchmarks, customer claims, or formal accessibility certification are established; future work must not fabricate them.
 
 ## Product Principles

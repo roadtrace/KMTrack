@@ -1,0 +1,27 @@
+table_schema,table_name,column_name,data_type,is_nullable,column_default
+public,inspections,id,uuid,NO,null
+public,inspections,created_at,timestamp with time zone,NO,now()
+public,inspections,user_id,uuid,YES,null
+public,inspections,team,text,YES,null
+public,inspections,inspected_at,timestamp with time zone,YES,null
+public,inspections,defect_type,text,YES,null
+public,inspections,latitude,double precision,YES,null
+public,inspections,longitude,double precision,YES,null
+public,inspections,latitude_dmm,text,YES,null
+public,inspections,longitude_dmm,text,YES,null
+public,inspections,expressway,text,YES,null
+public,inspections,direction,text,YES,null
+public,inspections,lane_number,smallint,YES,null
+public,inspections,lane_other,text,YES,null
+public,inspections,km_station,integer,YES,null
+public,inspections,interchange_exit,text,YES,null
+public,inspections,interchange_segment,text,YES,null
+public,inspections,photo_filename,text,YES,null
+public,inspections,photo_path,text,YES,null
+public,inspections,updated_at,timestamp with time zone,YES,now()
+public,profiles,id,uuid,NO,null
+public,profiles,created_at,timestamp with time zone,NO,now()
+public,profiles,full_name,text,NO,null
+public,profiles,role,text,YES,'''inspector'''::text
+public,profiles,approved,boolean,YES,false
+public,profiles,team,text,YES,null

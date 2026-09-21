@@ -1,14 +1,12 @@
 /* Restored pre-system corner styling. The bottom navigation tray intentionally
    remains rectangular; only its inset selected-tab highlight is rounded. */
 html:root header{border-radius:0 0 24px 24px;}
-html:root .dataset-drawer{border-radius:0 0 30px 30px;}
-html:root .dataset-content{padding:0 10px 10px;}
-html:root .dataset-panel{border-radius:14px;padding:12px 13px;}
-html:root .dataset-panel .calib-add{border-radius:10px;}
 html:root .readout{border-radius:18px;padding:14px 16px;}
 html:root .bound-panel{border-radius:10px;padding:10px 12px;}
 html:root button.bound-btn{border-radius:12px;}
 html:root .kmpost{border-radius:20px;}
+html:root .bridge-filter-menu{border-radius:14px;}
+html:root .bridge-filter-option{border-radius:9px;}
 html:root .lane-modal{border-radius:12px;padding:16px;}
 html:root .lane-modal :is(input,.edit-select,.modal-actions button){border-radius:8px;}
 html:root .edit-photo-thumb-wrap{border-radius:10px;overflow:hidden;cursor:zoom-in;}
@@ -57,19 +55,35 @@ html:root .entry-filters{grid-template-columns:minmax(0,1.15fr) auto minmax(0,1.
 .map-entry-controls > label{min-width:0;flex-direction:column;align-items:stretch;gap:4px;}
 .map-entry-controls > label:first-of-type{flex-direction:row;align-items:center;align-self:center;white-space:nowrap;gap:4px;}
 
-/* Center dates while still allowing native controls to shrink on iOS. */
+/* Center dates while still allowing native controls to shrink on iOS.
+   Vertical centring is done by SIZING the box symmetrically around the text
+   (auto height + equal block padding) rather than by nudging the shadow DOM.
+   `appearance:none` plus a forced height leaves the text top-aligned, and the
+   ::-webkit-datetime-edit rules below only apply to Chromium — iOS renders
+   these natively and ignored them. Symmetric padding is engine-agnostic.
+   11px font at line-height 1.3 => ~44px total, matching the 44px filter button. */
 html:root :is(.entry-filters,.map-entry-controls) > label{max-width:100%;min-inline-size:0;}
 html:root :is(.entry-filters,.map-entry-controls) input[type="date"]{
   display:block;appearance:none;-webkit-appearance:none;box-sizing:border-box;
   width:100%;inline-size:100%;min-width:0;min-inline-size:0;max-width:100%;
   overflow:hidden;text-align:center;text-align-last:center;padding-inline:4px;
+  height:auto;min-height:0;
+  padding-top:12px;padding-bottom:12px;line-height:1.3;
 }
 html:root :is(.entry-filters,.map-entry-controls) input[type="date"]::-webkit-date-and-time-value{width:100%;min-width:0;text-align:center;}
-html:root :is(.entry-filters,.map-entry-controls) input[type="date"]::-webkit-datetime-edit{display:flex;width:100%;min-width:0;padding:0;justify-content:center;align-items:center;}
-html:root :is(.entry-filters,.map-entry-controls) input[type="date"]::-webkit-datetime-edit-fields-wrapper{display:flex;justify-content:center;align-items:center;}
+/* Chromium belt-and-braces: keep the inner edit boxes full-height so their own
+   centring also applies. No effect on iOS, which is why the padding above is
+   the real fix. */
+html:root :is(.entry-filters,.map-entry-controls) input[type="date"]::-webkit-datetime-edit{display:flex;width:100%;min-width:0;height:100%;box-sizing:border-box;padding:0;justify-content:center;align-items:center;}
+html:root :is(.entry-filters,.map-entry-controls) input[type="date"]::-webkit-datetime-edit-fields-wrapper{display:flex;height:100%;justify-content:center;align-items:center;}
+/* The native calendar glyph is not part of this design and, sitting in flow, it
+   steals width from the centred text (clipping it on the narrower map fields).
+   Overlay it invisibly instead, so the whole field still opens the picker. */
+html:root :is(.entry-filters,.map-entry-controls) input[type="date"]{position:relative;}
+html:root :is(.entry-filters,.map-entry-controls) input[type="date"]::-webkit-calendar-picker-indicator{
+  position:absolute;left:0;top:0;width:100%;height:100%;margin:0;padding:0;opacity:0;cursor:pointer;
+}
 
-html:root .app-tab-bar{border-radius:0;padding:4px 12px env(safe-area-inset-bottom);}
-html:root .app-tab-btn{border-radius:12px;}
 html:root .photo-card{border-radius:8px;overflow:hidden;}
 html:root #photo-preview{border-radius:0;display:block;}
 :where(button,input,select,a,[role="button"],[role="tab"]):focus-visible{outline:2px solid var(--line-yellow);outline-offset:2px;}

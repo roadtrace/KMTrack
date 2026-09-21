@@ -1,0 +1,1975 @@
+/* ==========================================================================
+   KMTrack Design System
+   --------------------------------------------------------------------------
+   Field-instrument visual language: amber for action, teal for verification,
+   navy evidence surfaces, mono values for anything that must be exact.
+
+   This file is loaded LAST so it can retune the app's existing token layer
+   and component treatments without rewriting the inline stylesheet.
+
+   Deliberately NOT changed here:
+   - border-radius values (preserved per AGENTS.md / radius-system.css)
+   - inspection logic, storage, exports, GPS and camera behaviour
+   - placement of existing controls
+   ========================================================================== */
+
+/* ---------- Typefaces (vendored locally so the PWA stays offline-capable) -- */
+
+@font-face{
+  font-family:'Space Grotesk';
+  src:url('fonts/SpaceGrotesk-300_700-latin.woff2') format('woff2');
+  font-weight:300 700; font-style:normal; font-display:swap;
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face{
+  font-family:'Space Grotesk';
+  src:url('fonts/SpaceGrotesk-300_700-latinext.woff2') format('woff2');
+  font-weight:300 700; font-style:normal; font-display:swap;
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face{
+  font-family:'DM Mono';
+  src:url('fonts/DMMono-400-latin.woff2') format('woff2');
+  font-weight:400; font-style:normal; font-display:swap;
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face{
+  font-family:'DM Mono';
+  src:url('fonts/DMMono-400-latinext.woff2') format('woff2');
+  font-weight:400; font-style:normal; font-display:swap;
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face{
+  font-family:'DM Mono';
+  src:url('fonts/DMMono-500-latin.woff2') format('woff2');
+  font-weight:500; font-style:normal; font-display:swap;
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face{
+  font-family:'DM Mono';
+  src:url('fonts/DMMono-500-latinext.woff2') format('woff2');
+  font-weight:500; font-style:normal; font-display:swap;
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+
+/* ---------- Design tokens ------------------------------------------------ */
+
+:root{
+  color-scheme:dark;
+  /* Evidence / surface ramp (dark is the default instrument mode) */
+  --ds-bg:            #121b26;
+  --ds-bg-2:          #1b2532;
+  --ds-card:          #1b2532;
+  --ds-card-2:        #2c3644;
+  --ds-muted:         #2c3644;
+  --ds-sidebar:       #0c121a;
+
+  --ds-fg:            #efece6;
+  --ds-fg-muted:      #a4acb7;
+  --ds-fg-subtle:     hsl(214 14% 62%);
+
+  --ds-border:        #384352;
+  --ds-input:         #445264;
+  --ds-border-strong: var(--ds-input);
+
+  /* Reference palette: amber actions, teal confirmed states, red failures. */
+  --ds-primary:       #fab80f;
+  --ds-primary-strong:color-mix(in srgb, var(--ds-primary) 95%, #000);
+  --ds-primary-fg:    #182230;
+  --ds-secondary:     #48aeb1;
+  --ds-secondary-fg:  #121b26;
+  --ds-accent:        #2b474a;
+  --ds-accent-fg:     #ceecee;
+  --ds-destructive:   #dd413c;
+  --ds-destructive-fg:#efece6;
+  --ds-warning:       hsl(43 96% 72%);
+  --ds-warning-bg:    hsl(40 60% 18%);
+  --ds-error:         hsl(2 80% 78%);
+  --ds-error-bg:      hsl(2 40% 20%);
+
+  --ds-ring:          #fab80f;
+  --ds-shadow:        0 10px 32px rgba(5,10,15,.34);
+  --ds-shadow-sm:     0 8px 24px rgba(5,10,15,.22);
+
+  --ds-space-1:4px;
+  --ds-space-2:8px;
+  --ds-space-3:12px;
+  --ds-space-4:16px;
+  --ds-border-width:1px;
+  --ds-control-min:44px;
+  --app-nav-h:calc(64px + env(safe-area-inset-bottom));
+
+  /* Radii intentionally inherit from the existing scale (radius-system.css). */
+
+  /* Type */
+  --font-ui:'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
+  --font-heading:var(--font-ui);
+  --font-readout:'DM Mono',ui-monospace,'Courier New',monospace;
+  --mono:var(--font-readout);
+  --sans:var(--font-ui);
+
+  /* The two radii added deliberately: the reference card corner, and the
+     reference's tighter control radius. The rest of the scale still comes
+     from radius-system.css. */
+  --radius-card:14px;
+  --radius-control:10px;
+
+  /* Legacy token names remapped onto the new ramp, so existing rules inherit */
+  --asphalt:var(--ds-bg);
+  --asphalt-2:var(--ds-bg-2);
+  --panel:var(--ds-card);
+  --panel-raised:var(--ds-card-2);
+  --surface-soft:var(--ds-muted);
+  --line-white:var(--ds-fg);
+  --text-muted:var(--ds-fg-muted);
+  --text-subtle:var(--ds-fg-subtle);
+  --border:var(--ds-border);
+  --border-strong:var(--ds-border-strong);
+  --line-yellow:var(--ds-primary);
+  --safety-red:var(--ds-destructive);
+}
+
+html[data-theme="light"]{
+  color-scheme:light;
+
+  --ds-bg:            #f2efe9;
+  --ds-bg-2:          #e3e0d9;
+  --ds-card:          #f9f8f5;
+  --ds-card-2:        #fff;
+  --ds-muted:         #e3e0d9;
+  --ds-sidebar:       #1b2737;
+
+  --ds-fg:            #1b2737;
+  --ds-fg-muted:      #5b6776;
+  --ds-fg-subtle:     hsl(214 12% 43%);
+
+  --ds-border:        #d5cfc3;
+  --ds-input:         #c8c0b1;
+  --ds-border-strong: var(--ds-input);
+
+  --ds-secondary:     #33646c;
+  --ds-secondary-fg:  #f7f6f2;
+  --ds-accent:        #ceecee;
+  --ds-accent-fg:     #1c444a;
+  --ds-destructive:   #c72e29;
+  --ds-destructive-fg:#f7f6f2;
+  --ds-warning:       hsl(35 72% 26%);
+  --ds-warning-bg:    hsl(42 82% 86%);
+  --ds-error:         hsl(2 66% 32%);
+  --ds-error-bg:      hsl(2 70% 92%);
+  --ds-ring:          #f4a810;
+
+  --ds-shadow:        0 8px 24px rgba(27,39,55,.10);
+  --ds-shadow-sm:     0 6px 18px rgba(27,39,55,.08);
+}
+
+/* ---------- Base type ---------------------------------------------------- */
+
+html,body{font-family:var(--font-ui);}
+button,input,select,textarea{font-family:var(--font-ui);}
+h1,h2,h3,h4,.section-title,.ds-card-title,.category-label-text{
+  font-family:var(--font-heading);
+}
+html[data-theme="light"],html[data-theme="light"] body{color:var(--ds-fg);}
+
+/* Quiet the old flat washes in favour of the paper/ink base. */
+html[data-theme="light"] body{
+  background:var(--ds-bg);
+  background-attachment:scroll;
+}
+html:not([data-theme="light"]) body{background:var(--ds-bg);}
+
+/* Evidence values are always mono: coordinates, stations, timestamps. */
+.readout-main .field .value,
+.kmpost .kmvalue,
+.instrument-foot .coordinate-value,
+.nearby-asset-station,
+.nearby-asset-distance,
+.log-entry .info .meta,
+#capture-session-time,.header-copy .sub,.inspection-view .log-count-badge,
+#count-label,#last-time,#count-mini,#settings-alignment-count,
+.ds-chip,
+.photo-status,
+.camera-info .capture-time,
+.camera-info .capture-meta{
+  font-family:var(--font-readout);
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-.01em;
+}
+
+/* Eyebrow: 10px, uppercase, wide tracking. Used for every field/status label. */
+.kmpost .kmlabel,
+.readout-main .field .label,
+.bound-panel-label,
+.header-copy .sub,
+.count-bar-left,
+.eyebrow{
+  font-family:var(--font-ui);
+  font-size:10px;
+  font-weight:700;
+  line-height:1.25;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--ds-fg-muted);
+}
+
+h2,.section-title{
+  font-family:var(--font-heading);
+  font-size:19px;
+  font-weight:700;
+  letter-spacing:-.03em;
+  line-height:1.2;
+  /* The reference pairs uppercase eyebrows with sentence-case headings; the
+     old app-wide uppercase h2 treatment is superseded. */
+  text-transform:none;
+  color:var(--ds-fg);
+}
+
+/* ---------- Surfaces ----------------------------------------------------- */
+
+/* Every existing card adopts the quiet Base44 panel: hairline border,
+   card fill, one soft shadow. Borders carry the structure, not elevation.
+   NB: `.entry-filters` is deliberately NOT here. The log's date/filter row is
+   bare controls on the page, not a card — giving it a surface painted a stray
+   white rectangle behind them. `.map-entry-controls` is different: it is a
+   genuine floating bar over the map. */
+.readout,.bound-panel,details.calib,.log-entry,
+.ds-card,.sharing-filters,.map-entry-controls{
+  background:var(--ds-card);
+  border:1px solid var(--ds-border);
+  color:var(--ds-fg);
+  box-shadow:var(--ds-shadow-sm);
+}
+html[data-theme="light"] .readout,
+html[data-theme="light"] .bound-panel,
+html[data-theme="light"] details.calib,
+html[data-theme="light"] .log-entry,
+html[data-theme="light"] .ds-card{
+  background:var(--ds-card);
+  border-color:var(--ds-border);
+  box-shadow:var(--ds-shadow-sm);
+}
+
+/* ---------- Metric cells ------------------------------------------------- */
+
+/* Label above, mono value below, hairline separated — the Metric component. */
+.readout-main{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:0;
+}
+.readout-main .field{
+  background:transparent;
+  border:0;
+  border-top:1px solid var(--ds-border);
+  border-radius:0;
+  padding:10px 2px;
+}
+.readout-main .field:nth-child(-n+2){border-top:0;}
+.readout-main .field .value{
+  font-size:15px;
+  font-weight:500;
+  color:var(--ds-fg);
+  margin-top:3px;
+}
+
+/* ---------- Instrument surface (dark evidence card) ---------------------- */
+
+/* The app's hero readout takes the design system's dark capture surface:
+   navy ground, amber hairline rings, hazard stripe along the bottom edge. */
+.kmpost{
+  position:relative;
+  overflow:hidden;
+  background:var(--ds-sidebar);
+  color:hsl(40 22% 92%);
+  border:1px solid hsl(214 19% 24%);
+  box-shadow:var(--ds-shadow);
+}
+.kmpost::before{
+  content:"";
+  position:absolute; top:-90px; right:-70px;
+  width:190px; height:190px;
+  border:1px solid hsl(43 96% 52% / .35);
+  border-radius:50%;
+  box-shadow:0 0 0 22px hsl(43 96% 52% / .06),0 0 0 44px hsl(43 96% 52% / .035);
+  pointer-events:none;
+}
+.kmpost::after{
+  content:"";
+  position:absolute; left:0; right:0; bottom:0; height:5px;
+  background:repeating-linear-gradient(135deg,hsl(43 96% 52%) 0 14px,transparent 14px 28px);
+  opacity:.85;
+  pointer-events:none;
+}
+.kmpost .kmlabel{color:hsl(43 96% 52% / .92);}
+.kmpost .kmvalue,
+.kmpost .nearby-asset-name,
+.kmpost .nearby-asset-station,
+.kmpost .kmunit,
+.kmpost .nearby-asset-distance,
+.kmpost .segment-tag,
+.kmpost .ramp-tag{color:hsl(40 22% 92%);}
+.kmpost .kmunit,
+.kmpost .nearby-asset-distance{color:hsl(214 12% 68%);}
+.kmpost .segment-tag,
+.kmpost .ramp-tag{
+  background:hsl(214 34% 14%);
+  border:1px solid hsl(214 19% 27%);
+}
+.kmpost.interchange-mode .kmvalue{color:var(--ds-primary);}
+
+/* ---------- Unified instrument panel ------------------------------------
+   The former .readout (lat/long/accuracy/points/bound) and .kmpost (station
+   + nearby bridge) are now one panel modelled on the reference metric card:
+   a status strip, a 2x2 metric grid, a bridge row, and a coordinate footer.
+   The element keeps the `kmpost` class because updateReadout() reads
+   `#km-value.closest('.kmpost')` to toggle interchange mode.
+   ------------------------------------------------------------------------ */
+
+.instrument-panel{
+  margin-top:10px;
+  padding:0;
+  background:var(--ds-card);
+  border:1px solid var(--ds-border);
+  color:var(--ds-fg);
+  box-shadow:var(--ds-shadow-sm);
+}
+/* Reference card: `panel overflow-hidden` — 14px corner, flush children. */
+.kmpost.instrument-panel,
+html[data-theme="light"] .kmpost.instrument-panel{
+  border-radius:var(--radius-card);
+  /* Visible, not hidden: the bridge-filter dropdown opens below this card and
+     nothing inside is full-bleed, so there is nothing to clip. */
+  overflow:visible;
+}
+/* The reference metric card is a quiet theme-aware surface: no rings and no
+   hazard stripe (those belong to the dark capture card in that system). */
+.instrument-panel::before,
+.instrument-panel::after{display:none;}
+
+/* Top strip. Reference header: `px-4 py-4 bg-[hsl(var(--muted)/.65)]`, and it
+   carries no bottom border — the tint alone separates it from the metrics. */
+/* ---------- Capture instrument: station-dominant --------------------------
+   The station reading is what the inspector actually needs at a glance, so it
+   leads. Corridor, bound and the resolver's confidence sit around it; every
+   engineering number moved into the collapsed detail section below. */
+.capture-session-bar{
+  width:min(calc(100% - 28px),1144px);
+  margin:0 auto;
+  padding:12px 0 0;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-family:var(--font-ui);
+  font-size:10px;
+  font-weight:700;
+  line-height:1.4;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--ds-fg-muted);
+}
+.capture-session-bar time{
+  font-family:var(--font-readout);
+  font-weight:500;
+  letter-spacing:.02em;
+}
+.instrument-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:14px 16px 2px;
+  background:transparent;
+  border-bottom:0;
+}
+.instrument-accuracy{
+  display:grid;
+  justify-items:end;
+  gap:2px;
+  flex:0 0 auto;
+}
+.instrument-accuracy > span{
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--ds-fg-muted);
+}
+.instrument-accuracy strong{
+  font-family:var(--font-readout);
+  font-size:13px;
+  font-weight:500;
+  color:var(--ds-fg);
+}
+.instrument-accuracy strong::before{content:'⌖ ';color:var(--ds-secondary);}
+.gps-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:5px 10px;
+  border-radius:var(--radius-full);
+  font-family:var(--font-ui);
+  font-size:11px;
+  font-weight:700;
+  color:var(--ds-fg-muted);
+  background:var(--ds-muted);
+}
+.gps-chip .gps-dot{
+  width:7px;
+  height:7px;
+  flex:0 0 7px;
+  border-radius:var(--radius-full);
+  background:currentColor;
+}
+/* StatusPill tones. `fresh` is reserved for a verified match: never a stale or
+   held one. */
+.gps-chip[data-state="fresh"]{color:var(--ds-secondary);background:var(--ds-accent);}
+.gps-chip[data-state="held"],
+.gps-chip[data-state="checking"]{color:var(--ds-warning);background:var(--ds-warning-bg);}
+.gps-chip[data-state="stale"],
+.gps-chip[data-state="off-network"],
+.gps-chip[data-state="permission"],
+.gps-chip[data-state="unsupported"]{color:var(--ds-error);background:var(--ds-error-bg);}
+
+.instrument-station{
+  display:grid;
+  gap:4px;
+  padding:0px 16px 14px;
+}
+.instrument-station .segment-tag{
+  font-family:var(--font-ui);
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.02em;
+  color:var(--ds-fg-muted);
+  background:none;
+  border:0;
+  padding:0;
+}
+.instrument-station .segment-tag.faroff{color:var(--ds-warning);}
+.instrument-station .kmvalue{
+  font-family:var(--font-readout);
+  font-variant-numeric:tabular-nums;
+  font-size:clamp(28px,8vw,32px);
+  font-weight:500;
+  line-height:1.05;
+  letter-spacing:-.03em;
+  color:var(--ds-fg);
+}
+.instrument-nearby{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:12px;
+  line-height:1.45;
+  color:var(--ds-fg-muted);
+}
+.station-caption{
+  display:none; /* the KM prefix below carries this; the writer still runs */
+}
+/* "KM" is added here rather than in the writer so #km-value stays the bare
+   station that updateReadout() formats, and the header keeps matching it. */
+.instrument-station .kmvalue::before{content:'KM ';}
+.instrument-panel.interchange-mode .instrument-station .kmvalue::before{content:'';}
+/* A stale or unconfirmed match must never read as live. */
+.instrument-panel[data-gps-state="stale"] .kmvalue,
+.instrument-panel[data-gps-state="off-network"] .kmvalue,
+.instrument-panel[data-gps-state="permission"] .kmvalue,
+.instrument-panel[data-gps-state="unsupported"] .kmvalue{color:var(--ds-fg-subtle);}
+.instrument-panel[data-gps-state="held"] .kmvalue{opacity:.75;}
+.instrument-panel[data-gps-state="stale"] .station-caption::after{content:' · not live';color:var(--ds-error);}
+
+/* Collapsed engineering detail. */
+.instrument-details{border-top:1px solid var(--ds-border);}
+.instrument-details > summary{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-height:var(--ds-control-min);
+  padding:0 16px;
+  cursor:pointer;
+  list-style:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.instrument-details > summary::-webkit-details-marker{display:none;}
+.instrument-details > summary::marker{content:'';}
+.instrument-details-label{
+  font-family:var(--font-ui);
+  font-size:12px;
+  font-weight:700;
+  color:var(--ds-fg);
+}
+.instrument-details > summary .dataset-chevron{margin-left:auto;}
+.instrument-details-hint{
+  flex:1 1 auto;
+  min-width:0;
+  text-align:right;
+  font-size:11px;
+  color:var(--ds-fg-muted);
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.instrument-details-body{display:grid;gap:12px;padding:0 16px 14px;}
+.instrument-details-body .status{margin:0;}
+.instrument-details-body .instrument-metrics{padding:0;}
+.instrument-details-body .instrument-metrics .metric-wide{
+  grid-column:1 / -1;
+  border-top:1px solid var(--ds-border);
+  border-left:0;
+}
+.instrument-details-body .instrument-interchange,
+.instrument-details-body .nearby-asset{padding:0;}
+.instrument-details .instrument-foot{padding:12px 0 2px;}
+
+/* The confidence pill already explains why capture is waiting. */
+#defect-section.gps-pending .defect-gate,
+#defect-section:not(.gps-pending) .defect-gate{display:none !important;}
+#instrument-panel #gps-status[hidden]{display:none;}
+#defect-section{margin-top:12px;}
+#defect-section.focused .focused-category .lane-btn-row{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+#defect-section.focused .focused-category .lane-btn{
+  min-height:76px;
+  padding:18px 8px;
+  border-radius:var(--radius-control);
+  font-family:var(--font-readout);
+  font-size:26px;
+}
+#defect-section.focused .focused-category .lane-btn.others-btn{
+  grid-column:1 / -1;
+  min-height:56px;
+  padding:12px;
+  flex-direction:column;
+  font-family:var(--font-ui);
+  font-size:15px;
+}
+html:root .instrument-panel .bridge-filter-toggle{
+  position:relative;
+  right:auto;
+  top:auto;
+  flex:0 0 44px;
+  width:44px;
+  height:44px;
+  padding:0;
+  background:var(--ds-card-2);
+  border:1px solid var(--ds-border);
+  border-radius:var(--radius-control);
+  color:var(--ds-fg-muted);
+  box-shadow:none;
+}
+html:root .instrument-panel .bridge-filter-toggle:hover{background:var(--ds-muted);color:var(--ds-fg);}
+/* The old CSS-mask funnel is replaced by the inline SVG. */
+html:root .instrument-panel .bridge-filter-toggle::before{content:none;}
+html:root .instrument-panel .bridge-filter-toggle svg{
+  width:15px;height:15px;
+  fill:none;stroke:currentColor;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+html:root .instrument-panel .bridge-filter-toggle.filtered{
+  color:var(--ds-primary);
+  border-color:var(--ds-primary);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--ds-primary) 14%,transparent);
+}
+.instrument-panel .nearby-asset{position:relative;}
+/* Anchored to the bridge row and opening just below it.
+   `html:root` is required: sharing.css sets `html:root .bridge-filter-menu
+   {top:52px}`, which outranks a bare `.instrument-panel` chain and left the
+   menu opening 52px down — i.e. INSIDE the row it belongs to.
+
+   `max-height` here is only a fallback. The real cap is measured at open time by
+   `fitBridgeFilterMenu()`, because it depends on where the defect buttons land. */
+html:root .instrument-panel .bridge-filter-menu{
+  top:calc(100% + 8px);
+  right:0;
+  bottom:auto;
+  left:auto;
+  width:min(250px,calc(100% - 32px));
+  max-height:280px;
+  overflow:auto;
+  z-index:12;
+  background:var(--ds-card);
+  border:1px solid var(--ds-border);
+  color:var(--ds-fg);
+  box-shadow:var(--ds-shadow);
+}
+.instrument-panel .bridge-filter-title{color:var(--ds-fg-muted);}
+.instrument-panel .bridge-filter-option:hover{background:var(--ds-muted);}
+.instrument-panel .bridge-filter-option.selected{
+  background:hsl(43 96% 52% / .16);
+  color:var(--ds-fg);
+}
+
+/* 2x2 metric grid with hairline separators. */
+.instrument-metrics{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+}
+.instrument-metrics .metric{
+  min-width:0;
+  padding:12px;
+}
+.instrument-metrics .metric-wide{grid-column:1 / -1;}
+/* Reference cells: `px-3 py-3 first:pl-4`. The grid is `divide-x` only —
+   a vertical rule between columns and deliberately NO horizontal rule
+   between the metric rows. */
+.instrument-metrics .metric:first-child{padding-left:16px;}
+.instrument-metrics .metric:nth-child(even){border-left:1px solid var(--ds-border);}
+.instrument-metrics .kmlabel{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:10px;
+  font-weight:700;
+  line-height:1.5;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  color:var(--ds-fg-muted);
+}
+/* Metric glyphs are the reference's own lucide icons at their own size:
+   gauge / route / navigation / compass, 14px, stroke-width 2. */
+.metric-icon{
+  width:14px;height:14px;flex:0 0 14px;
+  fill:none;stroke:currentColor;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+/* Tab glyphs are the reference's nav icons: locate-fixed / map / database /
+   settings, 19px, stroke-width 2. */
+/* Reference Metric: every value is `mt-1 truncate font-mono text-[13px]
+   font-medium`. No metric — stationing included — gets its own scale. */
+.instrument-metrics .kmvalue,
+.instrument-metrics .metric-value,
+.instrument-metrics .segment-tag{
+  font-family:var(--font-readout);
+  font-variant-numeric:tabular-nums;
+  font-size:13px;
+  font-weight:500;
+  line-height:1.5;
+  margin-top:4px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  color:var(--ds-fg);
+}
+/* Corridor reads as a value, not a badge. `.faroff` keeps its warning colour. */
+.instrument-metrics .segment-tag{
+  display:block;
+  padding:0;
+  background:none;
+  border:0;
+  border-radius:0;
+  letter-spacing:0;
+}
+.instrument-metrics .segment-tag.faroff{
+  background:none;
+  color:hsl(35 72% 32%);
+}
+/* Reference: a full-width row under the grid —
+   `flex items-center gap-2 border-t border-[hsl(var(--border))] px-4 py-3
+    text-xs`, a 14px icon, a muted label and the name pushed right in bold. */
+.instrument-interchange{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  border-top:1px solid var(--ds-border);
+  padding:12px 16px;
+  font-size:12px;
+  line-height:1.4;
+}
+/* updateRampReadout() marks the name as shown; the whole row follows it. */
+.instrument-interchange:not(:has(.ramp-tag.show)){display:none;}
+.instrument-interchange .interchange-icon{color:var(--ds-secondary);}
+.instrument-interchange span{color:var(--ds-fg-muted);}
+.instrument-interchange .ramp-tag{
+  margin-top:0;
+  margin-left:auto;
+  /* The inline sheet paints .kmpost .ramp-tag as an accent CHIP. Every one of
+     those has to be reset or the name renders as a filled pill. */
+  padding:0;
+  background:none;
+  border:0;
+  border-radius:0;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-family:var(--font-ui);
+  font-size:12px;
+  font-weight:700;
+  color:var(--ds-fg);
+}
+.instrument-metrics .bound-toggle{
+  display:flex;
+  flex-direction:row;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:5px;
+}
+.instrument-metrics button.bound-btn{
+  width:auto;
+  min-width:46px;
+  min-height:44px;
+  padding:8px 14px;
+  font-size:13px;
+  border:1px solid var(--ds-border);
+  background:var(--ds-card-2);
+  color:var(--ds-fg);
+  box-shadow:none;
+}
+.instrument-metrics button.bound-btn.active{
+  background:var(--ds-primary);
+  border-color:var(--ds-primary);
+  color:var(--ds-primary-fg);
+  box-shadow:none;
+}
+.instrument-metrics .bound-hint,
+.instrument-metrics .bound-auto-status{
+  margin-top:5px;
+  font-size:10px;
+  font-style:italic;
+  line-height:1.35;
+  color:var(--ds-fg-subtle);
+}
+
+/* Nearby bridge keeps its own row so the bridge feature is not lost. The
+   classification filter sits at the end of this row. */
+.instrument-panel .nearby-asset{
+  border-left:0;
+  border-top:1px solid var(--ds-border);
+  padding:12px 16px;
+  display:flex;
+  /* The legacy .nearby-asset rule is a centred column; override the direction
+     or the filter button stacks under the text instead of sitting beside it. */
+  flex-direction:row;
+  align-items:center;
+  justify-content:flex-start;
+  gap:12px;
+}
+.instrument-panel .nearby-asset-body{
+  min-width:0;
+  flex:1 1 auto;
+}
+.instrument-panel .nearby-asset .kmlabel{
+  padding-right:0;
+  color:var(--ds-fg-muted);
+}
+.instrument-panel .nearby-asset-name{
+  font-size:15px;
+  font-weight:700;
+  line-height:1.3;
+  margin-top:3px;
+  color:var(--ds-fg);
+}
+.instrument-panel .nearby-asset-meta{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:baseline;
+  gap:10px;
+  margin-top:3px;
+}
+.instrument-panel .nearby-asset-station{
+  font-size:12.5px;
+  font-weight:500;
+  margin-top:0;
+  color:var(--ds-fg);
+}
+.instrument-panel .nearby-asset-distance{
+  font-size:11px;
+  margin-top:0;
+  color:var(--ds-fg-muted);
+}
+
+/* Reference footer: `border-t px-4 py-3 font-mono text-[11px]`. */
+.instrument-foot{
+  display:flex;
+  flex-wrap:nowrap;
+  align-items:center;
+  gap:8px;
+  border-top:1px solid var(--ds-border);
+  padding:12px 16px;
+}
+.instrument-foot .coordinate-value{
+  font-family:var(--font-readout);
+  font-variant-numeric:tabular-nums;
+  font-size:11px;
+  font-weight:400;
+  line-height:1.5;
+  color:var(--ds-fg-muted);
+  white-space:nowrap;
+}
+.instrument-foot .foot-separator{
+  font-family:var(--font-readout);
+  font-size:11px;
+  line-height:1.5;
+  color:var(--ds-fg-muted);
+}
+/* The header is global now, so the map fills the viewport minus the tab tray AND
+   the header. The header's height moves with the safe-area inset and the logo,
+   so it is measured into --app-header-h rather than hard-coded here. */
+.map-view{
+  height:calc(100vh - var(--app-header-h,0px) - var(--app-nav-h));
+  height:calc(100dvh - var(--app-header-h,0px) - var(--app-nav-h));
+  min-height:0;
+}
+
+/* Coordinates and date/time stay on one exact-value line. */
+.instrument-foot > *{flex:0 0 auto;min-width:0;}
+.foot-saved{
+  font-family:var(--font-readout);
+  font-variant-numeric:tabular-nums;
+  font-size:11px;
+  line-height:1.5;
+  color:var(--ds-fg-muted);
+  white-space:nowrap;
+}
+
+/* ---------- Global header ------------------------------------------------
+   Shown on every tab. The brand is the mark plus a TEXT wordmark rather than the
+   outlined lockup, because the map swaps that text for the live station /
+   coordinates / accuracy. */
+.top-shell{position:sticky;top:0;z-index:30;}
+/* Exact reference header markup:
+     flex items-center justify-between border-b border-[hsl(var(--border))]
+     bg-[hsl(var(--background)/.93)] px-4 pb-3 pt-3 backdrop-blur   +  .safe-top
+   Every one of those had to be set explicitly: the inline sheet paints an
+   opaque navy gradient with rounded bottom corners and a shadow, and background
+   / border-radius / box-shadow only reset when declared. */
+/* `html:root` is required, not optional. Two legacy rules outrank a bare
+   `.top-shell header` chain:
+     - index.html `html[data-theme="light"] header{background: …gradient…}` (0,1,2)
+     - radius-system.css `html:root header{border-radius:0 0 24px 24px}` (0,1,2)
+   Both styled the old dark masthead. Without the prefix the light theme keeps
+   its navy gradient and the rounded bottom corners. */
+html:root .top-shell header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  /* The sync panel is positioned against the header, NOT the pill: the pill sits
+     left of the reload button, so anchoring to it pushed the panel off the left
+     edge on a 320px screen. */
+  position:relative;
+  border:0;
+  border-bottom:1px solid var(--ds-border);
+  background:color-mix(in srgb, var(--ds-bg) 93%, transparent);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border-radius:0;
+  box-shadow:none;
+  padding:12px 16px;
+  padding-top:max(12px, env(safe-area-inset-top));
+}
+.header-brand{
+  display:flex;
+  /* The inline sheet makes this a centred COLUMN (logo above the clock). The
+     header is one left-aligned row, so every one of those has to be reset —
+     declaring only `display` leaves the column direction in place. */
+  flex-direction:row;
+  align-items:center;
+  justify-content:flex-start;
+  width:auto;
+  gap:12px;
+  min-width:0;
+  flex:0 1 auto;
+}
+.header-logo{
+  width:40px;
+  height:40px;
+  max-width:none;
+  flex:0 0 40px;
+  object-position:left center;
+}
+/* Reference Brand: `text-[17px] font-bold leading-none tracking-[-.05em]` with
+   the second half in --primary. The header follows the theme, so this is
+   token-driven rather than hard-coded white. */
+.header-wordmark{
+  font-family:var(--font-heading);
+  font-size:17px;
+  font-weight:700;
+  line-height:1;
+  letter-spacing:-.05em;
+  color:var(--ds-fg);
+  white-space:nowrap;
+}
+.header-track{color:var(--ds-primary);}
+.header-wordmark[hidden]{display:none;}
+.header-context{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+}
+.header-context[hidden]{display:none;}
+.header-context .map-title{
+  font-family:var(--font-readout);
+  font-size:15px;
+  font-weight:500;
+  line-height:1.3;
+  color:var(--ds-fg);
+}
+.header-context .map-status{
+  font-family:var(--font-readout);
+  font-size:11px;
+  line-height:1.3;
+  color:var(--ds-fg-muted);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+/* Reference right-hand group: `flex items-center gap-2`. */
+.header-actions{
+  display:flex;
+  align-items:center;
+  gap:var(--ds-space-2);
+  flex:0 0 auto;
+}
+/* ---------- Sync indicator (header) ---------------------------------------
+   The design system's StatusPill: fully rounded, 11px bold, ~10/6 padding, with
+   a leading dot. The whole pill is the tap target for the detail panel and keeps
+   the 44px control height, so it is a control, not just a label. */
+.sync-menu{position:static;flex:0 0 auto;}
+.sync-menu > summary{
+  list-style:none;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  min-height:var(--ds-control-min);
+  padding:6px 10px;
+  border-radius:var(--radius-full);
+  background:var(--ds-muted);
+  color:var(--ds-fg-muted);
+  font-family:var(--font-ui);
+  font-size:11px;
+  font-weight:700;
+  white-space:nowrap;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.sync-menu > summary::-webkit-details-marker{display:none;}
+.sync-menu > summary::marker{content:'';}
+.sync-pill-text{min-width:0;overflow:hidden;text-overflow:ellipsis;}
+.sync-dot{
+  width:7px;height:7px;flex:0 0 7px;
+  border-radius:var(--radius-full);
+  background:currentColor;
+}
+/* Tones follow the StatusPill contract: warn = caution/held, bad = failure or
+   blocked, fresh = verified, neutral = merely informative. */
+.sync-menu[data-sync-state="synced"] > summary{color:var(--ds-secondary);background:var(--ds-accent);}
+.sync-menu[data-sync-state="pending"] > summary,
+.sync-menu[data-sync-state="syncing"] > summary{color:var(--ds-warning);background:var(--ds-warning-bg);}
+.sync-menu[data-sync-state="failed"] > summary,
+.sync-menu[data-sync-state="offline"] > summary{color:var(--ds-error);background:var(--ds-error-bg);}
+
+/* Detail panel, positioned against the header so it is clamped to the viewport's
+   padding edge rather than the pill's — at 320px anchoring to the pill pushed it
+   off-screen to the left. */
+.sync-panel{
+  position:absolute;
+  top:calc(100% + 8px);
+  right:16px;
+  z-index:40;
+  width:min(19rem, calc(100vw - 32px));
+  max-width:calc(100vw - 32px);
+  display:grid;
+  gap:12px;
+  padding:14px;
+  border:1px solid var(--ds-border);
+  border-radius:var(--radius-card);
+  background:var(--ds-card);
+  box-shadow:0 18px 40px -18px rgb(0 0 0 / .45);
+}
+.sync-panel-head{display:flex;align-items:flex-start;gap:10px;}
+.sync-panel-head .sync-dot{margin-top:5px;color:var(--ds-fg-subtle);}
+.sync-menu[data-sync-state="synced"] .sync-panel-head .sync-dot{color:var(--ds-secondary);}
+.sync-menu[data-sync-state="pending"] .sync-panel-head .sync-dot,
+.sync-menu[data-sync-state="syncing"] .sync-panel-head .sync-dot{color:var(--ds-warning);}
+.sync-menu[data-sync-state="failed"] .sync-panel-head .sync-dot,
+.sync-menu[data-sync-state="offline"] .sync-panel-head .sync-dot{color:var(--ds-error);}
+.sync-panel-copy{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.sync-panel-title{
+  font-family:var(--font-heading);
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:-.02em;
+  color:var(--ds-fg);
+}
+.sync-panel-sub{font-size:12px;line-height:1.45;color:var(--ds-fg-muted);}
+.sync-counts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:0;}
+.sync-counts > div{padding:8px 6px;border-radius:8px;background:var(--ds-muted);text-align:center;}
+.sync-counts dt{
+  font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ds-fg-muted);
+}
+.sync-counts dd{
+  margin:3px 0 0;
+  font-family:var(--font-readout);
+  font-variant-numeric:tabular-nums;
+  font-size:13px;
+  font-weight:500;
+  color:var(--ds-fg);
+}
+.sync-actions{display:flex;flex-wrap:wrap;gap:8px;}
+.sync-actions .ds-btn{flex:1 1 auto;min-height:var(--ds-control-min);}
+/* A disabled primary keeps its amber fill in dark mode and reads as tappable,
+   which is misleading for the one control that explains the feature. */
+.sync-actions .ds-btn:disabled{opacity:.5;cursor:not-allowed;}
+.sync-note{margin:0;font-size:11px;line-height:1.5;color:var(--ds-fg-muted);}
+/* Reference `.btn .btn-ghost !min-h-9 !px-2` — transparent, no border, 36px. */
+.header-refresh{
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:var(--ds-control-min);
+  padding:0 8px;
+  border:1px solid transparent;
+  border-radius:10px;
+  background:transparent;
+  color:var(--ds-fg-muted);
+  font-weight:700;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.header-refresh:active{opacity:.6;}
+.header-refresh:disabled{opacity:.42;cursor:progress;}
+.header-refresh::before{
+  content:'';
+  width:17px;
+  height:17px;
+  background-color:currentColor;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12a9 9 0 1 1-3.1-6.8'/%3E%3Cpath d='M21 4v5h-5'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12a9 9 0 1 1-3.1-6.8'/%3E%3Cpath d='M21 4v5h-5'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+
+/* The panel is theme-aware, so it must also outrank the inline light-theme
+   rules that force the old green km-post's light text colours. */
+html[data-theme="light"] .instrument-panel{color:var(--ds-fg);}
+html[data-theme="light"] .instrument-panel .kmlabel,
+html[data-theme="light"] .instrument-panel .nearby-asset .kmlabel,
+html[data-theme="light"] .instrument-panel .nearby-asset-distance,
+html[data-theme="light"] .nearby-asset-distance{
+  color:var(--ds-fg-muted);
+}
+html[data-theme="light"] .instrument-metrics .kmvalue,
+html[data-theme="light"] .instrument-metrics .metric-value,
+html[data-theme="light"] .instrument-metrics .segment-tag,
+html[data-theme="light"] .instrument-panel .nearby-asset-name,
+html[data-theme="light"] .instrument-panel .nearby-asset-station{
+  color:var(--ds-fg);
+}
+html[data-theme="light"] .instrument-metrics .segment-tag.faroff{color:hsl(35 72% 32%);}
+
+/* ---------- Buttons ------------------------------------------------------ */
+
+/* Amber is reserved for the one action that moves an inspection forward. */
+button.defect-btn,.lane-btn,.select-toggle-btn,.export-btn,.calib-add,
+.bulk-actions-bar button,.camera-mode-btn,.map-locate-btn,.map-theme-toggle,
+.ds-btn{
+  font-family:var(--font-ui);
+  font-weight:700;
+  letter-spacing:-.01em;
+}
+
+button.bound-btn,
+.select-toggle-btn,
+.export-btn,
+.calib-add,
+.bulk-select-all-btn{
+  background:var(--ds-card-2);
+  border:1px solid var(--ds-border);
+  color:var(--ds-fg);
+}
+button.bound-btn:hover,
+.select-toggle-btn:hover,
+.export-btn:hover{background:var(--ds-muted);}
+
+/* Primary: the amber action */
+#export-btn:not(:disabled),
+.export-btn:not(:disabled),
+button.bound-btn.active,
+.select-toggle-btn.active{
+  background:var(--ds-primary);
+  border-color:var(--ds-primary);
+  color:var(--ds-primary-fg);
+}
+#export-btn:not(:disabled):hover{background:var(--ds-primary-strong);}
+
+/* Destructive */
+.bulk-delete-btn:not(:disabled),
+.photo-remove-btn{
+  background:var(--ds-destructive);
+  border-color:var(--ds-destructive);
+  color:var(--ds-destructive-fg);
+}
+
+/* Export was painted safety-green in sharing.css; amber owns the action role.
+   `html:root` matches that rule's specificity and this file loads later. */
+html:root #export-menu-btn,
+html[data-theme="light"] #export-menu-btn{
+  background:var(--ds-primary);
+  border-color:var(--ds-primary);
+  color:var(--ds-primary-fg);
+  /* sharing.css gives this button --radius-lg; align it with .ds-btn. */
+  border-radius:var(--radius-control);
+}
+html:root #export-menu-btn:hover{background:var(--ds-primary-strong);}
+html:root #export-menu-btn:disabled{
+  background:var(--ds-muted);
+  border-color:var(--ds-border);
+  color:var(--ds-fg-subtle);
+  opacity:1;
+}
+
+/* Quiet / ghost */
+.export-btn:disabled,.calib-add:disabled{
+  background:var(--ds-muted);
+  color:var(--ds-fg-subtle);
+  border-color:var(--ds-border);
+  opacity:1;
+}
+
+/* ---------- Fields ------------------------------------------------------- */
+
+.field,input[type="text"],input[type="date"],input[type="number"],
+select,textarea,.edit-select{
+  background:var(--ds-bg);
+  border:1px solid var(--ds-border-strong);
+  color:var(--ds-fg);
+  font-family:var(--font-ui);
+}
+.field:focus,select:focus,input:focus,textarea:focus{
+  border-color:var(--ds-secondary);
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--ds-secondary) 20%, transparent);
+}
+::placeholder{color:var(--ds-fg-subtle);}
+
+/* Filter-bar fields inherited the page colour, so beside the filled buttons
+   they read as borderless. Give them the field fill and their own text ink. */
+html:root :is(.entry-filters,.map-entry-controls) :is(input[type="date"],select){
+  background:var(--ds-card);
+  border-color:var(--ds-border-strong);
+  color:var(--ds-fg);
+}
+
+/* ---------- Specificity bridge ------------------------------------------
+   The inline stylesheet carries `html[data-theme="light"] …` overrides that
+   outrank a bare class selector. These restate the design-system treatment at
+   equal-or-higher specificity so light mode matches dark mode.
+   ------------------------------------------------------------------------ */
+
+/* The defect focus select paints its own chevron + gradient; replace both. */
+.defect-focus-select,
+html[data-theme="light"] .defect-focus-select{
+  background-color:var(--ds-card-2);
+  background-image:url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23707b87' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 8px center;
+  background-size:14px;
+  border-color:var(--ds-border);
+  border-radius:var(--radius-md);
+  color:var(--ds-fg);
+  box-shadow:none;
+}
+
+html[data-theme="light"] .category-camera-btn,
+html[data-theme="light"] .select-toggle-btn,
+html[data-theme="light"] .export-btn,
+html[data-theme="light"] .calib-add{
+  background:var(--ds-card-2);
+  border-color:var(--ds-border);
+  color:var(--ds-fg);
+  box-shadow:none;
+}
+html[data-theme="light"] .category-camera-btn:hover,
+html[data-theme="light"] .select-toggle-btn:hover{background:var(--ds-muted);}
+html[data-theme="light"] h2{color:var(--ds-fg);}
+html[data-theme="light"] .defect-focus-select{background-color:var(--ds-card-2);}
+
+/* ---------- Status pills ------------------------------------------------ */
+
+/* Compact, fully rounded, one clear tone. Never used to imply a road match
+   that has not actually been confirmed. */
+.status,.status-pill,.photo-status{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:5px 9px;
+  border-radius:var(--radius-full);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.01em;
+}
+.status.ok,.status-fresh{
+  color:var(--ds-accent-fg);
+  background:var(--ds-accent);
+}
+.status.warn,.status-warn{
+  color:var(--ds-warning);
+  background:var(--ds-warning-bg);
+}
+.status.err,.status-bad{
+  color:var(--ds-error);
+  background:var(--ds-error-bg);
+}
+
+/* ---------- Header -------------------------------------------------------
+
+   Superseded. The header now FOLLOWS the theme, exactly like the reference
+   (`bg-[hsl(var(--background)/.93)]`), and is styled in one place: the
+   "Global header" block near the top of this file.
+
+   A rule used to force a dark navy masthead in BOTH themes here, because the
+   brand was then a white SVG wordmark that a cream header would have erased.
+   The brand is now the mark plus themed text, so that no longer applies — do
+   not re-add it. */
+.header-copy .sub,
+html[data-theme="light"] header .sub{color:hsl(214 12% 68%);letter-spacing:.08em;}
+#storage-status:not([hidden]),
+html[data-theme="light"] #storage-status:not([hidden]){color:hsl(214 12% 68%);}
+
+.theme-toggle,.map-theme-toggle{
+  background:hsl(214 34% 14%);
+  border:1px solid hsl(214 19% 27%);
+  color:hsl(40 22% 92%);
+}
+.theme-toggle:hover,.map-theme-toggle:hover{background:hsl(214 27% 19%);}
+html[data-theme="light"] .theme-toggle,
+html[data-theme="light"] .map-theme-toggle{
+  background:hsl(214 34% 14%);
+  border-color:hsl(214 19% 27%);
+  color:hsl(40 22% 92%);
+}
+
+/* ---------- Network data disclosure ------------------------------------- */
+
+.dataset-drawer{margin:0;width:100%;border:0;border-top:1px solid var(--ds-border);background:transparent;box-shadow:none;}
+.dataset-drawer>summary{display:flex;align-items:center;gap:12px;min-height:64px;padding:16px 0;cursor:pointer;list-style:none;color:var(--ds-fg);}
+.dataset-drawer>summary::-webkit-details-marker{display:none;}
+.dataset-summary-copy{display:grid;gap:4px;flex:1;min-width:0;}
+.dataset-summary-copy strong{font-family:var(--font-ui);font-size:14px;font-weight:600;}
+.dataset-state-label{font-size:12px;line-height:1.5;color:var(--ds-fg-muted);}
+.dataset-chevron{width:20px;height:20px;flex:0 0 20px;display:grid;place-items:center;color:var(--ds-fg-muted);}
+.dataset-chevron::after{content:'';width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);}
+.dataset-drawer[open] .dataset-chevron::after{transform:rotate(225deg);}
+.dataset-content{display:grid;grid-template-columns:minmax(0,1fr);}
+.dataset-panel{min-width:0;padding:16px 0;border:0;border-top:1px solid var(--ds-border);background:transparent;box-shadow:none;}
+.dataset-panel-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.dataset-panel-title{margin:0;font-family:var(--font-ui);font-size:14px;line-height:1.5;font-weight:600;color:var(--ds-fg);}
+.dataset-badge{padding:4px 8px;border-radius:999px;font-size:11px;font-weight:600;line-height:1.5;color:var(--ds-fg-muted);background:var(--ds-muted);}
+.dataset-badge[data-state="ready"],.dataset-badge[data-state="cached"]{color:var(--ds-accent-fg);background:var(--ds-accent);}
+.dataset-badge[data-state="error"]{color:var(--ds-error);background:var(--ds-error-bg);}
+.dataset-panel .calib-hint{margin:8px 0 12px;font-size:13px;line-height:1.6;color:var(--ds-fg-muted);overflow-wrap:anywhere;}
+.dataset-panel .ds-btn{min-height:44px;padding:10px 16px;}
+
+/* ---------- Defect capture ---------------------------------------------- */
+
+/* Category colour still identifies the defect type (a real field affordance);
+   the tokens are simply pulled into the instrument palette. */
+.category-label .category-label-text{color:var(--ds-fg);}
+.category-sub,.lane-btn.others-btn .others-sub{color:var(--ds-fg-muted);}
+
+.defect-gate{
+  background:var(--ds-accent);
+  border:1px solid var(--ds-border);
+  color:var(--ds-accent-fg);
+}
+html[data-theme="light"] #defect-section.gps-pending .defect-gate{
+  background:var(--ds-accent);
+  border-color:hsl(188 36% 31% / .28);
+  color:var(--ds-accent-fg);
+}
+
+.category-camera-btn{
+  background:var(--ds-card-2);
+  border:1px solid var(--ds-border);
+  color:var(--ds-fg-muted);
+}
+.category-camera-btn:hover{background:var(--ds-muted);color:var(--ds-fg);}
+
+/* ---------- Log ---------------------------------------------------------- */
+
+.log-entry{border:1px solid var(--ds-border);}
+.log-entry .info .type{color:var(--ds-fg);}
+.log-entry .info .meta{color:var(--ds-fg-muted);}
+.log-empty{color:var(--ds-fg-subtle);}
+.count-bar{color:var(--ds-fg-muted);border-color:var(--ds-border);}
+.log-entry.selected{border-color:var(--ds-primary);box-shadow:0 0 0 2px hsl(43 96% 52% / .25);}
+
+/* ---------- Tab bar ------------------------------------------------------ */
+
+/* Replit's five-item mobile navigation, using the same dark instrument surface
+   in both app themes. The accent is an underline, never a filled active pill. */
+.app-tab-bar{
+  position:fixed;
+  z-index:900;
+  left:50%;
+  bottom:0;
+  transform:translateX(-50%);
+  width:min(100%,560px);
+  height:var(--app-nav-h);
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:4px;
+  padding:6px 8px env(safe-area-inset-bottom);
+  border:0;
+  border-top:1px solid #364556;
+  border-radius:0;
+  background:#1b2737;
+  box-shadow:0 -8px 24px rgba(0,0,0,.18);
+}
+html[data-theme="light"] .app-tab-bar{
+  background:var(--ds-card);
+  border-top-color:var(--ds-border);
+  box-shadow:0 -7px 22px rgba(27,39,55,.08);
+}
+.app-tab-btn{
+  position:relative;
+  min-width:0;
+  min-height:44px;
+  padding:4px 2px 8px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  color:#a4acb7;
+  font-size:10px;
+  font-weight:600;
+  cursor:pointer;
+}
+html[data-theme="light"] .app-tab-btn{color:var(--ds-fg-muted);}
+.app-tab-btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.app-tab-btn span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.app-tab-btn.active,
+html[data-theme="light"] .app-tab-btn.active{
+  background:transparent;
+  color:var(--ds-secondary);
+}
+.app-tab-btn.active::after{
+  content:"";
+  position:absolute;
+  bottom:2px;
+  left:14%;
+  right:14%;
+  height:2px;
+  border-radius:2px;
+  background:currentColor;
+}
+.app-tab-btn:focus-visible{outline:2px solid var(--ds-secondary);outline-offset:-2px;}
+
+/* ---------- Map ---------------------------------------------------------- */
+
+.map-topbar{background:var(--ds-card);border-color:var(--ds-border);}
+.map-title{color:var(--ds-fg);}
+.map-status{color:var(--ds-fg-muted);}
+.map-entry-controls{background:var(--ds-card);border-color:var(--ds-border);}
+html[data-theme="light"] .map-topbar{background:var(--ds-card);}
+html[data-theme="light"] .map-status{color:var(--ds-fg-muted);}
+html[data-theme="light"] .map-locate-btn,html[data-theme="light"] .map-theme-toggle{
+  background:var(--ds-card-2);border-color:var(--ds-border);color:var(--ds-fg);
+}
+
+/* ---------- Log, Tools & Settings views --------------------------------- */
+
+/* `.log-view` holds the shared register block, so it needs the same centred
+   column that `main` gives the Inspection tab. */
+.log-view,.tools-view,.settings-view{
+  max-width:520px;
+  margin:0 auto;
+  padding:14px;
+}
+
+/* Log tab data actions. Two rows, one job each, so neither can overflow:
+   row 1 Import + Select, row 2 Export + the bulk actions (revealed on Select).
+   The hint stays directly under Import, which is the button it describes. */
+.log-data-row{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:8px;
+}
+.log-data-hint{
+  margin:8px 0 10px;
+  font-size:12.5px;
+  line-height:1.5;
+  color:var(--ds-fg-muted);
+}
+/* The import-history control lives here rather than in the Import row.
+   Measured with everything selected: row 1 needed 367px against 362px
+   available at 390px (332px at 360px), so Delete wrapped to a second line.
+   This line already talks about imports, and it frees 52px. */
+.log-hint-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:8px 0 10px;
+}
+.log-hint-row .log-data-hint{margin:0;flex:1 1 auto;min-width:0;}
+.log-hint-row #import-history-btn{
+  flex:0 0 auto;
+  width:34px;
+  min-height:34px;
+  padding:0;
+  border-radius:var(--radius-sm);
+}
+.export-hint{
+  margin:8px 0 0;
+  font-size:12.5px;
+  line-height:1.5;
+  color:var(--ds-fg-muted);
+}
+
+/* ---------- Buttons (Base44 `.btn`) ------------------------------------- */
+/* Shared 44px tap target, 14px inline padding, and one control radius.
+   bold label, 8px icon gap. */
+.ds-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:var(--ds-space-2);
+  min-height:var(--ds-control-min);
+  padding:0 14px;
+  border:1px solid transparent;
+  border-radius:var(--radius-control);
+  font-family:var(--font-ui);
+  font-weight:700;
+  font-size:14px;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.ds-btn svg{width:17px;height:17px;flex:0 0 17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.ds-btn-primary{
+  background:var(--ds-primary);
+  color:var(--ds-primary-fg);
+  border-color:var(--ds-primary);
+}
+.ds-btn-primary:hover{background:var(--ds-primary-strong);}
+.ds-btn-quiet{
+  background:var(--ds-muted);
+  color:var(--ds-fg);
+  border-color:var(--ds-border);
+}
+.ds-btn-quiet:hover{background:var(--ds-card-2);}
+.ds-btn:disabled{opacity:.42;cursor:not-allowed;}
+.ds-view-head{padding:4px 2px 12px;}
+.ds-view-head .eyebrow{display:block;margin-bottom:6px;}
+/* Reference view titles are sentence case at ~30px/700 with tight tracking. */
+.ds-view-head h2{
+  margin:0 0 6px;
+  text-transform:none;
+  font-size:30px;
+  font-weight:700;
+  letter-spacing:-.06em;
+  line-height:1.1;
+}
+.ds-view-head p{
+  margin:0;
+  font-size:13px;
+  line-height:1.5;
+  color:var(--ds-fg-muted);
+}
+.ds-card{
+  border-radius:var(--radius-card);
+  padding:14px 16px;
+  margin-bottom:12px;
+}
+.ds-card-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:15px;
+  font-weight:700;
+  color:var(--ds-fg);
+  margin-bottom:2px;
+}
+.ds-card-title .ds-card-icon{
+  width:28px;height:28px;flex:0 0 28px;
+  display:inline-flex;align-items:center;justify-content:center;
+  border-radius:var(--radius-sm);
+  background:var(--ds-accent);
+  color:var(--ds-accent-fg);
+}
+.ds-card-hint{
+  font-size:12.5px;
+  line-height:1.5;
+  color:var(--ds-fg-muted);
+  margin:0 0 10px;
+}
+.ds-row{display:flex;flex-wrap:wrap;gap:var(--ds-space-2);align-items:center;}
+.ds-field{margin-bottom:10px;}
+.ds-field:last-child{margin-bottom:0;}
+.ds-field label{
+  display:block;
+  margin-bottom:5px;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--ds-fg-muted);
+}
+.ds-note{
+  margin-top:10px;
+  padding:9px 11px;
+  border-radius:var(--radius-sm);
+  background:var(--ds-muted);
+  color:var(--ds-fg-muted);
+  font-size:12px;
+  line-height:1.5;
+}
+.ds-status-line{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:12.5px;
+  color:var(--ds-fg-muted);
+}
+
+/* Base44's record chip: a muted pill with a glyph, used in place of the old
+   red numeric badge on the log heading. */
+.ds-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  margin-top:10px;
+  padding:5px 10px;
+  border-radius:var(--radius-full);
+  background:var(--ds-muted);
+  color:var(--ds-fg-muted);
+  font-size:12px;
+  font-weight:600;
+}
+.ds-chip svg{
+  width:14px;height:14px;flex:0 0 14px;
+  fill:none;stroke:currentColor;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+
+/* `[hidden]` alone loses to these components' `display` declarations, which
+   would leave the sync chip rendering as an empty dot and the "Imported files"
+   button showing with no history behind it. */
+.ds-chip[hidden],.ds-btn[hidden]{display:none;}
+
+/* The sync indicator now lives in the global header (see .sync-menu); the
+   Log-tab chip it replaced was removed with its markup. */
+
+/* Title and records chip share one row, chip flushed right. Measured with real
+   text metrics: the title runs 182px and the chip 99px idle / 129px selecting,
+   against 358px available at 390px — so this holds at phone widths without the
+   chip wrapping to its own line. */
+.log-head-row{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:12px;
+  min-width:0;
+}
+.log-head-row h2{min-width:0;}
+.log-head-row .ds-chip{margin-top:0;}
+
+/* Capture tab: the register is capped, so offer the way to the full list. */
+.log-view-all{
+  width:100%;
+  min-height:var(--ds-control-min);
+  margin-top:8px;
+  border:1px dashed var(--ds-border-strong);
+  border-radius:var(--radius-control);
+  background:transparent;
+  color:var(--ds-fg-muted);
+  font-family:var(--font-ui);
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+}
+.log-view-all:hover{color:var(--ds-fg);border-color:var(--ds-fg-muted);}
+
+/* Rows use the app's own long-standing geometry (title, timestamp right, context
+   below) with the per-defect left border carrying the colour coding. The
+   reference record-card row — a type-coloured glyph tile in a leading column —
+   was tried and rejected by the owner; do not reinstate it. */
+
+/* ---------- Capture tab: the record card --------------------------------
+   The header, the date filters and the rows become ONE card separated by
+   hairlines, instead of three floating blocks. Rows keep their per-row
+   swipe-clipping wrapper, so swipe, selection and the list observer are
+   untouched — only the visual shell changes.
+
+   The defect indication is the row's existing left border, which already
+   carries the app's own colours: --line-yellow as the default (Potholes has no
+   type class), --safety-orange, #c9c9c9, #c1707a.
+
+   Only the Capture tab is carded. The Log tab keeps its plain list. */
+.inspection-view #log-register{
+  border:1px solid var(--ds-border);
+  border-radius:var(--radius-card);
+  background:var(--ds-card);
+  overflow:hidden;
+}
+.inspection-view .log-header{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:start;
+  gap:2px 12px;
+  padding:14px 16px;
+  border-bottom:1px solid var(--ds-border);
+  background:color-mix(in srgb, var(--ds-muted) 65%, transparent);
+}
+/* The Capture card has NO filter row — filtering belongs to the Log tab's full
+   register. `visibleEntries()` therefore ignores the filters on this mount, so a
+   filter set over there cannot leave this card showing a subset the user has no
+   way to clear from here. */
+.inspection-view .log-date-filters{display:none;}
+.inspection-view .inspection-record-list{
+  gap:0;
+  padding:0;
+}
+/* Rows go full-bleed; the card owns the radius and the clipping.
+   `html:root` is required: sharing.css and radius-system.css both style these
+   with html:root[data-theme] selectors that outrank a bare class chain. */
+html:root .inspection-view .inspection-record-list .swipe-row{
+  margin:0;
+  border-radius:0;
+}
+/* Only the non-left edges are reset — border-left stays exactly as sharing.css
+   sets it, so the per-defect colours survive. Setting the `border-left`
+   shorthand here would repaint every row yellow. */
+html:root .inspection-view .inspection-record-list .log-entry{
+  border-top:0;
+  border-right:0;
+  border-bottom:0;
+  border-left-width:4px;
+  border-radius:0;
+  box-shadow:none;
+  background:transparent;
+}
+/* Hairline between rows, none above the first. */
+html:root .inspection-view .inspection-record-list .swipe-row + .swipe-row .log-entry{
+  border-top:1px solid var(--ds-border);
+}
+/* "View all" is the card's footer. */
+.inspection-view .inspection-record-list .log-view-all{
+  width:100%;
+  margin:0;
+  border:0;
+  border-top:1px solid var(--ds-border);
+  border-radius:0;
+}
+/* The count badge is appended INSIDE the h2, so the heading itself is the
+   column that stacks the eyebrow above the big numeral. */
+.inspection-view .log-header h2{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:2px;
+  grid-column:1;
+  grid-row:1;
+  margin:0;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.16em;
+  line-height:1.3;
+  text-transform:uppercase;
+  color:var(--ds-fg-muted);
+}
+/* Select starts inside this header in the markup; log-controls.js relocates it
+   to the Log tab's head at DOMContentLoaded. Hidden until it moves so it cannot
+   flash as a stray grid item. */
+.inspection-view .log-header #select-toggle-btn{display:none;}
+.inspection-view .log-count-badge{
+  grid-column:1;
+  grid-row:2;
+  display:block;
+  align-self:start;
+  min-width:0;
+  height:auto;
+  padding:0;
+  border-radius:0;
+  background:none;
+  box-shadow:none;
+  transform:none;
+  font-family:var(--font-readout);
+  font-size:30px;
+  font-weight:700;
+  line-height:1.1;
+  letter-spacing:-.04em;
+  color:var(--ds-fg);
+}
+.inspection-view .log-header::after{
+  content:'';
+  grid-column:2;
+  grid-row:1 / 3;
+  width:34px;
+  height:34px;
+  border-radius:var(--radius-sm);
+  background-color:var(--ds-card-2);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235b6776' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='8' height='4' x='8' y='2' rx='1'/%3E%3Cpath d='M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'/%3E%3Cpath d='M12 11h4M12 16h4M8 11h.01M8 16h.01'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size:18px;
+}
+/* Select rides at the right end of the Export/Import data row. Measured: the
+   three buttons need 285px against 362px available at 390px (287px in selection
+   mode with "Cancel" / "Export selected"), so they share one line with room. */
+.log-select-actions{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:8px;
+  margin-left:auto;
+}
+
+/* Shares the Import row, flushed right. Hidden until Select is pressed. */
+.log-bulk-actions{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  margin-left:auto;
+}
+/* `[hidden]` loses to the `display:flex` above. */
+.log-bulk-actions[hidden]{display:none;}
+/* Bulk controls. These lost their geometry when the `.log-action-footer` panel
+   was removed — `sharing.css` styled them only *inside* that container, so they
+   fell back to raw native buttons (square corners, 1px/6px padding, default
+   13.3px type, and a 2px outset bevel on Delete). Restored to match the
+   Select/Cancel button they sit beside, which uses --radius-md. */
+/* Bulk controls. These sit in `#log-bulk-actions` now, but they have moved
+   between mounts twice and each time silently lost their geometry when the
+   previous mount's scoped rule stopped matching. Target them by ID only, so the
+   styling cannot be orphaned by a future re-parenting.
+
+   Without this they fall back to raw native buttons: square corners, 1px/6px
+   padding, default 13.3px type, and a 2px outset bevel on Delete. */
+#bulk-select-all-btn,#bulk-delete-btn{
+  min-height:var(--ds-control-min);
+  padding:0 16px;
+  border:1px solid var(--ds-border);
+  border-radius:var(--radius-md);
+  font-family:var(--font-ui);
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:-.01em;
+  white-space:nowrap;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+#bulk-select-all-btn{
+  background:var(--ds-card-2);
+  color:var(--ds-fg);
+}
+#bulk-select-all-btn:hover{background:var(--ds-muted);}
+#bulk-delete-btn:not(:disabled){
+  background:var(--ds-destructive);
+  border-color:var(--ds-destructive);
+  color:var(--ds-destructive-fg);
+}
+#bulk-delete-btn:disabled{
+  background:var(--ds-muted);
+  border-color:var(--ds-border);
+  color:var(--ds-fg-subtle);
+  cursor:not-allowed;
+}
+/* Select is mounted only in the Log tab's head, so the Capture tab's register
+   header shows nothing but its heading and badge — no hiding rule needed. */
+/* In the Log tab the title and count live in the view head (Base44 style), so
+   the register's duplicate heading is hidden. */
+.log-view .log-header h2{display:none;}
+
+/* The toggle was pinned to the masthead corner; inside a Settings card it
+   participates in normal flow. */
+.settings-view .theme-toggle,
+html[data-theme="light"] .settings-view .theme-toggle{
+  position:static;
+  width:var(--ds-control-min);height:var(--ds-control-min);
+  background:var(--ds-card-2);
+  border:1px solid var(--ds-border);
+  color:var(--ds-fg);
+  box-shadow:none;
+}
+.settings-view .theme-toggle:hover{background:var(--ds-muted);}
+
+/* Import feedback lives with the import controls now. */
+#import-status:not(:empty){
+  margin-top:10px;
+  padding:9px 11px;
+  border-radius:var(--radius-sm);
+  background:var(--ds-muted);
+  color:var(--ds-fg-muted);
+  font-size:12px;
+  line-height:1.5;
+}
+#storage-status:not([hidden]){
+  margin:0;
+  color:var(--ds-fg-muted);
+  font-size:12.5px;
+  white-space:normal;
+}
+
+/* ---------- Data tools & Settings: reference card language ---------------
+   Values copied from the reference's ToolCard and SettingsPage:
+     ToolCard   = `.panel p-5` + a 40px tile (`rounded-xl`, icon in
+                  --secondary) + `gap-3` head + bold title + `text-sm` copy
+     Settings   = `space-y-4`, each `.panel p-5` with a 20px icon in
+                  --secondary; Appearance uses a real switch; Connection &
+                  status uses `.status-pill` badges. */
+.tool-card,
+.settings-panel{
+  border:1px solid var(--ds-border);
+  border-radius:var(--radius-card);
+  background:var(--ds-card);
+  padding:20px;
+}
+.tool-card + .tool-card,
+.settings-panel + .settings-panel,
+.tool-card + .settings-panel,
+.settings-panel + .tool-card{margin-top:16px;}
+
+.tool-head,
+.setting-head{display:flex;align-items:flex-start;gap:12px;}
+.tool-icon{
+  width:40px;height:40px;flex:0 0 40px;
+  display:grid;place-items:center;
+  border-radius:12px;
+  background:var(--ds-accent);
+  color:var(--ds-secondary);
+}
+.tool-icon svg{
+  width:20px;height:20px;
+  fill:none;stroke:currentColor;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+.tool-copy,.setting-copy{flex:1 1 auto;min-width:0;}
+.tool-copy h3,.setting-copy h3,.setting-row h3{
+  margin:0;
+  font-family:var(--font-heading);
+  font-size:17px;
+  font-weight:700;
+  letter-spacing:-.02em;
+  color:var(--ds-fg);
+}
+.tool-copy p,.setting-copy p{
+  margin:4px 0 0;
+  font-size:14px;
+  line-height:1.5;
+  color:var(--ds-fg-muted);
+}
+.tool-body{margin-top:20px;}
+
+/* Installability note: `gap-2 text-sm font-semibold` in --secondary. */
+.tool-note{
+  display:flex;align-items:center;gap:8px;
+  font-size:14px;font-weight:600;color:var(--ds-secondary);
+}
+.tool-note svg{
+  width:17px;height:17px;flex:0 0 17px;
+  fill:none;stroke:currentColor;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+
+/* Settings: a 20px icon in --secondary, no tile. */
+.setting-icon{
+  width:20px;height:20px;flex:0 0 20px;margin-top:2px;
+  fill:none;stroke:var(--ds-secondary);stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+.setting-field{
+  display:block;width:100%;box-sizing:border-box;margin-top:16px;
+  min-height:var(--ds-control-min);padding:11px 12px;
+  border:var(--ds-border-width) solid var(--ds-input);border-radius:var(--radius-control);
+  background:var(--ds-bg);color:var(--ds-fg);
+  font-family:var(--font-ui);font-size:14px;
+}
+.setting-readouts{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;
+  margin:16px 0 0;
+}
+.setting-readouts div{
+  padding:11px 12px;
+  border:1px solid var(--ds-border);border-radius:10px;
+  background:var(--ds-muted);
+}
+.setting-readouts dt{
+  font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--ds-fg-muted);
+}
+.setting-readouts dd{
+  margin:4px 0 0;
+  font-family:var(--font-readout);font-variant-numeric:tabular-nums;
+  font-size:13px;font-weight:500;color:var(--ds-fg);
+}
+
+/* Appearance: `flex items-center gap-3`, a 36px muted tile, and the switch. */
+.setting-row{display:flex;align-items:center;gap:12px;}
+.setting-tile{
+  width:36px;height:36px;flex:0 0 36px;
+  display:grid;place-items:center;
+  border-radius:8px;
+  background:var(--ds-muted);color:var(--ds-fg);
+}
+.setting-tile svg{
+  width:18px;height:18px;
+  fill:none;stroke:currentColor;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+/* Reference switch: `h-7 w-12 rounded-full` with a `size-5` knob. */
+.switch{
+  position:relative;flex:0 0 auto;
+  width:48px;height:28px;padding:0;
+  border:0;border-radius:999px;
+  background:color-mix(in srgb, var(--ds-fg-muted) 35%, transparent);
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.switch[aria-checked="true"]{background:var(--ds-secondary);}
+.switch-knob{
+  position:absolute;top:4px;left:4px;
+  width:20px;height:20px;border-radius:999px;
+  background:var(--ds-card);
+  transition:transform 140ms ease;
+}
+.switch[aria-checked="true"] .switch-knob{transform:translateX(20px);}
+
+/* Connection & status pills, on the reference's own tones. */
+.setting-pills{display:flex;flex-wrap:wrap;gap:var(--ds-space-2);margin-top:var(--ds-space-4);}
+.setting-pills .status-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 9px;border-radius:999px;
+  font-family:var(--font-ui);font-size:11px;font-weight:700;
+}
+.setting-pills .status-pill svg{
+  width:13px;height:13px;flex:0 0 13px;
+  fill:none;stroke:currentColor;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+.setting-pills .status-fresh{color:var(--ds-accent-fg);background:var(--ds-accent);}
+.setting-pills .status-warn{color:var(--ds-warning);background:var(--ds-warning-bg);}
+
+/* Reusable control treatment. Icon-only controls retain their visible size,
+   while their tappable box and keyboard ring stay consistent. */
+:is(.ds-btn,.select-toggle-btn,.export-btn,.calib-add,.log-view-all,
+    .category-camera-btn,.bridge-filter-toggle,.map-filter-menu > summary,
+    .map-locate-btn,.map-theme-toggle){min-height:var(--ds-control-min);}
+:is(.ds-btn,.select-toggle-btn,.export-btn,.calib-add,.log-view-all,
+    .category-camera-btn,.bridge-filter-toggle,.map-filter-menu > summary,
+    .map-locate-btn,.map-theme-toggle):focus-visible,
+:is(.lane-btn,.switch,[role="button"]):focus-within{
+  outline:2px solid var(--ds-ring);
+  outline-offset:2px;
+}
+html:root .map-filter-menu > summary{min-height:var(--ds-control-min);width:var(--ds-control-min);}
+html:root :is(.entry-filters,.map-entry-controls) :is(input[type="date"],select,button){
+  min-height:var(--ds-control-min);
+}
+
+/* ---------- Motion & accessibility -------------------------------------- */
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;transition-duration:.001ms !important;}
+}

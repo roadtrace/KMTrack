@@ -32,11 +32,18 @@
 
   function inspectionWorkbookRows(entries, toDMM, kmToCsvNumber){
     return [
-      ['Type of Defect','Timestamp','Latitude','Longitude','Latitude (DMM)','Longitude (DMM)','Expressway','Direction','Lane','Km Station','Photo','Photo Filename'],
+      /* The first 14 columns are the original KMTrack contract and must never be
+       * reordered or removed: inspection-sharing.js validates them on import and
+       * older workbooks have to keep importing. New columns are appended only. */
+      ['Type of Defect','Timestamp','Latitude','Longitude','Latitude (DMM)','Longitude (DMM)','Expressway','Direction','Lane','Km Station','Photo','Photo Filename','Interchange / Exit','Interchange Segment','Lane Number','Lane (Other)'],
       ...entries.map(e=>[
         e.type,e.timestamp,e.lat,e.lon,toDMM(e.lat,'N','S'),toDMM(e.lon,'E','W'),
         e.expressway||'',e.bound||'',e.lane||'',e.km===null||e.km===undefined?'':Number(kmToCsvNumber(e.km)),
-        e.photoId?'Yes':'No',e.photoFilename||''
+        e.photoId?'Yes':'No',e.photoFilename||'',e.interchange||'',e.interchangeSegment||'',
+        /* Structured lane: a whole number for lanes 1-4, else blank; the
+         * free-text description of an "Others" lane travels separately. */
+        (Number.isInteger(e.lane_number)&&e.lane_number>=1&&e.lane_number<=4)?e.lane_number:'',
+        e.lane_other||''
       ])
     ];
   }

@@ -13,14 +13,22 @@ test('first Select press enters mode without selecting entries',()=>{
 });
 
 test('Select stays text-based beside Export and becomes Cancel in selection mode',()=>{
-  assert.match(controls,/footer\.append\(count,toggle,exportMenu,selectAll,deleteSelected\)/);
+  // The `.log-action-footer` panel was removed; Select now rides at the right of
+  // the Export/Import data row, with the bulk actions on their own row above it.
+  assert.match(controls,/actions\.append\(toggle\)/);
+  assert.match(controls,/\(bulkMount \|\| actions\)\.append\(selectAll,deleteSelected\)/);
+  // No footer panel is built any more (the comment mentioning it is fine).
+  assert.doesNotMatch(controls,/className='log-action-footer'/);
+  assert.doesNotMatch(controls,/list\.after\(footer\)/);
+  assert.match(controls,/getElementById\('log-export-actions'\)/);
+  assert.doesNotMatch(controls,/footer\.append\([^)]*exportMenu/);
   assert.match(controls,/toggle\.textContent = selectMode \? 'Cancel' : 'Select'/);
   assert.match(controls,/toggle\.removeAttribute\('aria-checked'\)/);
   assert.match(css,/#select-toggle-btn\{[^}]*width:auto[^}]*font-size:12px/);
 });
 
 test('selection mode reveals the shared bulk actions without preselecting rows',()=>{
-  assert.match(controls,/footer\.classList\.toggle\('selection-mode',selectMode\)/);
+  assert.match(controls,/actions\.classList\.toggle\('selection-mode',selectMode\)/);
   assert.match(controls,/selectAll\.hidden=!selectMode/);
   assert.match(controls,/deleteSelected\.hidden=!selectMode/);
   assert.match(html,/bar\.style\.display = 'none'/);

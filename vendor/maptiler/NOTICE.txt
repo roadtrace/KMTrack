@@ -1,0 +1,23 @@
+Vendored third-party code — MapTiler basemap integration
+========================================================
+
+These files are vendored rather than loaded from a CDN so the app has no
+third-party dependency at runtime. index.html loads them on demand, and the dark
+basemap is the only thing that uses them.
+
+  maptiler-sdk.umd.min.js   @maptiler/sdk v4.1.0
+                            https://cdn.maptiler.com/maptiler-sdk-js/v4.1.0/
+                            BSD-3-Clause — https://github.com/maptiler/maptiler-sdk-js
+                            Bundles MapLibre GL JS (BSD-3-Clause) and other
+                            dependencies; see the package for the full list.
+
+  maptiler-sdk.css          stylesheet for the same release.
+
+  leaflet-maptilersdk.js    @maptiler/leaflet-maptilersdk v1.0.0
+                            https://cdn.maptiler.com/leaflet-maptilersdk/v1.0.0/
+                            https://github.com/maptiler/leaflet-maptilersdk
+                            UMD build: reads the global `L` (vendor/leaflet) and
+                            the global `maptilersdk`, and attaches `L.maptilerLayer`.
+
+Retrieved 2026-09-18. To update, replace all three files together — the plugin
+and the SDK are released in lockstep, and the plugin expects the SDK's global.
