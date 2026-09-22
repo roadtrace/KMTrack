@@ -40,7 +40,7 @@ SPOT IT turns a device's live location into road-network inspection context—in
 ## Brand Commitments
 
 - Product name: SPOT IT.
-- Preserve the current brand identity: the navy/orange SPOT IT palette, the SPOT IT mark and lockup (`spotit-mark.svg`, `spotit-logo-on-dark.svg`, `spotit-logo-on-light.svg`), and safety-color accents. The pre-2026-09-17 marks `KMTrack.png` and `KMTrack_logo.png` are retained but no longer used.
+- Preserve the current brand identity: the supplied Spot It app icon and the four theme/view-specific header lockups, together with the navy/orange palette and safety-color accents.
 - Preserve the restored corner treatment: existing curved panels, a rectangular bottom navigation tray, and rounded selected-tab highlights.
 - Interface language should be direct, compact, and practical for field work.
 
@@ -49,7 +49,7 @@ SPOT IT turns a device's live location into road-network inspection context—in
 - Existing production interface and behavior: `index.html` and its companion CSS/JavaScript modules.
 - PWA identity and platform description: `manifest.json`.
 - Network and structure datasets: `calibration.json` and `bridges.json`.
-- Product marks: `spotit-mark.svg` and the two `spotit-logo-on-*.svg` lockups, plus the PWA icon PNGs. `KMTrack.png` and `KMTrack_logo.png` are retained as prior-identity assets.
+- Product marks: `spot it app icon.svg`, the four `spot it header*.svg` lockups, and the generated PWA icon PNGs.
 - Import/export contract and operational limits: `SHARING.md`.
 - Working rules and process: `AGENTS.md`. There is no design baseline to
   preserve, and no separate radius rules file — both were retired on 2026-09-18.

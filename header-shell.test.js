@@ -16,15 +16,13 @@ test('the header is global, not inside the Capture view', () => {
   assert.equal((html.match(/<header>/g) || []).length, 1);
 });
 
-test('the header carries the mark, a two-tone wordmark, the sync control and reload', () => {
-  assert.match(html, /class="header-logo" src="spotit-mark\.svg"/);
-  // One artwork serves both themes: the mark's own amber tile keeps the navy
-  // reticle legible on the dark bar and on the paper surface alike, so there is
-  // no theme swap and no second asset to keep in sync.
-  assert.doesNotMatch(html, /header-logo-light/);
-  assert.doesNotMatch(design, /header-logo-light/);
-  // Reference Brand: "SPOT" in the foreground, "IT" in the brand accent.
-  assert.match(html, /id="header-wordmark"><span class="header-brand-name">SPOT<\/span> <span class="header-brand-accent">IT<\/span></);
+test('the header carries supplied theme-aware lockups, the sync control and reload', () => {
+  assert.match(html, /class="header-logo" id="header-logo" src="spot it header logo dark mode\.svg"/);
+  for(const file of [
+    'spot it header logo dark mode.svg','spot it header logo light mode.svg',
+    'spot it header map logo dark mode.svg','spot it header map logo light mode.svg'
+  ]) assert.ok(html.includes(file), file);
+  assert.doesNotMatch(html, /id="header-wordmark"/);
   // The sync indicator is the header's state control and opens its own panel.
   assert.match(html, /class="sync-menu" id="sync-menu"/);
   assert.match(html, /id="sync-status-text" role="status"/);
@@ -33,7 +31,6 @@ test('the header carries the mark, a two-tone wordmark, the sync control and rel
   assert.match(html, /id="sync-now-btn">Sync now</);
   assert.match(html, /id="reload-app-btn">Reload app</);
   assert.match(html, /class="header-refresh" id="net-refresh" aria-label="Reload app"/);
-  assert.match(design, /\.header-wordmark\[hidden\]\{display:none;\}/);
 });
 
 test('the header uses the shared surface and control values', () => {
@@ -48,15 +45,10 @@ test('the header uses the shared surface and control values', () => {
   // The inline navy gradient, rounded corners and shadow must all be reset.
   assert.match(bar, /border-radius:0/);
   assert.match(bar, /box-shadow:none/);
-  // Brand: 40px square mark, 12px gap, 18px uppercase two-tone wordmark.
-  assert.match(design, /\.header-logo\{[\s\S]{0,200}?width:40px/);
+  // Brand: responsive full lockup, with a compact 40px map mark.
+  assert.match(design, /\.header-logo\{[\s\S]{0,200}?height:40px/);
+  assert.match(design, /\.header-logo\[data-logo-context="map"\]\{width:40px/);
   assert.match(design, /\.header-brand\{[\s\S]{0,420}?gap:12px/);
-  const word = design.slice(design.indexOf('.header-wordmark{'), design.indexOf('.header-wordmark{') + 340);
-  assert.match(word, /font-size:18px/);
-  assert.match(word, /font-weight:700/);
-  assert.match(word, /letter-spacing:-\.01em/);
-  assert.match(word, /color:var\(--ds-fg\)/);
-  assert.match(design, /\.header-brand-accent\{color:var\(--brand-accent\);\}/);
   // The accent is a brand token taken from the mark's amber, not --primary.
   assert.match(design, /--brand-accent:\s*#FFBE00/);
   // StatusPill contract: fully rounded, 11px bold, holding the 44px control
@@ -73,11 +65,13 @@ test('the header uses the shared surface and control values', () => {
   assert.match(design, /\.header-actions\{[\s\S]{0,120}?gap:var\(--ds-space-2\)/);
 });
 
-test('the map swaps the wordmark for its station and status, in place', () => {
+test('the map swaps to its dedicated logo and shows station and status in place', () => {
   // The elements never move, so their existing writers keep working.
   assert.match(html, /id="header-map-context"[\s\S]{0,220}?id="map-km-station"[\s\S]{0,220}?id="map-status"/);
   assert.match(html, /function syncHeaderContext\(viewName\)/);
-  assert.match(html, /wordmark\.hidden = isMap;/);
+  assert.match(html, /logo\.src = isMap/);
+  assert.match(html, /spot it header map logo light mode\.svg/);
+  assert.match(html, /spot it header map logo dark mode\.svg/);
   assert.match(html, /context\.hidden = !isMap;/);
   // The map's own topbar and theme control are gone.
   assert.doesNotMatch(html, /class="map-topbar"/);
@@ -166,8 +160,8 @@ test('the sync indicator exists once, in the global header', () => {
   // The old Log-tab chip and its dead CSS are gone with it.
   assert.doesNotMatch(html, /sync-status-chip/);
   assert.doesNotMatch(design, /\.ds-chip-sync/);
-  // The map context swap is untouched.
-  assert.match(html, /wordmark\.hidden = isMap;/);
+  // The map context and dedicated map-logo swap are retained.
+  assert.match(html, /logo\.src = isMap/);
 });
 
 test('a reload comes back to the same tab and map position', () => {

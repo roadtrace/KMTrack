@@ -4,7 +4,7 @@
 // since the app already manages its own offline copy of that file and
 // the in-app "Reload dataset" button needs a real network attempt.
 
-const CACHE_VERSION = 'v194'; // bump this string whenever you deploy changes, to force an update
+const CACHE_VERSION = 'v196'; // bump this string whenever you deploy changes, to force an update
 const CACHE_NAME = `spotit-shell-${CACHE_VERSION}`;
 
 const APP_SHELL = [
@@ -41,14 +41,14 @@ const APP_SHELL = [
   './fonts/DMMono-400-latinext.woff2',
   './fonts/DMMono-500-latin.woff2',
   './fonts/DMMono-500-latinext.woff2',
-  './spotit-mark.svg',
-  './spotit-logo-on-dark.svg',
-  './spotit-logo-on-light.svg',
-  './spotit-icon-192.png',
-  './spotit-icon-512.png',
-  './spotit-apple-touch-icon.png',
-  './KMTrack_logo.png',
-  './KMTrack.png'
+  './spot it app icon.svg',
+  './spot it header logo dark mode.svg',
+  './spot it header logo light mode.svg',
+  './spot it header map logo dark mode.svg',
+  './spot it header map logo light mode.svg',
+  './spot-it-app-icon-v2-180.png',
+  './spot-it-app-icon-v2-192.png',
+  './spot-it-app-icon-v2-512.png'
 ];
 
 self.addEventListener('install', (event) => {

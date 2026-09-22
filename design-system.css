@@ -883,38 +883,17 @@ html:root .top-shell header{
   min-width:0;
   flex:0 1 auto;
 }
-/* The mark sits in a fixed 40px slot so the lockup's optical centre holds
-   whether the wordmark is showing or the map has swapped in the station. No
-   corner radius is set here: the artwork carries the original logo's own
-   proportional radius, and the PNG icons inherit it too. */
+/* Complete supplied lockups replace the former mark + live-text construction.
+   The map uses its compact dedicated mark so the live station remains legible. */
 .header-logo{
-  width:40px;
+  width:auto;
   height:40px;
-  max-width:none;
-  flex:0 0 40px;
+  max-width:min(42vw,166px);
+  flex:0 1 auto;
+  object-fit:contain;
   object-position:left center;
 }
-/* The mark carries its own amber tile, so one artwork serves both themes: the
-   navy reticle and the amber ground both hold on the dark and paper surfaces.
-   No theme swap, and no second asset to keep in sync. */
-/* Reference Brand: `text-[17px] font-bold leading-none tracking-[-.05em]` with
-   the second half in the accent. The header follows the theme, so this is
-   token-driven rather than hard-coded white. TRACE sets its wordmark as an
-   uppercase two-tone name, which "SPOT IT" picks up directly. */.header-wordmark{
-  font-family:var(--font-heading);
-  font-size:18px;
-  font-weight:700;
-  line-height:1;
-  /* A touch tighter than the UI default but looser than the old single-word
-     "KMTrack" tile: "SPOT" and "IT" have to read as two words. */
-  letter-spacing:-.01em;
-  text-transform:uppercase;
-  color:var(--ds-fg);
-  white-space:nowrap;
-}
-.header-brand-name{color:var(--ds-fg);}
-.header-brand-accent{color:var(--brand-accent);}
-.header-wordmark[hidden]{display:none;}
+.header-logo[data-logo-context="map"]{width:40px;max-width:40px;flex:0 0 40px;}
 .header-context{
   display:flex;
   flex-direction:column;

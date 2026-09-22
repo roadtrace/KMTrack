@@ -13,8 +13,8 @@
     if(localStorage.getItem('kmtrack_theme_v1') === 'light') document.documentElement.dataset.theme = 'light';
   }catch(e){ /* theme preference is non-critical */ }
 </script>
-<link rel="icon" type="image/svg+xml" href="spotit-mark.svg">
-<link rel="apple-touch-icon" href="spotit-apple-touch-icon.png">
+<link rel="icon" type="image/svg+xml" href="spot it app icon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="spot-it-app-icon-v2-180.png">
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 <title>SPOT IT — Road Inspection Log</title>
@@ -1190,8 +1190,7 @@ button {
 <div class="top-shell">
   <header>
     <div class="header-brand">
-      <img class="header-logo" src="spotit-mark.svg" alt="">
-      <span class="header-wordmark" id="header-wordmark"><span class="header-brand-name">SPOT</span> <span class="header-brand-accent">IT</span></span>
+      <img class="header-logo" id="header-logo" src="spot it header logo dark mode.svg" alt="Spot It">
       <div class="header-context" id="header-map-context" hidden>
         <div class="map-title" id="map-km-station">KM --.---</div>
         <div class="map-status" id="map-status">Waiting for GPS location…</div>
@@ -2866,11 +2865,16 @@ function mountLogRegister(viewName){
    every other tab shows the wordmark. The elements themselves never move, so
    `updateOsmLocation()` and the station writers keep working untouched. */
 function syncHeaderContext(viewName){
-  const wordmark = document.getElementById('header-wordmark');
+  const logo = document.getElementById('header-logo');
   const context = document.getElementById('header-map-context');
-  if(!wordmark || !context) return;
+  if(!logo || !context) return;
   const isMap = viewName === 'map';
-  wordmark.hidden = isMap;
+  const isLight = document.documentElement.dataset.theme === 'light';
+  logo.src = isMap
+    ? (isLight ? 'spot it header map logo light mode.svg' : 'spot it header map logo dark mode.svg')
+    : (isLight ? 'spot it header logo light mode.svg' : 'spot it header logo dark mode.svg');
+  logo.dataset.logoContext = isMap ? 'map' : 'default';
+  logo.alt = isMap ? 'Spot It map' : 'Spot It';
   context.hidden = !isMap;
 }
 
@@ -4466,6 +4470,8 @@ function setTheme(theme){
   if(appearanceTile) appearanceTile.innerHTML = isLight ? SETTING_SUN_ICON : SETTING_MOON_ICON;
   const themeMeta = document.querySelector('meta[name="theme-color"]');
   if(themeMeta) themeMeta.content = isLight ? '#19384c' : '#07131f';
+  const activeView = document.querySelector('.app-tab-btn.active')?.dataset.appView || 'inspection';
+  syncHeaderContext(activeView);
   updateOsmBasemap();
 }
 

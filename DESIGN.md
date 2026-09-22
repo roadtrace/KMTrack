@@ -101,11 +101,10 @@ App.tsx` + `src/index.css`) rather than inferred from a screenshot: header
 `.btn .btn-ghost !min-h-9 !px-2` for the refresh. **Our `--ds-*` tokens already
 carry the reference's exact hsl values**, so none of it is hard-coded.
 
-The brand is the **mark plus a text wordmark** (`KM` in `--ds-fg`, `TRACK` in
-`--ds-primary`), matching the reference's `Brand`. The outlined lockups
-(`spotit-logo-on-dark.svg`, `-on-light.svg`) are unused by the shell now and
-exist only as brand assets.
-- **The map swaps the wordmark for its station and status in place.**
+The brand uses the supplied theme-aware Spot It header lockups. The shell
+selects the dark/light artwork for the current theme and swaps to the dedicated
+map lockup when the Map tab is active.
+- **The map places its station and status beside the dedicated map logo.**
   `#map-km-station` and `#map-status` were *moved* into the header rather than
   reimplemented, so `updateOsmLocation()` and the station writers keep working
   untouched. The map's own topbar is gone with it.
