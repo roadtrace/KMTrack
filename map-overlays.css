@@ -160,3 +160,8 @@ html[data-theme="light"] .leaflet-tooltip.map-landmark-label {
     width: max-content;
     max-width: 180px;
 }
+
+html[data-theme="light"] .map-entry-dot.is-selected { stroke: #1b2737; stroke-width: 4; filter: drop-shadow(0 0 4px #fff); }
+html[data-theme="light"] .map-entry-symbol.is-selected .map-entry-hit { box-shadow: inset 0 0 0 2px #1b2737, 0 0 0 3px #fff; }
+.map-cluster-anchor { background: none; border: 0; }
+.map-entry-cluster { width: 44px; height: 44px; display: grid; place-items: center; border: 3px solid #fff; border-radius: 50%; background: #1b2737; color: #fff; box-shadow: 0 3px 14px rgba(27,39,55,.3); font: 700 13px/1 var(--font-ui); cursor: pointer; }

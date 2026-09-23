@@ -3910,6 +3910,7 @@
       <div class="header-brand">
         <img class="header-logo" id="header-logo" src="spot it header logo dark mode.svg" alt="Spot It">
         <div class="header-context" id="header-map-context" hidden>
+          <div class="map-road-match" id="map-workspace-road">Road match unconfirmed</div>
           <div class="map-title" id="map-km-station">KM --.---</div>
           <div class="map-status" id="map-status">Waiting for GPS location…</div>
         </div>
@@ -4198,7 +4199,11 @@
 
   <section class="app-view map-view" id="map-view" role="tabpanel" aria-labelledby="map-tab" hidden>
     <div id="osm-map" aria-label="OpenStreetMap showing the current inspection location"></div>
+    <div class="map-workspace-gps" id="map-workspace-gps" role="status"><span class="map-workspace-gps-dot" aria-hidden="true"></span>GPS pending</div>
+    <label class="map-workspace-scope"><select id="map-record-scope" aria-label="Map record scope"><option value="">All records</option><option value="mine">My records</option><option value="imported">Team records</option></select></label>
+    <div class="map-visible-count" id="map-visible-count" role="status">0 visible</div>
     <div id="map-bound-legend" class="map-bound-legend" aria-label="Map legend"></div>
+    <details class="map-workspace-legend" id="map-workspace-legend"><summary>Legend<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="map-workspace-legend-body"><div class="map-workspace-legend-title">Defect types</div><div id="map-type-legend"></div><div class="map-workspace-legend-title">Marker colors · bound</div><div id="map-light-bound-legend" aria-label="Marker bound colors"></div></div></details>
     <div class="map-entry-controls" aria-label="Map entry display options">
       <div class="map-floating-actions" role="group" aria-label="Map controls">
         <button type="button" class="map-locate-btn" id="map-locate-btn" aria-label="Center map on current location"
@@ -4217,12 +4222,15 @@
       <details class="map-filter-menu" id="map-filter-menu">
         <summary aria-label="Map entry filters" title="Filter entries"><svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M4 5h16l-6 7v6l-4 2v-8z" />
-          </svg></summary>
+          </svg><span id="map-filter-count" class="map-filter-count" hidden>0</span></summary>
         <div class="map-filter-options">
+          <label class="map-light-filter-field"><input type="checkbox" id="map-light-show-entries" checked>Show records</label>
+          <label class="map-light-filter-field">From<input type="date" id="map-light-entry-from" aria-label="Map from date"></label>
+          <label class="map-light-filter-field">To<input type="date" id="map-light-entry-to" aria-label="Map to date"></label>
           <label><select id="map-entry-type" aria-label="Defect type">
               <option value="">All defects</option>
             </select></label>
-          <label>Source<select id="map-entry-source">
+          <label class="map-source-filter">Source<select id="map-entry-source">
               <option value="">All inspections</option>
               <option value="mine">My inspections</option>
               <option value="imported">Imported inspections</option>
@@ -5503,6 +5511,12 @@
     }
 
     function clearBasemaps() {
+      if (osmVectorLayer && osmMap) {
+        // The vendored MapTiler Leaflet plugin leaves its logo and attribution
+        // behind on removal; clear only those plugin-owned elements on a switch.
+        osmMap.attributionControl.removeAttribution('<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>');
+        osmMap.getContainer().querySelectorAll(':scope > a[href="https://www.maptiler.com"]').forEach(link => link.remove());
+      }
       if (syncVectorCamera && osmMap) {
         osmMap.off('move', syncVectorCamera);
         osmMap.off('zoom', syncVectorCamera);
@@ -5666,7 +5680,10 @@
 
     function openMapEntry(id) {
       const index = entries.findIndex(entry => entry.id === id);
-      if (index >= 0) openEditModal(index);
+      if (index >= 0) {
+        SPOTITMap.selectEntry(id);
+        openEditModal(index);
+      }
     }
 
     function updateMapEntries() {
@@ -5674,26 +5691,83 @@
       const from = document.getElementById('map-entry-from');
       const to = document.getElementById('map-entry-to');
       const type = document.getElementById('map-entry-type');
-      const mapFilterActive = Boolean(from.value || to.value || type.value || document.getElementById('map-entry-source').value || document.getElementById('map-entry-inspector').value || document.getElementById('map-entry-bound').value);
-      document.getElementById('map-filter-menu')?.classList?.toggle('filtered', mapFilterActive);
+      const filterCount = [from.value, to.value, type.value, document.getElementById('map-entry-inspector').value, document.getElementById('map-entry-bound').value].filter(Boolean).length + (show ? 0 : 1);
+      const badge = document.getElementById('map-filter-count');
+      badge.textContent = String(filterCount);
+      badge.hidden = filterCount === 0;
+      document.getElementById('map-filter-menu')?.classList?.toggle('filtered', filterCount > 0);
+      document.getElementById('map-light-show-entries').checked = show;
+      document.getElementById('map-light-entry-from').value = from.value;
+      document.getElementById('map-light-entry-to').value = to.value;
+      document.getElementById('map-record-scope').value = document.getElementById('map-entry-source').value;
       from.disabled = !show;
       to.disabled = !show;
+      document.getElementById('map-light-entry-from').disabled = !show;
+      document.getElementById('map-light-entry-to').disabled = !show;
       from.max = to.value;
       to.min = from.value;
       if (!osmMap) return;
       if (!osmEntryLayer) osmEntryLayer = L.layerGroup();
       osmEntryLayer.clearLayers();
-      if (!show) { osmEntryLayer.remove(); SPOTITMap.legend([], false); return; }
+      if (!show) { osmEntryLayer.remove(); SPOTITMap.legend([], false); updateMapWorkspaceCounts([]); return; }
       osmEntryLayer.addTo(osmMap);
       const visible = SPOTITEntryFilters.mapEntries(entries, from.value, to.value, type.value, document.getElementById('map-entry-source').value, document.getElementById('map-entry-inspector').value, document.getElementById('map-entry-bound').value);
       SPOTITMap.legend(visible, true);
+      updateMapWorkspaceCounts(visible);
       SPOTITMap.renderEntries(osmMap, osmEntryLayer, visible, openMapEntry, formatKmStation);
     }
+    function updateMapWorkspaceCounts(visible) {
+      document.getElementById('map-visible-count').textContent = `${visible.length} visible`;
+      const types = new Map();
+      visible.forEach(entry => types.set(entry.type || 'Other', (types.get(entry.type || 'Other') || 0) + 1));
+      const host = document.getElementById('map-type-legend');
+      host.replaceChildren();
+      const boundLegend = document.getElementById('map-light-bound-legend');
+      boundLegend.replaceChildren(...[...document.getElementById('map-bound-legend').children].map(item => item.cloneNode(true)));
+      if (!types.size) { host.textContent = 'No visible defects'; return; }
+      [...types].sort(([a], [b]) => a.localeCompare(b)).forEach(([name, count]) => {
+        const row = document.createElement('div');
+        row.className = 'map-type-legend-row';
+        const label = document.createElement('span'); label.textContent = name;
+        const total = document.createElement('strong'); total.textContent = String(count);
+        row.append(label, total); host.append(row);
+      });
+    }
+    function syncMapWorkspaceContext() {
+      const road = document.getElementById('segment-tag');
+      document.getElementById('map-workspace-road').textContent = road && !road.classList.contains('faroff') && road.textContent.includes(' · ')
+        ? road.textContent : 'Road match unconfirmed';
+      const gps = document.getElementById('map-workspace-gps');
+      const state = document.getElementById('gps-chip')?.dataset.state || 'pending';
+      gps.dataset.state = state;
+      gps.lastChild.textContent = state === 'fresh' ? 'GPS ready' : state === 'stale' ? 'GPS stale' : currentPos ? 'GPS held' : 'GPS pending';
+    }
+    for (const id of ['segment-tag', 'map-km-station', 'gps-chip']) {
+      const target = document.getElementById(id);
+      if (target) new MutationObserver(syncMapWorkspaceContext).observe(target, {subtree: true, childList: true, characterData: true, attributes: id !== 'map-km-station'});
+    }
+    syncMapWorkspaceContext();
     document.getElementById('map-show-entries').addEventListener('change', updateMapEntries);
     document.getElementById('map-entry-from').addEventListener('change', updateMapEntries);
     document.getElementById('map-entry-to').addEventListener('change', updateMapEntries);
     document.getElementById('map-entry-type').addEventListener('change', updateMapEntries);
     document.getElementById('map-entry-bound').addEventListener('change', updateMapEntries);
+    document.getElementById('map-entry-source').addEventListener('change', updateMapEntries);
+    document.getElementById('map-entry-inspector').addEventListener('change', updateMapEntries);
+    document.getElementById('map-record-scope').addEventListener('change', event => {
+      document.getElementById('map-entry-source').value = event.target.value;
+      updateMapEntries();
+    });
+    document.getElementById('map-light-show-entries').addEventListener('change', event => {
+      document.getElementById('map-show-entries').checked = event.target.checked;
+      updateMapEntries();
+    });
+    for (const [lightId, originalId] of [['map-light-entry-from', 'map-entry-from'], ['map-light-entry-to', 'map-entry-to']]) {
+      document.getElementById(lightId).addEventListener('change', event => {
+        document.getElementById(originalId).value = event.target.value;
+        updateMapEntries();
+      });
+    }
     document.addEventListener('click', event => {
       const menu = document.getElementById('map-filter-menu');
       if (!menu.contains(event.target)) menu.open = false;
@@ -8047,6 +8121,7 @@
 
     let editPhotoObjectUrl = null;
     async function renderEditPhotoPreview(entry) {
+      document.getElementById('edit-map-photo').textContent = entry?.photoId ? 'Photo attached' : 'No photo';
       const emptyEl = document.getElementById('edit-photo-empty');
       const imgEl = document.getElementById('edit-photo-thumb');
       const thumbWrap = document.getElementById('edit-photo-thumb-wrap');
@@ -8104,18 +8179,27 @@
       syncEditOtherIndicators();
       sizeEntryEditableControls();
       renderEditPhotoPreview(entry);
+      document.getElementById('edit-map-station').textContent = `${entry.km == null ? 'KM n/a' : `KM ${formatKmStation(entry.km)}`} · ${entry.bound || 'bound unset'}`;
+      document.getElementById('edit-map-lane').textContent = `Lane ${entry.lane || 'unset'}`;
+      document.getElementById('edit-map-inspector').textContent = entry.inspector || 'Inspector unrecorded';
+      document.getElementById('edit-map-photo').textContent = entry.photoId ? 'Photo attached' : 'No photo';
       document.getElementById('edit-entry-date').textContent = entry.timestamp || 'Inspection entry';
       document.getElementById('edit-entry-gps').textContent = entry.lat != null && entry.lon != null && Number.isFinite(Number(entry.lat)) && Number.isFinite(Number(entry.lon))
         ? `${Number(entry.lat).toFixed(7)}, ${Number(entry.lon).toFixed(7)}` : 'No GPS fix captured';
       document.getElementById('edit-entry-inspector').textContent = entry.inspector || 'Not recorded';
       const modal = document.getElementById('edit-modal');
-      modal.classList.toggle('from-map', document.querySelector('.app-tab-btn.active')?.dataset.appView === 'map');
+      const fromMap = document.querySelector('.app-tab-btn.active')?.dataset.appView === 'map';
+      modal.classList.toggle('from-map', fromMap);
+      modal.classList.toggle('map-compact', fromMap && document.documentElement.dataset.theme === 'light');
+      document.getElementById('edit-sheet-expand').setAttribute('aria-expanded', modal.classList.contains('map-compact') ? 'false' : 'true');
       modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
       SPOTITMap.focusEditor();
     }
     function closeEditModal() {
       const modal = document.getElementById('edit-modal');
       modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true');
+      if (modal.classList.contains('from-map')) SPOTITMap.selectEntry(null);
+      modal.classList.remove('map-compact');
       editingEntryIndex = null;
     }
 
@@ -8177,6 +8261,23 @@
       });
 
       document.getElementById('edit-close').addEventListener('click', closeEditModal);
+      document.getElementById('edit-sheet-expand').addEventListener('click', () => {
+        const modal = document.getElementById('edit-modal');
+        const compact = modal.classList.toggle('map-compact');
+        document.getElementById('edit-sheet-expand').setAttribute('aria-expanded', compact ? 'false' : 'true');
+      });
+      const sheetHandle = document.querySelector('#edit-modal .entry-sheet-handle');
+      let handleStartY = null;
+      sheetHandle.addEventListener('pointerdown', event => { handleStartY = event.clientY; });
+      sheetHandle.addEventListener('pointerup', event => {
+        if (handleStartY === null || !document.getElementById('edit-modal').classList.contains('from-map')) return;
+        const distance = event.clientY - handleStartY;
+        handleStartY = null;
+        if (Math.abs(distance) < 30) return;
+        const compact = distance > 0;
+        document.getElementById('edit-modal').classList.toggle('map-compact', compact);
+        document.getElementById('edit-sheet-expand').setAttribute('aria-expanded', compact ? 'false' : 'true');
+      });
       document.getElementById('edit-delete').addEventListener('click', () => {
         if (editingEntryIndex === null) return;
         if (!confirm('Delete this inspection entry?')) return;
@@ -8593,6 +8694,7 @@
             <h3 id="edit-modal-title"><span class="entry-editable"><select id="edit-defect-select" class="edit-select" aria-label="Defect type"></select><svg class="entry-edit-pencil" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></h3></div>
           <button type="button" class="entry-sheet-close" id="edit-close" aria-label="Close entry details"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
         </div>
+        <div class="entry-map-summary"><strong id="edit-map-station"></strong><span id="edit-map-lane"></span><span id="edit-map-inspector"></span><span id="edit-map-photo"></span><button type="button" id="edit-sheet-expand" aria-expanded="true">Details<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button></div>
         <div class="entry-sheet-grid">
           <div class="entry-sheet-field"><label for="edit-expressway-select"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="19" r="2"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="17" cy="5" r="2"/></svg>Segment / Expressway</label><span class="entry-editable"><select id="edit-expressway-select" class="edit-select"></select><svg class="entry-edit-pencil" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span><span class="entry-editable entry-editable-other"><input id="edit-expressway-others-input" type="text" class="edit-others-input" aria-label="Specify expressway or segment" placeholder="Specify segment" style="display:none;"><svg class="entry-edit-pencil" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></span></div>
           <div class="entry-sheet-field"><label for="edit-km-input"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>KM Station</label><span class="entry-editable"><input id="edit-km-input" type="text" inputmode="decimal" placeholder="Off-network"><svg class="entry-edit-pencil" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></span></div>

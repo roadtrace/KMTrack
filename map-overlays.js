@@ -5,6 +5,13 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
   const BOUNDS={NB:'#00b9f2',SB:'#ef4444',EB:'#f4b400',WB:'#b18cff',Other:'#a7b0b8'};
+  let selectedEntryId=null;
+  let entryDots=[];
+  function selectEntry(id){
+    selectedEntryId=id;
+    entryDots.forEach(({entryId,marker})=>marker.getElement()?.classList.toggle('is-selected',entryId===id));
+    document.querySelectorAll('.map-entry-symbol').forEach(host=>host.classList.toggle('is-selected',host.dataset.entryId===id));
+  }
   function boundKey(value){
     const key=String(value||'').trim().toUpperCase().replace(/[\s_-]/g,'');
     return ({NB:'NB',NORTHBOUND:'NB',SB:'SB',SOUTHBOUND:'SB',EB:'EB',EASTBOUND:'EB',WB:'WB',WESTBOUND:'WB'})[key]||'Other';
@@ -61,6 +68,8 @@
   }
   function renderEntries(map,layer,rows,onOpen,formatKm){
     const L=globalThis.L,size=map.getSize(),occupied=[];
+    const light=document.documentElement.dataset.theme==='light';
+    entryDots=[];
     const mapRect=map.getContainer().getBoundingClientRect();
     for(const selector of ['.map-topbar','#map-bound-legend','.map-entry-controls']){
       const control=document.querySelector(selector);if(!control)continue;
@@ -68,21 +77,47 @@
       if(rect.width&&rect.height)occupied.push({x:rect.left-mapRect.left,y:rect.top-mapRect.top,w:rect.width,h:rect.height});
     }
     const sorted=rows.map(entry=>{const p=map.latLngToContainerPoint([entry.lat,entry.lon]);return {entry,x:p.x,y:p.y};}).sort((a,b)=>a.y-b.y);
+    const clusteredIds=new Set();
+    if(light && map.getZoom()<=14){
+      const cells=new Map();
+      sorted.filter(({x,y})=>x>=0&&x<=size.x&&y>=0&&y<=size.y).forEach(point=>{
+        const key=`${Math.floor(point.x/56)}:${Math.floor(point.y/56)}`;
+        if(!cells.has(key))cells.set(key,[]);
+        cells.get(key).push(point.entry);
+      });
+      cells.forEach(group=>{
+        if(group.length<2)return;
+        group.forEach(entry=>clusteredIds.add(entry.id));
+        const center=[group.reduce((sum,e)=>sum+e.lat,0)/group.length,group.reduce((sum,e)=>sum+e.lon,0)/group.length];
+        const host=element('button','map-entry-cluster',String(group.length));
+        host.type='button';host.setAttribute('aria-label',`${group.length} inspection entries. Zoom in to see each marker.`);
+        host.onclick=()=>{
+          map.fitBounds(group.map(e=>[e.lat,e.lon]),{maxZoom:16,padding:[44,44],animate:false});
+          if(map.getZoom()<=14)map.setView(center,15,{animate:false});
+        };
+        L.DomEvent.disableClickPropagation(host);L.DomEvent.disableScrollPropagation(host);
+        L.marker(center,{icon:L.divIcon({html:host,className:'map-cluster-anchor',iconSize:[44,44],iconAnchor:[22,22]}),keyboard:false,zIndexOffset:180}).addTo(layer);
+      });
+    }
     sorted.forEach(({entry})=>{
+      if(clusteredIds.has(entry.id))return;
       const point=[entry.lat,entry.lon],key=boundKey(entry.bound),color=BOUNDS[key];
       const screen=map.latLngToContainerPoint(point);
       if(screen.x < 0 || screen.x > size.x || screen.y < 0 || screen.y > size.y) return;
       const station=Number.isFinite(entry.km)?formatKm(entry.km):'KM n/a';
       const description=`${entry.type||'Inspection'}, ${station}, ${entry.bound||'bound not set'}, lane ${entry.lane||'not set'}`;
       const open=()=>onOpen(entry.id);
-      L.circleMarker(point,{radius:5,color,weight:1.5,fillColor:color,fillOpacity:1,interactive:true}).addTo(layer).on('click',open);
-      const host=element('div','map-entry-symbol');host.style.setProperty('--bound-color',color);
+      const marker=L.circleMarker(point,{radius:light?8:5,color,weight:light?2:1.5,fillColor:color,fillOpacity:1,interactive:true,className:'map-entry-dot'}).addTo(layer).on('click',open);
+      entryDots.push({entryId:entry.id,marker});
+      if(entry.id===selectedEntryId)marker.getElement()?.classList.add('is-selected');
+      const host=element('div','map-entry-symbol');host.style.setProperty('--bound-color',color);host.dataset.entryId=entry.id;
+      if(entry.id===selectedEntryId)host.classList.add('is-selected');
       const dot=element('button','map-entry-hit');dot.type='button';dot.setAttribute('aria-label',description);dot.onclick=event=>{
         if(!event.detail){open();return;}
         const point=map.mouseEventToContainerPoint(event);
         const closest=nearestEntry(sorted,point.x,point.y);if(closest)onOpen(closest.id);
       };
-      const placement=labelPlacement(screen,size,occupied,key==='SB'||key==='WB');
+      const placement=light?null:labelPlacement(screen,size,occupied,key==='SB'||key==='WB');
       host.append(dot);
       if(placement){
         occupied.push({...placement,w:70,h:28});
@@ -128,5 +163,5 @@
     });
     observer.observe(modal,{attributes:true,attributeFilter:['aria-hidden']});controls()[0]?.focus();
   }
-  return {BOUNDS,boundKey,landmarks,landmarkTitle,nearestEntry,labelPlacement,legend,renderEntries,renderLandmarks,focusEditor};
+  return {BOUNDS,boundKey,landmarks,landmarkTitle,nearestEntry,labelPlacement,legend,renderEntries,renderLandmarks,focusEditor,selectEntry};
 });
