@@ -3957,8 +3957,6 @@
             <p class="sync-note" id="sync-note"></p>
           </div>
         </details>
-        <button type="button" class="header-refresh" id="net-refresh" aria-label="Reload app"
-          title="Reload app"></button>
       </div>
     </header>
   </div>
@@ -4199,7 +4197,6 @@
 
   <section class="app-view map-view" id="map-view" role="tabpanel" aria-labelledby="map-tab" hidden>
     <div id="osm-map" aria-label="OpenStreetMap showing the current inspection location"></div>
-    <div class="map-workspace-gps" id="map-workspace-gps" role="status"><span class="map-workspace-gps-dot" aria-hidden="true"></span>GPS pending</div>
     <label class="map-workspace-scope"><select id="map-record-scope" aria-label="Map record scope"><option value="">All records</option><option value="mine">My records</option><option value="imported">Team records</option></select></label>
     <div class="map-visible-count" id="map-visible-count" role="status">0 visible</div>
     <div id="map-bound-legend" class="map-bound-legend" aria-label="Map legend"></div>
@@ -4778,7 +4775,8 @@
     /* Reload only — the recovery action, kept separate from syncing. Flushes the
      * queue first so an in-flight upload is not cut off by the navigation. */
     async function reloadApp() {
-      const button = document.getElementById('net-refresh');
+      if (hasUnsavedReloadWork() && !confirm('Reload app? Unsaved entry edits or camera work will be lost.')) return;
+      const button = document.getElementById('reload-app-btn');
       if (button) button.disabled = true;
       try {
         const result = await syncQueue.drain(entries);
@@ -4794,7 +4792,6 @@
 
     window.addEventListener('online', updateNetStatus);
     window.addEventListener('offline', updateNetStatus);
-    document.getElementById('net-refresh').addEventListener('click', reloadApp);
     document.getElementById('sync-now-btn').addEventListener('click', syncNow);
     document.getElementById('reload-app-btn').addEventListener('click', reloadApp);
     /* Choosing an action closes the panel, and so does tapping away from it. */
@@ -5737,15 +5734,8 @@
       const road = document.getElementById('segment-tag');
       document.getElementById('map-workspace-road').textContent = road && !road.classList.contains('faroff') && road.textContent.includes(' · ')
         ? road.textContent : 'Road match unconfirmed';
-      const gps = document.getElementById('map-workspace-gps');
-      const state = document.getElementById('gps-chip')?.dataset.state || 'pending';
-      gps.dataset.state = state;
-      gps.lastChild.textContent = state === 'fresh' ? 'GPS ready' : state === 'stale' ? 'GPS stale' : currentPos ? 'GPS held' : 'GPS pending';
     }
-    for (const id of ['segment-tag', 'map-km-station', 'gps-chip']) {
-      const target = document.getElementById(id);
-      if (target) new MutationObserver(syncMapWorkspaceContext).observe(target, {subtree: true, childList: true, characterData: true, attributes: id !== 'map-km-station'});
-    }
+    new MutationObserver(syncMapWorkspaceContext).observe(document.getElementById('segment-tag'), {subtree: true, childList: true, characterData: true, attributes: true});
     syncMapWorkspaceContext();
     document.getElementById('map-show-entries').addEventListener('change', updateMapEntries);
     document.getElementById('map-entry-from').addEventListener('change', updateMapEntries);
@@ -7928,6 +7918,17 @@
     const LANE_PRESETS = ['1', '2', '3', '4', 'Acce', 'Dece', 'Shoulder', 'Interchange', 'Ramp', 'Others'];
 
     let editingEntryIndex = null;
+    let editModalInitialState = null;
+
+    function entryEditDraftState() {
+      return JSON.stringify([...document.querySelectorAll('#edit-modal .entry-sheet-field :is(select, input), #edit-defect-select')]
+        .map(control => [control.id, control.value]));
+    }
+
+    function hasUnsavedReloadWork() {
+      return (document.getElementById('edit-modal').classList.contains('open') && editModalInitialState !== entryEditDraftState())
+        || document.getElementById('camera-modal').classList.contains('show');
+    }
 
     function syncEditOtherIndicators() {
       for (const id of ['edit-expressway-others-input', 'edit-bound-others-input', 'edit-lane-others-input']) {
@@ -8193,6 +8194,7 @@
       modal.classList.toggle('map-compact', fromMap && document.documentElement.dataset.theme === 'light');
       document.getElementById('edit-sheet-expand').setAttribute('aria-expanded', modal.classList.contains('map-compact') ? 'false' : 'true');
       modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
+      editModalInitialState = entryEditDraftState();
       SPOTITMap.focusEditor();
     }
     function closeEditModal() {
@@ -8201,6 +8203,7 @@
       if (modal.classList.contains('from-map')) SPOTITMap.selectEntry(null);
       modal.classList.remove('map-compact');
       editingEntryIndex = null;
+      editModalInitialState = null;
     }
 
     // The modal markup sits after the main script, so bind everything after the
