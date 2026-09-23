@@ -5666,7 +5666,7 @@
 
     function openMapEntry(id) {
       const index = entries.findIndex(entry => entry.id === id);
-      if (index >= 0) { openEditModal(index); SPOTITMap.focusEditor(); }
+      if (index >= 0) openEditModal(index);
     }
 
     function updateMapEntries() {
@@ -8075,17 +8075,23 @@
     }
 
     function openEditModal(index) {
-      editingEntryIndex = index;
       const entry = entries[index];
       if (!entry) return;
+      editingEntryIndex = index;
       populateDefectSelect(entry.type);
       populateLaneSelect(entry.lane || '');
       document.getElementById('edit-km-input').value = (entry.km !== null && entry.km !== undefined) ? formatKmStation(entry.km) : '';
       populateEditExpresswaySelect(entry.expressway || '');
       populateEditBoundSelect(entry.bound || '');
       renderEditPhotoPreview(entry);
+      document.getElementById('edit-entry-date').textContent = entry.timestamp || 'Inspection entry';
+      document.getElementById('edit-entry-gps').textContent = entry.lat != null && entry.lon != null && Number.isFinite(Number(entry.lat)) && Number.isFinite(Number(entry.lon))
+        ? `${Number(entry.lat).toFixed(7)}, ${Number(entry.lon).toFixed(7)}` : 'No GPS fix captured';
+      document.getElementById('edit-entry-inspector').textContent = entry.inspector || 'Not recorded';
       const modal = document.getElementById('edit-modal');
+      modal.classList.toggle('from-map', document.querySelector('.app-tab-btn.active')?.dataset.appView === 'map');
       modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
+      SPOTITMap.focusEditor();
     }
     function closeEditModal() {
       const modal = document.getElementById('edit-modal');
@@ -8133,6 +8139,14 @@
       });
 
       document.getElementById('edit-cancel').addEventListener('click', closeEditModal);
+      document.getElementById('edit-close').addEventListener('click', closeEditModal);
+      document.getElementById('edit-delete').addEventListener('click', () => {
+        if (editingEntryIndex === null) return;
+        if (!confirm('Delete this inspection entry?')) return;
+        const index = editingEntryIndex;
+        closeEditModal();
+        deletionController.remove(index, true);
+      });
       document.getElementById('edit-save').addEventListener('click', () => {
         if (editingEntryIndex === null) return;
         const kmResult = parseKmInput(document.getElementById('edit-km-input').value);
@@ -8534,38 +8548,30 @@
   </div>
 
   <div id="edit-modal" class="modal-backdrop" aria-hidden="true">
-    <div class="lane-modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
-      <h3 id="edit-modal-title">✎ Edit values</h3>
-      <label class="edit-field-label">Defect:</label>
-      <select id="edit-defect-select" class="edit-select"></select>
-      <label class="edit-field-label">Lane:</label>
-      <select id="edit-lane-select" class="edit-select"></select>
-      <input id="edit-lane-others-input" type="text" class="edit-others-input" placeholder="Specify lane"
-        style="display:none;">
-      <label class="edit-field-label">KM Station:</label>
-      <input id="edit-km-input" type="text" inputmode="decimal" placeholder="e.g. 8+200 — leave blank for off-network">
-      <label class="edit-field-label">Segment / Expressway:</label>
-      <select id="edit-expressway-select" class="edit-select"></select>
-      <input id="edit-expressway-others-input" type="text" class="edit-others-input"
-        placeholder="Specify expressway/segment" style="display:none;">
-      <label class="edit-field-label">Bound:</label>
-      <select id="edit-bound-select" class="edit-select"></select>
-      <input id="edit-bound-others-input" type="text" class="edit-others-input" placeholder="Specify direction"
-        style="display:none;">
-      <label class="edit-field-label">Photo:</label>
-      <div class="edit-photo-row">
-        <div class="edit-photo-thumb-wrap" id="edit-photo-thumb-wrap">
-          <div class="edit-photo-empty" id="edit-photo-empty">No photo attached</div>
-          <img id="edit-photo-thumb" alt="Entry photo" style="display:none;">
+    <div class="lane-modal entry-sheet" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+      <div class="entry-sheet-handle" aria-hidden="true"></div>
+      <div class="entry-sheet-scroll">
+        <div class="entry-sheet-header">
+          <div><span class="entry-sheet-eyebrow">Inspection entry · <span id="edit-entry-date"></span></span>
+            <h3 id="edit-modal-title">Entry details</h3></div>
+          <button type="button" class="entry-sheet-close" id="edit-close" aria-label="Close entry details">×</button>
         </div>
-        <div class="edit-photo-actions">
-          <button type="button" class="edit-photo-add-btn" id="edit-photo-add-btn">Add / Change Photo</button>
-          <button type="button" class="edit-photo-remove-btn" id="edit-photo-remove-btn" style="display:none;">Remove
-            Photo</button>
+        <p class="entry-sheet-hint">Tap a highlighted value to change it.</p>
+        <div class="entry-sheet-grid">
+          <div class="entry-sheet-field entry-sheet-wide"><label for="edit-defect-select">Defect</label><select id="edit-defect-select" class="edit-select"></select></div>
+          <div class="entry-sheet-field"><label for="edit-expressway-select">Segment / Expressway</label><select id="edit-expressway-select" class="edit-select"></select><input id="edit-expressway-others-input" type="text" class="edit-others-input" aria-label="Specify expressway or segment" placeholder="Specify segment" style="display:none;"></div>
+          <div class="entry-sheet-field"><label for="edit-km-input">KM Station</label><input id="edit-km-input" type="text" inputmode="decimal" placeholder="Off-network"></div>
+          <div class="entry-sheet-field"><label for="edit-bound-select">Bound</label><select id="edit-bound-select" class="edit-select"></select><input id="edit-bound-others-input" type="text" class="edit-others-input" aria-label="Specify direction" placeholder="Specify direction" style="display:none;"></div>
+          <div class="entry-sheet-field"><label for="edit-lane-select">Lane / Position</label><select id="edit-lane-select" class="edit-select"></select><input id="edit-lane-others-input" type="text" class="edit-others-input" aria-label="Specify lane" placeholder="Specify lane" style="display:none;"></div>
+        </div>
+        <div class="entry-sheet-meta"><span>Exact GPS</span><strong id="edit-entry-gps"></strong><span>Inspector</span><strong id="edit-entry-inspector"></strong></div>
+        <div class="entry-sheet-photo"><span class="entry-sheet-eyebrow">Photo evidence</span>
+          <div class="edit-photo-row"><div class="edit-photo-thumb-wrap" id="edit-photo-thumb-wrap"><div class="edit-photo-empty" id="edit-photo-empty">No photo attached</div><img id="edit-photo-thumb" alt="Entry photo" style="display:none;"></div>
+            <div class="edit-photo-actions"><button type="button" class="edit-photo-add-btn" id="edit-photo-add-btn">Add / Change Photo</button><button type="button" class="edit-photo-remove-btn" id="edit-photo-remove-btn" style="display:none;">Remove Photo</button></div>
+          </div>
         </div>
       </div>
-      <div class="modal-actions"><button type="button" class="lane-cancel" id="edit-cancel">Cancel</button><button
-          type="button" class="lane-save" id="edit-save">Save</button></div>
+      <div class="modal-actions entry-sheet-actions"><button type="button" id="edit-delete">Delete</button><button type="button" class="lane-cancel" id="edit-cancel">Cancel</button><button type="button" class="lane-save" id="edit-save">Save</button></div>
     </div>
   </div>
 
