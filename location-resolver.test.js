@@ -33,12 +33,33 @@ test('actual Smart Connect calibration traces remain on their respective stacked
   }
 });
 
-test('consistent movement through an interchange can switch to the connected corridor',()=>{
+test('a locked interchange exits only after sustained travel away on an outgoing corridor',()=>{
   const resolver=createResolver();
   for(let i=0;i<3;i++) resolver.resolve({lat:14.69+i*.0001,lon:121,accuracy:8,timestamp:i*1000,candidates:[row('NLEX',.005,10+i*.01),row('C3-SEG 8.1',.09,15)],interchange});
   let result;
-  for(let i=3;i<8;i++) result=resolver.resolve({lat:14.6903+(i-3)*.0002,lon:121,accuracy:8,timestamp:i*1000,candidates:[row('C3-SEG 8.1',.008,15+i*.02,'EB'),row('NLEX',.09,10.03)],interchange});
+  for(let i=3;i<8;i++){
+    result=resolver.resolve({lat:14.6903+(i-3)*.0002,lon:121,accuracy:8,timestamp:i*1000,candidates:[row('C3-SEG 8.1',.008,15+i*.02,'EB'),row('NLEX',.09,10.03)],interchange});
+    assert.equal(result.confirmedCorridor,'NLEX');
+    assert.equal(isInterchangeMode(result,8),true);
+  }
+  for(let i=8;i<20;i++) result=resolver.resolve({lat:14.6913+(i-8)*.0002,lon:121,accuracy:8,timestamp:i*1000,candidates:[row('C3-SEG 8.1',.008,15+i*.02,'EB'),row('NLEX',.09,10.03)]});
   assert.equal(result.confirmedCorridor,'C3-SEG 8.1');assert.equal(result.result.expressway,'C3-SEG 8.1');
+  assert.equal(result.interchangeLocked,false);
+  assert.equal(result.interchange,null);
+});
+
+test('crossing corridor, short GPS gaps, and a return to another ramp keep any interchange locked',()=>{
+  const site={site_id:'generic_exit',name:'Generic Exit'};
+  const resolver=createResolver();let result;
+  for(let i=0;i<3;i++) result=resolver.resolve({lat:15+i*.0001,lon:120.7,accuracy:8,timestamp:i*1000,candidates:[row('NLEX',.005,80),row('OTHER',.09,20)],interchange:site});
+  result=resolver.resolve({lat:15.0003,lon:120.7,accuracy:8,timestamp:3000,candidates:[row('OTHER',.005,20),row('NLEX',.09,80)],interchange:site});
+  assert.equal(result.interchangeLocked,true);
+  for(let i=4;i<9;i++) result=resolver.resolve({lat:15.0003+(i-3)*.0001,lon:120.7,accuracy:80,timestamp:i*1000,candidates:[row('OTHER',.005,20),row('NLEX',.09,80)]});
+  assert.equal(result.interchange.name,site.name);
+  result=resolver.resolve({lat:15.001,lon:120.7,accuracy:8,timestamp:9000,candidates:[row('OTHER',.005,20),row('NLEX',.09,80)],interchange:site});
+  assert.equal(result.interchangeLocked,true);
+  assert.equal(result.confirmedCorridor,'NLEX');
+  assert.equal(isInterchangeMode(result,8),true);
 });
 
 test('a closer crossing road cannot switch the confirmed corridor without a connection',()=>{

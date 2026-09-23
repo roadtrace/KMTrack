@@ -18,8 +18,8 @@
   }
 
   function isInterchangeMode(resolution,accuracyMeters){
-    return !!(resolution?.confirmed&&resolution.interchange&&resolution.result
-      &&resolution.result.distance>corridorDepartureThresholdKm(accuracyMeters));
+    return !!(resolution?.interchangeLocked||(resolution?.confirmed&&resolution.interchange&&resolution.result
+      &&resolution.result.distance>corridorDepartureThresholdKm(accuracyMeters)));
   }
 
   function createResolver(options={}){
@@ -31,7 +31,7 @@
     const interchangeHoldMs=options.interchangeHoldMs||30000;
     const interchangeExitKm=options.interchangeExitKm||0.15;
     let confirmedCorridor='',startup=null,pendingSwitch=null,lastFix=null,lastOutput=null;
-    let confirmedInterchange=null,interchangePending=null;
+    let confirmedInterchange=null,interchangePending=null,interchangeLocked=false,exitPending=null;
 
     function normalizedInterchange(match){
       if(!match) return null;
@@ -45,6 +45,10 @@
 
     function updateInterchange(match,fix,time){
       const found=normalizedInterchange(match);
+      if(interchangeLocked&&found&&found.siteId!==confirmedInterchange?.siteId) return {
+        siteId:confirmedInterchange.siteId,name:confirmedInterchange.name,
+        segment:confirmedInterchange.segment||'',segmentId:confirmedInterchange.segmentId||''
+      };
       if(found){
         if(confirmedInterchange&&confirmedInterchange.siteId===found.siteId){
           confirmedInterchange={...found,lastSeenAt:time,lastSeenFix:fix};interchangePending=null;
@@ -54,7 +58,7 @@
             confirmedInterchange={...found,lastSeenAt:time,lastSeenFix:fix};interchangePending=null;
           }
         }else interchangePending={...found,count:1};
-      }else if(confirmedInterchange){
+      }else if(confirmedInterchange&&!interchangeLocked){
         const elapsed=time-confirmedInterchange.lastSeenAt;
         const moved=distanceKm(confirmedInterchange.lastSeenFix,fix);
         if(elapsed>interchangeHoldMs&&moved>interchangeExitKm) confirmedInterchange=null;
@@ -83,6 +87,33 @@
       const stepIsPlausible=plausibleStep(fix,time,input.accuracy,input.speed);
       const best=candidates[0]||null;
 
+      // Once on a ramp, proximity to a crossing road is only exit evidence.
+      // The same site's geometry, including another loop or approach, resets it.
+      if(!interchangeLocked&&confirmedInterchange&&confirmedCorridor){
+        const current=candidates.find(row=>row.expressway===confirmedCorridor);
+        if(current&&current.distance>corridorDepartureThresholdKm(input.accuracy)) interchangeLocked=true;
+      }
+      if(interchangeLocked){
+        const sameSite=normalizedInterchange(input.interchange)?.siteId===confirmedInterchange?.siteId;
+        const accurate=Number.isFinite(input.accuracy)&&input.accuracy<=40;
+        const outgoing=best&&best.distance<=0.06?best:null;
+        const away=confirmedInterchange&&distanceKm(confirmedInterchange.lastSeenFix,fix)>=interchangeExitKm;
+        if(sameSite||!accurate||!stepIsPlausible||!outgoing||!away){
+          exitPending=null;
+        }else if(exitPending&&exitPending.corridor===outgoing.expressway){
+          exitPending.count++;
+        }else{
+          exitPending={corridor:outgoing.expressway,count:1,startedAt:time,startFix:fix};
+        }
+        if(exitPending&&exitPending.count>=switchFixes
+          &&time-exitPending.startedAt>=Math.max(switchElapsedMs,5000)
+          &&distanceKm(exitPending.startFix,fix)>=switchMovementKm){
+          confirmedCorridor=exitPending.corridor;
+          confirmedInterchange=null;interchangePending=null;
+          interchangeLocked=false;exitPending=null;pendingSwitch=null;startup=null;
+        }
+      }
+
       if(!confirmedCorridor){
         if(best){
           if(startup&&startup.corridor===best.expressway) startup.count++;
@@ -91,7 +122,7 @@
           const ambiguous=!!second&&second.distance-best.distance<0.025;
           if(stepIsPlausible&&startup.count>=(ambiguous?ambiguousStartupFixes:startupFixes)) confirmedCorridor=best.expressway;
         }
-      }else{
+      }else if(!interchangeLocked){
         const current=candidates.find(row=>row.expressway===confirmedCorridor)||null;
         const alternative=candidates.find(row=>row.expressway!==confirmedCorridor)||null;
         const advantage=current&&alternative?current.distance-alternative.distance:Infinity;
@@ -121,7 +152,11 @@
       lastFix={...fix,time};
       lastOutput={result,confirmed,confirmedCorridor,uncertain,
         reason:!confirmed?'Confirming road':pendingSwitch?'Confirming connection':!stepIsPlausible?'Ignoring implausible GPS movement':competitive?'Overlapping roads nearby':'',
-        interchange,saveAllowed:confirmed&&!!result,fresh:true};
+        interchange:interchangeLocked?{
+          siteId:confirmedInterchange.siteId,name:confirmedInterchange.name,
+          segment:confirmedInterchange.segment||'',segmentId:confirmedInterchange.segmentId||''
+        }:interchangeLocked===false&&confirmedInterchange===null?null:interchange,
+        interchangeLocked,saveAllowed:confirmed&&!!result,fresh:true};
       return lastOutput;
     }
 

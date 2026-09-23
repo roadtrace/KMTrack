@@ -5058,16 +5058,21 @@
     }
 
     // Returns the nearest ramp within rampMatchRadiusKm, or null if nothing's close enough.
-    function nearestRamp(lat, lon) {
+    function nearestRamp(lat, lon, preferredSiteId = '') {
       if (!rampPointIndex.length) return null;
-      let candidates = [];
-      for (const r of [1, 2, 4, 8]) { candidates = nearbyRampIndices(lat, lon, r); if (candidates.length) break; }
+      const candidates = nearbyRampIndices(lat, lon, 2);
       if (!candidates.length) return null;
-      let bestIdx = -1, bestDist = Infinity;
+      let bestIdx = -1, bestDist = Infinity, preferredIdx = -1, preferredDist = Infinity;
       for (const i of candidates) {
         const p = rampPointIndex[i];
         const d = haversineKm(lat, lon, p.lat, p.lon);
         if (d < bestDist) { bestDist = d; bestIdx = i; }
+        if (preferredSiteId && rampData[p.rampIdx].site_id === preferredSiteId && d < preferredDist) {
+          preferredDist = d; preferredIdx = i;
+        }
+      }
+      if (preferredIdx >= 0 && preferredDist <= rampMatchRadiusKm) {
+        bestIdx = preferredIdx; bestDist = preferredDist;
       }
       if (bestIdx < 0 || bestDist > rampMatchRadiusKm) return null;
       const ramp = rampData[rampPointIndex[bestIdx].rampIdx];
@@ -5927,7 +5932,7 @@
       currentResolvedLocation = locationResolver.resolve({
         lat: currentPos.lat, lon: currentPos.lon, accuracy: currentPos.acc, timestamp: currentPos.timestamp,
         speed: speedMs, candidates: computeCorridorCandidates(currentPos.lat, currentPos.lon),
-        interchange: nearestRamp(currentPos.lat, currentPos.lon)
+        interchange: nearestRamp(currentPos.lat, currentPos.lon, locationResolver.state().interchange?.siteId)
       });
       setGpsCaptureReady(resolvedLocationCanSave());
       return currentResolvedLocation;
