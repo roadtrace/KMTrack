@@ -113,7 +113,7 @@
     const modal=document.getElementById('edit-modal'),previous=document.activeElement;
     const controls=()=>[...modal.querySelectorAll('button,input,select,[tabindex]')].filter(e=>!e.disabled && e.tabIndex>=0 && e.getClientRects().length);
     const handle=event=>{
-      if(event.key==='Escape'){event.preventDefault();document.getElementById('edit-cancel').click();}
+      if(event.key==='Escape'){event.preventDefault();document.getElementById('edit-close').click();}
       if(event.key==='Tab'){
         const items=controls(),first=items[0],last=items[items.length-1];
         if(event.shiftKey && (document.activeElement===first || !modal.contains(document.activeElement))){event.preventDefault();last?.focus();}

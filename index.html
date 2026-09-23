@@ -7855,6 +7855,21 @@
 
     let editingEntryIndex = null;
 
+    function syncEditOtherIndicators() {
+      for (const id of ['edit-expressway-others-input', 'edit-bound-others-input', 'edit-lane-others-input']) {
+        const input = document.getElementById(id);
+        input.parentElement.style.display = input.style.display === 'none' ? 'none' : 'block';
+      }
+    }
+
+    function sizeEntryEditableControls() {
+      document.querySelectorAll('#edit-modal .entry-sheet-field .entry-editable :is(select, input)').forEach(control => {
+        if (control.style.display === 'none') return;
+        const label = control.tagName === 'SELECT' ? control.selectedOptions[0]?.textContent : (control.value || control.placeholder);
+        control.style.width = `${Math.min(Math.max((label || '').length + 3, 7), 30)}ch`;
+      });
+    }
+
     function populateDefectSelect(currentValue) {
       const sel = document.getElementById('edit-defect-select');
       sel.innerHTML = '';
@@ -8036,7 +8051,7 @@
       const imgEl = document.getElementById('edit-photo-thumb');
       const thumbWrap = document.getElementById('edit-photo-thumb-wrap');
       const removeBtn = document.getElementById('edit-photo-remove-btn');
-      const addBtn = document.getElementById('edit-photo-add-btn');
+      const addBtn = document.getElementById('edit-photo-add-label');
 
       if (editPhotoObjectUrl) { URL.revokeObjectURL(editPhotoObjectUrl); editPhotoObjectUrl = null; }
 
@@ -8079,10 +8094,15 @@
       if (!entry) return;
       editingEntryIndex = index;
       populateDefectSelect(entry.type);
+      const defectTitle = document.getElementById('edit-defect-select');
+      defectTitle.style.width = `${Math.min(Math.max(defectTitle.value.length + 2, 10), 32)}ch`;
+      document.getElementById('edit-modal-title').classList.toggle('long-title', defectTitle.value.length > 24);
       populateLaneSelect(entry.lane || '');
       document.getElementById('edit-km-input').value = (entry.km !== null && entry.km !== undefined) ? formatKmStation(entry.km) : '';
       populateEditExpresswaySelect(entry.expressway || '');
       populateEditBoundSelect(entry.bound || '');
+      syncEditOtherIndicators();
+      sizeEntryEditableControls();
       renderEditPhotoPreview(entry);
       document.getElementById('edit-entry-date').textContent = entry.timestamp || 'Inspection entry';
       document.getElementById('edit-entry-gps').textContent = entry.lat != null && entry.lon != null && Number.isFinite(Number(entry.lat)) && Number.isFinite(Number(entry.lon))
@@ -8101,18 +8121,36 @@
 
     // The modal markup sits after the main script, so bind everything after the
     // document has finished parsing — this prevents Safari/iOS from hitting
-    // null elements and leaving Save/Cancel unbound.
+    // null elements and leaving the sheet actions unbound.
     document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('edit-defect-select').addEventListener('change', e => {
+        e.target.style.width = `${Math.min(Math.max(e.target.value.length + 2, 10), 32)}ch`;
+        document.getElementById('edit-modal-title').classList.toggle('long-title', e.target.value.length > 24);
+      });
       document.getElementById('edit-lane-select').addEventListener('change', (e) => {
         document.getElementById('edit-lane-others-input').style.display = e.target.value === 'Others' ? 'block' : 'none';
+        syncEditOtherIndicators();
       });
       document.getElementById('edit-bound-select').addEventListener('change', (e) => {
         document.getElementById('edit-bound-others-input').style.display = e.target.value === 'Others' ? 'block' : 'none';
+        syncEditOtherIndicators();
       });
       document.getElementById('edit-expressway-select').addEventListener('change', (e) => {
         const val = e.target.value;
         document.getElementById('edit-expressway-others-input').style.display = val === 'Others' ? 'block' : 'none';
+        syncEditOtherIndicators();
       });
+      document.getElementById('edit-modal').addEventListener('click', e => {
+        const editable = e.target.closest('.entry-editable');
+        if (!editable || e.target.matches('select, input')) return;
+        const control = editable.querySelector('select, input');
+        if (!control) return;
+        try { if (control.showPicker) { control.showPicker(); return; } } catch (_) { /* focus below */ }
+        control.focus();
+        if (control.tagName === 'SELECT') control.click();
+      });
+      document.getElementById('edit-modal').addEventListener('change', sizeEntryEditableControls);
+      document.getElementById('edit-modal').addEventListener('input', sizeEntryEditableControls);
 
       // The number pad shown for this field (inputmode="decimal") has no "+"
       // key, so typing plain digits like "8200" would otherwise be parsed as
@@ -8138,7 +8176,6 @@
         }
       });
 
-      document.getElementById('edit-cancel').addEventListener('click', closeEditModal);
       document.getElementById('edit-close').addEventListener('click', closeEditModal);
       document.getElementById('edit-delete').addEventListener('click', () => {
         if (editingEntryIndex === null) return;
@@ -8553,25 +8590,23 @@
       <div class="entry-sheet-scroll">
         <div class="entry-sheet-header">
           <div><span class="entry-sheet-eyebrow">Inspection entry · <span id="edit-entry-date"></span></span>
-            <h3 id="edit-modal-title">Entry details</h3></div>
-          <button type="button" class="entry-sheet-close" id="edit-close" aria-label="Close entry details">×</button>
+            <h3 id="edit-modal-title"><span class="entry-editable"><select id="edit-defect-select" class="edit-select" aria-label="Defect type"></select><svg class="entry-edit-pencil" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></h3></div>
+          <button type="button" class="entry-sheet-close" id="edit-close" aria-label="Close entry details"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
         </div>
-        <p class="entry-sheet-hint">Tap a highlighted value to change it.</p>
         <div class="entry-sheet-grid">
-          <div class="entry-sheet-field entry-sheet-wide"><label for="edit-defect-select">Defect</label><select id="edit-defect-select" class="edit-select"></select></div>
-          <div class="entry-sheet-field"><label for="edit-expressway-select">Segment / Expressway</label><select id="edit-expressway-select" class="edit-select"></select><input id="edit-expressway-others-input" type="text" class="edit-others-input" aria-label="Specify expressway or segment" placeholder="Specify segment" style="display:none;"></div>
-          <div class="entry-sheet-field"><label for="edit-km-input">KM Station</label><input id="edit-km-input" type="text" inputmode="decimal" placeholder="Off-network"></div>
-          <div class="entry-sheet-field"><label for="edit-bound-select">Bound</label><select id="edit-bound-select" class="edit-select"></select><input id="edit-bound-others-input" type="text" class="edit-others-input" aria-label="Specify direction" placeholder="Specify direction" style="display:none;"></div>
-          <div class="entry-sheet-field"><label for="edit-lane-select">Lane / Position</label><select id="edit-lane-select" class="edit-select"></select><input id="edit-lane-others-input" type="text" class="edit-others-input" aria-label="Specify lane" placeholder="Specify lane" style="display:none;"></div>
+          <div class="entry-sheet-field"><label for="edit-expressway-select"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="19" r="2"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="17" cy="5" r="2"/></svg>Segment / Expressway</label><span class="entry-editable"><select id="edit-expressway-select" class="edit-select"></select><svg class="entry-edit-pencil" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span><span class="entry-editable entry-editable-other"><input id="edit-expressway-others-input" type="text" class="edit-others-input" aria-label="Specify expressway or segment" placeholder="Specify segment" style="display:none;"><svg class="entry-edit-pencil" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></span></div>
+          <div class="entry-sheet-field"><label for="edit-km-input"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>KM Station</label><span class="entry-editable"><input id="edit-km-input" type="text" inputmode="decimal" placeholder="Off-network"><svg class="entry-edit-pencil" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></span></div>
+          <div class="entry-sheet-field"><label for="edit-bound-select"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>Bound</label><span class="entry-editable"><select id="edit-bound-select" class="edit-select"></select><svg class="entry-edit-pencil" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span><span class="entry-editable entry-editable-other"><input id="edit-bound-others-input" type="text" class="edit-others-input" aria-label="Specify direction" placeholder="Specify direction" style="display:none;"><svg class="entry-edit-pencil" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></span></div>
+          <div class="entry-sheet-field"><label for="edit-lane-select"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>Lane / Position</label><span class="entry-editable"><select id="edit-lane-select" class="edit-select"></select><svg class="entry-edit-pencil" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span><span class="entry-editable entry-editable-other"><input id="edit-lane-others-input" type="text" class="edit-others-input" aria-label="Specify lane" placeholder="Specify lane" style="display:none;"><svg class="entry-edit-pencil" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></span></div>
         </div>
-        <div class="entry-sheet-meta"><span>Exact GPS</span><strong id="edit-entry-gps"></strong><span>Inspector</span><strong id="edit-entry-inspector"></strong></div>
-        <div class="entry-sheet-photo"><span class="entry-sheet-eyebrow">Photo evidence</span>
+        <div class="entry-sheet-meta"><div><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/><path d="M12 2v2m0 16v2M4 12H2m20 0h-2"/></svg>Exact GPS</span><strong id="edit-entry-gps"></strong></div><div><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>Inspector</span><strong id="edit-entry-inspector"></strong></div></div>
+        <div class="entry-sheet-photo"><span class="entry-sheet-eyebrow"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13.5" r="3.5"/></svg>Photo evidence</span>
           <div class="edit-photo-row"><div class="edit-photo-thumb-wrap" id="edit-photo-thumb-wrap"><div class="edit-photo-empty" id="edit-photo-empty">No photo attached</div><img id="edit-photo-thumb" alt="Entry photo" style="display:none;"></div>
-            <div class="edit-photo-actions"><button type="button" class="edit-photo-add-btn" id="edit-photo-add-btn">Add / Change Photo</button><button type="button" class="edit-photo-remove-btn" id="edit-photo-remove-btn" style="display:none;">Remove Photo</button></div>
+            <div class="edit-photo-actions"><button type="button" class="edit-photo-add-btn" id="edit-photo-add-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13.5" r="3.5"/></svg><span id="edit-photo-add-label">Add Photo</span></button><button type="button" class="edit-photo-remove-btn" id="edit-photo-remove-btn" style="display:none;"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18m-2 0-.9 14H5.9L5 6m3 0V4h8v2M10 10v7m4-7v7"/></svg>Remove Photo</button></div>
           </div>
         </div>
       </div>
-      <div class="modal-actions entry-sheet-actions"><button type="button" id="edit-delete">Delete</button><button type="button" class="lane-cancel" id="edit-cancel">Cancel</button><button type="button" class="lane-save" id="edit-save">Save</button></div>
+      <div class="modal-actions entry-sheet-actions"><button type="button" id="edit-delete"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18m-2 0-.9 14H5.9L5 6m3 0V4h8v2M10 10v7m4-7v7"/></svg>Delete</button><button type="button" class="lane-save" id="edit-save"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>Save</button></div>
     </div>
   </div>
 
