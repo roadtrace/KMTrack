@@ -1,20 +1,162 @@
-.map-bound-legend{position:absolute;top:calc(env(safe-area-inset-top) + 86px);right:12px;z-index:500;display:flex;flex-direction:column;gap:6px;padding:8px 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--panel);color:var(--line-white);font-size:11px;box-shadow:var(--shadow-card);pointer-events:none;max-width:180px;}
-.map-legend-item{display:flex;align-items:center;gap:8px;font-weight:700;}
-.map-legend-dot{width:10px;height:10px;border-radius:50%;border:1px solid rgba(255,255,255,.5);}
-.map-legend-landmark{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:700;}
-.map-legend-landmark svg{width:10px;height:13px;flex:0 0 10px;display:block;}
-.map-entry-anchor,.map-landmark-anchor{background:none;border:0;}
-.map-entry-symbol{position:relative;width:0;height:0;pointer-events:none;}
-.map-entry-hit{position:absolute;left:-22px;top:-22px;width:44px;height:44px;padding:0;border:0;background:transparent;cursor:pointer;pointer-events:auto;border-radius:50%;}
-.map-km-label{position:absolute;width:70px;height:28px;min-height:28px;padding:3px 5px;border:0;background:transparent;color:color-mix(in srgb,var(--bound-color) 72%,#fff);font:700 10px/1.2 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;white-space:nowrap;text-align:center;text-shadow:0 1px 2px #000,0 -1px 2px #000;box-shadow:none;cursor:pointer;pointer-events:auto;border-radius:var(--radius-xs);}
-.map-entry-hit:focus-visible,.map-km-label:focus-visible,.map-landmark-pin:focus-visible{outline:3px solid var(--bound-color,var(--line-yellow));outline-offset:2px;background:var(--panel);}
-.map-landmark-pin{width:44px;height:44px;padding:8px 11px;border:0;background:transparent;cursor:pointer;border-radius:var(--radius-sm);}
-.map-landmark-pin svg{width:22px;height:28px;display:block;}
-.leaflet-tooltip.map-landmark-label{border:0;background:transparent;color:#f5f7f8;box-shadow:none;text-shadow:0 1px 2px #000,0 -1px 2px #000;font:650 10px/1.25 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;letter-spacing:-.01em;}
-.leaflet-tooltip.map-landmark-label::before{display:none;}
-.map-landmark-details{font:12px/1.5 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;}
-html[data-theme="light"] .map-km-label{background:transparent;color:color-mix(in srgb,var(--bound-color) 72%,#17212a);text-shadow:0 1px 2px #fff,0 -1px 2px #fff;box-shadow:none;}
-html[data-theme="light"] .leaflet-tooltip.map-landmark-label{color:#20272c;text-shadow:0 1px 2px #fff,0 -1px 2px #fff;}
-#edit-modal{z-index:1200;}
-.leaflet-tooltip.map-landmark-label{max-width:190px;white-space:normal;text-align:center;}
-.leaflet-tooltip.map-landmark-label{width:max-content;max-width:180px;}
+.map-bound-legend {
+    position: absolute;
+    top: calc(env(safe-area-inset-top) + 8px);
+    right: 10px;
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 10px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--panel);
+    color: var(--line-white);
+    font-size: 11px;
+    box-shadow: var(--shadow-card);
+    pointer-events: none;
+    max-width: 180px;
+}
+
+.map-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+}
+
+.map-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, .5);
+}
+
+.map-legend-landmark {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.map-legend-landmark svg {
+    width: 10px;
+    height: 13px;
+    flex: 0 0 10px;
+    display: block;
+}
+
+.map-entry-anchor,
+.map-landmark-anchor {
+    background: none;
+    border: 0;
+}
+
+.map-entry-symbol {
+    position: relative;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.map-entry-hit {
+    position: absolute;
+    left: -22px;
+    top: -22px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    pointer-events: auto;
+    border-radius: 50%;
+}
+
+.map-km-label {
+    position: absolute;
+    width: 70px;
+    height: 28px;
+    min-height: 28px;
+    padding: 3px 5px;
+    border: 0;
+    background: transparent;
+    color: color-mix(in srgb, var(--bound-color) 72%, #fff);
+    font: 700 10px/1.2 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    white-space: nowrap;
+    text-align: center;
+    text-shadow: 0 1px 2px #000, 0 -1px 2px #000;
+    box-shadow: none;
+    cursor: pointer;
+    pointer-events: auto;
+    border-radius: var(--radius-xs);
+}
+
+.map-entry-hit:focus-visible,
+.map-km-label:focus-visible,
+.map-landmark-pin:focus-visible {
+    outline: 3px solid var(--bound-color, var(--line-yellow));
+    outline-offset: 2px;
+    background: var(--panel);
+}
+
+.map-landmark-pin {
+    width: 44px;
+    height: 44px;
+    padding: 8px 11px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+}
+
+.map-landmark-pin svg {
+    width: 22px;
+    height: 28px;
+    display: block;
+}
+
+.leaflet-tooltip.map-landmark-label {
+    border: 0;
+    background: transparent;
+    color: #f5f7f8;
+    box-shadow: none;
+    text-shadow: 0 1px 2px #000, 0 -1px 2px #000;
+    font: 650 10px/1.25 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    letter-spacing: -.01em;
+}
+
+.leaflet-tooltip.map-landmark-label::before {
+    display: none;
+}
+
+.map-landmark-details {
+    font: 12px/1.5 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+}
+
+html[data-theme="light"] .map-km-label {
+    background: transparent;
+    color: color-mix(in srgb, var(--bound-color) 72%, #17212a);
+    text-shadow: 0 1px 2px #fff, 0 -1px 2px #fff;
+    box-shadow: none;
+}
+
+html[data-theme="light"] .leaflet-tooltip.map-landmark-label {
+    color: #20272c;
+    text-shadow: 0 1px 2px #fff, 0 -1px 2px #fff;
+}
+
+#edit-modal {
+    z-index: 1200;
+}
+
+.leaflet-tooltip.map-landmark-label {
+    max-width: 190px;
+    white-space: normal;
+    text-align: center;
+}
+
+.leaflet-tooltip.map-landmark-label {
+    width: max-content;
+    max-width: 180px;
+}
