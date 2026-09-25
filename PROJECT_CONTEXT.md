@@ -1,0 +1,36 @@
+# Spot It / KMTrack — project handover
+
+**Purpose:** A mobile-first, offline-first expressway defect-inspection PWA for NLEX and related corridors. Field users record defects, GPS position, KM station, corridor/bound/lane, and photographs; they can view a map and export records. Spot It is the KMTrack web app, **not** the separate Python desktop NLEX Defect Inspection Tool (`main_updated.py`). Do not modify the Python app.
+
+## Source of truth and scope
+
+This handover records completed Phases 1–10 and decisions for later phases. Phase 10 Supabase authentication is complete in commit `2571c4f2618d6ca5a0430f6930a08b2620eaa51b`; Phase 11 inspection data connection is next. Inspect actual source before editing and verify live Supabase configuration rather than treating old exported SQL/CSV as current. Never paste secrets into repository docs or chat.
+
+The repository includes `index.html`, `entry-model.js`, `sync-queue.js`, `auth.js`, `auth-config.js`, `sw.js`, `location-resolver.js`, map/photo/export modules, `AGENTS.md`, `DESIGN.md`, `PRODUCT.md`, and `docs/supabase/` CSV snapshots. The current `AGENTS.md` instructs: preserve functional inspection logic, bump service-worker cache version and cache new assets, run tests, provide a commit message, and do not commit/push without permission. Preserve those instructions; do not replace the file wholesale.
+
+## Completed backend work (Phases 1–9)
+
+Supabase project created; `inspections` and `profiles` tables, email/password Auth, role/approval/team profile model, private `inspection-photos` bucket, RLS, Auth profile-creation trigger, `updated_at` trigger, identity-protection trigger, and security tests completed. Test photos and seven test inspection rows removed; temporary Other-Team Auth user removed. Approved administrator, Roadway inspector, and Roadway supervisor accounts were retained for integration; a public-registration test user was subsequently created and manually approved. **Do not assume the database is empty of all non-test records or delete any data without a fresh inventory and explicit approval.**
+
+Security model: inspector views team, creates own, edits own; supervisor views team, creates own, edits team; administrator views all and manages profiles but does not create/edit engineering records; unapproved users cannot access team/cloud inspection data. No normal inspection DELETE or Storage UPDATE/DELETE policy. Identity fields `id`, `user_id`, `team`, `created_at` cannot change on inspection UPDATE. Private photo access follows inspection visibility. Storage upload is for approved inspector/supervisor on own matching inspection/path. Bucket limit 5 MB; JPEG/PNG. Storage replacement flow is **not** finished; see architecture doc.
+
+## Completed Phase 10 behavior
+
+- Email/password sign-in and public registration use the locally pinned Supabase JS browser SDK v2.117.1. Sessions persist. Browser assets contain only the public Project URL and publishable key, **never** a service-role/secret key or saved password. Registration asks for full name, email, password, and confirmation; email confirmation is required. The live `handle_new_user()` trigger copies signup `full_name` metadata and sets `role='inspector'`, `approved=false`, `team=null`. Users cannot self-select these administrator-controlled fields.
+- First sign-in needs internet. Online verification reads `public.profiles` to determine approval, role, team, and user ID. Approved Inspector and Supervisor sign-in and local capture were live-tested. A pending user signed in and captured locally; after manual approval, Verify online changed the state to Approved without recreating the account or deleting the pending inspection.
+- The seven-day window measures time since successful online verification. After it expires, the bound account may still record inspections and photos locally; cloud/team functions require successful online verification. Pending/unapproved users likewise work locally without cloud/team access. Phase 10 does not connect cloud/team inspection data.
+- One local account workspace may be bound to one Auth user ID. Pre-existing inspections require explicit confirmation before first binding. Sign-out preserves local inspections and photos. A different account sees a protected Different account state and cannot view, modify, transfer, or automatically rebind the workspace; its sign-out returns to normal authentication. The same account restores access after sign-in.
+- Guest / Local Mode uses a separate local workspace and can use GPS/KM stationing, map, inspection capture, local photos, records, and Excel export. Guest has no cloud/team access. Guest/account record isolation and Guest Excel export were live-tested. Guest records remain local and are never automatically assigned to a later signed-in account.
+- An inspection created while pending has `preapproval_review_required=true`; Guest records also have `guest_claim_required=true`. Approval/re-verification does not clear these markers. Explicit review is required before pending-created records can become sync-eligible; Guest records need explicit review/claim. Those workflows belong to Phase 12. Do not automatically sync either kind of record.
+- Inspection and photo synchronization remain disabled; the existing queue has no transport. Local recording, GPS/KM, map, camera, exports, and photo storage remain in use.
+- Final focused tests passed 47/47. The full suite reported 123 passed and 59 failed. The 59 existing legacy failures are known test debt and have not been demonstrated to be Phase 10 regressions. The service-worker cache is v217.
+
+## Future sync and photo requirements
+
+- Saving a field inspection must remain independent of mobile data. Keep stable local UUIDs; retries must not create duplicate cloud rows. Recheck account and team before any cloud operation.
+- Guest and pending-created records need explicit review/claim before sync eligibility; future upload logic must check `preapproval_review_required` and `guest_claim_required` rather than treating local `pending` status alone as permission to upload.
+- Photo strategy: optimized, unwatermarked evidence image in cloud; watermark rendered dynamically from current metadata when viewing/exporting. Initial compression targets: max dimension ~1600px, JPEG quality ~75–80%, roughly 200–500 KB where detail remains clear; these are provisional, not hard guarantees. Bucket ceiling 5 MB. Phase 13 must resolve the existing Storage policy conflict so a new optimized file uploads successfully before switching the current photo reference. Do not overwrite synced photo objects or weaken Storage RLS.
+
+## Guardrails
+
+Preserve existing GPS/corridor/interchange/KM logic, map, camera, exports, local storage, PWA and UI behavior unless explicitly scoped. Phase 11 is next; do not activate inspection/photo transport without its approved scope. Keep Guest and pending-created records ineligible for automatic sync. Single-account binding is a Phase 10 limitation; consider multi-account local workspaces only in a later phase. Do not weaken database or Storage RLS. Do not put credentials, user passwords, service-role keys, or test credentials in source or documentation. Do not commit or push without explicit approval. Run tests and report limitations.

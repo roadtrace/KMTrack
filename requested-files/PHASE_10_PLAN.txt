@@ -1,0 +1,57 @@
+﻿HISTORICAL PLANNING RECORD - PHASE 10 COMPLETE
+Phase 10 implementation was completed in commit 2571c4f2618d6ca5a0430f6930a08b2620eaa51b.
+This file preserves the original pre-implementation plan and information request below.
+For final implemented behavior, use PROJECT_CONTEXT.md, SUPABASE_ARCHITECTURE.md,
+and IMPLEMENTATION_PLAN.md. Phase 11 Connect inspections is next.
+
+PHASE 10: SUPABASE AUTHENTICATION INTEGRATION
+Updated plan and information needed from the project owner
+
+Scope
+-----
+Phase 10 adds authentication and authorization only. Inspection and photo synchronization remain disabled. Do not redesign inspection storage, GPS/KM logic, maps, camera, exports, or photo handling. Do not commit or push without permission.
+
+Updated implementation plan
+---------------------------
+1. Add a small auth module and minimal sign-in, sign-out, and status UI. Restore the Supabase session, verify the signed-in user and their public.profiles row online, and record the last successful verification time. Use only the Project URL and publishable browser key.
+
+2. Bind the current local workspace to one Auth user ID. If it already contains inspections, show the record count and require explicit confirmation to bind that existing workspace to the signed-in account. Declining leaves records and photos untouched and unbound; it does not assign them to that user.
+
+3. On sign-out, retain local inspections and photos. Signing back into the same account restores access. If a different account signs in, keep the bound workspace hidden and inaccessible. Do not migrate or merge local workspaces in Phase 10.
+
+4. After seven days without successful online verification, keep local inspection recording and local photo storage available to the bound account. Clearly indicate that online verification is required before cloud functions resume. Recheck approval promptly on reconnection. Pending or revoked approval likewise means local-only use.
+
+5. Inspections created while unapproved must require later user review before becoming eligible for synchronization. Do not implement the review or synchronization workflow in Phase 10. Keep the existing sync queue without a transport.
+
+6. Test approved, pending, revoked, offline, expired-verification, legacy-binding, sign-out, and different-account cases. Cache the new local auth assets and bump the service-worker cache version.
+
+Implementation note: restoring a locally stored Supabase session is distinct from online identity/profile verification. Supabase auth.getUser() makes a network request.
+Reference: https://supabase.com/docs/reference/javascript/auth-getuser
+
+Information needed before implementation
+----------------------------------------
+1. Project URL (https://...supabase.co)
+   Find it in the project's Connect dialog. Integrations > Data API also shows the API URL.
+   References: https://supabase.com/docs/guides/getting-started/api-keys
+               https://supabase.com/docs/guides/api
+
+2. Publishable key beginning sb_publishable_
+   Find it in the Connect dialog or Settings > API Keys. Check the prefix before sharing it. This is the browser key.
+   Reference: https://supabase.com/docs/guides/getting-started/api-keys
+
+3. Current public.profiles columns and types, especially id, approved, role, team, and full_name
+   Find them in Table Editor > public > profiles > Columns. A screenshot or column/type list is enough; profile rows are not needed.
+
+4. Current profiles SELECT policy for users reading their own profile
+   Find it in Database > Policies > profiles. Provide the policy name and USING expression, or a screenshot. Historical CSV exports may not reflect the live policy.
+   Reference: https://supabase.com/docs/guides/deployment/going-into-prod
+
+5. Email/password provider status and email-confirmation setting
+   Find them in Authentication > Sign In / Providers > Email. Report whether email/password is enabled and whether email confirmation is required.
+   Reference: https://supabase.com/docs/guides/auth/general-configuration
+
+6. Test-state availability
+   Check Authentication > Users and Table Editor > public > profiles. Confirm that an approved inspector and a pending user are available for testing, or that you can set those states. Enter passwords yourself during browser testing; do not send passwords in chat.
+   Reference: https://supabase.com/docs/guides/auth/managing-user-data
+
+Never provide a secret key or service-role key. No application files were changed while preparing this plan.
