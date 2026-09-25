@@ -13,6 +13,7 @@
     try {
       if (localStorage.getItem('kmtrack_theme_v1') === 'light') document.documentElement.dataset.theme = 'light';
     } catch (e) { /* theme preference is non-critical */ }
+    document.documentElement.classList.add('auth-booting');
   </script>
   <link rel="icon" type="image/svg+xml" href="spot it app icon.svg">
   <link rel="apple-touch-icon" sizes="180x180" href="spot-it-app-icon-v2-180.png">
@@ -4368,6 +4369,19 @@
       <p>Make the instrument match your inspection protocol.</p>
     </div>
 
+    <section class="settings-panel auth-settings" aria-labelledby="auth-settings-heading">
+      <div class="setting-copy">
+        <h3 id="auth-settings-heading">Account</h3>
+        <p id="auth-settings-identity">Checking account…</p>
+        <p id="auth-settings-state" role="status">Local inspections remain on this device.</p>
+        <div class="auth-settings-actions">
+          <button type="button" class="ds-btn ds-btn-quiet" id="auth-verify-btn">Verify online</button>
+          <button type="button" class="ds-btn ds-btn-quiet" id="auth-signout-btn">Sign out</button>
+          <button type="button" class="ds-btn ds-btn-primary" id="auth-guest-signin-btn" hidden>Sign in</button>
+        </div>
+      </div>
+    </section>
+
     <section class="settings-panel">
       <div class="setting-head">
         <svg class="setting-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -4511,8 +4525,38 @@
     </button>
   </nav>
 
+  <section class="auth-gate" id="auth-gate" role="dialog" aria-modal="true" aria-labelledby="auth-gate-title">
+    <div class="auth-gate-card">
+      <span class="eyebrow">SPOT IT account</span>
+      <h2 id="auth-gate-title">Checking account…</h2>
+      <p id="auth-gate-message" role="status">Your local inspections and photos will remain on this device.</p>
+      <form id="auth-signin-form" hidden>
+        <label>Email<input id="auth-email" type="email" autocomplete="username" required></label>
+        <label>Password<input id="auth-password" type="password" autocomplete="current-password" required></label>
+        <button type="submit" class="ds-btn ds-btn-primary">Sign in</button>
+      </form>
+      <form id="auth-register-form" hidden>
+        <label>Full name<input id="auth-register-name" type="text" autocomplete="name" maxlength="120" required></label>
+        <label>Email<input id="auth-register-email" type="email" autocomplete="email" required></label>
+        <label>Password<input id="auth-register-password" type="password" autocomplete="new-password" required></label>
+        <label>Confirm password<input id="auth-register-confirm" type="password" autocomplete="new-password" required></label>
+        <button type="submit" class="ds-btn ds-btn-primary">Create account</button>
+      </form>
+      <button type="button" class="ds-btn ds-btn-quiet" id="auth-create-account" hidden>Create account</button>
+      <button type="button" class="ds-btn ds-btn-quiet" id="auth-back-signin" hidden>Back to sign in</button>
+      <button type="button" class="ds-btn ds-btn-primary" id="auth-confirm-signin" hidden>Sign in</button>
+      <button type="button" class="ds-btn ds-btn-primary" id="auth-bind-btn" hidden>Bind existing local workspace to this account</button>
+      <button type="button" class="ds-btn ds-btn-quiet" id="auth-continue-guest">Continue without signing in</button>
+      <button type="button" class="ds-btn ds-btn-quiet" id="auth-gate-signout" hidden>Sign out of this account</button>
+      <p id="auth-error" role="alert" hidden></p>
+    </div>
+  </section>
+
   <script src="./entry-model.js"></script>
   <script src="./sync-queue.js"></script>
+  <script src="./auth-config.js"></script>
+  <script src="./vendor/supabase/supabase-js-2.117.1.umd.js"></script>
+  <script src="./auth.js"></script>
   <script src="./map-config.js"></script>
   <script src="vendor/leaflet/leaflet.js"></script>
   <script src="./swipe-actions.js"></script>
@@ -4639,11 +4683,13 @@
 
     // ---------- Persistent storage (survives closing the app) ----------
     const STORAGE_KEY_ENTRIES = 'nlex_inspection_entries_v1';
+    const STORAGE_KEY_GUEST_ENTRIES = 'nlex_inspection_guest_entries_v1';
     const STORAGE_KEY_DATASET = 'nlex_network_dataset_v1';
     const STORAGE_KEY_BOUND = 'nlex_user_bound_v1';
     const STORAGE_KEY_SWIPE_PREVIEW = 'kmtrack_swipe_preview_v1';
     const STORAGE_KEY_THEME = 'kmtrack_theme_v1';
-    let storageAvailable = true;
+    let storageAvailable = testStorageWritable();
+    let authWorkspaceUnlocked = false;
     let calibrationDatasetReady = false;
     let rampDatasetReady = false;
 
@@ -4687,6 +4733,19 @@
      * A running sync outranks everything; only when there is nothing to do do the
      * quieter states show. */
     let syncInFlight = false;
+    let authDisplayState = null;
+    function activeEntriesStorageKey() {
+      return authDisplayState?.mode === 'guest' ? STORAGE_KEY_GUEST_ENTRIES : STORAGE_KEY_ENTRIES;
+    }
+    function activeExportInspectorStorageKey() {
+      return authDisplayState?.mode === 'guest' ? 'kmtrack_guest_export_inspector_name_v1' : 'kmtrack_inspector_name_v1';
+    }
+    function canViewTeamRecords() {
+      return ['approved', 'offline-recent'].includes(authDisplayState?.mode);
+    }
+    function accessibleEntries() {
+      return canViewTeamRecords() ? entries : entries.filter(entry => !entry.importBatchId);
+    }
 
     function syncState(counts, online, ready, syncing) {
       if (syncing) return 'syncing';
@@ -4712,15 +4771,19 @@
       const menu = document.getElementById('sync-menu');
       const text = document.getElementById('sync-status-text');
       if (!menu || !text) return;
-      const counts = SPOTITSync.summary(entries);
+      const counts = SPOTITSync.summary(accessibleEntries());
       const online = navigator.onLine !== false;
-      const ready = syncQueue.ready();
+      const ready = syncQueue.ready() && authDisplayState?.mode !== 'guest';
       const state = syncState(counts, online, ready, syncInFlight);
       const copy = SYNC_COPY[state];
       const fill = value => String(value).replace('{n}', counts.failed || counts.pending);
 
       menu.dataset.syncState = state;
-      text.textContent = fill(copy.pill);
+      const authLabel = authDisplayState?.mode === 'pending' ? 'Pending approval'
+        : authDisplayState?.mode === 'guest' ? 'Guest · local'
+        : ['verification-required', 'local-only'].includes(authDisplayState?.mode) ? 'Verify online'
+          : authDisplayState?.mode === 'offline-recent' ? 'Offline · local' : '';
+      text.textContent = authLabel || fill(copy.pill);
       const title = document.getElementById('sync-panel-title');
       const sub = document.getElementById('sync-panel-sub');
       if (title) title.textContent = fill(copy.title);
@@ -4739,16 +4802,16 @@
       }
       const note = document.getElementById('sync-note');
       if (note) {
-        note.textContent = ready
+        note.textContent = (authDisplayState?.message ? `${authDisplayState.message} ` : '') + (ready
           ? (syncInFlight ? 'Uploading…' : 'Uploads are keyed to each record\'s own ID, so a retry cannot duplicate one.')
-          : 'Cloud sync is not configured yet, so records stay on this device. Sync now becomes available once it is.';
+          : 'Cloud sync is not configured yet, so records stay on this device. Sync now becomes available once it is.');
       }
     }
 
     /* Sync only. Deliberately does NOT navigate — a page reload must never be a side
      * effect of syncing. */
     async function syncNow() {
-      if (syncInFlight) return;
+      if (syncInFlight || authDisplayState?.mode === 'guest') return;
       syncInFlight = true;
       updateSyncStatus();
       try {
@@ -4778,11 +4841,13 @@
       if (hasUnsavedReloadWork() && !confirm('Reload app? Unsaved entry edits or camera work will be lost.')) return;
       const button = document.getElementById('reload-app-btn');
       if (button) button.disabled = true;
-      try {
-        const result = await syncQueue.drain(entries);
-        if (result && result.ok && (result.uploaded || result.failed)) saveEntries();
-      } catch (e) {
-        console.warn('Reload drain failed', e);
+      if (authDisplayState?.mode !== 'guest') {
+        try {
+          const result = await syncQueue.drain(entries);
+          if (result && result.ok && (result.uploaded || result.failed)) saveEntries();
+        } catch (e) {
+          console.warn('Reload drain failed', e);
+        }
       }
       /* Everything durable is already in local storage, so nothing is lost — but
        * this does discard in-memory state, so an open camera draft is not preserved.
@@ -4825,7 +4890,8 @@
       storageAvailable = testStorageWritable();
       if (!storageAvailable) return;
       try {
-        const savedEntries = localStorage.getItem(STORAGE_KEY_ENTRIES);
+        const key = activeEntriesStorageKey();
+        const savedEntries = localStorage.getItem(key);
         if (savedEntries) {
           const parsed = JSON.parse(savedEntries);
           // SPOTITEntry owns the record shape. normalizeAll drops malformed rows
@@ -4836,7 +4902,7 @@
           entries = SPOTITEntry.normalizeAll(before);
           // Only rewrite when the migration actually changed something.
           if (JSON.stringify(entries) !== JSON.stringify(before)) {
-            localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(entries));
+            localStorage.setItem(key, JSON.stringify(entries));
           }
         }
         const savedBound = localStorage.getItem(STORAGE_KEY_BOUND);
@@ -4847,9 +4913,9 @@
     }
 
     function saveEntries() {
-      if (!storageAvailable) return false;
+      if (!storageAvailable || !authWorkspaceUnlocked) return false;
       try {
-        localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(entries));
+        localStorage.setItem(activeEntriesStorageKey(), JSON.stringify(entries));
         return true;
       } catch (e) {
         storageAvailable = false;
@@ -4863,7 +4929,6 @@
       }
     }
 
-    loadFromStorage();
     window.addEventListener('DOMContentLoaded', () => {
       const el = document.getElementById('storage-status');
       if (storageAvailable) {
@@ -5428,7 +5493,7 @@
         sessionTime.textContent = `${dateText} ${timeText}`;
       }
       const saved = document.getElementById('clock-saved');
-      if (saved) saved.textContent = `${entries.length} saved`;
+      if (saved) saved.textContent = `${accessibleEntries().length} saved`;
       updateConfidenceReadouts();
     }
     setInterval(tickClock, 1000);
@@ -5708,7 +5773,7 @@
       osmEntryLayer.clearLayers();
       if (!show) { osmEntryLayer.remove(); SPOTITMap.legend([], false); updateMapWorkspaceCounts([]); return; }
       osmEntryLayer.addTo(osmMap);
-      const visible = SPOTITEntryFilters.mapEntries(entries, from.value, to.value, type.value, document.getElementById('map-entry-source').value, document.getElementById('map-entry-inspector').value, document.getElementById('map-entry-bound').value);
+      const visible = SPOTITEntryFilters.mapEntries(accessibleEntries(), from.value, to.value, type.value, document.getElementById('map-entry-source').value, document.getElementById('map-entry-inspector').value, document.getElementById('map-entry-bound').value);
       SPOTITMap.legend(visible, true);
       updateMapWorkspaceCounts(visible);
       SPOTITMap.renderEntries(osmMap, osmEntryLayer, visible, openMapEntry, formatKmStation);
@@ -5769,7 +5834,7 @@
       }
     });
     document.getElementById('map-entry-clear').addEventListener('click', () => {
-      const days = entries.map(entry => SPOTITEntryFilters.entryDay(entry)).filter(day => /^\d{4}-\d{2}-\d{2}$/.test(day)).sort();
+      const days = accessibleEntries().map(entry => SPOTITEntryFilters.entryDay(entry)).filter(day => /^\d{4}-\d{2}-\d{2}$/.test(day)).sort();
       document.getElementById('map-entry-from').value = days[0] || '';
       document.getElementById('map-entry-to').value = days.at(-1) || '';
       document.getElementById('map-entry-clear').classList.toggle('active', Boolean(days.length));
@@ -6352,6 +6417,8 @@
 
       entries.push(SPOTITEntry.createEntry({
         type,
+        preapproval_review_required: authDisplayState?.mode !== 'approved',
+        guest_claim_required: authDisplayState?.mode === 'guest',
         timestamp: fullTimestamp(),
         ...snapshot,
         lane,
@@ -7054,6 +7121,8 @@
         await putPhoto(photoId + ':raw', result.rawBlob);
         entries.push(SPOTITEntry.createEntry({
           ...cameraDraftEntry,
+          preapproval_review_required: authDisplayState?.mode !== 'approved',
+          guest_claim_required: authDisplayState?.mode === 'guest',
           timestamp: fullTimestamp(),
           inspector: inspectorName,
           photoId,
@@ -7195,6 +7264,8 @@
         } else {
           entries.push(SPOTITEntry.createEntry({
             ...cameraDraftEntry,
+            preapproval_review_required: authDisplayState?.mode !== 'approved',
+            guest_claim_required: authDisplayState?.mode === 'guest',
             timestamp: fullTimestamp(),
             inspector: inspectorName,
             photoId,
@@ -7371,14 +7442,14 @@
       // The Capture card has no filter row, so it shows every record. Leaving an
       // active Log-tab filter applied here would show a subset the user cannot clear
       // from that tab, with a count that silently disagrees with the title.
-      if (logRegisterView === 'inspection') return entries;
-      return SPOTITEntryFilters.filterEntries(entries, getLogFilters());
+      if (logRegisterView === 'inspection') return accessibleEntries();
+      return SPOTITEntryFilters.filterEntries(accessibleEntries(), getLogFilters());
     }
     function syncEntryFilterOptions() {
       for (const id of ['entry-filter-type', 'map-entry-type']) {
         const select = document.getElementById(id);
         const previous = select.value;
-        const types = [...new Set(entries.map(entry => entry.type).concat(previous || []))].sort();
+        const types = [...new Set(accessibleEntries().map(entry => entry.type).concat(previous || []))].sort();
         select.replaceChildren(new Option('All defects', ''), ...types.map(type => new Option(type, type)));
         select.value = previous;
       }
@@ -7404,7 +7475,7 @@
     });
 
     function entriesForExport() {
-      const scope = SPOTITEntryFilters.exportScope(entries, getLogFilters(), selectedEntryIds);
+      const scope = SPOTITEntryFilters.exportScope(accessibleEntries(), getLogFilters(), selectedEntryIds);
       if (!scope.entries.length) { alert('No entries match the current filters.'); return null; }
       if (scope.restricted && !confirm('Export filtered/selected entries?')) return null;
       // Freeze one consistent export batch before any asynchronous workbook/photo work.
@@ -7459,14 +7530,26 @@
     // Records already carried an `inspector` field with no way to set a default.
     // This is that default: stored on the device and stamped on every new capture.
     const STORAGE_KEY_INSPECTOR = 'kmtrack_inspector_v1';
+    const STORAGE_KEY_GUEST_INSPECTOR = 'kmtrack_guest_inspector_v1';
+    function activeInspectorStorageKey() {
+      return authDisplayState?.mode === 'guest' ? STORAGE_KEY_GUEST_INSPECTOR : STORAGE_KEY_INSPECTOR;
+    }
     let inspectorName = '';
     try { inspectorName = localStorage.getItem(STORAGE_KEY_INSPECTOR) || ''; } catch (e) { /* non-critical */ }
+
+    function loadInspectorForWorkspace() {
+      inspectorName = '';
+      if (authWorkspaceUnlocked) {
+        try { inspectorName = localStorage.getItem(activeInspectorStorageKey()) || ''; } catch (_) { /* optional preference */ }
+      }
+      document.getElementById('inspector-input').value = inspectorName;
+    }
 
     function setInspectorName(value) {
       inspectorName = String(value || '').trim();
       try {
-        if (inspectorName) localStorage.setItem(STORAGE_KEY_INSPECTOR, inspectorName);
-        else localStorage.removeItem(STORAGE_KEY_INSPECTOR);
+        if (inspectorName) localStorage.setItem(activeInspectorStorageKey(), inspectorName);
+        else localStorage.removeItem(activeInspectorStorageKey());
       } catch (e) { /* non-critical */ }
       syncInspectorFilterOptions();
     }
@@ -7479,7 +7562,7 @@
       if (!select) return;
       const previous = select.value;
       const names = [...new Set(
-        entries.map(entry => String(entry.inspector || '').trim()).filter(Boolean)
+        accessibleEntries().map(entry => String(entry.inspector || '').trim()).filter(Boolean)
           .concat(inspectorName ? [inspectorName] : [])
       )].sort();
       select.replaceChildren(new Option('All inspectors', ''), ...names.map(name => new Option(name, name)));
@@ -7677,13 +7760,14 @@
       const exportBtn = document.getElementById('export-btn');
       const backupBtn = document.getElementById('backup-btn');
       const countMini = document.getElementById('count-mini');
-      if (countMini) countMini.textContent = entries.length;
+      const available = accessibleEntries();
+      if (countMini) countMini.textContent = available.length;
       document.getElementById('count-label').textContent = Object.values(getLogFilters()).some(Boolean)
-        ? `${visible.length} of ${entries.length} entries`
-        : `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}`;
-      document.getElementById('last-time').textContent = entries.length ? `last: ${entries[entries.length - 1].timestamp.split(' ')[1]}` : '--';
+        ? `${visible.length} of ${available.length} entries`
+        : `${available.length} ${available.length === 1 ? 'entry' : 'entries'}`;
+      document.getElementById('last-time').textContent = available.length ? `last: ${available[available.length - 1].timestamp.split(' ')[1]}` : '--';
 
-      if (entries.length === 0) {
+      if (available.length === 0) {
         list.innerHTML = '<div class="log-empty">No defects logged yet</div>';
         exportBtn.disabled = true;
         backupBtn.disabled = true;
@@ -7784,6 +7868,185 @@
      * so everything a view needs already exists; if it restores the map it also
      * re-creates the map at its remembered position. */
     restoreActiveView();
+
+    // Authentication controls access to the one device-local workspace. Records
+    // are loaded only after account binding is checked; the transport stays off.
+    function localWorkspaceCount() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_ENTRIES);
+        if (!raw) return 0;
+        const stored = JSON.parse(raw);
+        return Array.isArray(stored) ? stored.length : 1;
+      } catch (_) { return 1; } // Existing unreadable data must never be auto-bound.
+    }
+    function showAuthError(message) {
+      const el = document.getElementById('auth-error');
+      el.textContent = message || '';
+      el.hidden = !message;
+    }
+    let authExpiryTimer = null;
+    let registrationOpen = false;
+    function renderAuthState(state) {
+      clearTimeout(authExpiryTimer);
+      if (state.mode === 'offline-recent') {
+        const delay = Math.max(1, state.verifiedAt + SPOTITAuth.SEVEN_DAYS - Date.now() + 1);
+        authExpiryTimer = setTimeout(() => authController.start().catch(() => {}), delay);
+      }
+      const hadTeamAccess = canViewTeamRecords();
+      const previousEntriesKey = activeEntriesStorageKey();
+      authDisplayState = state;
+      const teamAllowed = canViewTeamRecords();
+      for (const id of ['entry-filter-source', 'map-entry-source', 'map-record-scope']) {
+        const select = document.getElementById(id);
+        const option = select?.querySelector('option[value="imported"]');
+        if (option) option.disabled = !teamAllowed;
+        if (!teamAllowed && select?.value === 'imported') select.value = 'mine';
+      }
+      for (const id of ['import-btn', 'import-history-btn']) document.getElementById(id).disabled = !teamAllowed;
+      if (!teamAllowed) for (const id of ['import-history-dialog', 'import-detail-dialog', 'import-dialog', 'export-name-dialog']) {
+        const dialog = document.getElementById(id);
+        if (dialog?.open) dialog.close('cancel');
+      }
+      if (hadTeamAccess && !teamAllowed && editingEntryIndex !== null && entries[editingEntryIndex]?.importBatchId) closeEditModal();
+      if (state.canUseLocal !== authWorkspaceUnlocked || (state.canUseLocal && previousEntriesKey !== activeEntriesStorageKey())) {
+        authWorkspaceUnlocked = state.canUseLocal;
+        entries = [];
+        if (authWorkspaceUnlocked) loadFromStorage();
+        loadInspectorForWorkspace();
+        renderLog();
+        updateMapEntries();
+      } else if (hadTeamAccess !== teamAllowed) {
+        renderLog();
+        updateMapEntries();
+      }
+      document.documentElement.classList.toggle('auth-booting', !state.canUseLocal);
+      const gate = document.getElementById('auth-gate');
+      gate.hidden = state.canUseLocal;
+      const titles = { 'signed-out': registrationOpen ? 'Create account' : 'Sign in', 'registration-pending': 'Account created', 'binding-required': 'Confirm local workspace', 'account-mismatch': 'Different account', 'storage-error': 'Storage unavailable' };
+      document.getElementById('auth-gate-title').textContent = titles[state.mode] || 'Checking account…';
+      document.getElementById('auth-gate-message').textContent = state.mode === 'signed-out' && registrationOpen
+        ? 'Create your identity. Team access requires administrator approval.'
+        : state.mode === 'binding-required'
+        ? `${state.legacyCount} existing local inspection${state.legacyCount === 1 ? '' : 's'} and associated photos are on this device. Bind them to ${state.email || 'this account'} only if they belong to you. Declining leaves them unchanged.`
+        : state.message || 'Your local inspections and photos remain on this device.';
+      document.getElementById('auth-signin-form').hidden = !(state.mode === 'signed-out' && !registrationOpen);
+      document.getElementById('auth-register-form').hidden = !(state.mode === 'signed-out' && registrationOpen);
+      document.getElementById('auth-create-account').hidden = state.mode !== 'signed-out' || registrationOpen;
+      document.getElementById('auth-back-signin').hidden = state.mode !== 'signed-out' || !registrationOpen;
+      document.getElementById('auth-confirm-signin').hidden = state.mode !== 'registration-pending';
+      document.getElementById('auth-bind-btn').hidden = state.mode !== 'binding-required';
+      document.getElementById('auth-continue-guest').hidden = !['signed-out', 'registration-pending', 'binding-required', 'account-mismatch'].includes(state.mode);
+      document.getElementById('auth-gate-signout').hidden = !['binding-required', 'account-mismatch', 'storage-error'].includes(state.mode);
+      document.getElementById('auth-settings-identity').textContent = state.mode === 'guest' ? 'Guest / Local Mode' : state.email || 'No account signed in';
+      document.getElementById('auth-settings-state').textContent = state.message || '';
+      document.getElementById('auth-verify-btn').hidden = state.mode === 'guest';
+      document.getElementById('auth-verify-btn').disabled = navigator.onLine === false;
+      document.getElementById('auth-signout-btn').hidden = state.mode === 'guest';
+      document.getElementById('auth-guest-signin-btn').hidden = state.mode !== 'guest';
+      updateSyncStatus();
+    }
+    let authController = null;
+    if (globalThis.SPOTITAuth) {
+      const authSdkReady = !!(globalThis.supabase?.createClient && globalThis.SPOTITAuthConfig);
+      const client = authSdkReady ? globalThis.supabase.createClient(SPOTITAuthConfig.url, SPOTITAuthConfig.publishableKey, {
+        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storageKey: SPOTITAuth.SESSION_KEY }
+      }) : { auth: {
+        getUser: async () => { throw new Error('Authentication assets unavailable'); },
+        signInWithPassword: async () => ({ error: new Error('Sign-in is unavailable. Reload the app when online or continue in Guest / Local Mode.') }),
+        signUp: async () => ({ error: new Error('Registration is unavailable. Reload the app when online.') }),
+        signOut: async () => ({ error: null }),
+        onAuthStateChange: () => {}
+      } };
+      authController = SPOTITAuth.createController({ client, storage: localStorage, localCount: localWorkspaceCount, onChange: renderAuthState });
+      client.auth.onAuthStateChange(event => {
+        if (event === 'SIGNED_OUT') queueMicrotask(() => authController.start());
+      });
+      authController.start().catch(error => showAuthError(error.message || 'Could not initialize authentication.'));
+      if (!authSdkReady) showAuthError('Sign-in is unavailable until authentication assets load. Guest / Local Mode remains available.');
+      window.addEventListener('online', () => authController.verifyOnline().catch(() => {}));
+      window.addEventListener('offline', () => authController.start().catch(() => {}));
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          const check = navigator.onLine === false ? authController.start() : authController.verifyOnline();
+          check.catch(() => {});
+        }
+      });
+    } else showAuthError('Authentication assets could not load. Your local records have not been changed.');
+    document.getElementById('auth-signin-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      if (!authController) return;
+      const password = document.getElementById('auth-password');
+      const button = event.currentTarget.querySelector('button[type="submit"]');
+      button.disabled = true;
+      showAuthError('');
+      try { await authController.signIn(document.getElementById('auth-email').value.trim(), password.value); }
+      catch (error) { showAuthError(error.message || 'Sign-in failed.'); }
+      finally { password.value = ''; button.disabled = false; }
+    });
+    document.getElementById('auth-create-account').addEventListener('click', () => {
+      registrationOpen = true;
+      showAuthError('');
+      renderAuthState(authController.getState());
+      document.getElementById('auth-register-name').focus();
+    });
+    document.getElementById('auth-back-signin').addEventListener('click', () => {
+      registrationOpen = false;
+      showAuthError('');
+      renderAuthState(authController.getState());
+    });
+    document.getElementById('auth-confirm-signin').addEventListener('click', () => {
+      registrationOpen = false;
+      showAuthError('');
+      authController.showSignIn();
+    });
+    document.getElementById('auth-register-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      if (!authController) return;
+      const button = event.currentTarget.querySelector('button[type="submit"]');
+      const password = document.getElementById('auth-register-password');
+      const confirmation = document.getElementById('auth-register-confirm');
+      button.disabled = true;
+      showAuthError('');
+      try {
+        await authController.register(document.getElementById('auth-register-name').value, document.getElementById('auth-register-email').value, password.value, confirmation.value);
+        registrationOpen = false;
+      } catch (error) { showAuthError(error.message || 'Could not create account.'); }
+      finally { password.value = ''; confirmation.value = ''; button.disabled = false; }
+    });
+    document.getElementById('auth-bind-btn').addEventListener('click', () => {
+      if (!authController) return;
+      const state = authController.getState();
+      if (state.mode !== 'binding-required') return;
+      if (confirm(`Bind ${state.legacyCount} existing local inspection${state.legacyCount === 1 ? '' : 's'} and their photos to ${state.email || 'this account'}? A different account will not be able to open this workspace.`)) authController.confirmBinding();
+    });
+    document.getElementById('auth-continue-guest').addEventListener('click', () => {
+      if (!authController) return;
+      showAuthError('');
+      const state = authController.enterGuest();
+      if (state.mode === 'storage-error') showAuthError(state.message);
+    });
+    document.getElementById('auth-guest-signin-btn').addEventListener('click', async () => {
+      if (!authController || authController.getState().mode !== 'guest') return;
+      if (hasUnsavedReloadWork() && !confirm('Leave Guest / Local Mode? Unsaved edits or camera work will be lost. Saved guest inspections and photos will remain.')) return;
+      if (document.getElementById('camera-modal').classList.contains('show')) closeCamera();
+      if (document.getElementById('edit-modal').classList.contains('open')) closeEditModal();
+      showAuthError('');
+      try { await authController.leaveGuest(); }
+      catch (error) { showAuthError(error.message || 'Could not open sign-in.'); }
+    });
+    async function signOutOfSpotIt() {
+      if (!authController) return;
+      if (hasUnsavedReloadWork() && !confirm('Sign out? Unsaved entry edits or camera work will be lost. Saved local records and photos will remain.')) return;
+      showAuthError('');
+      try {
+        await authController.signOut();
+        if (document.getElementById('camera-modal').classList.contains('show')) closeCamera();
+        if (document.getElementById('edit-modal').classList.contains('open')) closeEditModal();
+      } catch (error) { showAuthError(error.message || 'Could not sign out.'); }
+    }
+    document.getElementById('auth-signout-btn').addEventListener('click', signOutOfSpotIt);
+    document.getElementById('auth-gate-signout').addEventListener('click', signOutOfSpotIt);
+    document.getElementById('auth-verify-btn').addEventListener('click', () => authController?.verifyOnline().catch(error => showAuthError(error.message || 'Verification failed.')));
 
     document.getElementById('select-toggle-btn').addEventListener('click', () => {
       if (!selectMode) {
@@ -8349,7 +8612,7 @@
       return name;
     }
 
-    function inspectionWorkbookRows(exportEntries = entries) {
+    function inspectionWorkbookRows(exportEntries = accessibleEntries()) {
       return SPOTITSwipe.inspectionWorkbookRows(exportEntries, toDMM, kmToCsvNumber);
     }
 
@@ -8388,7 +8651,7 @@
       );
     }
 
-    async function buildInspectionWorkbook(createdAt, exportEntries = entries, includePhotos = false) {
+    async function buildInspectionWorkbook(createdAt, exportEntries = accessibleEntries(), includePhotos = false) {
       const rows = inspectionWorkbookRows(exportEntries);
       const photos = includePhotos ? await collectWorkbookPhotos(exportEntries) : [];
       const photoByEntry = new Map(photos.map((photo, index) => [photo.entryIndex, index]));
@@ -8429,7 +8692,7 @@
     }
 
     document.getElementById('export-btn').addEventListener('click', async () => {
-      if (entries.length === 0) return;
+      if (accessibleEntries().length === 0) return;
       const exportEntries = await prepareSharingExport();
       if (!exportEntries) return;
       const d = new Date();
@@ -8450,7 +8713,7 @@
         alert(`Could not export the Excel workbook. ${err.message || err}`);
       } finally {
         if (url) URL.revokeObjectURL(url);
-        exportBtn.disabled = entries.length === 0;
+        exportBtn.disabled = accessibleEntries().length === 0;
       }
     });
 
@@ -8526,7 +8789,7 @@
 
     // Native Excel Place in Cell photo export. Legacy photo ZIPs remain importable.
     document.getElementById('backup-btn').addEventListener('click', async () => {
-      if (entries.length === 0) return;
+      if (accessibleEntries().length === 0) return;
       const exportEntries = await prepareSharingExport();
       if (!exportEntries) return;
       const button = document.getElementById('backup-btn');
@@ -8549,7 +8812,7 @@
       } finally {
         if (url) URL.revokeObjectURL(url);
         button.textContent = originalLabel;
-        button.disabled = entries.length === 0; csvButton.disabled = entries.length === 0;
+        button.disabled = accessibleEntries().length === 0; csvButton.disabled = accessibleEntries().length === 0;
       }
     });
 

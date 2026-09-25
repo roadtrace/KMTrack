@@ -7,6 +7,7 @@ function fn(source,name){const n=source.indexOf(`function ${name}(`);return sour
 function context(){
   const photos=new Map(),state={saved:'',failSave:false,failPhoto:false,count:0};
   const ctx=vm.createContext({entries:[{...row,id:'mine',timestamp:'2026-09-01 10:00:00',inspector:''}],storageAvailable:true,SPOTITSharing:sharing,Blob,Uint8Array,Map,Set,Date,
+    canViewTeamRecords:()=>true,
     newId:()=>`generated-${++state.count}`,selectedEntryIds:new Set(),renderLog(){},updateMapEntries(){},confirm:()=>true,document:{getElementById:()=>({textContent:''})},
     saveEntries(){if(state.failSave)return false;state.saved=JSON.stringify(ctx.entries);return true;},
     async putPhoto(id,blob){if(state.failPhoto)throw Error('photo quota');photos.set(id,blob);},async deletePhoto(id){photos.delete(id);}
@@ -35,6 +36,7 @@ test('export dialog cancellation does not save or attribute entries; confirmatio
     const stored=new Map(),original=[{...row,inspector:''},{...row,id:'colleague',importBatchId:'batch'}];
     let dialog;
     const ctx=vm.createContext({sharingBusy:false,entries:structuredClone(original),SPOTITSharing:sharing,
+      activeExportInspectorStorageKey:()=> 'kmtrack_inspector_name_v1',
       entriesForExport:()=>structuredClone(original),localStorage:{getItem:key=>stored.get(key),setItem:(key,value)=>stored.set(key,value)},
       document:{getElementById:id=>id==='export-name-dialog'?dialog:{value:'Moise'}},renderLog(){},alert(){},saveEntries:()=>true});
     const input={value:''};

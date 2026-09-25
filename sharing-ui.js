@@ -2,7 +2,7 @@
 let sharingBusy=false;
 function syncSharingFilters(){
   const batches=new Map(),inspectors=new Set();
-  for(const entry of entries){
+  for(const entry of accessibleEntries()){
     if(entry.importBatchId) batches.set(entry.importBatchId,entry.importLabel||'Imported batch');
     if(entry.inspector) inspectors.add(entry.inspector);
   }
@@ -10,10 +10,12 @@ function syncSharingFilters(){
     for(const field of ['source','inspector']){
       const select=document.getElementById(`${prefix}-${field}`);
       if(!select) continue;
-      const previous=select.value;
+      const previous=!canViewTeamRecords()&&field==='source'&&select.value&&!['mine'].includes(select.value)?'mine':select.value;
       const options=field==='source'?[['','All inspections'],['mine','My inspections'],['imported','Imported inspections'],...batches]:[['','All inspectors'],...[...inspectors].sort().map(name=>[name,name])];
       if(previous&&!options.some(([value])=>value===previous)) options.push([previous,previous]);
       select.replaceChildren(...options.map(([value,label])=>new Option(label,value)));
+      const imported=select.querySelector('option[value="imported"]');
+      if(imported) imported.disabled=!canViewTeamRecords();
       select.value=previous;
     }
   }
@@ -22,6 +24,7 @@ function syncSharingFilters(){
 }
 
 function importedBatches(){
+  if(!canViewTeamRecords()) return [];
   const batches=new Map();
   for(const entry of entries){
     if(!entry.importBatchId) continue;
@@ -62,12 +65,12 @@ async function prepareSharingExport(){
   try{
     const dialog=document.getElementById('export-name-dialog');
     const input=document.getElementById('export-inspector-name');
-    try{input.value=localStorage.getItem('kmtrack_inspector_name_v1')||'';}catch{input.value='';}
+    try{input.value=localStorage.getItem(activeExportInspectorStorageKey())||'';}catch{input.value='';}
     dialog.returnValue='';dialog.showModal();
     await new Promise(resolve=>dialog.addEventListener('close',resolve,{once:true}));
     if(dialog.returnValue!=='export') return null;
     const name=input.value.trim();
-    try{localStorage.setItem('kmtrack_inspector_name_v1',name);}catch{/* Export still works when remembering preferences is blocked. */}
+    try{localStorage.setItem(activeExportInspectorStorageKey(),name);}catch{/* Export still works when remembering preferences is blocked. */}
     const result=SPOTITSharing.forExport(snapshot,name);
     // Attribute only this device's unnamed entries, never colleagues' records.
     const named=new Map(result.filter(e=>!e.importBatchId&&e.inspector).map(e=>[e.id,e.inspector]));
