@@ -5720,6 +5720,9 @@
       const saved = loadMapView();
       osmMap = L.map('osm-map', { zoomControl: false, attributionControl: true })
         .setView(saved ? [saved.lat, saved.lng] : [14.86, 120.88], saved ? saved.zoom : 10);
+      osmMap.createPane('spotit-gps');
+      osmMap.getPane('spotit-gps').style.zIndex = '675';
+      osmMap.getPane('spotit-gps').style.pointerEvents = 'none';
       // A restored view must not be yanked onto the current fix — that would discard
       // exactly the position the reload was meant to preserve.
       if (saved) osmHasCenteredOnLocation = true;
@@ -5744,6 +5747,13 @@
       const index = entries.findIndex(entry => entry.id === id);
       if (index >= 0) {
         SPOTITMap.selectEntry(id);
+        const entry = entries[index];
+        const markerY = osmMap.latLngToContainerPoint([entry.lat, entry.lon]).y;
+        const mapHeight = osmMap.getSize().y;
+        const visibleY = document.documentElement.dataset.theme === 'light'
+          ? Math.min(mapHeight - 150, mapHeight * .8)
+          : Math.min(220, mapHeight * .35);
+        if (markerY > visibleY) osmMap.panBy([0, Math.ceil(markerY - visibleY)], { animate: false });
         openEditModal(index);
       }
     }
@@ -5854,7 +5864,7 @@
         : 'Accuracy unavailable';
       if (!osmMap) return;
       if (!osmLocationMarker) {
-        osmLocationMarker = L.circleMarker(point, { radius: 8, color: '#fff', weight: 3, fillColor: '#168fd0', fillOpacity: 1, className: 'map-location-marker' }).addTo(osmMap);
+        osmLocationMarker = L.circleMarker(point, { pane: 'spotit-gps', radius: 8, color: '#fff', weight: 3, fillColor: '#168fd0', fillOpacity: 1, className: 'map-location-marker' }).addTo(osmMap);
         osmAccuracyCircle = L.circle(point, { radius: Math.max(currentPos.acc || 0, 1), color: '#168fd0', weight: 1, fillColor: '#168fd0', fillOpacity: .10, interactive: false }).addTo(osmMap);
       } else {
         osmLocationMarker.setLatLng(point);

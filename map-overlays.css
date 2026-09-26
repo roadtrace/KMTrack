@@ -73,8 +73,25 @@
     border-radius: 50%;
 }
 
+.map-entry-hit::before {
+    content: '';
+    position: absolute;
+    inset: 15px;
+    border: 1.5px solid #fff;
+    border-radius: 50%;
+    background: var(--bound-color);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .35);
+}
+
+.map-entry-symbol.is-selected .map-entry-hit::before {
+    inset: 13px;
+    border-width: 2px;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--bound-color) 30%, transparent), 0 1px 5px rgba(0, 0, 0, .45);
+}
+
 .map-km-label {
     position: absolute;
+    display: none;
     width: 70px;
     height: 28px;
     min-height: 28px;
@@ -82,18 +99,18 @@
     border: 0;
     background: transparent;
     color: color-mix(in srgb, var(--bound-color) 72%, #fff);
-    font: 700 10px/1.2 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    font: 700 10px/1.2 var(--font-ui);
     white-space: nowrap;
     text-align: center;
     text-shadow: 0 1px 2px #000, 0 -1px 2px #000;
     box-shadow: none;
-    cursor: pointer;
-    pointer-events: auto;
+    pointer-events: none;
     border-radius: var(--radius-xs);
 }
 
+.map-entry-symbol.is-selected .map-km-label { display: block; }
+
 .map-entry-hit:focus-visible,
-.map-km-label:focus-visible,
 .map-landmark-pin:focus-visible {
     outline: 3px solid var(--bound-color, var(--line-yellow));
     outline-offset: 2px;
@@ -116,13 +133,15 @@
     display: block;
 }
 
+.map-landmark-pin.is-wide svg { width: 15px; height: 19px; margin: 5px auto 0; }
+
 .leaflet-tooltip.map-landmark-label {
     border: 0;
     background: transparent;
     color: #f5f7f8;
     box-shadow: none;
     text-shadow: 0 1px 2px #000, 0 -1px 2px #000;
-    font: 650 10px/1.25 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    font: 650 10px/1.25 var(--font-ui);
     letter-spacing: -.01em;
 }
 
@@ -161,7 +180,6 @@ html[data-theme="light"] .leaflet-tooltip.map-landmark-label {
     max-width: 180px;
 }
 
-html[data-theme="light"] .map-entry-dot.is-selected { stroke: #1b2737; stroke-width: 4; filter: drop-shadow(0 0 4px #fff); }
-html[data-theme="light"] .map-entry-symbol.is-selected .map-entry-hit { box-shadow: inset 0 0 0 2px #1b2737, 0 0 0 3px #fff; }
 .map-cluster-anchor { background: none; border: 0; }
-.map-entry-cluster { width: 44px; height: 44px; display: grid; place-items: center; border: 3px solid #fff; border-radius: 50%; background: #1b2737; color: #fff; box-shadow: 0 3px 14px rgba(27,39,55,.3); font: 700 13px/1 var(--font-ui); cursor: pointer; }
+.map-entry-cluster { position: relative; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 50%; background: transparent; color: var(--ds-primary-fg); font: 700 12px/1 var(--font-ui); cursor: pointer; isolation: isolate; }
+.map-entry-cluster::before { content: ''; position: absolute; z-index: -1; inset: 5px; border: 2px solid #fff; border-radius: 50%; background: var(--ds-primary); box-shadow: var(--ds-shadow); }

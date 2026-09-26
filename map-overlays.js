@@ -9,8 +9,10 @@
   let entryDots=[];
   function selectEntry(id){
     selectedEntryId=id;
-    entryDots.forEach(({entryId,marker})=>marker.getElement()?.classList.toggle('is-selected',entryId===id));
-    document.querySelectorAll('.map-entry-symbol').forEach(host=>host.classList.toggle('is-selected',host.dataset.entryId===id));
+    entryDots.forEach(({entryId,marker})=>{
+      marker.getElement()?.querySelector('.map-entry-symbol')?.classList.toggle('is-selected',entryId===id);
+      marker.setZIndexOffset(entryId===id?1000:200);
+    });
   }
   function boundKey(value){
     const key=String(value||'').trim().toUpperCase().replace(/[\s_-]/g,'');
@@ -68,24 +70,38 @@
   }
   function renderEntries(map,layer,rows,onOpen,formatKm){
     const L=globalThis.L,size=map.getSize(),occupied=[];
-    const light=document.documentElement.dataset.theme==='light';
     entryDots=[];
     const mapRect=map.getContainer().getBoundingClientRect();
-    for(const selector of ['.map-topbar','#map-bound-legend','.map-entry-controls']){
+    for(const selector of ['.map-topbar','#map-bound-legend','.map-visible-count','.map-filter-menu','.map-workspace-legend','.map-workspace-scope','.map-floating-actions','.leaflet-control-attribution','#osm-map > a']){
       const control=document.querySelector(selector);if(!control)continue;
       const rect=control.getBoundingClientRect();
       if(rect.width&&rect.height)occupied.push({x:rect.left-mapRect.left,y:rect.top-mapRect.top,w:rect.width,h:rect.height});
     }
     const sorted=rows.map(entry=>{const p=map.latLngToContainerPoint([entry.lat,entry.lon]);return {entry,x:p.x,y:p.y};}).sort((a,b)=>a.y-b.y);
     const clusteredIds=new Set();
-    if(light && map.getZoom()<=14){
-      const cells=new Map();
-      sorted.filter(({x,y})=>x>=0&&x<=size.x&&y>=0&&y<=size.y).forEach(point=>{
-        const key=`${Math.floor(point.x/56)}:${Math.floor(point.y/56)}`;
+    if(map.getZoom()<=14){
+      const points=sorted.filter(({entry,x,y})=>entry.id!==selectedEntryId&&x>=0&&x<=size.x&&y>=0&&y<=size.y);
+      const cells=new Map(),groups=[];
+      points.forEach(point=>{
+        const cx=Math.floor(point.x/48),cy=Math.floor(point.y/48);
+        const neighbors=[];
+        for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++)neighbors.push(...(cells.get(`${cx+dx}:${cy+dy}`)||[]));
+        const near=neighbors.filter(other=>Math.hypot(point.x-other.x,point.y-other.y)<48);
+        const group=near[0]?.group||[];
+        if(!near.length)groups.push(group);
+        group.push(point);point.group=group;
+        near.forEach(other=>{
+          if(other.group===group)return;
+          const merged=other.group;
+          merged.forEach(member=>{member.group=group;group.push(member);});
+          groups.splice(groups.indexOf(merged),1);
+        });
+        const key=`${cx}:${cy}`;
         if(!cells.has(key))cells.set(key,[]);
-        cells.get(key).push(point.entry);
+        cells.get(key).push(point);
       });
-      cells.forEach(group=>{
+      groups.forEach(points=>{
+        const group=points.map(point=>point.entry);
         if(group.length<2)return;
         group.forEach(entry=>clusteredIds.add(entry.id));
         const center=[group.reduce((sum,e)=>sum+e.lat,0)/group.length,group.reduce((sum,e)=>sum+e.lon,0)/group.length];
@@ -107,40 +123,47 @@
       const station=Number.isFinite(entry.km)?formatKm(entry.km):'KM n/a';
       const description=`${entry.type||'Inspection'}, ${station}, ${entry.bound||'bound not set'}, lane ${entry.lane||'not set'}`;
       const open=()=>onOpen(entry.id);
-      const marker=L.circleMarker(point,{radius:light?8:5,color,weight:light?2:1.5,fillColor:color,fillOpacity:1,interactive:true,className:'map-entry-dot'}).addTo(layer).on('click',open);
-      entryDots.push({entryId:entry.id,marker});
-      if(entry.id===selectedEntryId)marker.getElement()?.classList.add('is-selected');
       const host=element('div','map-entry-symbol');host.style.setProperty('--bound-color',color);host.dataset.entryId=entry.id;
       if(entry.id===selectedEntryId)host.classList.add('is-selected');
       const dot=element('button','map-entry-hit');dot.type='button';dot.setAttribute('aria-label',description);dot.onclick=event=>{
         if(!event.detail){open();return;}
-        const point=map.mouseEventToContainerPoint(event);
-        const closest=nearestEntry(sorted,point.x,point.y);if(closest)onOpen(closest.id);
+        const tap=map.mouseEventToContainerPoint(event);
+        const closest=nearestEntry(sorted,tap.x,tap.y);
+        if(closest)onOpen(closest.id);
       };
-      const placement=light?null:labelPlacement(screen,size,occupied,key==='SB'||key==='WB');
+      const placement=labelPlacement(screen,size,occupied,key==='SB'||key==='WB')||{
+        x:Math.max(6,Math.min(size.x-76,screen.x+(screen.x>size.x/2?-80:10))),
+        y:Math.max(6,Math.min(size.y-34,screen.y-14))
+      };
       host.append(dot);
-      if(placement){
-        occupied.push({...placement,w:70,h:28});
-        const label=element('button','map-km-label',station);label.type='button';label.title=description;label.setAttribute('aria-label',description);label.onclick=open;
-        label.style.left=(placement.x-screen.x)+'px';label.style.top=(placement.y-screen.y)+'px';host.append(label);
-      }
+      const label=element('span','map-km-label',station);
+      label.style.left=(placement.x-screen.x)+'px';label.style.top=(placement.y-screen.y)+'px';host.append(label);
       L.DomEvent.disableClickPropagation(host);L.DomEvent.disableScrollPropagation(host);
-      L.marker(point,{icon:L.divIcon({html:host,className:'map-entry-anchor',iconSize:[0,0],iconAnchor:[0,0]}),keyboard:false,zIndexOffset:200}).addTo(layer);
+      const marker=L.marker(point,{icon:L.divIcon({html:host,className:'map-entry-anchor',iconSize:[0,0],iconAnchor:[0,0]}),keyboard:false,zIndexOffset:entry.id===selectedEntryId?1000:200}).addTo(layer);
+      entryDots.push({entryId:entry.id,marker});
     });
   }
   function renderLandmarks(map,layer,assets){
-    const L=globalThis.L;layer.clearLayers();
+    const L=globalThis.L,zoom=map.getZoom(),size=map.getSize(),labels=[];layer.clearLayers();
     landmarks(assets).forEach(asset=>{
       const title=landmarkTitle(asset);
-      const host=element('button','map-landmark-pin');host.type='button';host.setAttribute('aria-label',title);
+      const host=element('button',`map-landmark-pin${zoom<12?' is-wide':''}`);host.type='button';host.setAttribute('aria-label',title);
       host.innerHTML='<svg viewBox="0 0 32 40" aria-hidden="true"><path d="M16 39C13 33 2 23 2 16a14 14 0 1 1 28 0c0 7-11 17-14 23Z" fill="#f4b400" stroke="white" stroke-width="2"/><path d="M8 12h16M8 16h16M11 10v13m10-13v13M15 16v7m4-7v7" fill="none" stroke="white" stroke-width="2"/></svg>';
       const popup=element('div','map-landmark-details');popup.append(element('strong','',title));
       if(asset.to) popup.append(element('div','',`Ends at ${asset.to}`));
       if(asset.network) popup.append(element('div','',asset.network));
       const marker=L.marker([asset.lat,asset.lon],{icon:L.divIcon({html:host,className:'map-landmark-anchor',iconSize:[44,44],iconAnchor:[22,36]}),keyboard:false});
       marker.bindPopup(popup,{maxWidth:240});
-      const name=element('span','',title.replace(/ Bridge\b/g,''));
-      marker.bindTooltip(name,{permanent:map.getZoom()>=12,direction:'top',offset:[0,-28],className:'map-landmark-label'}).addTo(layer);
+      const name=element('span','',zoom>=15?title:asset.name.replace(/ Bridge\b/g,''));
+      const screen=map.latLngToContainerPoint([asset.lat,asset.lon]);
+      const major=asset.kind==='interchange'||asset.classification==='Interchange Bridge';
+      const width=Math.min(180,Math.max(65,name.textContent.length*5.5));
+      const label={x:screen.x-width/2,y:screen.y-78,w:width,h:38};
+      const showName=zoom>=12 && (zoom>=14||major) &&
+        label.x<size.x && label.x+label.w>0 && label.y<size.y && label.y+label.h>0 &&
+        !labels.some(other=>label.x<other.x+other.w+8&&label.x+label.w+8>other.x&&label.y<other.y+other.h+6&&label.y+label.h+6>other.y);
+      if(showName)labels.push(label);
+      marker.bindTooltip(name,{permanent:showName,direction:'top',offset:[0,-28],className:'map-landmark-label'}).addTo(layer);
       host.onclick=()=>marker.openPopup();L.DomEvent.disableClickPropagation(host);
     });
   }

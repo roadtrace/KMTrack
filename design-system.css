@@ -2898,7 +2898,7 @@ html[data-theme="light"] #edit-modal .entry-sheet-field :is(select, input), html
 @media (prefers-reduced-motion: reduce) { #edit-modal, #edit-modal .entry-sheet { transition-duration: .001ms; } }
 
 /* Shared Map workspace geometry; colors follow the active theme. */
-html:root #map-view { color: var(--ds-fg); }
+html:root #map-view { color: var(--ds-fg); --map-bottom-control-offset: 42px; }
 html:root #map-view :is(.map-workspace-scope, .map-visible-count, .map-workspace-legend, .map-filter-menu > summary, .map-filter-options, .map-locate-btn) {
   background: var(--ds-card-2); border: 1px solid var(--ds-border); color: var(--ds-fg);
   box-shadow: var(--ds-shadow); backdrop-filter: none; -webkit-backdrop-filter: none;
@@ -2952,8 +2952,8 @@ body:has(#map-view:not([hidden])) .header-context { max-width: min(56vw, 290px);
 body:has(#map-view:not([hidden])) .header-context .map-road-match { color: var(--ds-fg-muted); font: 700 10px/1.2 var(--font-ui); letter-spacing: .04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 body:has(#map-view:not([hidden])) .header-context .map-title { font: 700 16px/1.2 var(--font-readout); letter-spacing: -.02em; white-space: nowrap; }
 body:has(#map-view:not([hidden])) .header-context .map-status { font-size: 10px; }
-html:root #map-view .map-workspace-scope { top: auto; bottom: 60px; left: 14px; width: min(210px, calc(100% - 86px)); max-width: none; }
-html:root #map-view .map-floating-actions { right: 14px; bottom: 60px; }
+html:root #map-view .map-workspace-scope { top: auto; bottom: var(--map-bottom-control-offset); left: 14px; width: min(210px, calc(100% - 86px)); max-width: none; }
+html:root #map-view .map-floating-actions { right: 14px; bottom: var(--map-bottom-control-offset); }
 html:root #map-view .map-visible-count { top: 14px; bottom: auto; left: 14px; }
 html:root #map-view .map-filter-menu { top: 57px; right: auto; left: 14px; }
 html:root #map-view .map-workspace-legend { top: 14px; }
