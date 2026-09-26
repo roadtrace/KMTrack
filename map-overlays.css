@@ -39,12 +39,8 @@
     font-weight: 700;
 }
 
-.map-legend-landmark svg {
-    width: 10px;
-    height: 13px;
-    flex: 0 0 10px;
-    display: block;
-}
+.map-legend-landmark .map-landmark-glyph { position: relative; top: auto; left: auto; width: 12px; height: 12px; margin: 0 2px; border-radius: 2px; }
+.map-legend-landmark .map-landmark-glyph svg { width: 8px; height: 8px; }
 
 .map-entry-anchor,
 .map-landmark-anchor {
@@ -118,22 +114,34 @@
 }
 
 .map-landmark-pin {
+    position: relative;
     width: 44px;
     height: 44px;
-    padding: 8px 11px;
+    padding: 0;
     border: 0;
     background: transparent;
     cursor: pointer;
     border-radius: var(--radius-sm);
 }
 
-.map-landmark-pin svg {
+.map-landmark-glyph {
+    position: absolute;
+    top: 9px;
+    left: 11px;
+    display: grid;
+    place-items: center;
     width: 22px;
-    height: 28px;
-    display: block;
+    height: 22px;
+    border-radius: 4px;
+    background: #f4b400;
+    color: #17212a;
+    box-shadow: 0 2px 7px rgba(0, 0, 0, .28);
+    transform: rotate(45deg);
 }
 
-.map-landmark-pin.is-wide svg { width: 15px; height: 19px; margin: 5px auto 0; }
+.map-landmark-glyph svg { display: block; width: 14px; height: 14px; transform: rotate(-45deg); }
+.map-landmark-pin.is-wide .map-landmark-glyph { top: 17px; left: 14px; width: 16px; height: 16px; border-radius: 3px; }
+.map-landmark-pin.is-wide .map-landmark-glyph svg { width: 11px; height: 11px; }
 
 .leaflet-tooltip.map-landmark-label {
     border: 0;

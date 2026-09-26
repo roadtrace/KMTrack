@@ -5,6 +5,8 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
   const BOUNDS={NB:'#00b9f2',SB:'#ef4444',EB:'#f4b400',WB:'#b18cff',Other:'#a7b0b8'};
+  const BRIDGE_ICON='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bridge" aria-hidden="true"><path d="M10 9.728V16"/><path d="M14 9.728V16"/><path d="M18 20V4"/><path d="m22 11-4-4A7.5 7.5 0 0 1 6 7l-4 4"/><path d="M22 16H2"/><path d="M6 20V4"/></svg>';
+  const LANDMARK_ICON=`<span class="map-landmark-glyph">${BRIDGE_ICON}</span>`;
   let selectedEntryId=null;
   let entryDots=[];
   function selectEntry(id){
@@ -65,7 +67,7 @@
       item.append(dot,document.createTextNode(k==='Other'?'Other / unset':k));host.append(item);
     });
     const landmarkKey=element('span','map-legend-landmark');
-    landmarkKey.innerHTML='<svg viewBox="0 0 32 40" aria-hidden="true"><path d="M16 39C13 33 2 23 2 16a14 14 0 1 1 28 0c0 7-11 17-14 23Z" fill="#f4b400" stroke="white" stroke-width="2"/><path d="M8 12h16M8 16h16M11 10v13m10-13v13M15 16v7m4-7v7" fill="none" stroke="white" stroke-width="2"/></svg><span>Landmarks</span>';
+    landmarkKey.innerHTML=`${LANDMARK_ICON}<span>Landmarks</span>`;
     landmarkKey.title='Interchanges and Pulilan/Tibag Underpass';host.append(landmarkKey);
   }
   function renderEntries(map,layer,rows,onOpen,formatKm){
@@ -148,7 +150,7 @@
     landmarks(assets).forEach(asset=>{
       const title=landmarkTitle(asset);
       const host=element('button',`map-landmark-pin${zoom<12?' is-wide':''}`);host.type='button';host.setAttribute('aria-label',title);
-      host.innerHTML='<svg viewBox="0 0 32 40" aria-hidden="true"><path d="M16 39C13 33 2 23 2 16a14 14 0 1 1 28 0c0 7-11 17-14 23Z" fill="#f4b400" stroke="white" stroke-width="2"/><path d="M8 12h16M8 16h16M11 10v13m10-13v13M15 16v7m4-7v7" fill="none" stroke="white" stroke-width="2"/></svg>';
+      host.innerHTML=LANDMARK_ICON;
       const popup=element('div','map-landmark-details');popup.append(element('strong','',title));
       if(asset.to) popup.append(element('div','',`Ends at ${asset.to}`));
       if(asset.network) popup.append(element('div','',asset.network));

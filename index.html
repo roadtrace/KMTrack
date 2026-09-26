@@ -5750,9 +5750,7 @@
         const entry = entries[index];
         const markerY = osmMap.latLngToContainerPoint([entry.lat, entry.lon]).y;
         const mapHeight = osmMap.getSize().y;
-        const visibleY = document.documentElement.dataset.theme === 'light'
-          ? Math.min(mapHeight - 150, mapHeight * .8)
-          : Math.min(220, mapHeight * .35);
+        const visibleY = Math.min(mapHeight - 150, mapHeight * .8);
         if (markerY > visibleY) osmMap.panBy([0, Math.ceil(markerY - visibleY)], { animate: false });
         openEditModal(index);
       }
@@ -8464,7 +8462,7 @@
       const modal = document.getElementById('edit-modal');
       const fromMap = document.querySelector('.app-tab-btn.active')?.dataset.appView === 'map';
       modal.classList.toggle('from-map', fromMap);
-      modal.classList.toggle('map-compact', fromMap && document.documentElement.dataset.theme === 'light');
+      modal.classList.toggle('map-compact', fromMap);
       document.getElementById('edit-sheet-expand').setAttribute('aria-expanded', modal.classList.contains('map-compact') ? 'false' : 'true');
       modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
       editModalInitialState = entryEditDraftState();

@@ -87,17 +87,20 @@ test('map entry labels no longer render leader lines or arrow paths',()=>{
   assert.doesNotMatch(css,/map-km-leader/);
 });
 
-test('landmark pins keep a full touch target around a compact visible icon',()=>{
+test('landmark diamonds keep a full touch target and compact wide-zoom artwork',()=>{
   const js=fs.readFileSync(require.resolve('./map-overlays.js'),'utf8');
   const css=fs.readFileSync(require.resolve('./map-overlays.css'),'utf8');
   assert.match(js,/iconSize:\[44,44\],iconAnchor:\[22,36\]/);
-  assert.match(css,/\.map-landmark-pin\{width:44px;height:44px;/);
-  assert.match(css,/\.map-landmark-pin svg\{width:22px;height:28px;/);
+  assert.match(css,/\.map-landmark-pin\s*\{[^}]*width:\s*44px;[^}]*height:\s*44px;/);
+  assert.match(css,/\.map-landmark-glyph\s*\{[^}]*width:\s*22px;[^}]*height:\s*22px;[^}]*transform:\s*rotate\(45deg\);/);
+  assert.match(css,/\.map-landmark-pin\.is-wide \.map-landmark-glyph\s*\{[^}]*width:\s*16px;[^}]*height:\s*16px;/);
 });
-test('legend uses the same location-pin artwork as map landmarks',()=>{
+test('legend and map landmarks reuse the supplied Lucide Bridge icon',()=>{
   const js=fs.readFileSync(require.resolve('./map-overlays.js'),'utf8');
-  const pinPath='M16 39C13 33 2 23 2 16a14 14 0 1 1 28 0c0 7-11 17-14 23Z';
-  assert.equal(js.split(pinPath).length-1,2);
+  assert.match(js,/class="lucide lucide-bridge"/);
+  assert.match(js,/m22 11-4-4A7\.5 7\.5 0 0 1 6 7l-4 4/);
+  assert.match(js,/landmarkKey\.innerHTML=`\$\{LANDMARK_ICON\}/);
+  assert.match(js,/host\.innerHTML=LANDMARK_ICON/);
   assert.doesNotMatch(js,/◆ Landmarks/);
 });
 test('map labels use native typography and bound-tinted text without boxes',()=>{
