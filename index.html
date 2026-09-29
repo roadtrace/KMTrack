@@ -4191,6 +4191,12 @@
             <div class="log-empty">No defects logged yet</div>
           </div>
         </section>
+        <section class="block" id="cloud-inspections" hidden aria-label="Cloud inspections">
+          <div class="log-header"><h2>Cloud inspections</h2><button type="button" class="ds-btn ds-btn-quiet" id="cloud-refresh">Load cloud records</button></div>
+          <p id="cloud-status" role="status">Cloud records load only when requested. Local records and exports stay separate.</p>
+          <div id="cloud-list"></div>
+          <button type="button" class="ds-btn ds-btn-quiet" id="cloud-more" hidden>Load more</button>
+        </section>
       </div>
 
     </main>
@@ -4557,6 +4563,7 @@
   <script src="./auth-config.js"></script>
   <script src="./vendor/supabase/supabase-js-2.117.1.umd.js"></script>
   <script src="./auth.js"></script>
+  <script src="./inspection-api.js"></script>
   <script src="./map-config.js"></script>
   <script src="vendor/leaflet/leaflet.js"></script>
   <script src="./swipe-actions.js"></script>
@@ -4603,6 +4610,11 @@
     const GPS_FRESH_MS = 12000;
     let calibData = [];    // {e, b, k, lat, lon} — loaded from the NLEX network dataset
     let entries = [];      // {id, type, timestamp, lat, lon, km, expressway, bound, lane, photoId, photoFilename, photoTimestamp}
+    let cloudRows = [];   // Ephemeral Phase 11 view; never stored in entries or exported.
+    let cloudRowsOwnerId = '';
+    let cloudRowsProfileScope = '';
+    let cloudNextOffset = 0;
+    let inspectionApi = null;
     let expresswayBounds = {}; // { "NLEX": ["NB","SB"], "C3-R10 RAMP": ["EB","WB"], ... }
     let userBound = null;      // manually selected direction, e.g. "NB"
 
@@ -4746,13 +4758,132 @@
     function accessibleEntries() {
       return canViewTeamRecords() ? entries : entries.filter(entry => !entry.importBatchId);
     }
+    function cloudAccess() {
+      const role = authDisplayState?.profile?.role;
+      return authDisplayState?.mode === 'approved' && authDisplayState.cloudVerified === true && authWorkspaceUnlocked && authDisplayState.profile.approved === true
+        && (role === 'administrator' || ['inspector', 'supervisor'].includes(role) && !!authDisplayState.profile.team);
+    }
+    function setCloudStatus(message) { document.getElementById('cloud-status').textContent = message; }
+    function renderCloudRows() {
+      const host = document.getElementById('cloud-list');
+      host.replaceChildren();
+      if (!cloudAccess()) return;
+      if (!cloudRows.length) { host.textContent = 'No cloud records loaded.'; return; }
+      for (const row of cloudRows) {
+        const card = document.createElement('div');
+        card.className = 'cloud-inspection-row';
+        const heading = document.createElement('strong');
+        heading.textContent = `${row.defect_type || 'Inspection'} · ${row.expressway || 'Road unset'} · ${row.km_station == null ? 'KM n/a' : `KM ${(row.km_station / 1000).toFixed(3)}`}`;
+        const meta = document.createElement('span');
+        meta.textContent = `${row.inspected_at ? new Date(row.inspected_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) : 'Date unavailable'} · ${row.direction || 'Bound unset'} · Lane ${row.lane_number || row.lane_other || 'unset'}`;
+        card.append(heading, meta);
+        const canEdit = authDisplayState.profile.role === 'supervisor' && row.team === authDisplayState.profile.team || authDisplayState.profile.role === 'inspector' && row.user_id === authDisplayState.userId && row.team === authDisplayState.profile.team;
+        if (canEdit) {
+          const details = document.createElement('details');
+          const summary = document.createElement('summary'); summary.textContent = 'Edit cloud details'; details.append(summary);
+          const form = document.createElement('form');
+          const fields = [['defect_type', 'Defect'], ['expressway', 'Expressway'], ['direction', 'Bound'], ['lane_number', 'Lane number'], ['lane_other', 'Other lane / position'], ['km_station', 'KM metres'], ['interchange_exit', 'Interchange'], ['interchange_segment', 'Interchange segment']];
+          for (const [key, label] of fields) {
+            const wrapper = document.createElement('label'); wrapper.textContent = label;
+            const input = document.createElement('input'); input.name = key; input.value = row[key] == null ? '' : String(row[key]);
+            if (key === 'lane_number' || key === 'km_station') { input.type = 'number'; input.step = '1'; }
+            wrapper.append(input); form.append(wrapper);
+          }
+          const save = document.createElement('button'); save.type = 'submit'; save.className = 'ds-btn ds-btn-primary'; save.textContent = 'Save cloud edit'; form.append(save);
+          form.addEventListener('submit', async event => {
+            event.preventDefault(); save.disabled = true;
+            const userId = authDisplayState?.userId;
+            const profileScope = `${authDisplayState?.profile?.role}:${authDisplayState?.profile?.team || ''}`;
+            try {
+              const changes = {};
+              for (const [key] of fields) {
+                const raw = form.elements.namedItem(key).value.trim();
+                const value = raw === '' ? null : ['lane_number', 'km_station'].includes(key) ? Number(raw) : raw;
+                if (value !== row[key]) changes[key] = value;
+              }
+              if (!Object.keys(changes).length) { setCloudStatus('No cloud changes to save.'); return; }
+              const updated = await inspectionApi.updateAuthorized(row.id, changes, row);
+              if (!cloudAccess() || authDisplayState.userId !== userId || `${authDisplayState.profile.role}:${authDisplayState.profile.team || ''}` !== profileScope) return;
+              cloudRows = cloudRows.map(item => item.id === row.id ? updated : item);
+              renderCloudRows(); setCloudStatus('Cloud inspection updated. Local inspections were not changed.');
+            } catch (error) { if (cloudAccess() && authDisplayState.userId === userId && `${authDisplayState.profile.role}:${authDisplayState.profile.team || ''}` === profileScope) setCloudStatus(`Cloud edit failed: ${error.message || error}`); }
+            finally { save.disabled = false; }
+          });
+          details.append(form); card.append(details);
+        }
+        host.append(card);
+      }
+    }
+    function localEntryDurable(entry) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(activeEntriesStorageKey()) || '[]');
+        return Array.isArray(saved) && saved.some(row => row.id === entry.id && JSON.stringify(row) === JSON.stringify(entry));
+      } catch (_) { return false; }
+    }
+    async function submitLocalInspection(id, button) {
+      const entry = entries.find(item => item.id === id);
+      if (!entry || !inspectionApi) return;
+      const workspaceKey = activeEntriesStorageKey();
+      const userId = authDisplayState?.userId;
+      const submittedSnapshot = JSON.stringify(entry);
+      button.disabled = true;
+      try {
+        const result = await inspectionApi.insertOne(entry);
+        if (!cloudAccess() || authDisplayState.userId !== userId || activeEntriesStorageKey() !== workspaceKey) return;
+        if (result.status === 'id-conflict') {
+          setCloudStatus(result.row ? 'That UUID already exists in an authorized cloud record. No overwrite occurred; review it before any future reconciliation.' : 'That UUID already exists, but its row is not accessible. No overwrite occurred.');
+          return;
+        }
+        if (!entries.includes(entry) || JSON.stringify(entry) !== submittedSnapshot) {
+          setCloudStatus('Cloud accepted the saved inspection, but the local record changed during submission. Review both copies before any later sync.');
+          return;
+        }
+        const previousRemoteId = entry.remote_id;
+        const previousSyncStatus = entry.sync_status;
+        entry.remote_id = result.row.id;
+        entry.sync_status = 'synced';
+        if (!saveEntries()) { entry.remote_id = previousRemoteId; entry.sync_status = previousSyncStatus; setCloudStatus('Cloud accepted the inspection, but local confirmation could not be saved. Keep this device data and review before submitting again.'); return; }
+        renderLog(); setCloudStatus('One inspection submitted. Its local record and photo remain on this device.');
+      } catch (error) { if (cloudAccess() && authDisplayState.userId === userId && activeEntriesStorageKey() === workspaceKey) setCloudStatus(`Cloud submission failed: ${error.message || error}. The local inspection and photo remain intact.`); }
+      finally { button.disabled = false; }
+    }
+    document.getElementById('cloud-refresh').addEventListener('click', async event => {
+      if (!inspectionApi) return;
+      const button = event.currentTarget; button.disabled = true; setCloudStatus('Loading authorized cloud inspections…');
+      const userId = authDisplayState?.userId;
+      const profileScope = `${authDisplayState?.profile?.role}:${authDisplayState?.profile?.team || ''}`;
+      try {
+        const rows = await inspectionApi.fetchAuthorized();
+        if (!cloudAccess() || authDisplayState.userId !== userId || `${authDisplayState.profile.role}:${authDisplayState.profile.team || ''}` !== profileScope) return;
+        cloudRows = rows; cloudRowsOwnerId = userId; cloudRowsProfileScope = `${authDisplayState.profile.role}:${authDisplayState.profile.team || ''}`; cloudNextOffset = rows.length; document.getElementById('cloud-more').hidden = rows.length < 100; renderCloudRows(); setCloudStatus(`${rows.length} cloud inspection${rows.length === 1 ? '' : 's'} loaded. This view is separate from local records and exports.`);
+      } catch (error) {
+        if (cloudAccess() && authDisplayState.userId === userId) {
+          cloudRows = []; cloudRowsOwnerId = ''; cloudRowsProfileScope = ''; cloudNextOffset = 0; document.getElementById('cloud-more').hidden = true; renderCloudRows(); setCloudStatus(`Cloud load failed: ${error.message || error}`);
+        }
+      }
+      finally { button.disabled = false; }
+    });
+    document.getElementById('cloud-more').addEventListener('click', async event => {
+      if (!inspectionApi || !cloudAccess()) return;
+      const button = event.currentTarget; button.disabled = true;
+      const userId = authDisplayState.userId;
+      const profileScope = `${authDisplayState.profile.role}:${authDisplayState.profile.team || ''}`;
+      try {
+        const rows = await inspectionApi.fetchAuthorized({ from: cloudNextOffset });
+        if (!cloudAccess() || authDisplayState.userId !== userId || `${authDisplayState.profile.role}:${authDisplayState.profile.team || ''}` !== profileScope) return;
+        cloudRows.push(...rows.filter(row => !cloudRows.some(existing => existing.id === row.id)));
+        cloudNextOffset += rows.length; button.hidden = rows.length < 100;
+        renderCloudRows(); setCloudStatus(`${cloudRows.length} cloud inspections loaded. Local records and exports remain separate.`);
+      } catch (error) { if (cloudAccess() && authDisplayState.userId === userId) setCloudStatus(`Could not load more cloud inspections: ${error.message || error}`); }
+      finally { button.disabled = false; }
+    });
 
-    function syncState(counts, online, ready, syncing) {
+    function syncState(counts, online, ready, syncing, localEntries) {
       if (syncing) return 'syncing';
       if (counts.failed > 0) return 'failed';
       if (ready && counts.pending > 0) return 'pending';
       if (!online) return 'offline';
-      if (counts.total > 0 && counts.pending === 0 && counts.failed === 0) return 'synced';
+      if (counts.total > 0 && counts.pending === 0 && counts.failed === 0 && localEntries.every(entry => !!entry.remote_id)) return 'synced';
       return 'local';
     }
 
@@ -4763,7 +4894,7 @@
       failed: { tone: 'bad', pill: '{n} failed', title: 'Sync failed', sub: '{n} record(s) need retrying.' },
       pending: { tone: 'warn', pill: '{n} pending', title: 'Waiting to upload', sub: '{n} record(s) not on the server yet.' },
       offline: { tone: 'bad', pill: 'Off network', title: 'Off network', sub: 'Records are safe on this device.' },
-      synced: { tone: 'fresh', pill: 'All synced', title: 'All synced', sub: 'Every record is on the server.' },
+      synced: { tone: 'fresh', pill: 'Submitted', title: 'Cloud submissions recorded', sub: 'Each local inspection has a recorded cloud submission. Automatic sync is off.' },
       local: { tone: 'neutral', pill: 'Saved locally', title: 'Saved locally', sub: 'Records are stored on this device.' }
     };
 
@@ -4771,10 +4902,11 @@
       const menu = document.getElementById('sync-menu');
       const text = document.getElementById('sync-status-text');
       if (!menu || !text) return;
-      const counts = SPOTITSync.summary(accessibleEntries());
+      const localEntries = accessibleEntries();
+      const counts = SPOTITSync.summary(localEntries);
       const online = navigator.onLine !== false;
       const ready = syncQueue.ready() && authDisplayState?.mode !== 'guest';
-      const state = syncState(counts, online, ready, syncInFlight);
+      const state = syncState(counts, online, ready, syncInFlight, localEntries);
       const copy = SYNC_COPY[state];
       const fill = value => String(value).replace('{n}', counts.failed || counts.pending);
 
@@ -7834,6 +7966,7 @@
       <span class="record-bound">${xmlEscape(e.bound || '—')}</span>
       <span class="record-lane">${xmlEscape(laneLabel)}</span></div>
       ${e.photoId ? `<div class="record-photo-actions">${photoActionsHtml}</div>` : ''}
+      ${!capped && !selectMode && cloudAccess() && !e.importBatchId && !e.guest_claim_required && !e.preapproval_review_required && !e.remote_id && e.sync_status !== 'synced' ? `<button type="button" class="ds-btn ds-btn-quiet cloud-submit" data-entry-id="${xmlEscape(e.id)}">Submit this inspection</button>` : ''}
       ${checkboxHtml}
     `;
         row.innerHTML = `<button type="button" class="swipe-action edit" data-idx="${realIdx}" aria-label="Edit ${xmlEscape(e.type)} entry">Edit</button><button type="button" class="swipe-action delete" data-idx="${realIdx}" aria-label="Delete ${xmlEscape(e.type)} entry">Delete</button>`;
@@ -7862,6 +7995,9 @@
       });
       list.querySelectorAll('.swipe-action.edit').forEach(btn => btn.addEventListener('click', e => {
         e.stopPropagation(); openEditModal(+e.currentTarget.dataset.idx);
+      }));
+      list.querySelectorAll('.cloud-submit').forEach(btn => btn.addEventListener('click', event => {
+        event.stopPropagation(); submitLocalInspection(event.currentTarget.dataset.entryId, event.currentTarget);
       }));
       list.querySelectorAll('.swipe-action.delete').forEach(btn => btn.addEventListener('click', e => {
         e.stopPropagation(); deletionController.remove(+e.currentTarget.dataset.idx, true);
@@ -7901,8 +8037,15 @@
         authExpiryTimer = setTimeout(() => authController.start().catch(() => {}), delay);
       }
       const hadTeamAccess = canViewTeamRecords();
+      const hadCloudAccess = cloudAccess();
       const previousEntriesKey = activeEntriesStorageKey();
       authDisplayState = state;
+      if (state.mode !== 'approved' || !state.cloudVerified || cloudRowsOwnerId && (cloudRowsOwnerId !== state.userId || cloudRowsProfileScope !== `${state.profile?.role}:${state.profile?.team || ''}`)) {
+        cloudRows = []; cloudRowsOwnerId = ''; cloudRowsProfileScope = ''; cloudNextOffset = 0;
+        document.getElementById('cloud-list').replaceChildren();
+        document.getElementById('cloud-more').hidden = true;
+        setCloudStatus('Cloud records load only when requested. Local records and exports stay separate.');
+      }
       const teamAllowed = canViewTeamRecords();
       for (const id of ['entry-filter-source', 'map-entry-source', 'map-record-scope']) {
         const select = document.getElementById(id);
@@ -7923,10 +8066,11 @@
         loadInspectorForWorkspace();
         renderLog();
         updateMapEntries();
-      } else if (hadTeamAccess !== teamAllowed) {
+      } else if (hadTeamAccess !== teamAllowed || hadCloudAccess !== cloudAccess()) {
         renderLog();
         updateMapEntries();
       }
+      document.getElementById('cloud-inspections').hidden = !cloudAccess();
       document.documentElement.classList.toggle('auth-booting', !state.canUseLocal);
       const gate = document.getElementById('auth-gate');
       gate.hidden = state.canUseLocal;
@@ -7966,6 +8110,12 @@
         onAuthStateChange: () => {}
       } };
       authController = SPOTITAuth.createController({ client, storage: localStorage, localCount: localWorkspaceCount, onChange: renderAuthState });
+      inspectionApi = SPOTITInspections.createApi({
+        client,
+        verify: () => authController.verifyOnline(),
+        context: () => ({ ...authController.getState(), workspaceUserId: authController.binding()?.userId }),
+        durable: localEntryDurable
+      });
       client.auth.onAuthStateChange(event => {
         if (event === 'SIGNED_OUT') queueMicrotask(() => authController.start());
       });

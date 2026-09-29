@@ -2983,3 +2983,18 @@ html.auth-booting :is(.top-shell, .app-view, .app-tab-bar) { visibility: hidden;
 .auth-settings .setting-copy { width: 100%; }
 .auth-settings-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .auth-settings-actions button { min-height: 44px; }
+/* Phase 11 cloud view stays separate from the local inspection register. */
+#cloud-inspections { margin-top: 18px; }
+#cloud-inspections .log-header { gap: 12px; align-items: center; }
+#cloud-inspections .log-header h2 { margin: 0; }
+#cloud-status { margin: 8px 0 12px; color: var(--ink-muted, #657384); font-size: 13px; }
+.cloud-inspection-row { display: grid; gap: 5px; padding: 14px 0; border-top: 1px solid currentColor; border-color: rgba(122, 140, 158, .24); }
+.cloud-inspection-row > span { font-size: 13px; opacity: .75; }
+.cloud-inspection-row details { margin-top: 6px; }
+.cloud-inspection-row summary { cursor: pointer; min-height: 40px; }
+.cloud-inspection-row form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 8px 0; }
+.cloud-inspection-row form label { display: grid; gap: 3px; font-size: 12px; min-width: 0; }
+.cloud-inspection-row form input { box-sizing: border-box; width: 100%; min-height: 40px; padding: 8px; border: 1px solid rgba(122, 140, 158, .4); border-radius: 8px; background: var(--ds-card); color: var(--ds-fg); font: inherit; }
+.cloud-inspection-row form button { grid-column: 1 / -1; justify-self: start; }
+.cloud-submit { margin-top: 8px; min-height: 40px; }
+@media (max-width: 390px) { .cloud-inspection-row form { grid-template-columns: 1fr; } }
