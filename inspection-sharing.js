@@ -170,13 +170,15 @@
     }
     const embeddedPhotos=await readWorkbookPhotos(files);
     const all=await rows('xl/worksheets/sheet1.xml'),headers=all.shift();
-    const expected=['Type of Defect','Timestamp','Latitude','Longitude','Latitude (DMM)','Longitude (DMM)','Expressway','Direction','Lane','Km Station','Photo','Photo Filename'];
-    if(!headers||expected.some((v,i)=>headers[i]!==v)) throw Error('Please choose a SPOT IT inspection workbook with its original columns.');
-    if(headers[12]&&headers[12]!=='Interchange / Exit') throw Error('Please choose a SPOT IT inspection workbook with its original columns.');
-    if(headers[13]&&headers[13]!=='Interchange Segment') throw Error('Please choose a SPOT IT inspection workbook with its original columns.');
+    const legacy=['Type of Defect','Timestamp','Latitude','Longitude','Latitude (DMM)','Longitude (DMM)','Expressway','Direction','Lane','Km Station','Photo','Photo Filename'];
+    const current=['Type of Defect','Expressway','Km Station','Lane','Direction','Interchange / Exit','Interchange Segment','Photo','Photo Filename','Lane Number','Lane (Other)','Timestamp','Latitude','Longitude','Latitude (DMM)','Longitude (DMM)'];
+    const matches=(expected)=>headers&&expected.every((value,index)=>headers[index]===value);
+    const isCurrent=matches(current),isLegacy=matches(legacy)&&(!headers[12]||headers[12]==='Interchange / Exit')&&(!headers[13]||headers[13]==='Interchange Segment');
+    if(!isCurrent&&!isLegacy) throw Error('Please choose a SPOT IT inspection workbook with its original columns.');
+    const column=isCurrent?{timestamp:11,lat:12,lon:13,expressway:1,bound:4,lane:3,km:2,photoFilename:8,interchange:5,interchangeSegment:6}:{timestamp:1,lat:2,lon:3,expressway:6,bound:7,lane:8,km:9,photoFilename:11,interchange:12,interchangeSegment:13};
     const records=all.filter(row=>row.some(Boolean)).map(row=>{
-      if(row[2]===''||row[3]===''||row[2]==null||row[3]==null) throw Error('Workbook has missing coordinates.');
-      return normalize({type:row[0],timestamp:row[1],lat:Number(row[2]),lon:Number(row[3]),expressway:row[6]||'',bound:row[7]||'',lane:row[8]||'',km:row[9]?Number(row[9])/1000:null,photoFilename:row[11]||'',interchange:row[12]||'',interchangeSegment:row[13]||''});
+      if(row[column.lat]===''||row[column.lon]===''||row[column.lat]==null||row[column.lon]==null) throw Error('Workbook has missing coordinates.');
+      return normalize({type:row[0],timestamp:row[column.timestamp],lat:Number(row[column.lat]),lon:Number(row[column.lon]),expressway:row[column.expressway]||'',bound:row[column.bound]||'',lane:String(row[column.lane]||''),km:row[column.km]?Number(row[column.km])/1000:null,photoFilename:row[column.photoFilename]||'',interchange:row[column.interchange]||'',interchangeSegment:row[column.interchangeSegment]||''});
     });
     if(files.has('xl/worksheets/sheet2.xml')){
       const metadata=await rows('xl/worksheets/sheet2.xml');

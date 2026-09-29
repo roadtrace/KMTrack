@@ -1,4 +1,4 @@
-const test=require('node:test');
+﻿const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 
@@ -13,8 +13,8 @@ test('Excel exports center every cell style and format KM metres as stationing',
   const styles=html.match(/<cellXfs count="4">([\s\S]*?)<\/cellXfs>/)?.[1]||'';
   assert.equal((styles.match(/<alignment horizontal="center" vertical="center"\/>/g)||[]).length,4);
   assert.match(styles,/<xf numFmtId="164"[^>]*applyNumberFormat="1"[^>]*applyAlignment="1">/);
-  assert.match(html,/colIndex===9&&\(value===''\|\|value===null\|\|value===undefined\).*s="3"\/>/);
-  assert.match(html,/colIndex===9\?3:0/);
+  assert.match(html,/colIndex === 2 && \(value === \x27\x27 \|\| value === null \|\| value === undefined\).*s="3"\/>/);
+  assert.match(html,/colIndex === 2 \? 3 : 0/);
 });
 
 test('Sharing Details stays centered and photo workbooks use rich values rather than floating drawings',()=>{
@@ -37,7 +37,7 @@ test('photo export and import advertise and preserve one native-photo workbook',
 test('resolved interchange names persist through Excel export and import',()=>{
   assert.match(swipe,/Interchange \/ Exit/);
   assert.match(swipe,/Interchange Segment/);
-  assert.match(importer,/interchange:row\[12\]\|\|''/);
-  assert.match(importer,/interchangeSegment:row\[13\]\|\|''/);
+  assert.match(importer,/interchange:row\[column\.interchange\]\|\|\x27\x27/);
+  assert.match(importer,/interchangeSegment:row\[column\.interchangeSegment\]\|\|\x27\x27/);
   assert.match(importer,/expressway','interchange','interchangeSegment','bound/);
 });

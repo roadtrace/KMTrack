@@ -74,12 +74,9 @@ test('exports exclude deleted entries and restored entries return with unchanged
   const rows = swipe.inspectionWorkbookRows([entry], (v,p)=>`${p}${v}`, v=>Math.round(v*1000));
   assert.equal(rows.length, 2);
   assert.equal(rows[0].length, 16);
-  // The original 14 columns keep their exact order and content; the two lane
-  // columns are appended so older workbooks remain importable.
-  assert.deepEqual(rows[0].slice(0,14), ['Type of Defect','Timestamp','Latitude','Longitude','Latitude (DMM)','Longitude (DMM)','Expressway','Direction','Lane','Km Station','Photo','Photo Filename','Interchange / Exit','Interchange Segment']);
-  assert.deepEqual(rows[0].slice(14), ['Lane Number','Lane (Other)']);
-  assert.deepEqual(rows[1].slice(0,14), ['Potholes','2026-09-01 09:00:00',14.1,120.2,'N14.1','E120.2','NLEX','NB','2',8200,'Yes','p.jpg','Dau Interchange','NB Entry Ramp']);
-  assert.equal(swipe.inspectionWorkbookRows([{...entry,km:null}], (v,p)=>`${p}${v}`, v=>Math.round(v*1000))[1][9], '');
+  assert.deepEqual(rows[0], ['Type of Defect','Expressway','Km Station','Lane','Direction','Interchange / Exit','Interchange Segment','Photo','Photo Filename','Lane Number','Lane (Other)','Timestamp','Latitude','Longitude','Latitude (DMM)','Longitude (DMM)']);
+  assert.deepEqual(rows[1], ['Potholes','NLEX',8200,2,'NB','Dau Interchange','NB Entry Ramp','Yes','p.jpg','','','2026-09-01 09:00:00',14.1,120.2,'N14.1','E120.2']);
+  assert.equal(swipe.inspectionWorkbookRows([{...entry,km:null}], (v,p)=>`${p}${v}`, v=>Math.round(v*1000))[1][2], '');
   assert.equal(swipe.inspectionWorkbookRows([], ()=>'', v=>v).length, 1);
 });
 
@@ -87,16 +84,18 @@ test('lane columns carry a number for lanes 1-4 and free text for Others', () =>
   const base = {type:'Potholes',timestamp:'2026-09-01 09:00:00',lat:14.1,lon:120.2,km:null,photoId:''};
   const row = (extra) => swipe.inspectionWorkbookRows([{...base,...extra}], ()=>'x', v=>v)[1];
   const numbered = row({lane:'3',lane_number:3,lane_other:''});
-  assert.equal(numbered[14], 3);
-  assert.equal(numbered[15], '');
+  assert.equal(numbered[3], 3);
+  assert.equal(numbered[9], 3);
+  assert.equal(numbered[10], '');
   const other = row({lane:'Shoulder',lane_number:null,lane_other:'Shoulder'});
-  assert.equal(other[14], '');
-  assert.equal(other[15], 'Shoulder');
+  assert.equal(other[3], 'Shoulder');
+  assert.equal(other[9], '');
+  assert.equal(other[10], 'Shoulder');
   // A record written before the structured lane existed still exports cleanly.
   const legacy = row({lane:'Shoulder'});
-  assert.equal(legacy[14], '');
-  assert.equal(legacy[15], '');
+  assert.equal(legacy[9], '');
+  assert.equal(legacy[10], '');
   // Out-of-range or non-numeric lane numbers are never emitted as a lane.
-  assert.equal(row({lane_number:9})[14], '');
-  assert.equal(row({lane_number:1.5})[14], '');
+  assert.equal(row({lane_number:9})[9], '');
+  assert.equal(row({lane_number:1.5})[9], '');
 });
