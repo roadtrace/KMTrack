@@ -12,12 +12,15 @@
   const SESSION_KEY = 'kmtrack_supabase_session_v1';
   const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
 
-  function createController({ client, storage, localCount, onChange, online, now }) {
+  function createController({ client, storage, localCount, onChange, onInvalidate, online, now }) {
     const isOnline = online || (() => navigator.onLine !== false);
     const clock = now || Date.now;
     let state = { mode: 'checking', canUseLocal: false, cloudVerified: false, userId: '', email: '', profile: null, verifiedAt: 0 };
     let candidate = null;
     let generation = 0;
+    let sessionGeneration = 0;
+    let verificationPromise = null;
+    const invalidateSession = () => { sessionGeneration++; generation++; verificationPromise = null; if (onInvalidate) onInvalidate(); };
     let guestSignout = Promise.resolve();
     const read = key => { try { return JSON.parse(storage.getItem(key) || 'null'); } catch (_) { return null; } };
     const write = (key, value) => { try { storage.setItem(key, JSON.stringify(value)); return true; } catch (_) { return false; } };
@@ -29,6 +32,7 @@
     const guest = () => emit({ mode: 'guest', canUseLocal: true, cloudVerified: false, userId: '', email: '', profile: null, verifiedAt: 0, message: 'Guest / Local Mode. Inspections and photos stay on this device. Sign in later to review and claim them before any future sync.' });
 
     function enterGuest() {
+      invalidateSession();
       ++generation;
       if (!write(GUEST_KEY, true)) return emit({ mode: 'storage-error', canUseLocal: false, cloudVerified: false, userId: '', email: '', profile: null, verifiedAt: 0, message: 'Local storage is unavailable. Guest records cannot be saved safely.' });
       const saved = cache();
@@ -42,6 +46,7 @@
 
     async function leaveGuest() {
       if (state.mode !== 'guest') return state;
+      invalidateSession();
       await guestSignout;
       if (!write(GUEST_KEY, false)) return emit({ ...state, mode: 'storage-error', canUseLocal: false, message: 'Could not leave Guest / Local Mode safely.' });
       return signedOut('Guest records remain on this device. Sign in to open your account workspace.');
@@ -60,7 +65,7 @@
       const recent = identity.verifiedAt && clock() - identity.verifiedAt <= SEVEN_DAYS;
       let mode = 'local-only';
       let message = 'Online verification is required before cloud functions resume.';
-      if (verified && approved) { mode = 'approved'; message = 'Approved account. Inspections remain saved locally; cloud sync is not connected yet.'; }
+      if (verified && approved) { mode = 'approved'; message = 'Approved account. Eligible new inspections submit automatically; photos remain on this device.'; }
       else if (verified && !approved) { mode = 'pending'; message = 'Approval pending. Local inspections and photos are available; cloud and team data are unavailable.'; }
       else if (approved && recent && !isOnline()) { mode = 'offline-recent'; message = 'Offline. Local recording and previously imported records are available; live cloud and team data are unavailable.'; }
       else if (approved && !recent) { mode = 'verification-required'; message = 'Online verification is overdue. Keep recording locally; cloud and team data are unavailable.'; }
@@ -74,7 +79,15 @@
       return present(restored, false);
     }
 
-    async function verifyOnline() {
+    function verifyOnline() {
+      // Event wakeups and the runner can request verification together. Share
+      // one fresh profile check instead of returning an older approved state.
+      if (verificationPromise) return verificationPromise;
+      const pending = verifyOnlineImpl().finally(() => { if (verificationPromise === pending) verificationPromise = null; });
+      verificationPromise = pending;
+      return pending;
+    }
+    async function verifyOnlineImpl() {
       if (guestEnabled()) return state.mode === 'guest' ? state : guest();
       if (state.mode === 'registration-pending') return state;
       // A failed SDK sign-out may still retain an in-memory user. Explicit
@@ -121,6 +134,7 @@
     async function signIn(email, password) {
       if (guestEnabled()) throw new Error('Leave Guest / Local Mode before signing in. Guest records will remain separate.');
       if (!isOnline()) throw new Error('First sign-in and account changes require internet.');
+      invalidateSession();
       const result = await client.auth.signInWithPassword({ email, password });
       if (result.error) throw result.error;
       // Do not retain the password; the SDK owns its session storage.
@@ -156,6 +170,7 @@
     }
 
     async function signOut() {
+      invalidateSession();
       ++generation;
       const saved = cache();
       // Mark the identity signed out before the SDK emits SIGNED_OUT. Its event
@@ -181,11 +196,12 @@
 
     function confirmBinding() {
       if (state.mode !== 'binding-required' || !candidate?.userId) return state;
+      invalidateSession();
       if (!write(BINDING_KEY, { userId: candidate.userId, boundAt: clock() })) return emit({ ...state, mode: 'storage-error', message: 'Could not save workspace ownership. No records were assigned.' });
       return present(candidate, state.cloudVerified);
     }
 
-    return { start, signIn, register, showSignIn, signOut, verifyOnline, enterGuest, leaveGuest, confirmBinding, getState: () => state, binding, cache };
+    return { start, signIn, register, showSignIn, signOut, verifyOnline, enterGuest, leaveGuest, confirmBinding, invalidateSession, sessionGeneration: () => sessionGeneration, getState: () => state, binding, cache };
   }
 
   return { createController, BINDING_KEY, CACHE_KEY, GUEST_KEY, SESSION_KEY, SEVEN_DAYS };

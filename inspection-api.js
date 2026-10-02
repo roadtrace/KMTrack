@@ -1,5 +1,4 @@
-/* Explicit inspection operations and Phase 12.2 recovery foundation.
- * The offline sync queue is not connected. */
+/* Inspection operations and durable recovery shared by manual/automatic sync. */
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -10,7 +9,7 @@
   const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   const MUTABLE = new Set(['defect_type', 'expressway', 'direction', 'lane_number', 'lane_other', 'km_station', 'interchange_exit', 'interchange_segment']);
   const readText = value => value == null || value === '' ? null : String(value);
-  const fail = message => { throw new Error(message); };
+  const fail = (message, syncKind = 'permanent') => { const error = new Error(message); error.syncKind = syncKind; throw error; };
   function phTime(value) {
     const match = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/.exec(String(value || ''));
     if (!match) fail('Inspection time needs review: expected Philippine date and time.');
@@ -30,10 +29,10 @@
     return `${value >= 0 ? positive : negative}${degrees} ${((absolute - degrees) * 60).toFixed(4)}`;
   }
   function requireContext(context, write) {
-    if (!context || context.mode !== 'approved' || context.cloudVerified !== true || context.canUseLocal !== true || context.workspaceUserId !== context.userId || !UUID.test(context.userId || '') || context.profile?.id !== context.userId || context.profile.approved !== true) fail('Verify this account online and open its own workspace before using cloud inspections.');
+    if (!context || context.mode !== 'approved' || context.cloudVerified !== true || context.canUseLocal !== true || context.workspaceUserId !== context.userId || !UUID.test(context.userId || '') || context.profile?.id !== context.userId || context.profile.approved !== true) fail('Verify this account online and open its own workspace before using cloud inspections.', 'authorization');
     const role = context.profile.role;
-    if (!['inspector', 'supervisor', 'administrator'].includes(role) || !context.profile.team && role !== 'administrator') fail('An approved team profile is required.');
-    if (write && role === 'administrator') fail('Administrators cannot write engineering inspections.');
+    if (!['inspector', 'supervisor', 'administrator'].includes(role) || !context.profile.team && role !== 'administrator') fail('An approved team profile is required.', 'authorization');
+    if (write && role === 'administrator') fail('Administrators cannot write engineering inspections.', 'authorization');
     return context;
   }
   function eligible(entry, context) {
@@ -130,43 +129,63 @@
     try { return matchesSnapshot(snapshot, submissionContent(entry, current)); }
     catch (_) { return false; }
   }
-  const scopeKey = current => JSON.stringify([current?.userId, current?.workspaceUserId, current?.profile?.team, current?.profile?.role, current?.scopeGeneration]);
+  const scopeKey = current => JSON.stringify([current?.userId, current?.workspaceUserId, current?.profile?.team, current?.profile?.role, current?.scopeGeneration, current?.sessionGeneration]);
   const authorizationError = error => ['401','403','42501','PGRST301','PGRST302'].includes(String(error?.code)) || [401,403].includes(error?.status);
+  function classifyFailure(error) {
+    if (error?.syncKind) return error.syncKind;
+    const code = String(error?.code || '');
+    const status = Number(error?.status);
+    if (code === '42501' || code === '23505') return 'permanent';
+    if (authorizationError(error)) return 'authorization';
+    if ([408,429].includes(status) || status >= 500 || /^08/.test(code) || ['57P01','PGRST000','PGRST001','PGRST002','PGRST003','ECONNRESET','ETIMEDOUT','ENOTFOUND','EAI_AGAIN','ERR_NETWORK'].includes(code)) return 'transient';
+    if (status >= 400 && status < 500 || code) return 'permanent';
+    return 'transient'; // A missing response never proves an INSERT failed.
+  }
 
   function createApi({ client, verify, context, durable, persist, isCurrent }) {
+    let inFlight = false;
+    async function serialized(operation, entry) {
+      if (inFlight) return { status: 'busy', retryAllowed: false };
+      inFlight = true;
+      try { return await operation(entry); }
+      finally { inFlight = false; }
+    }
     async function authorized(write) {
-      await verify();
+      try { await verify(); }
+      catch (_) { fail('Online account/profile verification is unavailable.', 'authorization'); }
       const current = requireContext(context(), write);
-      const result = await client.auth.getUser();
-      if (result.error || result.data?.user?.id !== current.userId) fail('Authenticated account changed. Verify online again.');
+      let result;
+      try { result = await client.auth.getUser(); }
+      catch (_) { fail('Online account verification is unavailable.', 'authorization'); }
+      if (result.error || result.data?.user?.id !== current.userId) fail('Authenticated account changed. Verify online again.', 'authorization');
       return current;
     }
     function guard(entry, scope) {
       requireContext(context(), true);
-      if (scopeKey(context()) !== scope || typeof isCurrent !== 'function' || !isCurrent(entry)) fail('Account, session, workspace or local record changed.');
+      if (scopeKey(context()) !== scope || typeof isCurrent !== 'function' || !isCurrent(entry)) fail('Account, session, workspace or local record changed.', 'scope');
     }
     function saveState(entry, changes) {
       const before = { ...entry };
       Object.assign(entry, changes);
       try {
-        if (typeof persist !== 'function' || persist(entry) !== true || !durable(entry)) fail('Local confirmation could not be saved.');
+        if (typeof persist !== 'function' || persist(entry) !== true || !durable(entry)) fail('Local confirmation could not be saved.', 'storage');
       } catch (error) {
         for (const key of Object.keys(entry)) if (!(key in before)) delete entry[key];
         Object.assign(entry, before);
-        throw error;
+        fail(error.message || 'Local confirmation could not be saved.', 'storage');
       }
     }
     function hold(entry, message, review = false) {
-      saveState(entry, { sync_status: 'needs_review', sync_outcome_unknown: true, submission_retry_allowed: false, ...(review ? { submission_review_required: true } : {}), sync_error: message });
+      saveState(entry, { sync_status: entry.sync_status === 'local_only' ? 'local_only' : 'needs_review', sync_outcome_unknown: true, submission_retry_allowed: false, ...(review ? { submission_review_required: true } : {}), sync_error: message });
     }
     async function insertOne(entry) {
       // Reject memory-only records before even starting online authorization.
-      if (!durable(entry)) fail('Save this inspection locally before cloud submission.');
+      if (!durable(entry)) fail('Save this inspection locally before cloud submission.', 'storage');
       const scope = scopeKey(context());
       const current = await authorized(true);
       guard(entry, scope);
       eligible(entry, current);
-      if (!durable(entry)) fail('Save this inspection locally before cloud submission.');
+      if (!durable(entry)) fail('Save this inspection locally before cloud submission.', 'storage');
       const snapshot = entry.submission_snapshot || submissionSnapshot(entry, current);
       const row = snapshotRow(snapshot);
       if (row.id !== entry.id.toLowerCase() || row.user_id !== current.userId.toLowerCase() || row.team !== current.profile.team || !localMatchesSnapshot(entry, snapshot, current)) {
@@ -177,15 +196,16 @@
       // uncertain marker. Any later interruption must reconcile before INSERT.
       saveState(entry, { submission_snapshot: snapshot, submission_retry_allowed: false, sync_status: 'syncing', sync_outcome_unknown: true, sync_error: '' });
       const attempt = JSON.stringify(snapshot);
+      const attemptRecord = JSON.stringify(entry);
       let result;
       try { result = await client.from('inspections').insert(row).select().single(); }
       catch (error) {
         guard(entry, scope);
-        hold(entry, 'Submission response unavailable; reconcile before another insert.');
+        hold(entry, 'Submission response unavailable; reconcile before another insert.', JSON.stringify(entry) !== attemptRecord);
         throw error;
       }
       guard(entry, scope);
-      if (JSON.stringify(entry.submission_snapshot) !== attempt || !localMatchesSnapshot(entry, snapshot, current)) {
+      if (JSON.stringify(entry) !== attemptRecord || JSON.stringify(entry.submission_snapshot) !== attempt || !localMatchesSnapshot(entry, snapshot, current)) {
         hold(entry, 'Local inspection changed during submission; review the original snapshot.', true);
         return { status: 'local-changed' };
       }
@@ -202,7 +222,7 @@
         hold(entry, 'Server acknowledgement differs from the submission snapshot.', true);
         return { status: 'mismatch' };
       }
-      saveState(entry, { remote_id: entry.id, sync_status: 'synced', sync_outcome_unknown: false, sync_error: '', synced_at: new Date().toISOString() });
+      saveState(entry, { remote_id: entry.id, sync_status: 'synced', sync_outcome_unknown: false, sync_attempts: 0, sync_next_retry_at: null, sync_error: '', synced_at: new Date().toISOString() });
       return { row: result.data, status: 'inserted' };
     }
     // Explicit one-record recovery seam only. Nothing schedules or invokes this
@@ -240,7 +260,10 @@
         return { status: 'local-changed', retryAllowed: false };
       }
       if (!found || typeof found !== 'object') return { status: 'transient-failure', retryAllowed: false };
-      if (found.error) return { status: authorizationError(found.error) ? 'inaccessible' : 'transient-failure', retryAllowed: false };
+      if (found.error) {
+        if (found.error.code === '42501') hold(entry, 'Cloud read was rejected by permissions. Automatic handling requires review.', true);
+        return { status: authorizationError(found.error) ? 'inaccessible' : classifyFailure(found.error) === 'permanent' ? 'permanent-failure' : 'transient-failure', retryAllowed: false };
+      }
       if (!Object.hasOwn(found, 'data') || found.data === undefined) return { status: 'transient-failure', retryAllowed: false };
       if (found.data === null) {
         if (entry.submission_uuid_conflict || entry.remote_id || entry.sync_status === 'synced') {
@@ -254,7 +277,7 @@
         hold(entry, 'Cloud identity or inspection content differs from the original snapshot.', true);
         return { status: 'mismatch', retryAllowed: false };
       }
-      saveState(entry, { remote_id: entry.id, sync_status: 'synced', sync_outcome_unknown: false, submission_retry_allowed: false, sync_error: '', synced_at: new Date().toISOString() });
+      saveState(entry, { remote_id: entry.id, sync_status: 'synced', sync_outcome_unknown: false, submission_retry_allowed: false, sync_attempts: 0, sync_next_retry_at: null, sync_error: '', synced_at: new Date().toISOString() });
       return { status: 'matching', retryAllowed: false };
     }
     async function fetchAuthorized({ from = 0, limit = 100 } = {}) {
@@ -273,7 +296,7 @@
       if (!result.data) fail('Inspection was not updated. It may no longer be accessible.');
       return { ...result.data, cloud_source: true };
     }
-    return { insertOne, reconcileOne, fetchAuthorized, updateAuthorized };
+    return { insertOne: entry => serialized(insertOne, entry), reconcileOne: entry => serialized(reconcileOne, entry), isBusy: () => inFlight, fetchAuthorized, updateAuthorized };
   }
-  return { phTime, dmm, eligible, laneParts, mapEntry, submissionSnapshot, matchesSnapshot, localMatchesSnapshot, ROW_FIELDS, cloudChanges, createApi };
+  return { phTime, dmm, eligible, laneParts, mapEntry, submissionSnapshot, matchesSnapshot, localMatchesSnapshot, scopeKey, classifyFailure, ROW_FIELDS, cloudChanges, createApi };
 });

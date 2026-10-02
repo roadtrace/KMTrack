@@ -4565,6 +4565,7 @@
   <script src="./vendor/supabase/supabase-js-2.117.1.umd.js"></script>
   <script src="./auth.js"></script>
   <script src="./inspection-api.js"></script>
+  <script src="./sync-runner.js"></script>
   <script src="./map-config.js"></script>
   <script src="vendor/leaflet/leaflet.js"></script>
   <script src="./swipe-actions.js"></script>
@@ -4735,17 +4736,13 @@
       }
     }
 
-    // ---------- Sync seam (no backend yet) ----------
-    // A queue with no transport: ready() is false, so nothing is ever sent. The
-    // Supabase client is added later by passing `{transport}` here — the entry
-    // model, the queue and the indicator all stay unchanged.
-    const syncQueue = SPOTITSync.createQueue({});
+    // ---------- Serial inspection sync (photos remain local) ----------
+    let syncRunner = null;
 
     /* The indicator speaks in six states, most actionable first. Every one is read
      * from real data: `navigator.onLine` and the queue's own summary of the records.
      * A running sync outranks everything; only when there is nothing to do do the
      * quieter states show. */
-    let syncInFlight = false;
     let authDisplayState = null;
     function activeEntriesStorageKey() {
       return authDisplayState?.mode === 'guest' ? STORAGE_KEY_GUEST_ENTRIES : STORAGE_KEY_ENTRIES;
@@ -4826,13 +4823,16 @@
       const scopeGeneration = inspectionScopeGeneration;
       button.disabled = true;
       try {
-        const result = await inspectionApi.insertOne(entry);
+        const result = syncRunner ? await syncRunner.submit(entry) : await inspectionApi.insertOne(entry);
         if (!cloudAccess() || authDisplayState.userId !== userId || activeEntriesStorageKey() !== workspaceKey || inspectionScopeGeneration !== scopeGeneration) return;
+        if (result.status === 'busy') { setCloudStatus('An inspection operation is already in progress. No duplicate submission was started.'); return; }
+        if (result.status === 'retrying') { setCloudStatus('Inspection saved locally. Reconciliation and retry are scheduled; its photo stays local.'); return; }
+        if (result.status === 'paused') { setCloudStatus('Submission paused. Verify online and check local storage; the inspection and photo remain local.'); return; }
         if (result.status === 'id-conflict') {
           setCloudStatus('That UUID already exists. No overwrite occurred; reconciliation is required before any retry.');
           return;
         }
-        if (result.status !== 'inserted') {
+        if (!['inserted','submitted'].includes(result.status)) {
           setCloudStatus('Submission requires review. The original submission snapshot and local photo remain on this device.');
           return;
         }
@@ -4873,8 +4873,8 @@
 
     function syncState(counts, online, ready, syncing, localEntries) {
       if (counts.unsaved > 0) return 'unsaved';
-      if (counts.needs_review > 0) return 'review';
       if (syncing) return 'syncing';
+      if (counts.needs_review > 0) return 'review';
       if (counts.syncing > 0) return 'syncing';
       if (counts.failed > 0) return 'failed';
       if (ready && counts.pending > 0) return 'pending';
@@ -4888,11 +4888,11 @@
     const SYNC_COPY = {
       unsaved: { tone: 'bad', pill: 'Not saved', title: 'Local save not confirmed', sub: 'Some records are only in memory. Export them before closing; cloud submission is blocked.' },
       review: { tone: 'warn', pill: 'Review required', title: 'Records need review', sub: 'Review or claim is required before these records can be submitted.' },
-      syncing: { tone: 'warn', pill: 'Syncing…', title: 'Syncing', sub: 'Uploading records now.' },
-      failed: { tone: 'bad', pill: '{n} failed', title: 'Sync failed', sub: '{n} record(s) need retrying.' },
-      pending: { tone: 'warn', pill: '{n} pending', title: 'Waiting to upload', sub: '{n} record(s) not on the server yet.' },
-      offline: { tone: 'bad', pill: 'Off network', title: 'Off network', sub: 'Records are safe on this device.' },
-      synced: { tone: 'fresh', pill: 'Submitted', title: 'Cloud submissions recorded', sub: 'Each local inspection has a recorded cloud submission. Automatic sync is off.' },
+      syncing: { tone: 'warn', pill: 'Submitting…', title: 'Submitting inspections', sub: 'One inspection operation runs at a time. Photos stay local.' },
+      failed: { tone: 'warn', pill: 'Retrying', title: 'Retry scheduled', sub: 'Transient failures use a saved retry schedule.' },
+      pending: { tone: 'warn', pill: '{n} pending', title: 'Saved locally / pending', sub: '{n} record(s) await submission.' },
+      offline: { tone: 'warn', pill: 'Waiting for connection', title: 'Waiting for connection', sub: 'Records are safe on this device.' },
+      synced: { tone: 'fresh', pill: 'Submitted', title: 'Cloud submissions recorded', sub: 'Each relevant local inspection has a confirmed cloud acknowledgement. Photos remain local.' },
       local: { tone: 'neutral', pill: 'Saved locally', title: 'Saved locally', sub: 'Records are stored on this device.' }
     };
 
@@ -4903,8 +4903,14 @@
       const localEntries = accessibleEntries();
       const counts = SPOTITSync.summary(localEntries, { durable: localEntryDurable });
       const online = navigator.onLine !== false;
-      const ready = syncQueue.ready() && authDisplayState?.mode !== 'guest';
-      const state = syncState(counts, online, ready, syncInFlight, localEntries);
+      const runnerState = syncRunner?.status();
+      const syncInFlight = runnerState?.running === true;
+      const ready = !!syncRunner?.ready() && SPOTITSync.accountEligible(inspectionContext());
+      let state = syncState(counts, online, ready, syncInFlight, localEntries);
+      if (ready && !syncInFlight && !['unsaved','synced'].includes(state)) {
+        if (!online || runnerState?.paused === 'authorization') state = 'offline';
+        else if (runnerState?.waitingUntil > Date.now()) state = 'failed';
+      }
       const copy = SYNC_COPY[state];
       const fill = value => String(value).replace('{n}', counts.failed || counts.pending);
 
@@ -4928,30 +4934,28 @@
       const now = document.getElementById('sync-now-btn');
       if (now) {
         now.disabled = syncInFlight || !ready;
-        now.textContent = syncInFlight ? 'Syncing…' : 'Sync now';
+        now.textContent = syncInFlight ? 'Submitting…' : 'Retry now';
       }
       const note = document.getElementById('sync-note');
       if (note) {
-        note.textContent = state === 'unsaved' ? SYNC_COPY.unsaved.sub : (authDisplayState?.message ? `${authDisplayState.message} ` : '') + (ready
-          ? (syncInFlight ? 'Uploading…' : 'Uploads are keyed to each record\'s own ID, so a retry cannot duplicate one.')
-          : 'Cloud sync is not configured yet, so records stay on this device. Sync now becomes available once it is.');
+        note.textContent = state === 'unsaved' ? SYNC_COPY.unsaved.sub : (ready
+          ? (runnerState?.paused ? 'Submission is paused. Verify online or review the held inspection.' : runnerState?.waitingUntil > Date.now() ? `Retry after ${new Date(runnerState.waitingUntil).toLocaleTimeString('en-PH')}. Uncertain submissions reconcile first; photos stay local.` : 'Eligible new inspections submit automatically while this page is open. Uncertain outcomes reconcile first; photos stay local.')
+          : 'Records stay on this device until this account and workspace are verified online. Guest and preapproval records remain held.');
       }
     }
 
     /* Sync only. Deliberately does NOT navigate — a page reload must never be a side
      * effect of syncing. */
     async function syncNow() {
-      if (syncInFlight || authDisplayState?.mode === 'guest') return;
-      syncInFlight = true;
-      updateSyncStatus();
+      if (!syncRunner || syncRunner.status().running || authDisplayState?.mode === 'guest') return;
+      const scope = SPOTITInspections.scopeKey(inspectionContext());
       try {
-        const result = await syncQueue.drain(entries);
-        if (result && result.ok && (result.uploaded || result.failed)) saveEntries();
+        await authController.verifyOnline();
+        await syncRunner.whenIdle();
+        if (SPOTITInspections.scopeKey(inspectionContext()) !== scope) return;
+        await syncRunner.retryNow();
       } catch (e) {
-        // The queue never throws; this is a backstop so a tap can never break the UI.
-        console.warn('Sync failed', e);
-      } finally {
-        syncInFlight = false;
+        setCloudStatus('Submission paused. Verify online before retrying.');
       }
       updateSyncStatus();
     }
@@ -4965,20 +4969,13 @@
       updateStatusPills();
     }
 
-    /* Reload only — the recovery action, kept separate from syncing. Flushes the
-     * queue first so an in-flight upload is not cut off by the navigation. */
+    /* Reload invalidates active work; durable attempts reconcile after restart. */
     async function reloadApp() {
       if (hasUnsavedReloadWork() && !confirm('Reload app? Unsaved entry edits or camera work will be lost.')) return;
       const button = document.getElementById('reload-app-btn');
       if (button) button.disabled = true;
-      if (authDisplayState?.mode !== 'guest') {
-        try {
-          const result = await syncQueue.drain(entries);
-          if (result && result.ok && (result.uploaded || result.failed)) saveEntries();
-        } catch (e) {
-          console.warn('Reload drain failed', e);
-        }
-      }
+      inspectionScopeGeneration++;
+      syncRunner?.invalidate();
       /* Everything durable is already in local storage, so nothing is lost — but
        * this does discard in-memory state, so an open camera draft is not preserved.
        * The active tab and map position ARE restored; see restoreActiveView(). */
@@ -5051,6 +5048,7 @@
         SPOTITLocalStore.save(localStorage, activeEntriesStorageKey(), entries);
         const el = document.getElementById('storage-status');
         if (el) el.hidden = true;
+        if (typeof syncRunner !== 'undefined' && syncRunner) queueMicrotask(() => syncRunner.wake('saved'));
         return true;
       } catch (e) {
         storageAvailable = false;
@@ -8039,9 +8037,13 @@
     let authExpiryTimer = null;
     let registrationOpen = false;
     let inspectionScopeGeneration = 0;
+    function inspectionContext() {
+      return { ...authController.getState(), workspaceUserId: authController.binding()?.userId,
+        scopeGeneration: inspectionScopeGeneration, sessionGeneration: authController.sessionGeneration() };
+    }
     function renderAuthState(state) {
       const scope = value => JSON.stringify([value?.mode, value?.cloudVerified, value?.canUseLocal, value?.userId, value?.profile?.role, value?.profile?.team]);
-      if (scope(state) !== scope(authDisplayState)) inspectionScopeGeneration++;
+      if (scope(state) !== scope(authDisplayState)) { inspectionScopeGeneration++; syncRunner?.invalidate(); }
       clearTimeout(authExpiryTimer);
       if (state.mode === 'offline-recent') {
         const delay = Math.max(1, state.verifiedAt + SPOTITAuth.SEVEN_DAYS - Date.now() + 1);
@@ -8107,6 +8109,7 @@
       document.getElementById('auth-signout-btn').hidden = state.mode === 'guest';
       document.getElementById('auth-guest-signin-btn').hidden = state.mode !== 'guest';
       updateSyncStatus();
+      if (state.mode === 'approved' && state.cloudVerified) queueMicrotask(() => syncRunner?.wake('verified'));
     }
     let authController = null;
     if (globalThis.SPOTITAuth) {
@@ -8120,28 +8123,30 @@
         signOut: async () => ({ error: null }),
         onAuthStateChange: () => {}
       } };
-      authController = SPOTITAuth.createController({ client, storage: localStorage, localCount: localWorkspaceCount, onChange: renderAuthState });
+      authController = SPOTITAuth.createController({ client, storage: localStorage, localCount: localWorkspaceCount, onChange: renderAuthState, onInvalidate: () => syncRunner?.invalidate() });
       inspectionApi = SPOTITInspections.createApi({
         client,
         verify: () => authController.verifyOnline(),
-        context: () => ({ ...authController.getState(), workspaceUserId: authController.binding()?.userId, scopeGeneration: inspectionScopeGeneration }),
+        context: inspectionContext,
         durable: localEntryDurable,
         persist: () => saveEntries(),
         isCurrent: entry => authWorkspaceUnlocked && entries.includes(entry)
       });
-      client.auth.onAuthStateChange(event => {
-        if (event === 'SIGNED_OUT') queueMicrotask(() => authController.start());
+      syncRunner = SPOTITSyncRunner.createRunner({
+        api: inspectionApi, entries: () => entries, context: inspectionContext, durable: localEntryDurable,
+        persist: () => saveEntries(), available: () => storageAvailable && authWorkspaceUnlocked && !document.hidden && navigator.onLine !== false,
+        onChange: () => { updateSyncStatus(); renderLog(); }
       });
-      authController.start().catch(error => showAuthError(error.message || 'Could not initialize authentication.'));
-      if (!authSdkReady) showAuthError('Sign-in is unavailable until authentication assets load. Guest / Local Mode remains available.');
-      window.addEventListener('online', () => authController.verifyOnline().catch(() => {}));
-      window.addEventListener('offline', () => authController.start().catch(() => {}));
-      document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) {
-          const check = navigator.onLine === false ? authController.start() : authController.verifyOnline();
-          check.catch(() => {});
+      syncRunner.bindWakeups({ window, document, verify: () => authController.verifyOnline() });
+      client.auth.onAuthStateChange(event => {
+        if (['SIGNED_OUT','SIGNED_IN','USER_UPDATED'].includes(event)) {
+          authController.invalidateSession();
+          queueMicrotask(() => authController.start().catch(() => {}));
         }
       });
+      authController.start().then(() => syncRunner.wake('startup')).catch(error => showAuthError(error.message || 'Could not initialize authentication.'));
+      if (!authSdkReady) showAuthError('Sign-in is unavailable until authentication assets load. Guest / Local Mode remains available.');
+      window.addEventListener('offline', () => authController.start().catch(() => {}));
     } else showAuthError('Authentication assets could not load. Your local records have not been changed.');
     document.getElementById('auth-signin-form').addEventListener('submit', async event => {
       event.preventDefault();

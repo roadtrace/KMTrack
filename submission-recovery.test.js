@@ -205,9 +205,9 @@ test('restart retains snapshot and sticky review flags; missing absence proof fa
   const record={...f.record,sync_status:'failed',sync_outcome_unknown:false,submission_review_required:false};
   assert.equal(sync.automaticEligibility(record,f.current,true).reason,'reconciliation-required');
 });
-test('production wiring retains disconnected transport and no overwrite, scheduling or photo recovery path',()=>{
+test('production wiring shares guarded recovery with the serial runner without overwrite or photo transport',()=>{
   const source=fs.readFileSync(require.resolve('./inspection-api'),'utf8');const html=fs.readFileSync(require.resolve('./index.html'),'utf8');
   assert.doesNotMatch(source,/\.upsert\s*\(/);assert.doesNotMatch(source,/\.storage\b|setInterval\(/);
-  assert.match(html,/SPOTITSync\.createQueue\(\{\}\)/);assert.doesNotMatch(html,/\.reconcileOne\(/);
-  assert.match(html,/scopeGeneration: inspectionScopeGeneration/);assert.match(html,/isCurrent: entry => authWorkspaceUnlocked && entries\.includes\(entry\)/);
+  assert.match(html,/SPOTITSyncRunner\.createRunner\(/);assert.doesNotMatch(html,/\.reconcileOne\(/);
+  assert.match(html,/scopeGeneration: inspectionScopeGeneration/);assert.match(html,/sessionGeneration: authController\.sessionGeneration\(\)/);assert.match(html,/isCurrent: entry => authWorkspaceUnlocked && entries\.includes\(entry\)/);
 });

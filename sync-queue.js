@@ -34,6 +34,11 @@
 
   const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   const reviewRequired=e=>!!e && (e.guest_claim_required===true || e.preapproval_review_required===true || e.submission_review_required===true || e.sync_outcome_unknown===true);
+  function accountEligible(context){
+    return !!context && context.mode==='approved' && context.cloudVerified===true && context.canUseLocal===true &&
+      UUID.test(context.userId||'') && context.workspaceUserId===context.userId && context.profile?.id===context.userId &&
+      context.profile.approved===true && ['inspector','supervisor'].includes(context.profile.role) && !!context.profile.team;
+  }
 
   /* Pure eligibility: the caller supplies a fresh account/workspace context and
    * a storage check. Missing proof fails closed. Phase 11 checks still apply. */
@@ -49,9 +54,7 @@
     if(entry.sync_status===STATUS.NEEDS_REVIEW || entry.sync_outcome_unknown===true) return reject('needs-review');
     if(entry.submission_snapshot && entry.submission_retry_allowed!==true) return reject('reconciliation-required');
     if(!isPending(entry) && !isFailed(entry)) return reject('not-pending');
-    if(!context || context.mode!=='approved' || context.cloudVerified!==true || context.canUseLocal!==true ||
-      !UUID.test(context.userId||'') || context.workspaceUserId!==context.userId || context.profile?.id!==context.userId ||
-      context.profile.approved!==true || !['inspector','supervisor'].includes(context.profile.role) || !context.profile.team)
+    if(!accountEligible(context))
       return reject('account-verification-required');
     if(entry.user_id && entry.user_id!==context.userId || entry.team && entry.team!==context.profile.team) return reject('record-scope-mismatch');
     if(durable!==true) return reject('not-durable');
@@ -172,5 +175,5 @@
     return {ready,drain,summary:()=>summary([]),nextBatch:(entries,limit)=>nextBatch(entries,limit||batchSize,opts.scope?.())};
   }
 
-  return {STATUS,DEFAULT_BATCH,isPending,isFailed,isSynced,automaticEligibility,isUploadable,pending,failed,synced,nextBatch,summary,photoNeedsUpload,markSynced,markFailed,requeue,requeueAll,createQueue};
+  return {STATUS,DEFAULT_BATCH,isPending,isFailed,isSynced,accountEligible,automaticEligibility,isUploadable,pending,failed,synced,nextBatch,summary,photoNeedsUpload,markSynced,markFailed,requeue,requeueAll,createQueue};
 });

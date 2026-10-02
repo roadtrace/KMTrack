@@ -4,7 +4,7 @@
 // since the app already manages its own offline copy of that file and
 // the in-app "Reload dataset" button needs a real network attempt.
 
-const CACHE_VERSION = 'v225'; // bump this string whenever you deploy changes, to force an update
+const CACHE_VERSION = 'v226'; // bump this string whenever you deploy changes, to force an update
 const CACHE_NAME = `spotit-shell-${CACHE_VERSION}`;
 
 const APP_SHELL = [
@@ -18,6 +18,7 @@ const APP_SHELL = [
   './vendor/supabase/supabase-js-2.117.1.umd.js',
   './vendor/supabase/LICENSE',
   './sync-queue.js',
+  './sync-runner.js',
   './map-config.js',
   './swipe-actions.js',
   './entry-filters.js',

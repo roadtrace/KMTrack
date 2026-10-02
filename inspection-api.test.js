@@ -93,7 +93,7 @@ test('authorized fetch stays a distinct cloud collection', async () => {
 test('app keeps fetched rows separate from local Map, Log, export and the disconnected queue', () => {
   const source = fs.readFileSync(require.resolve('./inspection-api.js').replace('inspection-api.js', 'index.html'), 'utf8');
   assert.match(source, /let cloudRows = \[\]/);
-  assert.match(source, /SPOTITSync\.createQueue\(\{\}\)/);
+  assert.match(source, /SPOTITSyncRunner\.createRunner\(/);
   assert.match(source, /return canViewTeamRecords\(\) \? entries : entries\.filter/);
   assert.match(source, /cloudRows = rows; cloudRowsOwnerId = userId/);
   assert.doesNotMatch(source, /entries\.(?:push|concat)\([^\n]*cloudRows/);

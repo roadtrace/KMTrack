@@ -1,8 +1,8 @@
 # Phase 12.2 submission recovery contract
 
-Automatic queue transport remains disconnected. This increment does not call
-reconciliation from app events, add a retry runner, or change schema/RLS. The
-existing explicit single-inspection submission now uses the recovery foundation.
+Phase 12.2 established this recovery foundation without automatic transport or
+schema/RLS changes. Phase 12.3A connects the serial runner to these same guarded
+methods; see `PHASE12_RUNNER.md` for current scheduling and failure handling.
 
 ## Persisted intent and lifecycle
 
@@ -34,7 +34,8 @@ reconciliation. No later local edit changes the original snapshot.
 runner. It performs fresh profile/account verification and one authorized UUID
 SELECT, then persists the local classification. It never inserts, patches,
 uploads a photo, or copies cloud rows into Entries. There is no app/event/UI
-invocation of this method in Phase 12.2.
+invocation of this method in Phase 12.2. Phase 12.3A invokes it through the serial
+runner, with the same local-first snapshot and comparison guarantees.
 
 | Status | Durable local result | Later INSERT |
 | --- | --- | --- |
@@ -61,18 +62,21 @@ this increment. Guest/preapproval flags are never cleared by recovery.
 
 ## Caller requirements and Phase 12.3 prerequisites
 
-`createApi` now requires synchronous `persist(entry)` returning true only after
+`createApi` requires synchronous `persist(entry)` returning true only after
 confirmed storage, `durable(entry)`, and `isCurrent(entry)` checking membership in
 the active workspace. App persistence uses `saveEntries`/readback. The caller's
 context supplies `scopeGeneration`, which changes across account/access/workspace
-transitions (including leaving and returning to the same account). Profile/team,
+transitions (including leaving and returning to the same account). Phase 12.3A
+also supplies an immediately invalidated Auth `sessionGeneration` and a shared
+INSERT/reconciliation lock. Profile/team,
 owner, workspace binding, record membership, snapshot, and local record are
 checked before applying results. Late results from another scope are discarded.
 
-A future runner must consume these guarded methods, reconcile uncertain attempts
+The runner must consume these guarded methods, reconcile uncertain attempts
 first, and send only new eligible records using the retained snapshot. It must
 serialize per-record operations, recheck scope at each request, and keep storage
-failures/mismatches held. Scheduling/backoff is not implemented. Fresh live schema,
+failures/mismatches held. Scheduling/backoff is detailed in `PHASE12_RUNNER.md`.
+Fresh live schema,
 RLS/account verification and device/PWA recovery tests need separate authorization
 before integration or live tests. No storage redesign or schema/RLS blocker was
 found in this local increment.
