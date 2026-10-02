@@ -4561,6 +4561,7 @@
   <script src="./entry-model.js"></script>
   <script src="./local-entry-store.js"></script>
   <script src="./sync-queue.js"></script>
+  <script src="./preapproval-review.js"></script>
   <script src="./auth-config.js"></script>
   <script src="./vendor/supabase/supabase-js-2.117.1.umd.js"></script>
   <script src="./auth.js"></script>
@@ -4820,6 +4821,59 @@
     }
     function localEntryDurable(entry) {
       return authWorkspaceUnlocked && SPOTITLocalStore.contains(localStorage, activeEntriesStorageKey(), entry);
+    }
+    let preapprovalReview = null;
+    let activePreapprovalDialog = null;
+    function reviewController() {
+      return preapprovalReview ||= SPOTITPreapprovalReview.createReview({
+        entries: () => entries, context: inspectionContext, key: activeEntriesStorageKey,
+        durable: entry => storageAvailable && localEntryDurable(entry), verify: () => authController.verifyOnline(),
+        persist: (candidate, key) => {
+          if (!storageAvailable || !authWorkspaceUnlocked || key !== activeEntriesStorageKey()) return false;
+          try { SPOTITLocalStore.saveReview(localStorage, key, entries, candidate); return true; }
+          catch (_) {
+            storageAvailable = false;
+            return false;
+          }
+        },
+        wake: () => syncRunner?.wake('preapproval-reviewed')
+      });
+    }
+    function openPreapprovalReview(id) {
+      try {
+        const controller = reviewController(), ticket = controller.open(id);
+        const record = JSON.parse(ticket.record);
+        activePreapprovalDialog?.close();
+        const dialog = document.createElement('dialog');
+        activePreapprovalDialog = dialog;
+        dialog.setAttribute('aria-label', 'Review inspection');
+        dialog.style.maxWidth = 'min(32rem, 90vw)';
+        const title = document.createElement('h2'); title.textContent = 'Review inspection';
+        const details = document.createElement('p');
+        details.style.whiteSpace = 'pre-wrap';
+        details.textContent = [record.type, record.timestamp, record.expressway, record.bound,
+          `Lane: ${record.lane || 'unset'}`, `KM: ${record.km ?? 'unset'}`,
+          record.interchange, record.interchangeSegment,
+          `GPS: ${record.lat}, ${record.lon}`, record.notes,
+          record.photoId ? 'Photo saved locally; it will stay on this device.' : 'No local photo',
+          `Submission team: ${inspectionContext().profile.team}`].filter(Boolean).join('\n');
+        const status = document.createElement('p'); status.setAttribute('role', 'status');
+        const buttons = [];
+        for (const [decision, label] of [['submit', 'Submit'], ['local', 'Keep local']]) {
+          const button = document.createElement('button'); button.type = 'button';
+          button.className = 'ds-btn ds-btn-primary'; button.textContent = label; buttons.push(button);
+          button.onclick = async () => {
+            buttons.forEach(b => b.disabled = true);
+            try { await controller.decide(ticket, decision); dialog.close(); renderLog(); }
+            catch (error) { status.textContent = error.message; }
+          };
+          dialog.append(button);
+        }
+        const close = document.createElement('button'); close.type = 'button'; close.textContent = 'Close';
+        close.onclick = () => dialog.close();
+        dialog.prepend(title, details); dialog.append(status, close);
+        dialog.addEventListener('close', () => { ticket.cancelled = true; dialog.remove(); if (activePreapprovalDialog === dialog) activePreapprovalDialog = null; }); document.body.append(dialog); dialog.showModal();
+      } catch (error) { setCloudStatus(error.message); }
     }
     async function submitLocalInspection(id, button) {
       const entry = entries.find(item => item.id === id);
@@ -7978,6 +8032,8 @@
       <span class="record-bound">${xmlEscape(e.bound || '—')}</span>
       <span class="record-lane">${xmlEscape(laneLabel)}</span></div>
       ${e.photoId ? `<div class="record-photo-actions">${photoActionsHtml}</div>` : ''}
+      ${e.preapproval_review_required && !e.guest_claim_required ? '<span class="import-label">Preapproval inspection requires review</span>' : ''}
+      ${!capped && !selectMode && authDisplayState && SPOTITPreapprovalReview.reviewable(e, inspectionContext()) && localEntryDurable(e) ? `<button type="button" class="ds-btn ds-btn-quiet preapproval-review" data-entry-id="${xmlEscape(e.id)}">Review inspection</button>` : ''}
       ${!capped && !selectMode && cloudAccess() && localEntryDurable(e) && !e.importBatchId && !e.guest_claim_required && !e.preapproval_review_required && !e.submission_review_required && (!e.submission_snapshot || e.submission_retry_allowed === true) && !e.sync_outcome_unknown && !e.remote_id && ['pending','failed'].includes(e.sync_status) ? `<button type="button" class="ds-btn ds-btn-quiet cloud-submit" data-entry-id="${xmlEscape(e.id)}">Submit this inspection</button>` : ''}
       ${checkboxHtml}
     `;
@@ -8010,6 +8066,9 @@
       }));
       list.querySelectorAll('.cloud-submit').forEach(btn => btn.addEventListener('click', event => {
         event.stopPropagation(); submitLocalInspection(event.currentTarget.dataset.entryId, event.currentTarget);
+      }));
+      list.querySelectorAll('.preapproval-review').forEach(btn => btn.addEventListener('click', event => {
+        event.stopPropagation(); openPreapprovalReview(event.currentTarget.dataset.entryId);
       }));
       list.querySelectorAll('.swipe-action.delete').forEach(btn => btn.addEventListener('click', e => {
         e.stopPropagation(); deletionController.remove(+e.currentTarget.dataset.idx, true);
@@ -8049,7 +8108,7 @@
     }
     function renderAuthState(state) {
       const scope = value => JSON.stringify([value?.mode, value?.cloudVerified, value?.canUseLocal, value?.userId, value?.profile?.role, value?.profile?.team]);
-      if (scope(state) !== scope(authDisplayState)) { inspectionScopeGeneration++; syncRunner?.invalidate(); }
+      if (scope(state) !== scope(authDisplayState)) { inspectionScopeGeneration++; syncRunner?.invalidate(); activePreapprovalDialog?.close(); }
       clearTimeout(authExpiryTimer);
       if (state.mode === 'offline-recent') {
         const delay = Math.max(1, state.verifiedAt + SPOTITAuth.SEVEN_DAYS - Date.now() + 1);

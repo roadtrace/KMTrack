@@ -18,5 +18,15 @@
       return !!entry && Array.isArray(saved) && saved.some(row=>row && row.id===entry.id && JSON.stringify(row)===JSON.stringify(entry));
     }catch(_){return false;}
   }
-  return {save,contains};
+  function saveReview(storage,key,before,after){
+    const original=JSON.stringify(before);
+    if(storage.getItem(key)!==original) throw new Error('Saved workspace changed. Reopen the review.');
+    try { return save(storage,key,after); }
+    catch(error){
+      // Keep the original hold on disk as well as in memory if confirmation fails.
+      storage.setItem(key,original);
+      throw error;
+    }
+  }
+  return {save,contains,saveReview};
 });
