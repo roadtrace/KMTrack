@@ -6,8 +6,8 @@
  * added later without touching the inspection system.
  *
  * New submissions use INSERT with the record's permanent UUID. A UUID conflict
- * must never overwrite an existing row. Unknown outcomes require reconciliation
- * in a later increment; this local foundation does not implement that transport.
+ * must never overwrite an existing row. Unknown outcomes require the explicit
+ * inspection API reconciliation seam; this queue does not invoke that seam.
  */
 (function(root,factory){
   const api=factory(root);
@@ -33,7 +33,7 @@
   const isSynced=e=>!!e && e.sync_status===STATUS.SYNCED;
 
   const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  const reviewRequired=e=>!!e && (e.guest_claim_required===true || e.preapproval_review_required===true || e.sync_outcome_unknown===true);
+  const reviewRequired=e=>!!e && (e.guest_claim_required===true || e.preapproval_review_required===true || e.submission_review_required===true || e.sync_outcome_unknown===true);
 
   /* Pure eligibility: the caller supplies a fresh account/workspace context and
    * a storage check. Missing proof fails closed. Phase 11 checks still apply. */
@@ -42,10 +42,12 @@
     if(!entry || !UUID.test(entry.id||'')) return reject('invalid-uuid');
     if(entry.guest_claim_required===true) return reject('guest-claim-required');
     if(entry.preapproval_review_required===true) return reject('preapproval-review-required');
+    if(entry.submission_review_required===true) return reject('submission-review-required');
     if(entry.importBatchId || entry.cloud_source) return reject('imported-or-cloud-record');
     if(entry.remote_id || isSynced(entry)) return reject('already-submitted');
     if(entry.sync_status===STATUS.LOCAL_ONLY) return reject('local-only');
     if(entry.sync_status===STATUS.NEEDS_REVIEW || entry.sync_outcome_unknown===true) return reject('needs-review');
+    if(entry.submission_snapshot && entry.submission_retry_allowed!==true) return reject('reconciliation-required');
     if(!isPending(entry) && !isFailed(entry)) return reject('not-pending');
     if(!context || context.mode!=='approved' || context.cloudVerified!==true || context.canUseLocal!==true ||
       !UUID.test(context.userId||'') || context.workspaceUserId!==context.userId || context.profile?.id!==context.userId ||
@@ -135,7 +137,7 @@
    *
    * A future `transport.upload(entry)` must INSERT using `entry.id` and return
    * an acknowledged `{remoteId}`. Conflicts/unknown outcomes must be handled
-   * before acknowledgement. App transport remains disconnected in Phase 12.1.
+   * before acknowledgement. App transport remains disconnected in Phase 12.2.
    */
   function createQueue(options){
     const opts=options||{};

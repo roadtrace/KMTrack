@@ -29,7 +29,9 @@ function fixture(over = {}) {
       };
     }
   };
-  const transport = api.createApi({ client, verify: async () => {}, context: () => current, durable: candidate => candidate.id === stored.id && candidate.updated_at === stored.updated_at && candidate.photoId === stored.photoId });
+  const transport = api.createApi({ client, verify: async () => {}, context: () => current,
+    durable: candidate => JSON.stringify(candidate) === JSON.stringify(stored),
+    persist: candidate => { stored = JSON.parse(JSON.stringify(candidate)); return true; }, isCurrent: () => true });
   return { transport, get operation() { return operation; }, get written() { return written; }, setState: value => { current = state(value); }, setRows: value => { rows = value; }, setError: value => { writeError = value; }, setStored: value => { stored = value; } };
 }
 
@@ -66,16 +68,18 @@ test('Inspector and Supervisor insert only one durable eligible inspection; fail
   const f = fixture(); const local = entry();
   assert.equal((await f.transport.insertOne(local)).status, 'inserted');
   assert.equal(f.operation, 'insert'); assert.equal(f.written.user_id, user); assert.equal(f.written.team, 'roadway');
-  assert.equal(local.photoId, 'local-photo'); assert.equal(local.sync_status, undefined);
+  assert.equal(local.photoId, 'local-photo'); assert.equal(local.sync_status, 'synced');
   f.setState({ profile: { id: user, approved: true, role: 'supervisor', team: 'roadway' } });
-  assert.equal((await f.transport.insertOne(local)).status, 'inserted');
+  const supervisorLocal = entry(); f.setStored(supervisorLocal);
+  assert.equal((await f.transport.insertOne(supervisorLocal)).status, 'inserted');
   f.setError(new Error('offline'));
-  await assert.rejects(f.transport.insertOne(local), /offline/);
-  assert.equal(local.photoFilename, 'local.jpg'); assert.equal(local.remote_id, undefined);
+  const failedLocal = entry(); f.setStored(failedLocal);
+  await assert.rejects(f.transport.insertOne(failedLocal), /offline/);
+  assert.equal(failedLocal.photoFilename, 'local.jpg'); assert.equal(failedLocal.remote_id, undefined);
   f.setStored(entry({ updated_at: 'older' }));
   await assert.rejects(f.transport.insertOne(local), /Save this inspection locally/);
 });
-test('duplicate UUID is inspected, never upserted or overwritten', async () => {
+test('duplicate UUID is held for explicit reconciliation, never upserted or overwritten', async () => {
   const f = fixture(); f.setError({ code: '23505', message: 'duplicate' }); f.setRows([{ id, user_id: user }]);
   assert.deepEqual((await f.transport.insertOne(entry())).status, 'id-conflict');
   assert.equal(f.operation, 'insert');

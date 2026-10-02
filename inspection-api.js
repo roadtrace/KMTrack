@@ -1,4 +1,5 @@
-/* Explicit Phase 11 inspection operations. The offline sync queue is not connected. */
+/* Explicit inspection operations and Phase 12.2 recovery foundation.
+ * The offline sync queue is not connected. */
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -38,9 +39,10 @@
   function eligible(entry, context) {
     requireContext(context, true);
     if (!entry || !UUID.test(entry.id || '')) fail('Inspection UUID is missing or invalid; review this local record.');
-    if (entry.importBatchId || entry.guest_claim_required === true || entry.preapproval_review_required === true) fail('This inspection requires review before cloud submission.');
+    if (entry.importBatchId || entry.guest_claim_required === true || entry.preapproval_review_required === true || entry.submission_review_required === true) fail('This inspection requires review before cloud submission.');
     if (entry.cloud_source || entry.remote_id || entry.sync_status === 'synced') fail('This inspection already identifies a cloud record.');
     if (['local_only','needs_review','syncing'].includes(entry.sync_status) || entry.sync_outcome_unknown === true) fail('This inspection is held locally or requires reconciliation before submission.');
+    if (entry.submission_snapshot && entry.submission_retry_allowed !== true) fail('Reconcile the previous submission before another insert.');
     return true;
   }
   function laneParts(entry) {
@@ -49,6 +51,11 @@
   }
   function mapEntry(entry, context) {
     eligible(entry, context);
+    return submissionContent(entry, context);
+  }
+  // Shared Phase 11 mapping, also usable for comparing held records. This does
+  // not grant permission to send them: mapEntry/authorized enforce that boundary.
+  function submissionContent(entry, context) {
     if (!Number.isFinite(entry.lat) || Math.abs(entry.lat) > 90 || !Number.isFinite(entry.lon) || Math.abs(entry.lon) > 180) fail('Inspection coordinates need review.');
     if (!String(entry.type || '').trim()) fail('Defect type is required.');
     const metres = entry.km == null ? null : Math.round(entry.km * 1000);
@@ -80,7 +87,53 @@
     if (mapped.lane_other != null) mapped.lane_number = null;
     return mapped;
   }
-  function createApi({ client, verify, context, durable }) {
+  const ROW_FIELDS = Object.freeze(['id','created_at','user_id','team','inspected_at','defect_type','latitude','longitude','latitude_dmm','longitude_dmm','expressway','direction','lane_number','lane_other','km_station','interchange_exit','interchange_segment','photo_filename','photo_path']);
+  const NUMERIC_FIELDS = new Set(['latitude','longitude','lane_number','km_station']);
+  const NULLABLE_FIELDS = new Set(['expressway','direction','lane_number','lane_other','km_station','interchange_exit','interchange_segment','photo_filename','photo_path']);
+  function canonicalRow(row) {
+    if (!row || typeof row !== 'object') fail('Submission row is missing.');
+    const result = {};
+    for (const key of ROW_FIELDS) {
+      const value = row[key];
+      if (value === null && NULLABLE_FIELDS.has(key)) result[key] = null;
+      else if (['id','user_id'].includes(key)) {
+        if (!UUID.test(value || '')) fail('Invalid row identity.');
+        result[key] = value.toLowerCase();
+      } else if (['created_at','inspected_at'].includes(key)) {
+        // Do not discard meaningful sub-millisecond precision from a server row.
+        if (/\.\d{3}\d*[1-9]\d*(?:Z|[+-]\d\d:\d\d)$/.test(value)) fail('Timestamp precision differs.');
+        result[key] = isoInstant(value, key);
+      } else if (NUMERIC_FIELDS.has(key)) {
+        if (typeof value !== 'number' || !Number.isFinite(value)) fail('Invalid numeric row field.');
+        result[key] = value;
+      } else {
+        if (typeof value !== 'string') fail('Missing or invalid row field.');
+        result[key] = value;
+      }
+    }
+    return result;
+  }
+  function submissionSnapshot(entry, current) {
+    return { version: 1, row: canonicalRow(mapEntry(entry, current)) };
+  }
+  function snapshotRow(snapshot) {
+    if (snapshot?.version !== 1) fail('Submission snapshot needs review.');
+    const row = canonicalRow(snapshot.row);
+    if (row.photo_filename !== null || row.photo_path !== null || !row.team || !row.defect_type || Math.abs(row.latitude) > 90 || Math.abs(row.longitude) > 180 || row.lane_number !== null && ![1,2,3,4].includes(row.lane_number) || row.km_station !== null && !Number.isInteger(row.km_station)) fail('Submission snapshot needs review.');
+    return row;
+  }
+  function matchesSnapshot(snapshot, row) {
+    try { return JSON.stringify(snapshotRow(snapshot)) === JSON.stringify(canonicalRow(row)); }
+    catch (_) { return false; }
+  }
+  function localMatchesSnapshot(entry, snapshot, current) {
+    try { return matchesSnapshot(snapshot, submissionContent(entry, current)); }
+    catch (_) { return false; }
+  }
+  const scopeKey = current => JSON.stringify([current?.userId, current?.workspaceUserId, current?.profile?.team, current?.profile?.role, current?.scopeGeneration]);
+  const authorizationError = error => ['401','403','42501','PGRST301','PGRST302'].includes(String(error?.code)) || [401,403].includes(error?.status);
+
+  function createApi({ client, verify, context, durable, persist, isCurrent }) {
     async function authorized(write) {
       await verify();
       const current = requireContext(context(), write);
@@ -88,21 +141,121 @@
       if (result.error || result.data?.user?.id !== current.userId) fail('Authenticated account changed. Verify online again.');
       return current;
     }
+    function guard(entry, scope) {
+      requireContext(context(), true);
+      if (scopeKey(context()) !== scope || typeof isCurrent !== 'function' || !isCurrent(entry)) fail('Account, session, workspace or local record changed.');
+    }
+    function saveState(entry, changes) {
+      const before = { ...entry };
+      Object.assign(entry, changes);
+      try {
+        if (typeof persist !== 'function' || persist(entry) !== true || !durable(entry)) fail('Local confirmation could not be saved.');
+      } catch (error) {
+        for (const key of Object.keys(entry)) if (!(key in before)) delete entry[key];
+        Object.assign(entry, before);
+        throw error;
+      }
+    }
+    function hold(entry, message, review = false) {
+      saveState(entry, { sync_status: 'needs_review', sync_outcome_unknown: true, submission_retry_allowed: false, ...(review ? { submission_review_required: true } : {}), sync_error: message });
+    }
     async function insertOne(entry) {
       // Reject memory-only records before even starting online authorization.
       if (!durable(entry)) fail('Save this inspection locally before cloud submission.');
+      const scope = scopeKey(context());
       const current = await authorized(true);
+      guard(entry, scope);
       eligible(entry, current);
       if (!durable(entry)) fail('Save this inspection locally before cloud submission.');
-      const row = mapEntry(entry, current);
-      const result = await client.from('inspections').insert(row).select().single();
-      if (!result.error) return { row: result.data, status: 'inserted' };
-      if (result.error.code === '23505') {
-        const found = await client.from('inspections').select('*').eq('id', entry.id).maybeSingle();
-        if (found.error) throw found.error;
-        return { row: found.data || null, status: 'id-conflict' };
+      const snapshot = entry.submission_snapshot || submissionSnapshot(entry, current);
+      const row = snapshotRow(snapshot);
+      if (row.id !== entry.id.toLowerCase() || row.user_id !== current.userId.toLowerCase() || row.team !== current.profile.team || !localMatchesSnapshot(entry, snapshot, current)) {
+        hold(entry, 'Local inspection differs from its original submission snapshot. Review required.', true);
+        fail('Submission snapshot differs; review required.');
       }
-      throw result.error;
+      // One confirmed storage write contains both the immutable intent and the
+      // uncertain marker. Any later interruption must reconcile before INSERT.
+      saveState(entry, { submission_snapshot: snapshot, submission_retry_allowed: false, sync_status: 'syncing', sync_outcome_unknown: true, sync_error: '' });
+      const attempt = JSON.stringify(snapshot);
+      let result;
+      try { result = await client.from('inspections').insert(row).select().single(); }
+      catch (error) {
+        guard(entry, scope);
+        hold(entry, 'Submission response unavailable; reconcile before another insert.');
+        throw error;
+      }
+      guard(entry, scope);
+      if (JSON.stringify(entry.submission_snapshot) !== attempt || !localMatchesSnapshot(entry, snapshot, current)) {
+        hold(entry, 'Local inspection changed during submission; review the original snapshot.', true);
+        return { status: 'local-changed' };
+      }
+      if (result.error) {
+        if (result.error.code === '23505') {
+          // A uniqueness error proves a row exists, even if RLS hides it.
+          saveState(entry, { submission_uuid_conflict: true, sync_status: 'needs_review', sync_outcome_unknown: true, sync_error: 'UUID conflict; reconcile before any retry.' });
+          return { status: 'id-conflict', row: null };
+        }
+        hold(entry, 'Submission response failed; reconcile before another insert.');
+        throw result.error;
+      }
+      if (!matchesSnapshot(snapshot, result.data)) {
+        hold(entry, 'Server acknowledgement differs from the submission snapshot.', true);
+        return { status: 'mismatch' };
+      }
+      saveState(entry, { remote_id: entry.id, sync_status: 'synced', sync_outcome_unknown: false, sync_error: '', synced_at: new Date().toISOString() });
+      return { row: result.data, status: 'inserted' };
+    }
+    // Explicit one-record recovery seam only. Nothing schedules or invokes this
+    // automatically, and this method never writes to the backend.
+    async function reconcileOne(entry) {
+      const scope = scopeKey(context());
+      try { guard(entry, scope); }
+      catch (_) { return { status: 'inaccessible', retryAllowed: false }; }
+      if (!durable(entry)) return { status: 'not-durable', retryAllowed: false };
+      // Revoke any previous absence proof before a fresh verification/read. A
+      // failed fresh read must never leave an older retry permission active.
+      saveState(entry, { submission_retry_allowed: false, sync_outcome_unknown: true });
+      let current;
+      try { current = await authorized(true); guard(entry, scope); }
+      catch (_) { return { status: 'inaccessible', retryAllowed: false }; }
+      if (!durable(entry)) return { status: 'not-durable', retryAllowed: false };
+      let snapshot, row;
+      try {
+        snapshot = JSON.parse(JSON.stringify(entry.submission_snapshot));
+        row = snapshotRow(snapshot);
+        if (row.id !== entry.id.toLowerCase() || row.user_id !== current.userId.toLowerCase() || row.team !== current.profile.team || entry.guest_claim_required || entry.preapproval_review_required || entry.submission_review_required || entry.importBatchId || entry.cloud_source || entry.sync_status === 'local_only') fail('Snapshot scope requires review.');
+        if (!localMatchesSnapshot(entry, snapshot, current)) fail('Local inspection differs from its original snapshot.');
+      } catch (_) {
+        hold(entry, 'Submission snapshot or local content requires review.', true);
+        return { status: 'mismatch', retryAllowed: false };
+      }
+      const fingerprint = JSON.stringify(entry);
+      let found;
+      try { found = await client.from('inspections').select(ROW_FIELDS.join(',')).eq('id', row.id).maybeSingle(); }
+      catch (error) { found = { error }; }
+      try { guard(entry, scope); }
+      catch (_) { return { status: 'inaccessible', retryAllowed: false }; }
+      if (JSON.stringify(entry) !== fingerprint || !durable(entry)) {
+        hold(entry, 'Local inspection changed during reconciliation; review required.', true);
+        return { status: 'local-changed', retryAllowed: false };
+      }
+      if (!found || typeof found !== 'object') return { status: 'transient-failure', retryAllowed: false };
+      if (found.error) return { status: authorizationError(found.error) ? 'inaccessible' : 'transient-failure', retryAllowed: false };
+      if (!Object.hasOwn(found, 'data') || found.data === undefined) return { status: 'transient-failure', retryAllowed: false };
+      if (found.data === null) {
+        if (entry.submission_uuid_conflict || entry.remote_id || entry.sync_status === 'synced') {
+          hold(entry, 'Previously existing UUID is not visible; absence cannot authorize another insert.');
+          return { status: 'inaccessible', retryAllowed: false };
+        }
+        saveState(entry, { submission_retry_allowed: true, sync_status: 'failed', sync_outcome_unknown: false, sync_error: 'No authorized cloud row found; controlled retry may be considered.' });
+        return { status: 'no-row', retryAllowed: true };
+      }
+      if (!matchesSnapshot(snapshot, found.data)) {
+        hold(entry, 'Cloud identity or inspection content differs from the original snapshot.', true);
+        return { status: 'mismatch', retryAllowed: false };
+      }
+      saveState(entry, { remote_id: entry.id, sync_status: 'synced', sync_outcome_unknown: false, submission_retry_allowed: false, sync_error: '', synced_at: new Date().toISOString() });
+      return { status: 'matching', retryAllowed: false };
     }
     async function fetchAuthorized({ from = 0, limit = 100 } = {}) {
       await authorized(false);
@@ -120,7 +273,7 @@
       if (!result.data) fail('Inspection was not updated. It may no longer be accessible.');
       return { ...result.data, cloud_source: true };
     }
-    return { insertOne, fetchAuthorized, updateAuthorized };
+    return { insertOne, reconcileOne, fetchAuthorized, updateAuthorized };
   }
-  return { phTime, dmm, eligible, laneParts, mapEntry, cloudChanges, createApi };
+  return { phTime, dmm, eligible, laneParts, mapEntry, submissionSnapshot, matchesSnapshot, localMatchesSnapshot, ROW_FIELDS, cloudChanges, createApi };
 });

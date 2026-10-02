@@ -4823,27 +4823,22 @@
       if (!entry || !inspectionApi) return;
       const workspaceKey = activeEntriesStorageKey();
       const userId = authDisplayState?.userId;
-      const submittedSnapshot = JSON.stringify(entry);
+      const scopeGeneration = inspectionScopeGeneration;
       button.disabled = true;
       try {
         const result = await inspectionApi.insertOne(entry);
-        if (!cloudAccess() || authDisplayState.userId !== userId || activeEntriesStorageKey() !== workspaceKey) return;
+        if (!cloudAccess() || authDisplayState.userId !== userId || activeEntriesStorageKey() !== workspaceKey || inspectionScopeGeneration !== scopeGeneration) return;
         if (result.status === 'id-conflict') {
-          setCloudStatus(result.row ? 'That UUID already exists in an authorized cloud record. No overwrite occurred; review it before any future reconciliation.' : 'That UUID already exists, but its row is not accessible. No overwrite occurred.');
+          setCloudStatus('That UUID already exists. No overwrite occurred; reconciliation is required before any retry.');
           return;
         }
-        if (!entries.includes(entry) || JSON.stringify(entry) !== submittedSnapshot) {
-          setCloudStatus('Cloud accepted the saved inspection, but the local record changed during submission. Review both copies before any later sync.');
+        if (result.status !== 'inserted') {
+          setCloudStatus('Submission requires review. The original submission snapshot and local photo remain on this device.');
           return;
         }
-        const previousRemoteId = entry.remote_id;
-        const previousSyncStatus = entry.sync_status;
-        entry.remote_id = result.row.id;
-        entry.sync_status = 'synced';
-        if (!saveEntries()) { entry.remote_id = previousRemoteId; entry.sync_status = previousSyncStatus; setCloudStatus('Cloud accepted the inspection, but local confirmation could not be saved. Keep this device data and review before submitting again.'); return; }
-        renderLog(); setCloudStatus('One inspection submitted. Its local record and photo remain on this device.');
-      } catch (error) { if (cloudAccess() && authDisplayState.userId === userId && activeEntriesStorageKey() === workspaceKey) setCloudStatus(`Cloud submission failed: ${error.message || error}. The local inspection and photo remain intact.`); }
-      finally { button.disabled = false; }
+        setCloudStatus('One inspection submitted. Its local record and photo remain on this device.');
+      } catch (error) { if (cloudAccess() && authDisplayState.userId === userId && activeEntriesStorageKey() === workspaceKey && inspectionScopeGeneration === scopeGeneration) setCloudStatus(`Cloud submission failed: ${error.message || error}. The local inspection and photo remain intact.`); }
+      finally { button.disabled = false; if (cloudAccess() && authDisplayState.userId === userId && activeEntriesStorageKey() === workspaceKey && inspectionScopeGeneration === scopeGeneration) renderLog(); }
     }
     document.getElementById('cloud-refresh').addEventListener('click', async event => {
       if (!inspectionApi) return;
@@ -7979,7 +7974,7 @@
       <span class="record-bound">${xmlEscape(e.bound || '—')}</span>
       <span class="record-lane">${xmlEscape(laneLabel)}</span></div>
       ${e.photoId ? `<div class="record-photo-actions">${photoActionsHtml}</div>` : ''}
-      ${!capped && !selectMode && cloudAccess() && localEntryDurable(e) && !e.importBatchId && !e.guest_claim_required && !e.preapproval_review_required && !e.sync_outcome_unknown && !e.remote_id && ['pending','failed'].includes(e.sync_status) ? `<button type="button" class="ds-btn ds-btn-quiet cloud-submit" data-entry-id="${xmlEscape(e.id)}">Submit this inspection</button>` : ''}
+      ${!capped && !selectMode && cloudAccess() && localEntryDurable(e) && !e.importBatchId && !e.guest_claim_required && !e.preapproval_review_required && !e.submission_review_required && (!e.submission_snapshot || e.submission_retry_allowed === true) && !e.sync_outcome_unknown && !e.remote_id && ['pending','failed'].includes(e.sync_status) ? `<button type="button" class="ds-btn ds-btn-quiet cloud-submit" data-entry-id="${xmlEscape(e.id)}">Submit this inspection</button>` : ''}
       ${checkboxHtml}
     `;
         row.innerHTML = `<button type="button" class="swipe-action edit" data-idx="${realIdx}" aria-label="Edit ${xmlEscape(e.type)} entry">Edit</button><button type="button" class="swipe-action delete" data-idx="${realIdx}" aria-label="Delete ${xmlEscape(e.type)} entry">Delete</button>`;
@@ -8043,7 +8038,10 @@
     }
     let authExpiryTimer = null;
     let registrationOpen = false;
+    let inspectionScopeGeneration = 0;
     function renderAuthState(state) {
+      const scope = value => JSON.stringify([value?.mode, value?.cloudVerified, value?.canUseLocal, value?.userId, value?.profile?.role, value?.profile?.team]);
+      if (scope(state) !== scope(authDisplayState)) inspectionScopeGeneration++;
       clearTimeout(authExpiryTimer);
       if (state.mode === 'offline-recent') {
         const delay = Math.max(1, state.verifiedAt + SPOTITAuth.SEVEN_DAYS - Date.now() + 1);
@@ -8126,8 +8124,10 @@
       inspectionApi = SPOTITInspections.createApi({
         client,
         verify: () => authController.verifyOnline(),
-        context: () => ({ ...authController.getState(), workspaceUserId: authController.binding()?.userId }),
-        durable: localEntryDurable
+        context: () => ({ ...authController.getState(), workspaceUserId: authController.binding()?.userId, scopeGeneration: inspectionScopeGeneration }),
+        durable: localEntryDurable,
+        persist: () => saveEntries(),
+        isCurrent: entry => authWorkspaceUnlocked && entries.includes(entry)
       });
       client.auth.onAuthStateChange(event => {
         if (event === 'SIGNED_OUT') queueMicrotask(() => authController.start());

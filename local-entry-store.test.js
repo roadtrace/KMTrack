@@ -5,6 +5,7 @@ const vm=require('node:vm');
 const store=require('./local-entry-store');
 const model=require('./entry-model');
 const sync=require('./sync-queue');
+const inspections=require('./inspection-api');
 const html=fs.readFileSync(require.resolve('./index.html'),'utf8');
 const user='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const context={mode:'approved',cloudVerified:true,canUseLocal:true,userId:user,workspaceUserId:user,profile:{id:user,approved:true,role:'inspector',team:'roadway'}};
@@ -17,11 +18,18 @@ function fixture({failure='',mode='approved'}={}){
   const data=new Map(),status={hidden:true,textContent:''};let rendered=0;
   const storage={getItem:key=>data.get(key)||null,setItem(key,value){if(failure==='write')throw Error('quota');if(failure!=='readback')data.set(key,value);}};
   const state=vm.createContext({SPOTITLocalStore:store,SPOTITEntry:model,localStorage:storage,entries:[],storageAvailable:true,authWorkspaceUnlocked:true,
-    authDisplayState:{...context,mode},document:{getElementById:()=>status},console:{error(){}},
+    authDisplayState:{...context,mode},inspectionScopeGeneration:0,document:{getElementById:()=>status},console:{error(){}},
     activeEntriesStorageKey:()=>mode==='guest'?'guest':'account',renderLog(){rendered++;},resolvedLocationCanSave:()=>true,
     resolvedEntrySnapshot:()=>({lat:14,lon:121,km:8}),fullTimestamp:()=>'2026-10-02 10:00:00',inspectorName:'Inspector'});
   for(const name of ['localEntryDurable','saveEntries','logDefect','syncState'])vm.runInContext(source(name),state);
   return {state,data,status,storage,rendered:()=>rendered};
+}
+function manualApi(f, send) {
+  f.state.inspectionApi=inspections.createApi({
+    client:{auth:{getUser:async()=>({data:{user:{id:user}}})},from:()=>({insert:row=>({select:()=>({single:()=>send(row)})})})},
+    verify:async()=>{},context:()=>context,durable:f.state.localEntryDurable,
+    persist:()=>f.state.saveEntries(),isCurrent:e=>f.state.entries.includes(e)
+  });
 }
 test('normal local Save confirms persisted record before it can be eligible',()=>{
   const f=fixture();assert.equal(f.state.logDefect('Potholes','2'),true);
@@ -77,7 +85,8 @@ test('storage proof handles corrupt JSON and blocked reads safely',()=>{
 test('Phase 11 manual submission saves its acknowledgement and preserves the local photo',async()=>{
   const f=fixture();f.state.logDefect('Potholes','2');const record=f.state.entries[0];
   record.photoId='local-photo';f.state.saveEntries();let calls=0;
-  Object.assign(f.state,{cloudAccess:()=>true,setCloudStatus:message=>{f.status.textContent=message;},inspectionApi:{insertOne:async e=>{calls++;return {status:'inserted',row:{id:e.id}};}}});
+  Object.assign(f.state,{cloudAccess:()=>true,setCloudStatus:message=>{f.status.textContent=message;}});
+  manualApi(f,async row=>{calls++;return {data:row};});
   vm.runInContext(source('submitLocalInspection'),f.state);
   await f.state.submitLocalInspection(record.id,{disabled:false});
   assert.equal(calls,1);assert.equal(record.sync_status,'synced');assert.equal(record.remote_id,record.id);
@@ -85,20 +94,24 @@ test('Phase 11 manual submission saves its acknowledgement and preserves the loc
 });
 test('Phase 11 failed acknowledgement persistence rolls back local success markers',async()=>{
   const f=fixture();f.state.logDefect('Potholes','2');const record=f.state.entries[0];
-  Object.assign(f.state,{cloudAccess:()=>true,setCloudStatus:message=>{f.status.textContent=message;},inspectionApi:{insertOne:async e=>{f.storage.setItem=()=>{throw Error('quota');};return {status:'inserted',row:{id:e.id}};}}});
+  Object.assign(f.state,{cloudAccess:()=>true,setCloudStatus:message=>{f.status.textContent=message;}});
+  manualApi(f,async row=>{f.storage.setItem=()=>{throw Error('quota');};return {data:row};});
   vm.runInContext(source('submitLocalInspection'),f.state);
   await f.state.submitLocalInspection(record.id,{disabled:false});
-  assert.equal(record.sync_status,'pending');assert.equal(record.remote_id,'');
-  assert.equal(JSON.parse(f.data.get('account'))[0].sync_status,'pending');
-  assert.match(f.status.textContent,/local confirmation could not be saved/);
+  assert.equal(record.sync_status,'syncing');assert.equal(record.remote_id,'');
+  assert.equal(JSON.parse(f.data.get('account'))[0].sync_status,'syncing');
+  assert.equal(record.sync_outcome_unknown,true);assert.ok(record.submission_snapshot);
+  assert.match(f.status.textContent,/confirmation could not be saved/i);
 });
 test('Phase 11 UUID conflict remains review-only with no acknowledgement or overwrite',async()=>{
   const f=fixture();f.state.logDefect('Potholes','2');const record=f.state.entries[0];
-  const before=JSON.stringify(record);
-  Object.assign(f.state,{cloudAccess:()=>true,setCloudStatus:message=>{f.status.textContent=message;},inspectionApi:{insertOne:async()=>({status:'id-conflict',row:null})}});
+  Object.assign(f.state,{cloudAccess:()=>true,setCloudStatus:message=>{f.status.textContent=message;}});
+  manualApi(f,async()=>({error:{code:'23505'}}));
   vm.runInContext(source('submitLocalInspection'),f.state);
   await f.state.submitLocalInspection(record.id,{disabled:false});
-  assert.equal(JSON.stringify(record),before);assert.match(f.status.textContent,/No overwrite occurred/);
+  assert.equal(record.sync_status,'needs_review');assert.equal(record.remote_id,'');
+  assert.equal(record.submission_uuid_conflict,true);assert.ok(record.submission_snapshot);
+  assert.match(f.status.textContent,/No overwrite occurred/);
 });
 
 test('failed restart migration keeps outcome unknown blocked and reports the save failure',()=>{
