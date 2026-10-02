@@ -28,5 +28,14 @@
       throw error;
     }
   }
-  return {save,contains,saveReview};
+  function saveClaim(storage,key,before,after){
+    const original=storage.getItem(key);
+    if((original===null?'[]':original)!==JSON.stringify(before)) throw new Error('Saved account workspace changed.');
+    try { return save(storage,key,after); }
+    catch(error){
+      if(original===null) storage.removeItem(key); else storage.setItem(key,original);
+      throw error;
+    }
+  }
+  return {save,contains,saveReview,saveClaim};
 });

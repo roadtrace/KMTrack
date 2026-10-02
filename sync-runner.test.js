@@ -265,7 +265,7 @@ test('concurrent Auth/runner verification calls share a fresh profile check',asy
 test('production app connects guarded runner, caches its module, and invalidates reloads instead of draining twice',()=>{
   const html=fs.readFileSync(require.resolve('./index.html'),'utf8'),sw=fs.readFileSync(require.resolve('./sw.js'),'utf8');
   assert.match(html,/SPOTITSyncRunner\.createRunner\(/);assert.match(html,/syncRunner\.bindWakeups/);assert.match(html,/syncRunner\.submit\(entry\)/);assert.match(html,/syncRunner\.wake\('startup'\)/);assert.match(html,/syncRunner\?\.wake\('verified'\)/);assert.match(html,/syncRunner\.wake\('saved'\)/);
-  assert.doesNotMatch(html,/syncQueue\.drain\(/);assert.match(sw,/'\.\/sync-runner\.js'/);assert.match(sw,/'v229'/);
+  assert.doesNotMatch(html,/syncQueue\.drain\(/);assert.match(sw,/'\.\/sync-runner\.js'/);assert.match(sw,/'v230'/);
   const source=fs.readFileSync(require.resolve('./sync-runner'),'utf8');assert.doesNotMatch(source,/\.upsert\(|\.update\(|\.storage\b|\.from\(/);
 });
 

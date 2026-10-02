@@ -4187,6 +4187,12 @@
             <button type="button" class="bulk-select-all-btn" id="bulk-select-all-btn">Select all</button>
             <button type="button" class="bulk-delete-btn" id="bulk-delete-btn" disabled>Delete selected (0)</button>
           </div>
+          <details id="guest-claim-panel" hidden>
+            <summary>Guest inspections require claim</summary>
+            <p>Review one inspection to create a new copy in your account workspace. Guest originals stay on this device.</p>
+            <div id="guest-claim-list"></div>
+            <p id="guest-claim-status" role="status"></p>
+          </details>
           <div id="log-list">
             <div class="log-empty">No defects logged yet</div>
           </div>
@@ -4562,6 +4568,7 @@
   <script src="./local-entry-store.js"></script>
   <script src="./sync-queue.js"></script>
   <script src="./preapproval-review.js"></script>
+  <script src="./guest-claim.js"></script>
   <script src="./auth-config.js"></script>
   <script src="./vendor/supabase/supabase-js-2.117.1.umd.js"></script>
   <script src="./auth.js"></script>
@@ -4824,6 +4831,91 @@
     }
     let preapprovalReview = null;
     let activePreapprovalDialog = null;
+    let guestClaims = null;
+    let activeGuestClaimDialog = null;
+    function guestClaimController() {
+      return guestClaims ||= SPOTITGuestClaim.createClaims({
+        storage: localStorage, guestKey: STORAGE_KEY_GUEST_ENTRIES,
+        entries: () => entries, accountKey: () => STORAGE_KEY_ENTRIES,
+        context: () => {
+          const state = inspectionContext();
+          return { ...state, cloudVerified: navigator.onLine !== false && state.cloudVerified,
+            canUseLocal: storageAvailable && authWorkspaceUnlocked && state.canUseLocal };
+        },
+        verify: () => authController.verifyOnline(),
+        lock: navigator.locks ? action => navigator.locks.request('kmtrack-guest-claim-v1', action) : null,
+        copyPhoto: (source, copy, guard) => SPOTITGuestClaim.copyLocalPhoto(getPhoto, putPhoto, source, copy, guard),
+        verifyPhoto: (source, copy, guard) => SPOTITGuestClaim.confirmLocalPhoto(getPhoto, source, copy, guard),
+        persist: (candidate, key) => {
+          if (!storageAvailable || !authWorkspaceUnlocked || activeEntriesStorageKey() !== key) return false;
+          try { return SPOTITLocalStore.saveClaim(localStorage, key, entries, candidate); }
+          catch (_) { storageAvailable = false; return false; }
+        },
+        publish: candidate => { entries = candidate; }, wake: () => syncRunner?.wake('guest-claimed')
+      });
+    }
+    function renderGuestClaims() {
+      const panel = document.getElementById('guest-claim-panel'), list = document.getElementById('guest-claim-list');
+      if (!panel) return;
+      panel.hidden = true; list.replaceChildren();
+      if (!authDisplayState || !authWorkspaceUnlocked || !SPOTITSync.accountEligible(inspectionContext())) return;
+      const status = document.getElementById('guest-claim-status'); status.textContent = '';
+      try {
+        const rows = guestClaimController().list(); panel.hidden = !rows.length;
+        for (const { source, status: state } of rows) {
+          const row = document.createElement('p'), text = document.createElement('span');
+          const labels = { claimed: 'Already claimed', recoverable: 'Incomplete claim: review to recover',
+            'source-changed': 'Guest content changed after claim: held', 'other-account': 'Previously claimed: held',
+            'copy-missing': 'Previously claimed copy missing: held', conflict: 'Claim history needs review', unclaimed: 'Guest inspection requires claim' };
+          text.textContent = `${source.type} · ${source.timestamp} · ${source.expressway || 'Road unset'} · ${labels[state]}`;
+          row.append(text);
+          if (['unclaimed', 'recoverable'].includes(state)) {
+            const button = document.createElement('button'); button.type = 'button';
+            button.className = 'ds-btn ds-btn-quiet'; button.textContent = 'Review Guest inspection';
+            button.onclick = () => openGuestClaimReview(source.id); row.append(button);
+          }
+          list.append(row);
+        }
+      } catch (error) { panel.hidden = false; status.textContent = error.message; }
+    }
+    function openGuestClaimReview(id) {
+      try {
+        const controller = guestClaimController(), ticket = controller.open(id), record = JSON.parse(ticket.source);
+        activeGuestClaimDialog?.close();
+        const dialog = document.createElement('dialog'); activeGuestClaimDialog = dialog;
+        dialog.setAttribute('aria-label', 'Claim Guest inspection'); dialog.style.maxWidth = 'min(32rem, 90vw)';
+        const title = document.createElement('h2'); title.textContent = 'Claim Guest inspection';
+        const details = document.createElement('p'); details.style.whiteSpace = 'pre-wrap';
+        details.textContent = [record.type, record.timestamp, record.expressway, record.bound,
+          `Lane: ${record.lane || 'unset'}`, `KM: ${record.km ?? 'unset'}`, record.interchange,
+          record.interchangeSegment, `GPS: ${record.lat}, ${record.lon}`, record.notes,
+          `Destination team: ${inspectionContext().profile.team}`,
+          'Claim creates a new account-owned copy. The Guest original and its photo stay intact. The copy may submit automatically; photos stay local.'].filter(Boolean).join('\n');
+        const status = document.createElement('p'); status.setAttribute('role', 'status');
+        const claim = document.createElement('button'); claim.type = 'button'; claim.className = 'ds-btn ds-btn-primary'; claim.textContent = 'Claim to my workspace';
+        let photoURL = null;
+        claim.onclick = async () => {
+          claim.disabled = true;
+          try { await controller.claim(ticket); dialog.close(); renderLog(); }
+          catch (error) { status.textContent = error.message; renderGuestClaims(); }
+        };
+        const cancel = document.createElement('button'); cancel.type = 'button'; cancel.textContent = 'Keep as Guest / Cancel'; cancel.onclick = () => dialog.close();
+        dialog.append(title, details, claim, cancel, status);
+        dialog.addEventListener('close', () => { ticket.cancelled = true; if (photoURL) URL.revokeObjectURL(photoURL); dialog.remove(); if (activeGuestClaimDialog === dialog) activeGuestClaimDialog = null; });
+        document.body.append(dialog); dialog.showModal();
+        if (record.photoId) getPhoto(record.photoId).then(blob => {
+          if (!blob || ticket.cancelled || activeGuestClaimDialog !== dialog) return;
+          const image = document.createElement('img'); image.alt = 'Saved Guest inspection photo'; image.style.maxWidth = '100%';
+          photoURL = URL.createObjectURL(blob); image.src = photoURL; dialog.insertBefore(image, claim);
+        }).catch(() => { if (!ticket.cancelled) status.textContent = 'Local photo is unavailable. Claim will remain blocked until it can be copied.'; });
+      } catch (error) { document.getElementById('guest-claim-status').textContent = error.message; }
+    }
+    window.addEventListener('storage', event => {
+      if ([STORAGE_KEY_GUEST_ENTRIES, STORAGE_KEY_ENTRIES, SPOTITGuestClaim.LEDGER_KEY, SPOTITAuth.BINDING_KEY].includes(event.key)) {
+        activeGuestClaimDialog?.close(); renderGuestClaims();
+      }
+    });
+    window.addEventListener('offline', () => { activeGuestClaimDialog?.close(); renderGuestClaims(); });
     function reviewController() {
       return preapprovalReview ||= SPOTITPreapprovalReview.createReview({
         entries: () => entries, context: inspectionContext, key: activeEntriesStorageKey,
@@ -7953,6 +8045,7 @@
     }
 
     function renderLog() {
+      renderGuestClaims();
       openSwipeEntryId = null;
       syncEntryFilterOptions();
       syncInspectorFilterOptions();
@@ -8032,6 +8125,7 @@
       <span class="record-bound">${xmlEscape(e.bound || '—')}</span>
       <span class="record-lane">${xmlEscape(laneLabel)}</span></div>
       ${e.photoId ? `<div class="record-photo-actions">${photoActionsHtml}</div>` : ''}
+      ${e.guest_claim_required ? '<span class="import-label">Guest inspection requires claim</span>' : ''}
       ${e.preapproval_review_required && !e.guest_claim_required ? '<span class="import-label">Preapproval inspection requires review</span>' : ''}
       ${!capped && !selectMode && authDisplayState && SPOTITPreapprovalReview.reviewable(e, inspectionContext()) && localEntryDurable(e) ? `<button type="button" class="ds-btn ds-btn-quiet preapproval-review" data-entry-id="${xmlEscape(e.id)}">Review inspection</button>` : ''}
       ${!capped && !selectMode && cloudAccess() && localEntryDurable(e) && !e.importBatchId && !e.guest_claim_required && !e.preapproval_review_required && !e.submission_review_required && (!e.submission_snapshot || e.submission_retry_allowed === true) && !e.sync_outcome_unknown && !e.remote_id && ['pending','failed'].includes(e.sync_status) ? `<button type="button" class="ds-btn ds-btn-quiet cloud-submit" data-entry-id="${xmlEscape(e.id)}">Submit this inspection</button>` : ''}
@@ -8108,7 +8202,7 @@
     }
     function renderAuthState(state) {
       const scope = value => JSON.stringify([value?.mode, value?.cloudVerified, value?.canUseLocal, value?.userId, value?.profile?.role, value?.profile?.team]);
-      if (scope(state) !== scope(authDisplayState)) { inspectionScopeGeneration++; syncRunner?.invalidate(); activePreapprovalDialog?.close(); }
+      if (scope(state) !== scope(authDisplayState)) { inspectionScopeGeneration++; syncRunner?.invalidate(); activePreapprovalDialog?.close(); activeGuestClaimDialog?.close(); }
       clearTimeout(authExpiryTimer);
       if (state.mode === 'offline-recent') {
         const delay = Math.max(1, state.verifiedAt + SPOTITAuth.SEVEN_DAYS - Date.now() + 1);
@@ -8149,6 +8243,7 @@
         updateMapEntries();
       }
       document.getElementById('cloud-inspections').hidden = !cloudAccess();
+      renderGuestClaims();
       document.documentElement.classList.toggle('auth-booting', !state.canUseLocal);
       const gate = document.getElementById('auth-gate');
       gate.hidden = state.canUseLocal;
