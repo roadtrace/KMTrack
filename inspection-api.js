@@ -40,6 +40,7 @@
     if (!entry || !UUID.test(entry.id || '')) fail('Inspection UUID is missing or invalid; review this local record.');
     if (entry.importBatchId || entry.guest_claim_required === true || entry.preapproval_review_required === true) fail('This inspection requires review before cloud submission.');
     if (entry.cloud_source || entry.remote_id || entry.sync_status === 'synced') fail('This inspection already identifies a cloud record.');
+    if (['local_only','needs_review','syncing'].includes(entry.sync_status) || entry.sync_outcome_unknown === true) fail('This inspection is held locally or requires reconciliation before submission.');
     return true;
   }
   function laneParts(entry) {
@@ -88,6 +89,8 @@
       return current;
     }
     async function insertOne(entry) {
+      // Reject memory-only records before even starting online authorization.
+      if (!durable(entry)) fail('Save this inspection locally before cloud submission.');
       const current = await authorized(true);
       eligible(entry, current);
       if (!durable(entry)) fail('Save this inspection locally before cloud submission.');

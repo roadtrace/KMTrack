@@ -15,8 +15,8 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
 
-  const SYNC_STATUS=Object.freeze({PENDING:'pending',SYNCED:'synced',FAILED:'failed'});
-  const SYNC_STATUSES=[SYNC_STATUS.PENDING,SYNC_STATUS.SYNCED,SYNC_STATUS.FAILED];
+  const SYNC_STATUS=Object.freeze({PENDING:'pending',SYNCING:'syncing',SYNCED:'synced',FAILED:'failed',NEEDS_REVIEW:'needs_review',LOCAL_ONLY:'local_only'});
+  const SYNC_STATUSES=Object.values(SYNC_STATUS);
 
   /* RFC 4122 v4. crypto.randomUUID covers every current browser; the manual
    * path keeps older WebViews working without ever producing a non-UUID. */
@@ -87,7 +87,11 @@
       team: text(raw.team),               /* future team id */
       created_at: created || stamp,
       updated_at: text(raw.updated_at) || created || stamp,
-      sync_status: SYNC_STATUSES.includes(raw.sync_status) ? raw.sync_status : SYNC_STATUS.PENDING,
+      // Missing status is legacy pending; an unknown status must not authorize a send.
+      sync_status: SYNC_STATUSES.includes(raw.sync_status) ? raw.sync_status : raw.sync_status==null || raw.sync_status==='' ? SYNC_STATUS.PENDING : SYNC_STATUS.NEEDS_REVIEW,
+      guest_claim_required: raw.guest_claim_required===true,
+      preapproval_review_required: raw.preapproval_review_required===true,
+      sync_outcome_unknown: raw.sync_outcome_unknown===true,
       sync_attempts: Number.isFinite(raw.sync_attempts) ? raw.sync_attempts : 0,
       sync_error: text(raw.sync_error),
       remote_id: text(raw.remote_id)
@@ -114,8 +118,16 @@
   }
 
   /* Backfills an array, preserving order and dropping only invalid rows. */
-  function normalizeAll(list, now){
-    return (Array.isArray(list)?list:[]).map(row=>normalizeEntry(row,now)).filter(Boolean);
+  function normalizeAll(list, now, options){
+    return (Array.isArray(list)?list:[]).map(row=>{
+      const entry=normalizeEntry(row,now);
+      if(entry && options?.restart && entry.sync_status===SYNC_STATUS.SYNCING){
+        entry.sync_status=SYNC_STATUS.NEEDS_REVIEW;
+        entry.sync_outcome_unknown=true;
+        entry.sync_error=entry.sync_error||'Submission interrupted; server outcome must be reconciled before another insert.';
+      }
+      return entry;
+    }).filter(Boolean);
   }
 
   return {SYNC_STATUS,SYNC_STATUSES,uuid,laneFields,normalizeEntry,normalizeAll,createEntry,touch,setLane,isoNow};

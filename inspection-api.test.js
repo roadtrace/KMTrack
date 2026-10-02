@@ -55,6 +55,8 @@ test('submission rejects invalid UUID, Guest, Pending, stale verification, misma
     [entry({ id: 'old-id' }), state()], [entry(), state({ mode: 'guest' })], [entry(), state({ mode: 'pending', profile: { approved: false, role: 'inspector', team: null } })],
     [entry(), state({ cloudVerified: false })], [entry(), state({ workspaceUserId: id })],
     [entry({ guest_claim_required: true }), state()], [entry({ preapproval_review_required: true }), state()],
+    [entry({ sync_status: 'local_only' }), state()], [entry({ sync_status: 'needs_review' }), state()],
+    [entry({ sync_status: 'syncing' }), state()], [entry({ sync_outcome_unknown: true }), state()],
     [entry({ importBatchId: 'batch' }), state()], [entry({ remote_id: id }), state()], [entry({ cloud_source: true }), state()],
     [entry(), state({ profile: { id: user, approved: true, role: 'administrator', team: null } })]
   ];
@@ -109,4 +111,11 @@ test('Phase 11 keeps the sync queue without transport', async () => {
   const queue = sync.createQueue({});
   assert.equal(queue.ready(), false);
   assert.deepEqual(await queue.drain([entry()]), { ok: false, reason: 'no-transport', uploaded: 0, failed: 0 });
+});
+
+test('non-durable submission is rejected before any authorization or inspection request',async()=>{
+  let requests=0;
+  const instance=api.createApi({client:{auth:{getUser:async()=>{requests++;}},from:()=>{requests++;}},verify:async()=>{requests++;},context:()=>state(),durable:()=>false});
+  await assert.rejects(instance.insertOne(entry()),/Save this inspection locally/);
+  assert.equal(requests,0);
 });

@@ -5,9 +5,9 @@
  * outcome. A transport is injected by the caller, so the Supabase client can be
  * added later without touching the inspection system.
  *
- * Duplicate safety: uploads are addressed by the record's permanent UUID
- * (`entry.id`) and applied as an upsert, so retrying a failed upload — or
- * re-running the whole queue — can never create a second cloud row.
+ * New submissions use INSERT with the record's permanent UUID. A UUID conflict
+ * must never overwrite an existing row. Unknown outcomes require reconciliation
+ * in a later increment; this local foundation does not implement that transport.
  */
 (function(root,factory){
   const api=factory(root);
@@ -23,7 +23,7 @@
       if(typeof module==='object' && module.exports) return require('./entry-model.js').SYNC_STATUS;
     }catch(e){ /* fall through */ }
     if(root && root.SPOTITEntry && root.SPOTITEntry.SYNC_STATUS) return root.SPOTITEntry.SYNC_STATUS;
-    return {PENDING:'pending',SYNCED:'synced',FAILED:'failed'};
+    return {PENDING:'pending',SYNCING:'syncing',SYNCED:'synced',FAILED:'failed',NEEDS_REVIEW:'needs_review',LOCAL_ONLY:'local_only'};
   }
   const STATUS=resolveStatus();
   const DEFAULT_BATCH=25;
@@ -32,10 +32,31 @@
   const isFailed=e=>!!e && e.sync_status===STATUS.FAILED;
   const isSynced=e=>!!e && e.sync_status===STATUS.SYNCED;
 
-  /* A record is uploadable only once it has a permanent UUID. Without one a
-   * retry could not be de-duplicated, so it is never sent. */
-  function isUploadable(entry){
-    return !!entry && typeof entry.id==='string' && entry.id.length>0 && !isSynced(entry);
+  const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  const reviewRequired=e=>!!e && (e.guest_claim_required===true || e.preapproval_review_required===true || e.sync_outcome_unknown===true);
+
+  /* Pure eligibility: the caller supplies a fresh account/workspace context and
+   * a storage check. Missing proof fails closed. Phase 11 checks still apply. */
+  function automaticEligibility(entry,context,durable){
+    const reject=reason=>({eligible:false,reason});
+    if(!entry || !UUID.test(entry.id||'')) return reject('invalid-uuid');
+    if(entry.guest_claim_required===true) return reject('guest-claim-required');
+    if(entry.preapproval_review_required===true) return reject('preapproval-review-required');
+    if(entry.importBatchId || entry.cloud_source) return reject('imported-or-cloud-record');
+    if(entry.remote_id || isSynced(entry)) return reject('already-submitted');
+    if(entry.sync_status===STATUS.LOCAL_ONLY) return reject('local-only');
+    if(entry.sync_status===STATUS.NEEDS_REVIEW || entry.sync_outcome_unknown===true) return reject('needs-review');
+    if(!isPending(entry) && !isFailed(entry)) return reject('not-pending');
+    if(!context || context.mode!=='approved' || context.cloudVerified!==true || context.canUseLocal!==true ||
+      !UUID.test(context.userId||'') || context.workspaceUserId!==context.userId || context.profile?.id!==context.userId ||
+      context.profile.approved!==true || !['inspector','supervisor'].includes(context.profile.role) || !context.profile.team)
+      return reject('account-verification-required');
+    if(entry.user_id && entry.user_id!==context.userId || entry.team && entry.team!==context.profile.team) return reject('record-scope-mismatch');
+    if(durable!==true) return reject('not-durable');
+    return {eligible:true,reason:''};
+  }
+  function isUploadable(entry,scope){
+    return automaticEligibility(entry,scope?.context,scope?.durable?.(entry)).eligible;
   }
 
   const pending=entries=>(entries||[]).filter(isPending);
@@ -44,20 +65,27 @@
 
   /* Pending first, then previously-failed retries, so a failed record is picked
    * up again on the next run without a separate pass. */
-  function nextBatch(entries, limit){
-    const list=(entries||[]).filter(isUploadable);
+  function nextBatch(entries, limit, scope){
+    const list=(entries||[]).filter(entry=>isUploadable(entry,scope));
     return list.filter(isPending).concat(list.filter(isFailed)).slice(0, limit||DEFAULT_BATCH);
   }
 
-  function summary(entries){
+  function summary(entries, options){
     const list=entries||[];
-    let p=0,s=0,f=0;
+    const counts={total:list.length,pending:0,syncing:0,synced:0,failed:0,needs_review:0,local_only:0,unsaved:0};
     for(const e of list){
-      if(isSynced(e)) s++;
-      else if(isFailed(e)) f++;
-      else p++;
+      if(options?.durable && !options.durable(e)) counts.unsaved++;
+      else if(!e) counts.needs_review++;
+      else if(e.sync_status===STATUS.LOCAL_ONLY || e.importBatchId || e.cloud_source) counts.local_only++;
+      else if(reviewRequired(e) || e.sync_status===STATUS.NEEDS_REVIEW) counts.needs_review++;
+      else if(isSynced(e) && e.remote_id===e.id) counts.synced++;
+      else if(isSynced(e) || e.remote_id) counts.needs_review++;
+      else if(e.sync_status===STATUS.SYNCING) counts.syncing++;
+      else if(isPending(e)) counts.pending++;
+      else if(isFailed(e)) counts.failed++;
+      else counts.needs_review++;
     }
-    return {total:list.length,pending:p,synced:s,failed:f};
+    return counts;
   }
 
   /* True when the record has a photo that has not yet been pushed to a private
@@ -69,10 +97,16 @@
 
   function markSynced(entry, meta){
     if(!entry) return entry;
+    if(reviewRequired(entry) || [STATUS.LOCAL_ONLY,STATUS.NEEDS_REVIEW].includes(entry.sync_status)) return entry;
+    if(!UUID.test(entry.id||'') || meta?.remoteId!==entry.id){
+      entry.sync_status=STATUS.NEEDS_REVIEW;
+      entry.sync_outcome_unknown=true;
+      entry.sync_error='A matching server acknowledgement is required before marking this inspection submitted.';
+      return entry;
+    }
     entry.sync_status=STATUS.SYNCED;
-    /* Keep the server's id when it returns one, but the record's own UUID is
-     * always a valid key — upsert is keyed on that. */
-    entry.remote_id=(meta && meta.remoteId) || entry.remote_id || entry.id;
+    /* The server acknowledgement identifies the fixed UUID used by INSERT. */
+    entry.remote_id=meta.remoteId;
     entry.sync_error='';
     entry.sync_attempts=entry.sync_attempts||0;
     entry.synced_at=new Date().toISOString();
@@ -80,7 +114,7 @@
   }
 
   function markFailed(entry, error){
-    if(!entry) return entry;
+    if(!entry || reviewRequired(entry) || [STATUS.LOCAL_ONLY,STATUS.NEEDS_REVIEW,STATUS.SYNCED].includes(entry.sync_status) || entry.remote_id) return entry;
     entry.sync_status=STATUS.FAILED;
     entry.sync_error=error==null?'':String(error && error.message ? error.message : error).slice(0,500);
     entry.sync_attempts=(entry.sync_attempts||0)+1;
@@ -88,7 +122,7 @@
   }
 
   function requeue(entry){
-    if(entry) entry.sync_status=STATUS.PENDING;
+    if(entry && isFailed(entry) && !reviewRequired(entry) && !entry.remote_id) entry.sync_status=STATUS.PENDING;
     return entry;
   }
 
@@ -99,9 +133,9 @@
 
   /* The integration point.
    *
-   * `transport.upload(entry)` must upsert by `entry.id` and resolve to an
-   * optional `{remoteId}`. Anything it throws marks the record failed and it is
-   * retried on the next drain with the same UUID.
+   * A future `transport.upload(entry)` must INSERT using `entry.id` and return
+   * an acknowledged `{remoteId}`. Conflicts/unknown outcomes must be handled
+   * before acknowledgement. App transport remains disconnected in Phase 12.1.
    */
   function createQueue(options){
     const opts=options||{};
@@ -117,11 +151,12 @@
     async function drain(entries){
       if(!ready()) return {ok:false,reason:'no-transport',uploaded:0,failed:0};
       let uploaded=0,failures=0;
-      for(const entry of nextBatch(entries,batchSize)){
+      for(const entry of nextBatch(entries,batchSize,opts.scope?.())){
         try{
           const result=await transport.upload(entry,{now});
           markSynced(entry,result);
-          uploaded++;
+          if(isSynced(entry)) uploaded++;
+          else failures++;
         }catch(error){
           markFailed(entry,error);
           failures++;
@@ -132,8 +167,8 @@
       return {ok:true,uploaded,failed:failures};
     }
 
-    return {ready,drain,summary:()=>summary([]),nextBatch:(entries,limit)=>nextBatch(entries,limit||batchSize)};
+    return {ready,drain,summary:()=>summary([]),nextBatch:(entries,limit)=>nextBatch(entries,limit||batchSize,opts.scope?.())};
   }
 
-  return {STATUS,DEFAULT_BATCH,isPending,isFailed,isSynced,isUploadable,pending,failed,synced,nextBatch,summary,photoNeedsUpload,markSynced,markFailed,requeue,requeueAll,createQueue};
+  return {STATUS,DEFAULT_BATCH,isPending,isFailed,isSynced,automaticEligibility,isUploadable,pending,failed,synced,nextBatch,summary,photoNeedsUpload,markSynced,markFailed,requeue,requeueAll,createQueue};
 });

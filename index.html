@@ -4559,6 +4559,7 @@
   </section>
 
   <script src="./entry-model.js"></script>
+  <script src="./local-entry-store.js"></script>
   <script src="./sync-queue.js"></script>
   <script src="./auth-config.js"></script>
   <script src="./vendor/supabase/supabase-js-2.117.1.umd.js"></script>
@@ -4815,10 +4816,7 @@
       }
     }
     function localEntryDurable(entry) {
-      try {
-        const saved = JSON.parse(localStorage.getItem(activeEntriesStorageKey()) || '[]');
-        return Array.isArray(saved) && saved.some(row => row.id === entry.id && JSON.stringify(row) === JSON.stringify(entry));
-      } catch (_) { return false; }
+      return authWorkspaceUnlocked && SPOTITLocalStore.contains(localStorage, activeEntriesStorageKey(), entry);
     }
     async function submitLocalInspection(id, button) {
       const entry = entries.find(item => item.id === id);
@@ -4879,17 +4877,22 @@
     });
 
     function syncState(counts, online, ready, syncing, localEntries) {
+      if (counts.unsaved > 0) return 'unsaved';
+      if (counts.needs_review > 0) return 'review';
       if (syncing) return 'syncing';
+      if (counts.syncing > 0) return 'syncing';
       if (counts.failed > 0) return 'failed';
       if (ready && counts.pending > 0) return 'pending';
       if (!online) return 'offline';
-      if (counts.total > 0 && counts.pending === 0 && counts.failed === 0 && localEntries.every(entry => !!entry.remote_id)) return 'synced';
+      if (counts.total > 0 && counts.synced === counts.total) return 'synced';
       return 'local';
     }
 
     /* Tone follows the design system's StatusPill vocabulary: warn = caution/held,
      * bad = failure/blocked, fresh = verified, neutral = merely informative. */
     const SYNC_COPY = {
+      unsaved: { tone: 'bad', pill: 'Not saved', title: 'Local save not confirmed', sub: 'Some records are only in memory. Export them before closing; cloud submission is blocked.' },
+      review: { tone: 'warn', pill: 'Review required', title: 'Records need review', sub: 'Review or claim is required before these records can be submitted.' },
       syncing: { tone: 'warn', pill: 'Syncing…', title: 'Syncing', sub: 'Uploading records now.' },
       failed: { tone: 'bad', pill: '{n} failed', title: 'Sync failed', sub: '{n} record(s) need retrying.' },
       pending: { tone: 'warn', pill: '{n} pending', title: 'Waiting to upload', sub: '{n} record(s) not on the server yet.' },
@@ -4903,7 +4906,7 @@
       const text = document.getElementById('sync-status-text');
       if (!menu || !text) return;
       const localEntries = accessibleEntries();
-      const counts = SPOTITSync.summary(localEntries);
+      const counts = SPOTITSync.summary(localEntries, { durable: localEntryDurable });
       const online = navigator.onLine !== false;
       const ready = syncQueue.ready() && authDisplayState?.mode !== 'guest';
       const state = syncState(counts, online, ready, syncInFlight, localEntries);
@@ -4915,7 +4918,7 @@
         : authDisplayState?.mode === 'guest' ? 'Guest · local'
         : ['verification-required', 'local-only'].includes(authDisplayState?.mode) ? 'Verify online'
           : authDisplayState?.mode === 'offline-recent' ? 'Offline · local' : '';
-      text.textContent = authLabel || fill(copy.pill);
+      text.textContent = state === 'unsaved' ? copy.pill : authLabel || fill(copy.pill);
       const title = document.getElementById('sync-panel-title');
       const sub = document.getElementById('sync-panel-sub');
       if (title) title.textContent = fill(copy.title);
@@ -4934,7 +4937,7 @@
       }
       const note = document.getElementById('sync-note');
       if (note) {
-        note.textContent = (authDisplayState?.message ? `${authDisplayState.message} ` : '') + (ready
+        note.textContent = state === 'unsaved' ? SYNC_COPY.unsaved.sub : (authDisplayState?.message ? `${authDisplayState.message} ` : '') + (ready
           ? (syncInFlight ? 'Uploading…' : 'Uploads are keyed to each record\'s own ID, so a retry cannot duplicate one.')
           : 'Cloud sync is not configured yet, so records stay on this device. Sync now becomes available once it is.');
       }
@@ -5031,23 +5034,28 @@
           // the structured lane pair, the permanent UUID, created_at/updated_at and
           // sync_status — so existing logs keep loading without alteration.
           const before = Array.isArray(parsed) ? parsed : [];
-          entries = SPOTITEntry.normalizeAll(before);
+          entries = SPOTITEntry.normalizeAll(before, undefined, { restart: true });
           // Only rewrite when the migration actually changed something.
           if (JSON.stringify(entries) !== JSON.stringify(before)) {
-            localStorage.setItem(key, JSON.stringify(entries));
+            SPOTITLocalStore.save(localStorage, key, entries);
           }
         }
         const savedBound = localStorage.getItem(STORAGE_KEY_BOUND);
         if (savedBound) userBound = savedBound;
       } catch (e) {
+        storageAvailable = false;
         console.error('Could not read saved entries', e);
+        const el = document.getElementById('storage-status');
+        if (el) { el.hidden = false; el.textContent = 'Local records could not be loaded or their migration saved safely. Cloud submission is blocked. Export available records before closing.'; }
       }
     }
 
     function saveEntries() {
-      if (!storageAvailable || !authWorkspaceUnlocked) return false;
       try {
-        localStorage.setItem(activeEntriesStorageKey(), JSON.stringify(entries));
+        if (!storageAvailable || !authWorkspaceUnlocked) throw new Error('Local workspace storage is unavailable.');
+        SPOTITLocalStore.save(localStorage, activeEntriesStorageKey(), entries);
+        const el = document.getElementById('storage-status');
+        if (el) el.hidden = true;
         return true;
       } catch (e) {
         storageAvailable = false;
@@ -5055,7 +5063,7 @@
         const el = document.getElementById('storage-status');
         if (el) {
           el.hidden = false;
-          el.textContent = '⚠ Save failed — storage blocked (check you\'re not in Private Browsing). Export now to avoid losing this entry.';
+          el.textContent = 'Local save failed. Unsaved records are only in memory and cannot be submitted. Export now before closing the app.';
         }
         return false;
       }
@@ -6568,8 +6576,9 @@
         photoTimestamp: ''
       }));
 
-      saveEntries();
+      const saved = saveEntries();
       renderLog();
+      return saved;
     }
 
     // ---------- Sound feedback ----------
@@ -7269,10 +7278,10 @@
           photoFilename: result.filename,
           photoTimestamp: formatPhotoDate(result.stamp)
         }));
-        saveEntries();
-        playConfirmSound();
+        const saved = saveEntries();
         renderLog();
-        flashCameraCapture(laneValue);
+        if (saved) { playConfirmSound(); flashCameraCapture(laneValue); }
+        else { cameraErrorEl.textContent = 'Inspection save failed. This capture is only in memory. Export before closing.'; cameraErrorEl.classList.add('show'); }
       } catch (err) {
         cameraErrorEl.textContent = `Could not save the photo on this device. ${err.message || err}`;
         cameraErrorEl.classList.add('show');
@@ -7391,7 +7400,10 @@
             entry.photoId = photoId;
             entry.photoFilename = pendingCaptureFilename;
             entry.photoTimestamp = formatPhotoDate(pendingCaptureStamp);
-            saveEntries();
+            if (!saveEntries()) {
+              clearCaptureReview(); closeCamera(); renderLog();
+              return; // Keep the previously persisted photo; no successful-save feedback.
+            }
           }
           playConfirmSound();
           clearCaptureReview();
@@ -7412,8 +7424,8 @@
             photoFilename: pendingCaptureFilename,
             photoTimestamp: formatPhotoDate(pendingCaptureStamp)
           }));
-          saveEntries();
-          playConfirmSound();
+          const saved = saveEntries();
+          if (saved) playConfirmSound();
           clearCaptureReview();
           closeCamera();
           renderLog();
@@ -7958,6 +7970,7 @@
         const laneLabel = /^\d+$/.test(laneValue) ? `L${laneValue}` : laneValue;
         div.innerHTML = `
       <div class="record-type"><span class="type">${xmlEscape(displayType)}</span>
+        ${!localEntryDurable(e) ? '<span class="import-label">Not saved · export before closing</span>' : ''}
         ${importedBy ? `<span class="import-label">(Imported - ${xmlEscape(importedBy)})</span>` : ''}
       </div>
       <time class="record-date" datetime="${xmlEscape(String(e.timestamp).replace(' ', 'T'))}" title="${xmlEscape(e.timestamp)}">${xmlEscape(shortDate)}</time>
@@ -7966,7 +7979,7 @@
       <span class="record-bound">${xmlEscape(e.bound || '—')}</span>
       <span class="record-lane">${xmlEscape(laneLabel)}</span></div>
       ${e.photoId ? `<div class="record-photo-actions">${photoActionsHtml}</div>` : ''}
-      ${!capped && !selectMode && cloudAccess() && !e.importBatchId && !e.guest_claim_required && !e.preapproval_review_required && !e.remote_id && e.sync_status !== 'synced' ? `<button type="button" class="ds-btn ds-btn-quiet cloud-submit" data-entry-id="${xmlEscape(e.id)}">Submit this inspection</button>` : ''}
+      ${!capped && !selectMode && cloudAccess() && localEntryDurable(e) && !e.importBatchId && !e.guest_claim_required && !e.preapproval_review_required && !e.sync_outcome_unknown && !e.remote_id && ['pending','failed'].includes(e.sync_status) ? `<button type="button" class="ds-btn ds-btn-quiet cloud-submit" data-entry-id="${xmlEscape(e.id)}">Submit this inspection</button>` : ''}
       ${checkboxHtml}
     `;
         row.innerHTML = `<button type="button" class="swipe-action edit" data-idx="${realIdx}" aria-label="Edit ${xmlEscape(e.type)} entry">Edit</button><button type="button" class="swipe-action delete" data-idx="${realIdx}" aria-label="Delete ${xmlEscape(e.type)} entry">Delete</button>`;
@@ -8277,8 +8290,7 @@
     // ---------- Quick lane-log buttons (the 16 number buttons + 4 "Others", all haptic-backed checkboxes) ----------
     document.querySelectorAll('.lane-log-trigger').forEach(cb => {
       cb.addEventListener('change', () => {
-        playConfirmSound();
-        logDefect(cb.dataset.defect, cb.dataset.lane);
+        if (logDefect(cb.dataset.defect, cb.dataset.lane)) playConfirmSound();
       });
     });
 

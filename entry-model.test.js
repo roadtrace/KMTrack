@@ -123,3 +123,27 @@ test('touch advances updated_at without disturbing created_at', () => {
   assert.equal(entry.created_at, created);
   assert.equal(entry.updated_at, '2026-06-01T00:00:00.000Z');
 });
+
+test('restart preserves durable states, retry metadata, identity and review flags',()=>{
+  const states=['pending','failed','synced','needs_review','local_only'];
+  const original=states.map(sync_status=>model.createEntry({lat:1,lon:1,sync_status,sync_attempts:3,sync_error:'retained',sync_next_retry_at:'2026-10-03T00:00:00Z',guest_claim_required:true,preapproval_review_required:true,photoId:'local'}));
+  const restored=model.normalizeAll(JSON.parse(JSON.stringify(original)),undefined,{restart:true});
+  assert.deepEqual(restored,original);
+});
+test('only a restart converts syncing to blocked outcome unknown without inventing success',()=>{
+  const record=model.createEntry({lat:1,lon:1,sync_status:'syncing',sync_attempts:2,photoId:'local',preapproval_review_required:true});
+  assert.equal(model.normalizeAll([record])[0].sync_status,'syncing');
+  const recovered=model.normalizeAll([record],undefined,{restart:true})[0];
+  assert.equal(recovered.sync_status,'needs_review');assert.equal(recovered.sync_outcome_unknown,true);
+  assert.equal(recovered.sync_attempts,2);assert.equal(recovered.id,record.id);
+  assert.equal(recovered.photoId,'local');assert.equal(recovered.preapproval_review_required,true);
+  assert.equal(recovered.remote_id,'');assert.match(recovered.sync_error,/reconciled/);
+  assert.deepEqual(model.normalizeAll([recovered],undefined,{restart:true})[0],recovered);
+});
+test('missing legacy state stays pending; unknown state stays blocked on later reads',()=>{
+  assert.equal(model.normalizeEntry({lat:1,lon:1}).sync_status,'pending');
+  const out=model.normalizeEntry({lat:1,lon:1,sync_status:'unexpected'});
+  assert.equal(out.sync_status,'needs_review');
+  assert.equal(model.normalizeEntry(out).sync_status,'needs_review');
+  for(const invalid of [0,false,{},'unknown']) assert.equal(model.normalizeEntry({lat:1,lon:1,sync_status:invalid}).sync_status,'needs_review');
+});
