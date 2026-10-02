@@ -1,6 +1,6 @@
-# Phase 12.3B live validation — coordinate acknowledgement Fix 1
+# Phase 12.3B live validation — continuation results
 
-Date: 2026-10-02 (Asia/Manila). Fix 1 and preserved-row recovery passed. Phase 12.3B remains NOT complete. Initial-stop evidence below is retained as history.
+Date: 2026-10-02 (Asia/Manila). Continuation validation is complete under the requested rule permitting explicit partial/unverified limitations. The contained offline-capture fix is locally validated and awaits user commit/push. Initial-stop and Fix 1 evidence below is historical; the continuation section at the end is current. This does not claim every live path passed.
 
 ## Repository and isolation
 
@@ -11,7 +11,7 @@ Date: 2026-10-02 (Asia/Manila). Fix 1 and preserved-row recovery passed. Phase 1
 - User explicitly authorized Playwright after connected browser control failed. Test harness/scripts/evidence are ignored files under output/playwright/. They contain no passwords, auth tokens or auth headers. No tracing/session export was used.
 - Capture used emulated browser geolocation; this is not physical GPS/device coverage. A stale fix first prevented capture correctly and created no record.
 
-## Results by requested area
+## Initial-stop / Fix 1 results (historical; current continuation below)
 
 | Area | Result | Evidence / limitation |
 | --- | --- | --- |
@@ -108,3 +108,73 @@ The explicit syncRunner.reconcileAcknowledgement seam shares existing runner/API
 - Tests cover exact/serialized coordinates, changed coordinates including smaller differences in the same rounded bucket, invalid/non-finite/null/string values, strict non-coordinate fields, unchanged snapshots, strict local edits, matching held-row recovery, no-row/failure holds, authorization/review exclusions, serialization locks, scope changes and durable-save rollback.
 
 Fix 1 resolves the compatibility blocker and requested area 2 only. Offline/reconnect, restart/foreground, uncertain-response fault injection, manual/automatic overlap and the remaining authorization/device coverage are still incomplete as listed above. No remaining Phase 12.3B scenarios were resumed. No schema/RLS/profile/Storage/Realtime changes, inspection PATCH/DELETE, new INSERT, staging, commit or push occurred during Fix 1. No Phase 12.4, claims, photo sync or unrelated UI work. Await separately authorized continuation; preserve the existing test row and the published 153-record workspace.
+
+## Items 3-9 continuation - current results
+
+Starting verification: main and origin/main both 4920434 (0 / 0), committed coordinate fix present, cache v227. Nothing staged. Applicable instructions, handoff, planning documents and this report read first. Existing AGENTS.md, handoff/skill and reference workbook preserved. Explicit continuation approval supersedes the stale handoff scope. Accepted first-INSERT/matching recovery was not repeated.
+
+| Item | Status | Evidence / limitation |
+| --- | --- | --- |
+| 3. Offline/reconnect | PASSED AFTER CONTAINED FIX | Durable offline Save, zero inspection requests offline, local Log/Map/Excel, automatic POST / 201, correct mapped row and durable synced acknowledgement. |
+| 4. Restart/foreground | PARTIALLY VERIFIED | Offline pending reload, synced reload exclusion, saved retry count/time survived. Tab switching emitted no visibility events; live foreground wake NOT VERIFIED. |
+| 5. Uncertain recovery | PARTIALLY VERIFIED | Actual successful no-row GET preceded INSERT. Persistent simulated read failures retained uncertainty and prohibited INSERT. Safe live mismatching-UUID fixture NOT VERIFIED. |
+| 6. Authorization/workspace | PARTIALLY VERIFIED | Approved Inspector, Guest/review exclusion, sign-out and late-response isolation passed. Additional roles, different account/team, expired verification and direct live RLS denial NOT VERIFIED. |
+| 7. Manual/automatic overlap | PASSED | Automatic POST held; actual manual handler returned busy, no second POST; release produced one POST / 201 and one row. |
+| 8. Retry/failure | PARTIALLY VERIFIED | Browser failures 1/2, persisted backoff/restart, success reset, permanent validation hold and unrelated later submission passed. Cap/jitter/eight-failure budget tested deterministically. Direct RLS/conflict denial NOT VERIFIED live. |
+| 9. Device/PWA | PARTIALLY VERIFIED | Desktop reload/offline/reconnect/local persistence and synthetic-input photo retention passed; v227 initially, v228 after fix. Installed PWA, true foreground and physical mobile/GPS/camera NOT VERIFIED. |
+
+### Contained offline-capture defect and fix
+
+Three capture paths set preapproval_review_required whenever display mode differed from approved. Going offline changes a recently verified approved account to offline-recent, so normal offline Save incorrectly acquired a sticky preapproval hold. Reproduced UUID 2d13ed58-9bbf-4fcf-9e46-079df8b53c91 remains preserved and held; its existing flag was not cleared.
+
+index.html now uses captureNeedsPreapproval in standard, continuous-photo and single-photo new-record creation. Only an unlocked approved-profile workspace in approved or offline-recent mode avoids a new hold. Auth already limits offline-recent to recent cached approval. Pending, Guest, expired/local-only and locked/mismatched states remain held. Fresh online authorization, role/team, durability and snapshot requirements for cloud writes are unchanged. Existing flags/snapshots are untouched. Cache bumped to v228. Regression runs actual logDefect across eight authorization cases and checks all three capture sites; extracted capture tests include the helper.
+
+A labeling mistake selected the older TEST 1 card; its original label was restored through the normal edit form before proceeding. Snapshot/cloud row remained unchanged and no PATCH occurred. Guest lane reset generated an extra local capture; it was labeled and preserved too. No production UI changes were made for these harness issues.
+
+### Scenario evidence
+
+All account writes used approved Inspector 8546d12a-5112-441c-badd-822591dcc526 in its bound roadway workspace. GPS inputs were emulated desktop positions. Photo input was a synthetic canvas video stream through normal camera/capture/Save code. No application authorization, durability, snapshot or RLS protection was bypassed.
+
+- Fixed TEST 2: persisted pending offline with no review flag and no inspection requests. Local Log displayed its label; Map exposed a labeled accessible marker. Normal offline Excel export downloaded successfully with five local data rows plus headers in both worksheets. Reconnect automatically sent one POST / 201 without manual Submit. Authorized cloud loading confirmed one UUID row, owner/team and all snapshot fields matching, null photos. Durable synced state, remote_id same UUID, attempts 0, schedule null.
+- TEST 3 pending survived offline reload. A POST deliberately aborted before backend dispatch produced failed/unknown, attempt 1, original snapshot and sync_next_retry_at 2026-10-02T06:59:18.459Z. Reload retained count/schedule and made no immediate inspection request. Already-synced records were not resubmitted during reloads.
+- TEST 3 no-row sequence: aborted POST; simulated GET / 503; actual GET / 200 returning no row; actual POST / 201 using original snapshot. SDK internally retried the transient read. INSERT occurred only after successful absence proof. One backend INSERT/cloud row; success reset retry metadata. The aborted request is not a backend INSERT.
+- TEST 5 persistent failure: initial POST aborted pre-backend; normal Retry now triggered four SDK GET attempts, all simulated 503. Final read-failure state: attempts 2, unknown true, retry_allowed false, original snapshot retained, next_retry_at 2026-10-02T07:08:49.143Z. No INSERT followed failed reads. Later Retry now received actual GET / 200 no-row then simulated POST / 400 (23514), producing sticky needs_review, review_required true, attempts 2, schedule null. Both POST attempts intercepted before backend execution; cloud count 0. This is simulated validation rejection, not a live RLS denial.
+- Browser states established failure counts 1 -> 2 and saved schedule. Deterministic tests establish increasing exponential delays, +/-20% jitter, 30-minute cap and eight failures. No record metadata or clock was edited to force eligibility; normal Retry now avoided long waits.
+- TEST 4 automatic POST held before dispatch; actual submitLocalInspection handler invoked by approved harness with a temporary button returned the normal busy message while activeId matched. No second POST. Release gave POST / 201, synced/reset metadata; authorized cloud load verified one row. In-flight UI excludes submit, hence handler harness used. Real tab switching/bringToFront emitted no visibilitychange events and does not establish foreground wake.
+- Held-record independence: TEST 5 stayed needs_review while later TEST 6 automatically submitted under the same valid scope. Original preapproval-held TEST 2 stayed excluded. Local-only/imported/already-synced and other review exclusions additionally passed deterministic tests; no fake persisted flags manufactured in live workspace.
+- TEST 6 photo: normal offline Save stored stamped image 32,885 bytes and raw image 7,645 bytes. Offline reload retained the same photoId/image size and durable pending record. Reconnect metadata POST / 201 succeeded; local image remained 32,885 bytes. Both cloud photo fields null, Storage requests 0. This does not imply physical-camera coverage.
+- TEST 7: actual backend INSERT / 201 with correct owner/team/content; response held while normal Settings Sign out completed and normal Continue without signing in entered separate Guest workspace. Releasing the response did not acknowledge the old account or populate Guest entries. Account remains durably syncing/unknown with original snapshot, blank remote_id, attempts 0; one cloud row exists. This intentionally preserved interrupted attempt awaits future same-account reconciliation, not an additional INSERT or repeated accepted matching-recovery test.
+- Guest TEST 8 and control-reset record carry guest_claim_required and preapproval_review_required, remain pending with blank remote_id, survive reload, and send no inspection requests. Guest displays only its two records; eight account records remain preserved separately. Loaded cloud rows were never imported into local Entries/Map/export.
+
+### Preserved record ledger
+
+All labels below are complete. No cleanup authorized. Counts for loaded rows use authorized GET; photo and delayed-response counts use successful single INSERT representation plus UUID primary key, without post-sign-out SELECT. Local-only absence follows no backend INSERT and/or actual no-row read.
+
+| UUID | Label | Methods/statuses | Backend INSERTs / cloud rows | Final local state / retry |
+| --- | --- | --- | --- | --- |
+| ec802180-55c1-4c7d-b1d7-cb7c804d72c1 | PHASE 12.3B TEST 1 - AUTO SYNC - DO NOT DELETE | Loaded GET / 200 only | 0 new / 1 existing | synced, remote_id same UUID, attempts 0, no schedule |
+| 2d13ed58-9bbf-4fcf-9e46-079df8b53c91 | PHASE 12.3B TEST 2 - OFFLINE RECONNECT - DO NOT DELETE | No record write | 0 / 0 | pending, preapproval hold, remote_id blank, attempts 0 |
+| 52c45d89-da88-4418-9389-b5de8c9713b9 | PHASE 12.3B TEST 2 - OFFLINE RECONNECT - DO NOT DELETE - FIXED CAPTURE | POST / 201; loaded GET / 200 | 1 / 1 | synced, remote_id same UUID, attempts 0, schedule null |
+| 7fd63adf-6840-40f2-8fd5-e98d1c1162ab | PHASE 12.3B TEST 3 - RESTART RETRY NO ROW - DO NOT DELETE | POST aborted; simulated GET / 503; actual GET / 200 no-row; POST / 201; loaded GET / 200 | 1 / 1 | synced, remote_id same UUID, attempts 0, schedule null |
+| 6b87c156-a5b7-4a47-a15c-22f098b6fd9a | PHASE 12.3B TEST 4 - MANUAL AUTO FOREGROUND - DO NOT DELETE | Delayed POST / 201; loaded GET / 200 | 1 / 1 | synced, remote_id same UUID, attempts 0, schedule null |
+| 3773a001-b6f3-4436-a8e1-27e4a1c65b24 | PHASE 12.3B TEST 5 - READ FAILURE PERMANENT HOLD - DO NOT DELETE | POST aborted; four simulated GET / 503; actual GET / 200 no-row; simulated POST / 400 | 0 / 0 | needs_review/unknown, remote_id blank, attempts 2, schedule null |
+| 0ae76e19-15c3-44e1-9db9-002158c55d2d | PHASE 12.3B TEST 6 - LOCAL PHOTO - DO NOT DELETE | POST / 201 | 1 / 1 | synced, remote_id same UUID, attempts 0, schedule null; photo retained |
+| 0587f99f-c674-46a3-9424-6192517e6d24 | PHASE 12.3B TEST 7 - SIGNOUT LATE RESPONSE - DO NOT DELETE | POST / 201, response delayed until Guest | 1 / 1 | account storage syncing/unknown, remote_id blank, attempts 0, no schedule |
+| 3941470e-d566-45c7-89f9-4c14a1f2c638 | PHASE 12.3B TEST 8 - GUEST CONTROL RESET - DO NOT DELETE | None | 0 / 0 | Guest pending/review+claim, remote_id blank, attempts 0 |
+| 0d14c9ba-be37-485d-b669-65c98e9f435c | PHASE 12.3B TEST 8 - GUEST EXCLUDED - DO NOT DELETE | None | 0 / 0 | Guest pending/review+claim, remote_id blank, attempts 0 |
+
+Totals: five actual backend INSERTs, all 201 with unique labeled UUIDs; three additional POST attempts intercepted pre-backend (two aborted, one simulated 400). No duplicate cloud row/INSERT, wrong owner/team write, inspection PATCH, DELETE or Storage request. No schema/RLS/trigger/profile/role/Storage/Realtime changes. Existing TEST 1/Phase 11 rows preserved; published 153-record workspace never bound or modified.
+
+### Explicit limitations and final checks
+
+- Additional Supervisor, other Inspector, Admin and pending-account private sign-in not supplied. Earlier inventory has no pending fixture; no profile changed. No prohibited backend write sent to prove direct RLS denial. Deterministic role exclusions are not fresh live RLS evidence.
+- No safe live mismatching-UUID fixture manufactured; no legitimate-row PATCH/RLS bypass. Expired verification, different account/team transition and sign-out before otherwise eligible runner work remain NOT VERIFIED live. Live sign-out during work/Guest isolation passed; deterministic authorization/session/scope tests passed.
+- Live foreground visibility events unavailable; installed-PWA reopening and physical mobile/GPS/camera NOT VERIFIED. No claim of running while closed. Cap/jitter/eight failures tested deterministically, not long real-time waits. Direct backend RLS/conflict denial unverified.
+- Focused API/recovery/runner: 156 passed, 0 failed, 0 skipped/cancelled. Nine-file regression: 239 passed, 0 failed, 0 skipped/cancelled.
+- Full node --test: 367 total, 310 passed, 57 failed, 0 skipped/cancelled. Same recorded baseline failure count; unrelated failures not fixed. One regression test added.
+- 14 JavaScript syntax checks and 2 inline scripts passed. git diff --check passed.
+- Sanitized ignored artifacts: output/playwright/continuation-*-evidence.txt, scripts and phase12-offline-export.xlsx. No auth headers, tokens, cookies or passwords captured.
+- Isolated browser left open in Guest mode with two Guest/eight account records preserved. Final guard permits inspection GET only; inspection writes and Storage blocked. Remove test-only routes before separately authorized future writes. Do not close its in-memory session or clear storage until preservation/recovery arranged.
+- Source changes: index.html helper, sw.js v228, sync-runner.test.js capture regression/dependency/cache assertion, local-entry-store.test.js extracted helper dependency; this report updated. Nothing staged/committed/pushed. No Phase 12.4 or unrelated features.
+
+Phase 12.3B validation is complete with these explicit partial/unverified limitations under the requested completion rule. No architectural/schema blocker found. Contained fix awaits user review/commit/push. This does not claim universal device, role or backend-denial coverage.

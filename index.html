@@ -4753,6 +4753,12 @@
     function canViewTeamRecords() {
       return ['approved', 'offline-recent'].includes(authDisplayState?.mode);
     }
+    function captureNeedsPreapproval() {
+      // A recently verified approved workspace may capture offline. This does
+      // not grant cloud access or clear review flags on existing records.
+      return !(authWorkspaceUnlocked && authDisplayState?.profile?.approved === true
+        && ['approved', 'offline-recent'].includes(authDisplayState.mode));
+    }
     function accessibleEntries() {
       return canViewTeamRecords() ? entries : entries.filter(entry => !entry.importBatchId);
     }
@@ -6558,7 +6564,7 @@
 
       entries.push(SPOTITEntry.createEntry({
         type,
-        preapproval_review_required: authDisplayState?.mode !== 'approved',
+        preapproval_review_required: captureNeedsPreapproval(),
         guest_claim_required: authDisplayState?.mode === 'guest',
         timestamp: fullTimestamp(),
         ...snapshot,
@@ -7263,7 +7269,7 @@
         await putPhoto(photoId + ':raw', result.rawBlob);
         entries.push(SPOTITEntry.createEntry({
           ...cameraDraftEntry,
-          preapproval_review_required: authDisplayState?.mode !== 'approved',
+          preapproval_review_required: captureNeedsPreapproval(),
           guest_claim_required: authDisplayState?.mode === 'guest',
           timestamp: fullTimestamp(),
           inspector: inspectorName,
@@ -7409,7 +7415,7 @@
         } else {
           entries.push(SPOTITEntry.createEntry({
             ...cameraDraftEntry,
-            preapproval_review_required: authDisplayState?.mode !== 'approved',
+            preapproval_review_required: captureNeedsPreapproval(),
             guest_claim_required: authDisplayState?.mode === 'guest',
             timestamp: fullTimestamp(),
             inspector: inspectorName,

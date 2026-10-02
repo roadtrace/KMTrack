@@ -74,7 +74,7 @@ test('actual local Save and capture wake the runner only after confirmed durable
   const status={hidden:true};const app=vm.createContext({SPOTITEntry:model,SPOTITLocalStore:store,localStorage:f.storage,entries:f.rows,storageAvailable:true,authWorkspaceUnlocked:true,
     authDisplayState:f.current,syncRunner:f.runner,queueMicrotask,document:{getElementById:()=>status},console:{error(){}},activeEntriesStorageKey:()=> 'account',
     resolvedLocationCanSave:()=>true,resolvedEntrySnapshot:()=>({lat:14,lon:121,km:8}),fullTimestamp:()=> '2026-10-02 10:00:00',inspectorName:'Inspector',renderLog(){}});
-  for(const name of ['saveEntries','logDefect'])vm.runInContext(source(name),app);
+  for(const name of ['saveEntries','captureNeedsPreapproval','logDefect'])vm.runInContext(source(name),app);
   assert.equal(app.logDefect('Potholes','2'),true);assert.equal(f.operations.length,0);assert.equal(store.contains(f.storage,'account',f.rows[0]),true);
   await Promise.resolve();await f.runner.whenIdle();assert.equal(f.operations.length,1);assert.equal(f.rows[0].sync_status,'synced');
 });
@@ -265,7 +265,7 @@ test('concurrent Auth/runner verification calls share a fresh profile check',asy
 test('production app connects guarded runner, caches its module, and invalidates reloads instead of draining twice',()=>{
   const html=fs.readFileSync(require.resolve('./index.html'),'utf8'),sw=fs.readFileSync(require.resolve('./sw.js'),'utf8');
   assert.match(html,/SPOTITSyncRunner\.createRunner\(/);assert.match(html,/syncRunner\.bindWakeups/);assert.match(html,/syncRunner\.submit\(entry\)/);assert.match(html,/syncRunner\.wake\('startup'\)/);assert.match(html,/syncRunner\?\.wake\('verified'\)/);assert.match(html,/syncRunner\.wake\('saved'\)/);
-  assert.doesNotMatch(html,/syncQueue\.drain\(/);assert.match(sw,/'\.\/sync-runner\.js'/);assert.match(sw,/'v227'/);
+  assert.doesNotMatch(html,/syncQueue\.drain\(/);assert.match(sw,/'\.\/sync-runner\.js'/);assert.match(sw,/'v228'/);
   const source=fs.readFileSync(require.resolve('./sync-runner'),'utf8');assert.doesNotMatch(source,/\.upsert\(|\.update\(|\.storage\b|\.from\(/);
 });
 
@@ -288,4 +288,19 @@ test('runner explicit acknowledgement recheck never INSERTs after no-row and can
   assert.equal((await f.runner.reconcileAcknowledgement(entry)).status,'inaccessible');await f.runner.wake('verified');
   assert.deepEqual(f.operations.map(op=>op.kind),['read']);assert.equal(entry.submission_review_required,true);assert.equal(entry.submission_retry_allowed,false);
   entry.sync_error='Unrelated review';f.persist();assert.equal((await f.runner.reconcileAcknowledgement(entry)).status,'paused');assert.equal(f.operations.length,1);
+});
+
+test('normal capture keeps recent approved offline work eligible without releasing older review flags',()=>{
+  const html=fs.readFileSync('index.html','utf8');
+  const helper=html.match(/    function captureNeedsPreapproval\(\) \{[\s\S]*?\n    \}/)[0];
+  const capture=html.match(/    function logDefect\(type, lane\) \{[\s\S]*?\n    \}/)[0];
+  for(const [mode,approved,unlocked,review] of [['approved',true,true,false],['offline-recent',true,true,false],['pending',false,true,true],['verification-required',true,true,true],['local-only',true,true,true],['guest',false,true,true],['account-mismatch',true,false,true],['offline-recent',false,true,true]]){
+    const old=record(1,{preapproval_review_required:true});
+    const box={authDisplayState:{mode,profile:{approved}},authWorkspaceUnlocked:unlocked,entries:[old],SPOTITEntry:model,resolvedLocationCanSave:()=>true,resolvedEntrySnapshot:()=>({lat:14,lon:121,km:12}),fullTimestamp:()=> '2026-10-02 15:00:00',inspectorName:'Test',saveEntries:()=>true,renderLog:()=>{}};
+    vm.runInNewContext(helper+'\n'+capture+'\nlogDefect("Others","1");',box);
+    assert.equal(box.entries[1].preapproval_review_required,review,mode);
+    assert.equal(old.preapproval_review_required,true);
+    assert.equal(box.entries[1].guest_claim_required,mode==='guest');
+  }
+  assert.equal((html.match(/preapproval_review_required: captureNeedsPreapproval\(\)/g)||[]).length,3);
 });
