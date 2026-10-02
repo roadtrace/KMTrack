@@ -211,3 +211,78 @@ test('production wiring shares guarded recovery with the serial runner without o
   assert.match(html,/SPOTITSyncRunner\.createRunner\(/);assert.doesNotMatch(html,/\.reconcileOne\(/);
   assert.match(html,/scopeGeneration: inspectionScopeGeneration/);assert.match(html,/sessionGeneration: authController\.sessionGeneration\(\)/);assert.match(html,/isCurrent: entry => authWorkspaceUnlocked && entries\.includes\(entry\)/);
 });
+
+// Real float8 JSON fixture: binary storage retained all submitted bits, while
+// extra_float_digits=0 returned these exact 15-significant-digit numbers.
+const liveCoordinates={latitude:14.679362999296158,longitude:121.00064099999909};
+const serializedCoordinates={latitude:14.6793629992962,longitude:121.000640999999};
+function coordinateSnapshot(){
+  const f=fixture();Object.assign(f.record,{lat:liveCoordinates.latitude,lon:liveCoordinates.longitude});f.persist();
+  return {f,snapshot:api.submissionSnapshot(f.record,f.current)};
+}
+for(const [label,values] of [['identical',liveCoordinates],['observed float8 serialization',serializedCoordinates]])test(`coordinate acknowledgement accepts ${label} without changing persisted intent`,()=>{
+  const {f,snapshot}=coordinateSnapshot(),original=JSON.stringify(snapshot);
+  assert.equal(api.matchesSnapshot(snapshot,{...snapshot.row,...values}),true);
+  assert.equal(JSON.stringify(snapshot),original);assert.equal(api.localMatchesSnapshot(f.record,snapshot,f.current),true);
+});
+for(const [label,change] of [
+  ['changed latitude',{latitude:14.679363}],['changed longitude',{longitude:121.000642}],
+  ['adjacent 15-digit latitude',{latitude:14.6793629992963}],['adjacent 15-digit longitude',{longitude:121.000641}],
+  ['different full-precision value in same rounding bucket',{latitude:14.67936299929616}],
+  ['null latitude',{latitude:null}],['null longitude',{longitude:null}],['NaN',{latitude:NaN}],
+  ['infinity',{longitude:Infinity}],['non-numeric',{longitude:'not a number'}],
+  ['numeric string (float8 endpoint returns JSON numbers)',{latitude:'14.6793629992962'}],
+  ['owner',{user_id:other}],['team',{team:'another'}],['defect',{defect_type:'Cracks'}],
+  ['strict KM',{km_station:8200.00000000001}],['strict lane',{lane_number:'2'}]
+])test(`coordinate normalization still rejects ${label}`,()=>{
+  const {snapshot}=coordinateSnapshot();assert.equal(api.matchesSnapshot(snapshot,{...snapshot.row,...serializedCoordinates,...change}),false);
+});
+test('even an exact server-serialization coordinate edit fails the local-content guard',()=>{
+  const {f,snapshot}=coordinateSnapshot();f.record.lat=serializedCoordinates.latitude;
+  assert.equal(api.localMatchesSnapshot(f.record,snapshot,f.current),false);
+});
+test('rounded INSERT acknowledgement succeeds while retaining full original snapshot and local photo',async()=>{
+  const {f,snapshot}=coordinateSnapshot();f.setSend(async row=>({data:{...row,...serializedCoordinates}}));
+  assert.equal((await f.instance.insertOne(f.record)).status,'inserted');
+  assert.deepEqual(f.record.submission_snapshot,snapshot);assert.equal(f.record.sync_status,'synced');assert.equal(f.record.photoId,'local-photo');assert.equal(f.inserts,1);
+});
+function acknowledgementFixture(){
+  const {f}=coordinateSnapshot();const row=f.uncertain();
+  Object.assign(f.record,{submission_review_required:true,sync_error:'Server acknowledgement differs from the submission snapshot.',sync_attempts:3,sync_next_retry_at:'2026-10-02T03:00:00Z'});f.persist();
+  return {f,row};
+}
+test('explicit acknowledgement recheck performs SELECT only, clears hold only after durable full match',async()=>{
+  const {f,row}=acknowledgementFixture(),snapshot=copy(f.record.submission_snapshot);f.setRead(async()=>({data:{...row,...serializedCoordinates}}));
+  assert.equal((await f.instance.reconcileOne(f.record)).status,'mismatch');assert.equal(f.reads,0);
+  // Default still holds. Restore the original acknowledgement reason to exercise
+  // the explicitly requested read-only reconsideration (no record content edit).
+  f.record.sync_error='Server acknowledgement differs from the submission snapshot.';f.persist();
+  assert.equal((await f.instance.reconcileOne(f.record,{recheckAcknowledgement:true})).status,'matching');
+  assert.equal(f.reads,1);assert.equal(f.inserts,0);assert.equal(f.record.remote_id,id);assert.equal(f.record.submission_review_required,false);
+  assert.equal(f.record.sync_outcome_unknown,false);assert.equal(f.record.submission_retry_allowed,false);assert.equal(f.record.sync_attempts,0);assert.equal(f.record.sync_next_retry_at,null);
+  assert.deepEqual(f.record.submission_snapshot,snapshot);assert.equal(store.contains(f.storage,'account',f.record),true);
+});
+for(const [label,result,status] of [['no row',{data:null},'inaccessible'],['transient',{error:{status:503}},'transient-failure'],['RLS',{error:{code:'42501'}},'inaccessible']])test(`explicit acknowledgement recheck ${label} never clears hold or permits INSERT`,async()=>{
+  const {f}=acknowledgementFixture(),snapshot=copy(f.record.submission_snapshot);f.setRead(async()=>result);
+  assert.equal((await f.instance.reconcileOne(f.record,{recheckAcknowledgement:true})).status,status);
+  assert.equal(f.record.submission_review_required,true);assert.equal(f.record.submission_retry_allowed,false);assert.equal(f.record.remote_id,'');assert.equal(f.inserts,0);
+  assert.deepEqual(f.record.submission_snapshot,snapshot);await assert.rejects(f.instance.insertOne(f.record));
+});
+for(const change of [{sync_error:'Different review reason'},{guest_claim_required:true},{preapproval_review_required:true},{sync_status:'local_only'},{submission_uuid_conflict:true},{lane:'3'}])test(`explicit recheck cannot bypass another hold/content change: ${JSON.stringify(change)}`,async()=>{
+  const {f,row}=acknowledgementFixture();Object.assign(f.record,change);f.persist();f.setRead(async()=>({data:row}));
+  assert.equal((await f.instance.reconcileOne(f.record,{recheckAcknowledgement:true})).status,'mismatch');assert.equal(f.reads,0);assert.equal(f.inserts,0);
+});
+test('explicit recheck rejects changed review reason during authorization',async()=>{
+  const {f}=acknowledgementFixture();f.setVerify(async()=>{f.record.sync_error='Different review';f.persist();});
+  assert.equal((await f.instance.reconcileOne(f.record,{recheckAcknowledgement:true})).status,'mismatch');assert.equal(f.reads,0);
+});
+test('explicit recheck discards late scoped result and rolls back a failed acknowledgement save',async()=>{
+  for(const failure of ['scope','save']){
+    const {f,row}=acknowledgementFixture(),gate=deferred(),started=deferred();f.setRead(()=>{started.resolve();return gate.promise;});
+    const pending=f.instance.reconcileOne(f.record,{recheckAcknowledgement:true});await started.promise;
+    if(failure==='scope')f.setState({sessionGeneration:99});else f.setFailure('write');
+    gate.resolve({data:{...row,...serializedCoordinates}});
+    if(failure==='scope')assert.equal((await pending).status,'inaccessible');else await assert.rejects(pending,error=>error.syncKind==='storage');
+    assert.equal(f.record.remote_id,'');assert.equal(f.record.submission_review_required,true);assert.equal(f.inserts,0);
+  }
+});

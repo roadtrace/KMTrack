@@ -265,6 +265,27 @@ test('concurrent Auth/runner verification calls share a fresh profile check',asy
 test('production app connects guarded runner, caches its module, and invalidates reloads instead of draining twice',()=>{
   const html=fs.readFileSync(require.resolve('./index.html'),'utf8'),sw=fs.readFileSync(require.resolve('./sw.js'),'utf8');
   assert.match(html,/SPOTITSyncRunner\.createRunner\(/);assert.match(html,/syncRunner\.bindWakeups/);assert.match(html,/syncRunner\.submit\(entry\)/);assert.match(html,/syncRunner\.wake\('startup'\)/);assert.match(html,/syncRunner\?\.wake\('verified'\)/);assert.match(html,/syncRunner\.wake\('saved'\)/);
-  assert.doesNotMatch(html,/syncQueue\.drain\(/);assert.match(sw,/'\.\/sync-runner\.js'/);assert.match(sw,/'v226'/);
+  assert.doesNotMatch(html,/syncQueue\.drain\(/);assert.match(sw,/'\.\/sync-runner\.js'/);assert.match(sw,/'v227'/);
   const source=fs.readFileSync(require.resolve('./sync-runner'),'utf8');assert.doesNotMatch(source,/\.upsert\(|\.update\(|\.storage\b|\.from\(/);
+});
+
+test('runner explicit acknowledgement recovery is serialized SELECT-only and is never selected by automatic wake',async()=>{
+  const entry=record(1,{lat:14.679362999296158,lon:121.00064099999909});const f=fixture([entry]);
+  entry.submission_snapshot=inspections.submissionSnapshot(entry,f.current);
+  Object.assign(entry,{sync_status:'needs_review',sync_outcome_unknown:true,submission_review_required:true,submission_retry_allowed:false,sync_error:'Server acknowledgement differs from the submission snapshot.'});f.persist();
+  const intent=JSON.stringify(entry.submission_snapshot);const gate=deferred(),started=deferred();
+  f.setRead(async()=>{started.resolve();await gate.promise;return {data:{...entry.submission_snapshot.row,latitude:14.6793629992962,longitude:121.000640999999}};});
+  await f.runner.wake('startup');assert.equal(f.operations.length,0);
+  const recovering=f.runner.reconcileAcknowledgement(entry);await started.promise;
+  assert.equal((await f.runner.submit(entry)).status,'busy');assert.equal((await f.runner.reconcileAcknowledgement(entry)).status,'busy');
+  gate.resolve();assert.equal((await recovering).status,'matching');
+  await f.runner.wake('verified');assert.deepEqual(f.operations.map(op=>op.kind),['read']);assert.equal(entry.sync_status,'synced');
+  assert.equal(entry.remote_id,entry.id);assert.equal(JSON.stringify(entry.submission_snapshot),intent);assert.equal(entry.submission_review_required,false);
+});
+test('runner explicit acknowledgement recheck never INSERTs after no-row and cannot release unrelated holds',async()=>{
+  const entry=record();const f=fixture([entry]);entry.submission_snapshot=inspections.submissionSnapshot(entry,f.current);
+  Object.assign(entry,{sync_status:'needs_review',sync_outcome_unknown:true,submission_review_required:true,sync_error:'Server acknowledgement differs from the submission snapshot.'});f.persist();
+  assert.equal((await f.runner.reconcileAcknowledgement(entry)).status,'inaccessible');await f.runner.wake('verified');
+  assert.deepEqual(f.operations.map(op=>op.kind),['read']);assert.equal(entry.submission_review_required,true);assert.equal(entry.submission_retry_allowed,false);
+  entry.sync_error='Unrelated review';f.persist();assert.equal((await f.runner.reconcileAcknowledgement(entry)).status,'paused');assert.equal(f.operations.length,1);
 });

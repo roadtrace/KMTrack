@@ -168,6 +168,20 @@
       return launch((token,scope)=>process(entry,scope,token));
     }
     function invalidate(){epoch++;paused='scope-change';cancelTimer();emit();}
+    function reconcileAcknowledgement(entry){
+      if(running || api?.isBusy?.()) return Promise.resolve({status:'busy'});
+      const candidate={...entry,submission_review_required:false};
+      if(!ready() || !available() || !inspections.acknowledgementReview(entry)
+        || !eligible(candidate,context(),durable(entry))) return Promise.resolve({status:'paused'});
+      paused='';
+      // Explicit recovery uses the same runner/API lock and scope guards, but
+      // never calls process/insertOne, even when the UUID read returns no row.
+      return launch(async(token,scope)=>{
+        if(!current(entry,scope,token)) return {status:'scope-changed'};
+        const result=await api.reconcileOne(entry,{recheckAcknowledgement:true});
+        return current(entry,scope,token)?result:{status:'scope-changed'};
+      });
+    }
     function stop(){closed=true;invalidate();}
     function retryNow(){
       if(running) return running;
@@ -193,7 +207,7 @@
       document.addEventListener('visibilitychange',visible);
       return ()=>{window.removeEventListener('online',online);window.removeEventListener('offline',offline);document.removeEventListener('visibilitychange',visible);};
     }
-    return {ready,wake,submit,retryNow,bindWakeups,invalidate,stop,status:state,whenIdle:()=>running||Promise.resolve()};
+    return {ready,wake,submit,retryNow,reconcileAcknowledgement,bindWakeups,invalidate,stop,status:state,whenIdle:()=>running||Promise.resolve()};
   }
   return {RETRY,retryDelay,retryTime,needsReconciliation,eligible,ordered,createRunner};
 });

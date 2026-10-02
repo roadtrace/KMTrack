@@ -88,6 +88,22 @@
   }
   const ROW_FIELDS = Object.freeze(['id','created_at','user_id','team','inspected_at','defect_type','latitude','longitude','latitude_dmm','longitude_dmm','expressway','direction','lane_number','lane_other','km_station','interchange_exit','interchange_segment','photo_filename','photo_path']);
   const NUMERIC_FIELDS = new Set(['latitude','longitude','lane_number','km_station']);
+  const COORDINATE_FIELDS = new Set(['latitude','longitude']);
+  const ACKNOWLEDGEMENT_MISMATCH = 'Server acknowledgement differs from the submission snapshot.';
+  // Verified float8 columns and extra_float_digits=0 serialize to 15 significant
+  // decimal digits (PostgreSQL datatype-numeric#datatype-float). Accept ONLY the
+  // exact intended number or its exact 15-digit output, not an epsilon interval.
+  // Keep snapshots and local-content checks at their original full precision.
+  function coordinateMatches(intended, returned) {
+    return typeof intended === 'number' && typeof returned === 'number'
+      && Number.isFinite(intended) && Number.isFinite(returned)
+      && (intended === returned || Number(intended.toPrecision(15)) === returned);
+  }
+  function acknowledgementReview(entry) {
+    return entry?.sync_status === 'needs_review' && entry.sync_outcome_unknown === true
+      && entry.submission_review_required === true && entry.sync_error === ACKNOWLEDGEMENT_MISMATCH
+      && !entry.remote_id && !entry.submission_uuid_conflict;
+  }
   const NULLABLE_FIELDS = new Set(['expressway','direction','lane_number','lane_other','km_station','interchange_exit','interchange_segment','photo_filename','photo_path']);
   function canonicalRow(row) {
     if (!row || typeof row !== 'object') fail('Submission row is missing.');
@@ -122,11 +138,15 @@
     return row;
   }
   function matchesSnapshot(snapshot, row) {
-    try { return JSON.stringify(snapshotRow(snapshot)) === JSON.stringify(canonicalRow(row)); }
+    try {
+      const intended = snapshotRow(snapshot), returned = canonicalRow(row);
+      return ROW_FIELDS.every(key => COORDINATE_FIELDS.has(key)
+        ? coordinateMatches(intended[key], returned[key]) : intended[key] === returned[key]);
+    }
     catch (_) { return false; }
   }
   function localMatchesSnapshot(entry, snapshot, current) {
-    try { return matchesSnapshot(snapshot, submissionContent(entry, current)); }
+    try { return JSON.stringify(snapshotRow(snapshot)) === JSON.stringify(canonicalRow(submissionContent(entry, current))); }
     catch (_) { return false; }
   }
   const scopeKey = current => JSON.stringify([current?.userId, current?.workspaceUserId, current?.profile?.team, current?.profile?.role, current?.scopeGeneration, current?.sessionGeneration]);
@@ -219,15 +239,18 @@
         throw result.error;
       }
       if (!matchesSnapshot(snapshot, result.data)) {
-        hold(entry, 'Server acknowledgement differs from the submission snapshot.', true);
+        hold(entry, ACKNOWLEDGEMENT_MISMATCH, true);
         return { status: 'mismatch' };
       }
       saveState(entry, { remote_id: entry.id, sync_status: 'synced', sync_outcome_unknown: false, sync_attempts: 0, sync_next_retry_at: null, sync_error: '', synced_at: new Date().toISOString() });
       return { row: result.data, status: 'inserted' };
     }
-    // Explicit one-record recovery seam only. Nothing schedules or invokes this
-    // automatically, and this method never writes to the backend.
-    async function reconcileOne(entry) {
+    // One-record recovery used by the runner. A permanent acknowledgement hold
+    // requires explicit reconsideration; this method never writes to the backend.
+    async function reconcileOne(entry, { recheckAcknowledgement = false } = {}) {
+      // Explicit SELECT-only reconsideration of this one acknowledgement hold.
+      // Never clear review before a complete matching read or permit an INSERT.
+      const recheck = recheckAcknowledgement === true && acknowledgementReview(entry);
       const scope = scopeKey(context());
       try { guard(entry, scope); }
       catch (_) { return { status: 'inaccessible', retryAllowed: false }; }
@@ -243,7 +266,7 @@
       try {
         snapshot = JSON.parse(JSON.stringify(entry.submission_snapshot));
         row = snapshotRow(snapshot);
-        if (row.id !== entry.id.toLowerCase() || row.user_id !== current.userId.toLowerCase() || row.team !== current.profile.team || entry.guest_claim_required || entry.preapproval_review_required || entry.submission_review_required || entry.importBatchId || entry.cloud_source || entry.sync_status === 'local_only') fail('Snapshot scope requires review.');
+        if (row.id !== entry.id.toLowerCase() || row.user_id !== current.userId.toLowerCase() || row.team !== current.profile.team || entry.guest_claim_required || entry.preapproval_review_required || entry.submission_review_required && !recheck || recheck && !acknowledgementReview(entry) || entry.importBatchId || entry.cloud_source || entry.sync_status === 'local_only') fail('Snapshot scope requires review.');
         if (!localMatchesSnapshot(entry, snapshot, current)) fail('Local inspection differs from its original snapshot.');
       } catch (_) {
         hold(entry, 'Submission snapshot or local content requires review.', true);
@@ -266,6 +289,7 @@
       }
       if (!Object.hasOwn(found, 'data') || found.data === undefined) return { status: 'transient-failure', retryAllowed: false };
       if (found.data === null) {
+        if (recheck) return { status: 'inaccessible', retryAllowed: false };
         if (entry.submission_uuid_conflict || entry.remote_id || entry.sync_status === 'synced') {
           hold(entry, 'Previously existing UUID is not visible; absence cannot authorize another insert.');
           return { status: 'inaccessible', retryAllowed: false };
@@ -277,7 +301,7 @@
         hold(entry, 'Cloud identity or inspection content differs from the original snapshot.', true);
         return { status: 'mismatch', retryAllowed: false };
       }
-      saveState(entry, { remote_id: entry.id, sync_status: 'synced', sync_outcome_unknown: false, submission_retry_allowed: false, sync_attempts: 0, sync_next_retry_at: null, sync_error: '', synced_at: new Date().toISOString() });
+      saveState(entry, { remote_id: entry.id, sync_status: 'synced', sync_outcome_unknown: false, submission_retry_allowed: false, ...(recheck ? { submission_review_required: false } : {}), sync_attempts: 0, sync_next_retry_at: null, sync_error: '', synced_at: new Date().toISOString() });
       return { status: 'matching', retryAllowed: false };
     }
     async function fetchAuthorized({ from = 0, limit = 100 } = {}) {
@@ -296,7 +320,7 @@
       if (!result.data) fail('Inspection was not updated. It may no longer be accessible.');
       return { ...result.data, cloud_source: true };
     }
-    return { insertOne: entry => serialized(insertOne, entry), reconcileOne: entry => serialized(reconcileOne, entry), isBusy: () => inFlight, fetchAuthorized, updateAuthorized };
+    return { insertOne: entry => serialized(insertOne, entry), reconcileOne: (entry, options) => serialized(value => reconcileOne(value, options), entry), isBusy: () => inFlight, fetchAuthorized, updateAuthorized };
   }
-  return { phTime, dmm, eligible, laneParts, mapEntry, submissionSnapshot, matchesSnapshot, localMatchesSnapshot, scopeKey, classifyFailure, ROW_FIELDS, cloudChanges, createApi };
+  return { phTime, dmm, eligible, laneParts, mapEntry, submissionSnapshot, matchesSnapshot, localMatchesSnapshot, acknowledgementReview, scopeKey, classifyFailure, ROW_FIELDS, cloudChanges, createApi };
 });
