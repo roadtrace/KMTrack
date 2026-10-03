@@ -242,7 +242,7 @@
         hold(entry, ACKNOWLEDGEMENT_MISMATCH, true);
         return { status: 'mismatch' };
       }
-      saveState(entry, { remote_id: entry.id, sync_status: 'synced', sync_outcome_unknown: false, sync_attempts: 0, sync_next_retry_at: null, sync_error: '', synced_at: new Date().toISOString() });
+      saveState(entry, { user_id: row.user_id, team: row.team, remote_id: entry.id, sync_status: 'synced', sync_outcome_unknown: false, sync_attempts: 0, sync_next_retry_at: null, sync_error: '', synced_at: new Date().toISOString() });
       return { row: result.data, status: 'inserted' };
     }
     // One-record recovery used by the runner. A permanent acknowledgement hold
@@ -301,7 +301,7 @@
         hold(entry, 'Cloud identity or inspection content differs from the original snapshot.', true);
         return { status: 'mismatch', retryAllowed: false };
       }
-      saveState(entry, { remote_id: entry.id, sync_status: 'synced', sync_outcome_unknown: false, submission_retry_allowed: false, ...(recheck ? { submission_review_required: false } : {}), sync_attempts: 0, sync_next_retry_at: null, sync_error: '', synced_at: new Date().toISOString() });
+      saveState(entry, { user_id: row.user_id, team: row.team, remote_id: entry.id, sync_status: 'synced', sync_outcome_unknown: false, submission_retry_allowed: false, ...(recheck ? { submission_review_required: false } : {}), sync_attempts: 0, sync_next_retry_at: null, sync_error: '', synced_at: new Date().toISOString() });
       return { status: 'matching', retryAllowed: false };
     }
     async function fetchAuthorized({ from = 0, limit = 100 } = {}) {

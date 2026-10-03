@@ -53,7 +53,23 @@ test('snapshot and uncertain marker are confirmed before INSERT; success persist
   assert.equal(f.inserts,1);assert.deepEqual(f.record.submission_snapshot,expected);
   assert.equal(f.record.remote_id,id);assert.equal(f.record.sync_status,'synced');assert.equal(f.record.sync_outcome_unknown,false);
   assert.equal(f.record.photoId,'local-photo');assert.equal(store.contains(f.storage,'account',f.record),true);
+  assert.equal(f.record.user_id,user);assert.equal(f.record.team,'roadway');
   await assert.rejects(f.instance.insertOne(f.record));assert.equal(f.inserts,1);
+});
+test('normal blank-owner capture becomes photo eligible only after a matching durable acknowledgement',async()=>{
+  const f=fixture(),photo=require('./photo-upload-state');
+  f.setState({verifiedAt:Date.now()});
+  assert.equal(f.record.user_id,'');assert.equal(f.record.team,'');
+  assert.equal(photo.eligibility(f.record,f.current,true).eligible,false);
+  assert.equal((await f.instance.insertOne(f.record)).status,'inserted');
+  assert.equal(photo.eligibility(f.record,f.current,store.contains(f.storage,'account',f.record)).eligible,true);
+  f.restart();assert.equal(f.record.user_id,user);assert.equal(f.record.team,'roadway');
+});
+test('mismatching acknowledgement cannot assign local capture ownership or photo eligibility',async()=>{
+  const f=fixture();f.setSend(async row=>({data:{...row,user_id:other}}));
+  assert.equal((await f.instance.insertOne(f.record)).status,'mismatch');
+  assert.equal(f.record.user_id,'');assert.equal(f.record.team,'');assert.equal(f.record.remote_id,'');
+  assert.equal(f.record.sync_status,'needs_review');
 });
 for(const failure of ['write','readback'])test(`snapshot ${failure} failure prevents INSERT`,async()=>{
   const f=fixture();f.setFailure(failure);await assert.rejects(f.instance.insertOne(f.record));
@@ -80,6 +96,7 @@ test('matching authorized row restores remote_id and durable synced state withou
   f.setRead(async()=>({data:{...row,created_at:'2026-10-02T10:00:01+08:00',inspected_at:'2026-10-02T10:00:00+08:00',updated_at:'server value ignored'}}));
   assert.deepEqual(await f.instance.reconcileOne(f.record),{status:'matching',retryAllowed:false});
   assert.equal(f.record.remote_id,id);assert.equal(f.record.sync_status,'synced');assert.equal(f.record.photoId,'local-photo');
+  assert.equal(f.record.user_id,user);assert.equal(f.record.team,'roadway');
   assert.equal(f.inserts,0);assert.equal(JSON.parse(f.storage.getItem('account')).length,1);assert.equal(store.contains(f.storage,'account',f.record),true);
 });
 test('canonical UUID comparison retains permanent local UUID spelling for acknowledged status',async()=>{

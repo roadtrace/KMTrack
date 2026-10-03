@@ -69,6 +69,7 @@ test('Inspector and Supervisor insert only one durable eligible inspection; fail
   assert.equal((await f.transport.insertOne(local)).status, 'inserted');
   assert.equal(f.operation, 'insert'); assert.equal(f.written.user_id, user); assert.equal(f.written.team, 'roadway');
   assert.equal(local.photoId, 'local-photo'); assert.equal(local.sync_status, 'synced');
+  assert.equal(local.user_id, user); assert.equal(local.team, 'roadway');
   f.setState({ profile: { id: user, approved: true, role: 'supervisor', team: 'roadway' } });
   const supervisorLocal = entry(); f.setStored(supervisorLocal);
   assert.equal((await f.transport.insertOne(supervisorLocal)).status, 'inserted');
@@ -76,6 +77,7 @@ test('Inspector and Supervisor insert only one durable eligible inspection; fail
   const failedLocal = entry(); f.setStored(failedLocal);
   await assert.rejects(f.transport.insertOne(failedLocal), /offline/);
   assert.equal(failedLocal.photoFilename, 'local.jpg'); assert.equal(failedLocal.remote_id, undefined);
+  assert.equal(failedLocal.user_id, 'forged'); assert.equal(failedLocal.team, 'forged');
   f.setStored(entry({ updated_at: 'older' }));
   await assert.rejects(f.transport.insertOne(local), /Save this inspection locally/);
 });
