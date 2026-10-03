@@ -18,6 +18,20 @@
       return !!entry && Array.isArray(saved) && saved.some(row=>row && row.id===entry.id && JSON.stringify(row)===JSON.stringify(entry));
     }catch(_){return false;}
   }
+  // Short-lived, read-only enumeration snapshot. Never reuse across an await or
+  // mutation; individual cloud operations still require fresh contains checks.
+  function snapshotContains(storage,key){
+    try{
+      const saved=JSON.parse(storage.getItem(key)||'[]');
+      if(!Array.isArray(saved)) return ()=>false;
+      const rows=new Map();
+      for(const row of saved) if(row && row.id){
+        const versions=rows.get(row.id)||new Set();
+        versions.add(JSON.stringify(row));rows.set(row.id,versions);
+      }
+      return entry=>!!entry && !!rows.get(entry.id)?.has(JSON.stringify(entry));
+    }catch(_){return ()=>false;}
+  }
   function saveReview(storage,key,before,after){
     const original=JSON.stringify(before);
     if(storage.getItem(key)!==original) throw new Error('Saved workspace changed. Reopen the review.');
@@ -37,5 +51,5 @@
       throw error;
     }
   }
-  return {save,contains,saveReview,saveClaim};
+  return {save,contains,snapshotContains,saveReview,saveClaim};
 });

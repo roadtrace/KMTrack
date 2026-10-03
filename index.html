@@ -4578,6 +4578,7 @@
   <script src="./photo-sync.js"></script>
   <script src="./photo-pilot.js"></script>
   <script src="./sync-runner.js"></script>
+  <script src="./foreground-sync.js"></script>
   <script src="./map-config.js"></script>
   <script src="vendor/leaflet/leaflet.js"></script>
   <script src="./swipe-actions.js"></script>
@@ -4750,6 +4751,11 @@
 
     // ---------- Serial inspection sync (photos remain local) ----------
     let syncRunner = null;
+    const foregroundSync = SPOTITForegroundSync.createScheduler({
+      wake: () => syncRunner?.wake('saved'),
+      render: () => renderLog(),
+      onError: error => console.error('Foreground sync could not continue', error)
+    });
     let photoCloudController = null;
     let pilotPhotoViewer = null;
     // Phase 13D constructs a disabled controller for explicit manual recovery.
@@ -4770,7 +4776,7 @@
           const after = entries.map(row => row === e ? { ...row, ...changes } : row);
           SPOTITLocalStore.saveReview(localStorage, activeEntriesStorageKey(), before, after);
           Object.assign(e, changes);
-          renderLog();
+          foregroundSync.changed();
           return localEntryDurable(e);
         }
       });
@@ -5139,7 +5145,8 @@
       const text = document.getElementById('sync-status-text');
       if (!menu || !text) return;
       const localEntries = accessibleEntries();
-      const counts = SPOTITSync.summary(localEntries, { durable: localEntryDurable });
+      const counts = SPOTITSync.summary(localEntries, { durable: authWorkspaceUnlocked
+        ? SPOTITLocalStore.snapshotContains(localStorage, activeEntriesStorageKey()) : () => false });
       const online = navigator.onLine !== false;
       const runnerState = syncRunner?.status();
       const syncInFlight = runnerState?.running === true;
@@ -5280,7 +5287,7 @@
       }
     }
 
-    function saveEntries() {
+    function saveEntries(wakeSync = true) {
       try {
         if (!storageAvailable || !authWorkspaceUnlocked) throw new Error('Local workspace storage is unavailable.');
         for (const entry of entries) {
@@ -5289,7 +5296,7 @@
         SPOTITLocalStore.save(localStorage, activeEntriesStorageKey(), entries);
         const el = document.getElementById('storage-status');
         if (el) el.hidden = true;
-        if (typeof syncRunner !== 'undefined' && syncRunner) queueMicrotask(() => syncRunner.wake('saved'));
+        if (wakeSync && typeof syncRunner !== 'undefined' && syncRunner) foregroundSync.saved();
         return true;
       } catch (e) {
         storageAvailable = false;
@@ -6811,7 +6818,7 @@
       }));
 
       const saved = saveEntries();
-      renderLog();
+      foregroundSync.changed();
       return saved;
     }
 
@@ -7640,14 +7647,14 @@
             entry.photoFilename = pendingCaptureFilename;
             entry.photoTimestamp = formatPhotoDate(pendingCaptureStamp);
             if (!saveEntries()) {
-              clearCaptureReview(); closeCamera(); renderLog();
+              clearCaptureReview(); closeCamera(); foregroundSync.changed();
               return; // Keep the previously persisted photo; no successful-save feedback.
             }
           }
           playConfirmSound();
           clearCaptureReview();
           closeCamera();
-          renderLog();
+          foregroundSync.changed();
           if (oldPhotoId) {
             await deletePhoto(oldPhotoId);
             await deletePhoto(oldPhotoId + ':raw');
@@ -7667,7 +7674,7 @@
           if (saved) playConfirmSound();
           clearCaptureReview();
           closeCamera();
-          renderLog();
+          foregroundSync.changed();
         }
       } catch (err) {
         cameraErrorEl.textContent = `Could not save the photo on this device. ${err.message || err}`;
@@ -8140,6 +8147,8 @@
     }
 
     function renderLog() {
+      const entryDurable = authWorkspaceUnlocked
+        ? SPOTITLocalStore.snapshotContains(localStorage, activeEntriesStorageKey()) : () => false;
       renderGuestClaims();
       openSwipeEntryId = null;
       syncEntryFilterOptions();
@@ -8212,7 +8221,7 @@
         const laneLabel = /^\d+$/.test(laneValue) ? `L${laneValue}` : laneValue;
         div.innerHTML = `
       <div class="record-type"><span class="type">${xmlEscape(displayType)}</span>
-        ${!localEntryDurable(e) ? '<span class="import-label">Not saved · export before closing</span>' : ''}
+        ${!entryDurable(e) ? '<span class="import-label">Not saved · export before closing</span>' : ''}
         ${importedBy ? `<span class="import-label">(Imported - ${xmlEscape(importedBy)})</span>` : ''}
       </div>
       <time class="record-date" datetime="${xmlEscape(String(e.timestamp).replace(' ', 'T'))}" title="${xmlEscape(e.timestamp)}">${xmlEscape(shortDate)}</time>
@@ -8226,12 +8235,12 @@
       ${photoState.unavailable ? `<span class="import-label">${xmlEscape(photoState.unavailable)}</span>` : ''}
       ${!capped && !selectMode && (photoState.review || photoState.retry || photoState.reserved) ? `<button type="button" class="ds-btn ds-btn-quiet photo-issue" data-entry-id="${xmlEscape(e.id)}">Review photo issue</button>` : ''}
       ${!capped && !selectMode && photoState.retry ? `<button type="button" class="ds-btn ds-btn-quiet photo-retry" data-entry-id="${xmlEscape(e.id)}" ${!PHOTO_CLOUD_TRANSPORT_ENABLED ? 'disabled' : ''}>Retry photo</button><span class="import-label">${!PHOTO_CLOUD_TRANSPORT_ENABLED ? 'Photo uploads disabled for pilot' : ''}</span>` : ''}
-      ${!capped && !selectMode && !photoCloudController?.isBusy() && authDisplayState && authController && SPOTITPhotoUpload.eligibility(e, inspectionContext(), localEntryDurable(e)).eligible ? `<button type="button" class="ds-btn ds-btn-quiet photo-prepare" data-entry-id="${xmlEscape(e.id)}">${e.photo_upload_manifest ? 'Check prepared photo locally' : 'Prepare photo locally'}</button>` : ''}
+      ${!capped && !selectMode && !photoCloudController?.isBusy() && authDisplayState && authController && SPOTITPhotoUpload.eligibility(e, inspectionContext(), entryDurable(e)).eligible ? `<button type="button" class="ds-btn ds-btn-quiet photo-prepare" data-entry-id="${xmlEscape(e.id)}">${e.photo_upload_manifest ? 'Check prepared photo locally' : 'Prepare photo locally'}</button>` : ''}
       ${photoState.hasPhoto ? '</div>' : ''}
       ${e.guest_claim_required ? '<span class="import-label">Guest inspection requires claim</span>' : ''}
       ${e.preapproval_review_required && !e.guest_claim_required ? '<span class="import-label">Preapproval inspection requires review</span>' : ''}
-      ${!capped && !selectMode && authDisplayState && SPOTITPreapprovalReview.reviewable(e, inspectionContext()) && localEntryDurable(e) ? `<button type="button" class="ds-btn ds-btn-quiet preapproval-review" data-entry-id="${xmlEscape(e.id)}">Review inspection</button>` : ''}
-      ${!capped && !selectMode && cloudAccess() && localEntryDurable(e) && !e.importBatchId && !e.guest_claim_required && !e.preapproval_review_required && !e.submission_review_required && (!e.submission_snapshot || e.submission_retry_allowed === true) && !e.sync_outcome_unknown && !e.remote_id && ['pending','failed'].includes(e.sync_status) ? `<button type="button" class="ds-btn ds-btn-quiet cloud-submit" data-entry-id="${xmlEscape(e.id)}">Submit this inspection</button>` : ''}
+      ${!capped && !selectMode && authDisplayState && SPOTITPreapprovalReview.reviewable(e, inspectionContext()) && entryDurable(e) ? `<button type="button" class="ds-btn ds-btn-quiet preapproval-review" data-entry-id="${xmlEscape(e.id)}">Review inspection</button>` : ''}
+      ${!capped && !selectMode && cloudAccess() && entryDurable(e) && !e.importBatchId && !e.guest_claim_required && !e.preapproval_review_required && !e.submission_review_required && (!e.submission_snapshot || e.submission_retry_allowed === true) && !e.sync_outcome_unknown && !e.remote_id && ['pending','failed'].includes(e.sync_status) ? `<button type="button" class="ds-btn ds-btn-quiet cloud-submit" data-entry-id="${xmlEscape(e.id)}">Submit this inspection</button>` : ''}
       ${checkboxHtml}
     `;
         row.innerHTML = `<button type="button" class="swipe-action edit" data-idx="${realIdx}" aria-label="Edit ${xmlEscape(e.type)} entry">Edit</button><button type="button" class="swipe-action delete" data-idx="${realIdx}" aria-label="Delete ${xmlEscape(e.type)} entry">Delete</button>`;
@@ -8418,13 +8427,15 @@
         verify: () => authController.verifyOnline(),
         context: inspectionContext,
         durable: localEntryDurable,
-        persist: () => saveEntries(),
+        persist: () => saveEntries(false),
         isCurrent: entry => authWorkspaceUnlocked && entries.includes(entry)
       });
       syncRunner = SPOTITSyncRunner.createRunner({
         api: inspectionApi, entries: () => entries, context: inspectionContext, durable: localEntryDurable,
-        persist: () => saveEntries(), available: () => storageAvailable && authWorkspaceUnlocked && !document.hidden && navigator.onLine !== false,
-        onChange: () => { updateSyncStatus(); renderLog(); }
+        persist: () => saveEntries(false), available: () => storageAvailable && authWorkspaceUnlocked && !document.hidden && navigator.onLine !== false,
+        durableSnapshot: () => authWorkspaceUnlocked ? SPOTITLocalStore.snapshotContains(localStorage, activeEntriesStorageKey()) : () => false,
+        yieldToUI: () => new Promise(resolve => setTimeout(resolve, 0)),
+        onChange: () => foregroundSync.changed()
       });
       syncRunner.bindWakeups({ window, document, verify: () => authController.verifyOnline() });
       client.auth.onAuthStateChange(event => {

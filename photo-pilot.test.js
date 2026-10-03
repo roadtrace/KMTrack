@@ -95,7 +95,7 @@ test('actual Log markup exposes compact states, review, disabled retry and local
 });
 test('production gate, independent runner and cached pilot asset remain explicit',()=>{
   const sw=fs.readFileSync('sw.js','utf8');assert.match(html,/const PHOTO_CLOUD_TRANSPORT_ENABLED = false/);assert.doesNotMatch(html,/\.dispatch\(/);
-  assert.match(html,/enabled: PHOTO_CLOUD_TRANSPORT_ENABLED/);assert.match(sw,/'v234'/);assert.ok(sw.includes('./photo-pilot.js')&&html.includes('./photo-pilot.js'));
+  assert.match(html,/enabled: PHOTO_CLOUD_TRANSPORT_ENABLED/);assert.match(sw,/'v235'/);assert.ok(sw.includes('./photo-pilot.js')&&html.includes('./photo-pilot.js'));
   assert.doesNotMatch(fs.readFileSync('sync-runner.js','utf8'),/SPOTITPhoto|photo-pilot|photo-sync/);
   assert.doesNotMatch(fs.readFileSync('photo-pilot.js','utf8'),/\.upload\(|\.update\(|\.remove\(|getPublicUrl|createSignedUrl/);
 });
@@ -133,6 +133,7 @@ test('actual Log renderer retains local preview and separates row/photo state fo
   const element=()=>({dataset:{},classList:{},children:[],appendChild(v){this.children.push(v);},setAttribute(){},addEventListener(){},querySelectorAll(){return [];}});
   const controls=new Map(),control=id=>{if(!controls.has(id))controls.set(id,element());return controls.get(id);};
   const context={entries:rows,visibleEntries:()=>rows,accessibleEntries:()=>rows,document:{getElementById:control,createElement:element},
+    authWorkspaceUnlocked:true,SPOTITLocalStore:require('./local-entry-store'),localStorage:{getItem:()=>JSON.stringify(rows)},activeEntriesStorageKey:()=> 'account',
     SPOTITPhotoPilot:pilot,SPOTITPhotoUpload:photo,SPOTITPreapprovalReview:{reviewable:()=>false},authDisplayState:null,authController:null,
     PHOTO_CLOUD_TRANSPORT_ENABLED:false,photoCloudController:null,selectedEntryIds:new Set(),selectMode:false,logRegisterView:'log',CAPTURE_RECENT_LIMIT:10,
     typeClass:()=> 'potholes',localEntryDurable:()=>true,formatKmStation:()=> '12+500',getLogFilters:()=>({}),cloudAccess:()=>false,

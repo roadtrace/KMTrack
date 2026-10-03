@@ -40,7 +40,7 @@ function fixture(initial=[record()]){
       select:()=>({eq:(key,id)=>{assert.equal(key,'id');return {maybeSingle:()=>network('read',id,()=>read(id))};}})
     };}
   },verify:()=>verify(),context:()=>current,durable:e=>store.contains(storage,'account',e),persist,isCurrent:e=>rows.includes(e)});
-  const options={api,entries:()=>rows,context:()=>current,durable:e=>store.contains(storage,'account',e),persist,
+  const options={api,entries:()=>rows,context:()=>current,durable:e=>store.contains(storage,'account',e),durableSnapshot:()=>store.snapshotContains(storage,'account'),persist,
     now:()=>now,random:()=>0.5,available:()=>connected&&visible,setTimer:(fn,delay)=>{const id=++timerId;timers.set(id,{fn,at:now+delay});return id;},clearTimer:id=>timers.delete(id)};
   let runner=runnerModule.createRunner(options);
   const f={api,storage,data,cloud,operations,timers,persist,options,get rows(){return rows;},get current(){return current;},get now(){return now;},get maxActive(){return maxActive;},get runner(){return runner;},
@@ -72,7 +72,7 @@ test('actual local Save and capture wake the runner only after confirmed durable
   const f=fixture([]);const html=fs.readFileSync(require.resolve('./index.html'),'utf8');
   function source(name){const start=html.indexOf(`function ${name}(`);return html.slice(start,html.indexOf('\n    }',start)+6);}
   const status={hidden:true};const app=vm.createContext({SPOTITEntry:model,SPOTITLocalStore:store,localStorage:f.storage,entries:f.rows,storageAvailable:true,authWorkspaceUnlocked:true,
-    authDisplayState:f.current,syncRunner:f.runner,queueMicrotask,document:{getElementById:()=>status},console:{error(){}},activeEntriesStorageKey:()=> 'account',
+    authDisplayState:f.current,syncRunner:f.runner,foregroundSync:{saved:()=>queueMicrotask(()=>f.runner.wake('saved')),changed(){}},queueMicrotask,document:{getElementById:()=>status},console:{error(){}},activeEntriesStorageKey:()=> 'account',
     resolvedLocationCanSave:()=>true,resolvedEntrySnapshot:()=>({lat:14,lon:121,km:8}),fullTimestamp:()=> '2026-10-02 10:00:00',inspectorName:'Inspector',renderLog(){}});
   for(const name of ['saveEntries','captureNeedsPreapproval','logDefect'])vm.runInContext(source(name),app);
   assert.equal(app.logDefect('Potholes','2'),true);assert.equal(f.operations.length,0);assert.equal(store.contains(f.storage,'account',f.rows[0]),true);
@@ -264,8 +264,8 @@ test('concurrent Auth/runner verification calls share a fresh profile check',asy
 });
 test('production app connects guarded runner, caches its module, and invalidates reloads instead of draining twice',()=>{
   const html=fs.readFileSync(require.resolve('./index.html'),'utf8'),sw=fs.readFileSync(require.resolve('./sw.js'),'utf8');
-  assert.match(html,/SPOTITSyncRunner\.createRunner\(/);assert.match(html,/syncRunner\.bindWakeups/);assert.match(html,/syncRunner\.submit\(entry\)/);assert.match(html,/syncRunner\.wake\('startup'\)/);assert.match(html,/syncRunner\?\.wake\('verified'\)/);assert.match(html,/syncRunner\.wake\('saved'\)/);
-  assert.doesNotMatch(html,/syncQueue\.drain\(/);assert.match(sw,/'\.\/sync-runner\.js'/);assert.match(sw,/'v234'/);
+  assert.match(html,/SPOTITSyncRunner\.createRunner\(/);assert.match(html,/syncRunner\.bindWakeups/);assert.match(html,/syncRunner\.submit\(entry\)/);assert.match(html,/syncRunner\.wake\('startup'\)/);assert.match(html,/syncRunner\?\.wake\('verified'\)/);assert.match(html,/syncRunner\?\.wake\('saved'\)/);
+  assert.doesNotMatch(html,/syncQueue\.drain\(/);assert.match(sw,/'\.\/sync-runner\.js'/);assert.match(sw,/'v235'/);
   const source=fs.readFileSync(require.resolve('./sync-runner'),'utf8');assert.doesNotMatch(source,/\.upsert\(|\.update\(|\.storage\b|\.from\(/);
 });
 
@@ -296,11 +296,19 @@ test('normal capture keeps recent approved offline work eligible without releasi
   const capture=html.match(/    function logDefect\(type, lane\) \{[\s\S]*?\n    \}/)[0];
   for(const [mode,approved,unlocked,review] of [['approved',true,true,false],['offline-recent',true,true,false],['pending',false,true,true],['verification-required',true,true,true],['local-only',true,true,true],['guest',false,true,true],['account-mismatch',true,false,true],['offline-recent',false,true,true]]){
     const old=record(1,{preapproval_review_required:true});
-    const box={authDisplayState:{mode,profile:{approved}},authWorkspaceUnlocked:unlocked,entries:[old],SPOTITEntry:model,resolvedLocationCanSave:()=>true,resolvedEntrySnapshot:()=>({lat:14,lon:121,km:12}),fullTimestamp:()=> '2026-10-02 15:00:00',inspectorName:'Test',saveEntries:()=>true,renderLog:()=>{}};
+    const box={authDisplayState:{mode,profile:{approved}},authWorkspaceUnlocked:unlocked,entries:[old],SPOTITEntry:model,resolvedLocationCanSave:()=>true,resolvedEntrySnapshot:()=>({lat:14,lon:121,km:12}),fullTimestamp:()=> '2026-10-02 15:00:00',inspectorName:'Test',saveEntries:()=>true,foregroundSync:{changed(){}},renderLog:()=>{}};
     vm.runInNewContext(helper+'\n'+capture+'\nlogDefect("Others","1");',box);
     assert.equal(box.entries[1].preapproval_review_required,review,mode);
     assert.equal(old.preapproval_review_required,true);
     assert.equal(box.entries[1].guest_claim_required,mode==='guest');
   }
   assert.equal((html.match(/preapproval_review_required: captureNeedsPreapproval\(\)/g)||[]).length,3);
+});
+
+test('foreground batch yield admits navigation and rechecks scope before the next inspection',async()=>{
+ const f=fixture([record(1),record(2)]),yielded=deferred(),resume=deferred();
+ f.options.yieldToUI=async()=>{yielded.resolve();await resume.promise;};
+ const run=f.runner.wake();await yielded.promise;assert.equal(f.operations.length,1);
+ let navigated=false;await Promise.resolve().then(()=>{navigated=true;f.runner.invalidate();});assert.equal(navigated,true);
+ resume.resolve();await run;assert.equal(f.operations.length,1);assert.equal(f.maxActive,1);
 });

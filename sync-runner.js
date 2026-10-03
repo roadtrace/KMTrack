@@ -46,7 +46,7 @@
     const state=()=>({running:!!running,activeId,paused,waitingUntil:nextTime()});
     const emit=()=>{if(options.onChange) options.onChange(state());};
     const ready=()=>!!api && typeof api.insertOne==='function' && typeof api.reconcileOne==='function';
-    const list=()=>ordered(entries(),context(),durable);
+    const list=()=>ordered(entries(),context(),options.durableSnapshot?options.durableSnapshot():durable);
     function nextTime(){
       if(!ready() || closed || paused || !queue.accountEligible(context())) return null;
       const times=list().map(retryTime).filter(Number.isFinite);
@@ -135,6 +135,9 @@
         seen.add(entry);
         const result=await process(entry,scope,token);
         if(result.status==='submitted') submitted++;
+        // Let foreground input/paint run between records. The next iteration
+        // rechecks scope, eligibility and fresh persisted state after the yield.
+        if(options.yieldToUI) await options.yieldToUI();
       }
       return {submitted,paused};
     }

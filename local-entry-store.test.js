@@ -19,7 +19,7 @@ function fixture({failure='',mode='approved'}={}){
   const storage={getItem:key=>data.get(key)||null,setItem(key,value){if(failure==='write')throw Error('quota');if(failure!=='readback')data.set(key,value);}};
   const state=vm.createContext({SPOTITLocalStore:store,SPOTITEntry:model,localStorage:storage,entries:[],storageAvailable:true,authWorkspaceUnlocked:true,
     authDisplayState:{...context,mode},inspectionScopeGeneration:0,syncRunner:null,document:{getElementById:()=>status},console:{error(){}},
-    activeEntriesStorageKey:()=>mode==='guest'?'guest':'account',renderLog(){rendered++;},resolvedLocationCanSave:()=>true,
+    activeEntriesStorageKey:()=>mode==='guest'?'guest':'account',foregroundSync:{changed(){rendered++;},saved(){}},renderLog(){rendered++;},resolvedLocationCanSave:()=>true,
     resolvedEntrySnapshot:()=>({lat:14,lon:121,km:8}),fullTimestamp:()=>'2026-10-02 10:00:00',inspectorName:'Inspector'});
   for(const name of ['localEntryDurable','saveEntries','captureNeedsPreapproval','logDefect','syncState'])vm.runInContext(source(name),state);
   return {state,data,status,storage,rendered:()=>rendered};
