@@ -4564,6 +4564,7 @@
     </div>
   </section>
 
+  <script src="./photo-upload-state.js"></script>
   <script src="./entry-model.js"></script>
   <script src="./local-entry-store.js"></script>
   <script src="./sync-queue.js"></script>
@@ -4754,6 +4755,45 @@
     let authDisplayState = null;
     function activeEntriesStorageKey() {
       return authDisplayState?.mode === 'guest' ? STORAGE_KEY_GUEST_ENTRIES : STORAGE_KEY_ENTRIES;
+    }
+
+    async function addPhotoUploadEnvelope(key, envelope) {
+      const db = await openPhotoDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(PHOTO_STORE_NAME, 'readwrite');
+        tx.objectStore(PHOTO_STORE_NAME).add(envelope, key);
+        tx.oncomplete = resolve;
+        tx.onabort = tx.onerror = () => reject(tx.error || new Error('Immutable photo save failed.'));
+      });
+    }
+
+    async function prepareLocalPhoto(id, button) {
+      const entry = entries.find(e => e.id === id);
+      if (!entry || !authController) return;
+      button.disabled = true;
+      try {
+        const preparer = SPOTITPhotoUpload.createPreparer({
+          context: inspectionContext, key: activeEntriesStorageKey,
+          durable: localEntryDurable, isCurrent: e => authWorkspaceUnlocked && entries.includes(e),
+          read: getPhoto, add: addPhotoUploadEnvelope,
+          lock: (key, run) => {
+            if (!navigator.locks?.request) throw new Error('Safe local photo preparation requires browser locks.');
+            return navigator.locks.request(key, run);
+          },
+          save: (e, changes) => {
+            const before = entries.map(row => ({ ...row }));
+            const after = entries.map(row => row === e ? { ...row, ...changes } : row);
+            SPOTITLocalStore.saveReview(localStorage, activeEntriesStorageKey(), before, after);
+            Object.assign(e, changes);
+            return localEntryDurable(e);
+          }
+        });
+        // Local only: uses the current fresh verification, never requests a
+        // profile check, wakes sync, reserves a path or contacts Storage.
+        await preparer.prepare(entry);
+      } catch (error) {
+        alert(`Photo preparation held: ${error.message || error}`);
+      } finally { button.disabled = false; renderLog(); }
     }
     function activeExportInspectorStorageKey() {
       return authDisplayState?.mode === 'guest' ? 'kmtrack_guest_export_inspector_name_v1' : 'kmtrack_inspector_name_v1';
@@ -5197,6 +5237,9 @@
     function saveEntries() {
       try {
         if (!storageAvailable || !authWorkspaceUnlocked) throw new Error('Local workspace storage is unavailable.');
+        for (const entry of entries) {
+          if (entry.photo_upload_manifest && entry.photo_upload_manifest.source_photo_id !== entry.photoId) SPOTITPhotoUpload.sourceChanged(entry);
+        }
         SPOTITLocalStore.save(localStorage, activeEntriesStorageKey(), entries);
         const el = document.getElementById('storage-status');
         if (el) el.hidden = true;
@@ -7361,6 +7404,7 @@
     // exactly as it was, since there's nothing clean to regenerate it from.
     async function regenerateStampedPhotoForEntry(entry) {
       if (!entry || !entry.photoId) return;
+      const regenerationPhotoId = entry.photoId;
       try {
         const rawBlob = await getPhoto(entry.photoId + ':raw');
         if (!rawBlob) return;
@@ -7377,6 +7421,10 @@
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', .88));
         if (!blob) return;
         await putPhoto(entry.photoId, blob);
+        if (authWorkspaceUnlocked && entries.includes(entry) && entry.photoId === regenerationPhotoId) {
+          SPOTITPhotoUpload.sourceChanged(entry, 'Local stamped photo changed; immutable payload retained for review.');
+          if (entry.photo_upload_manifest) saveEntries();
+        }
       } catch (e) {
         console.warn('Could not regenerate stamped photo for this entry', e);
       }
@@ -8125,6 +8173,8 @@
       <span class="record-bound">${xmlEscape(e.bound || '—')}</span>
       <span class="record-lane">${xmlEscape(laneLabel)}</span></div>
       ${e.photoId ? `<div class="record-photo-actions">${photoActionsHtml}</div>` : ''}
+      ${SPOTITPhotoUpload.label(e) ? `<span class="import-label" title="${xmlEscape(e.photo_sync_error || '')}">${xmlEscape(SPOTITPhotoUpload.label(e))}</span>` : ''}
+      ${!capped && !selectMode && authDisplayState && authController && SPOTITPhotoUpload.eligibility(e, inspectionContext(), localEntryDurable(e)).eligible ? `<button type="button" class="ds-btn ds-btn-quiet photo-prepare" data-entry-id="${xmlEscape(e.id)}">${e.photo_upload_manifest ? 'Check prepared photo locally' : 'Prepare photo locally'}</button>` : ''}
       ${e.guest_claim_required ? '<span class="import-label">Guest inspection requires claim</span>' : ''}
       ${e.preapproval_review_required && !e.guest_claim_required ? '<span class="import-label">Preapproval inspection requires review</span>' : ''}
       ${!capped && !selectMode && authDisplayState && SPOTITPreapprovalReview.reviewable(e, inspectionContext()) && localEntryDurable(e) ? `<button type="button" class="ds-btn ds-btn-quiet preapproval-review" data-entry-id="${xmlEscape(e.id)}">Review inspection</button>` : ''}
@@ -8160,6 +8210,9 @@
       }));
       list.querySelectorAll('.cloud-submit').forEach(btn => btn.addEventListener('click', event => {
         event.stopPropagation(); submitLocalInspection(event.currentTarget.dataset.entryId, event.currentTarget);
+      }));
+      list.querySelectorAll('.photo-prepare').forEach(btn => btn.addEventListener('click', event => {
+        event.stopPropagation(); prepareLocalPhoto(event.currentTarget.dataset.entryId, event.currentTarget);
       }));
       list.querySelectorAll('.preapproval-review').forEach(btn => btn.addEventListener('click', event => {
         event.stopPropagation(); openPreapprovalReview(event.currentTarget.dataset.entryId);

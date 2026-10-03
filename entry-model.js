@@ -59,8 +59,10 @@
     const lane=laneFields(raw.lane);
     const stamp=isoNow(now);
     const created=text(raw.created_at);
+    const photoModel=typeof module==='object' && module.exports ? require('./photo-upload-state') : globalThis.SPOTITPhotoUpload;
     return {
       ...raw,
+      ...photoModel.normalize(raw),
       id: text(raw.id) || uuid(),
       type: text(raw.type) || 'Others',
       timestamp: text(raw.timestamp),
