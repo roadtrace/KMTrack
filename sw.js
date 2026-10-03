@@ -4,7 +4,7 @@
 // since the app already manages its own offline copy of that file and
 // the in-app "Reload dataset" button needs a real network attempt.
 
-const CACHE_VERSION = 'v235'; // bump this string whenever you deploy changes, to force an update
+const CACHE_VERSION = 'v236'; // bump this string whenever you deploy changes, to force an update
 const CACHE_NAME = `spotit-shell-${CACHE_VERSION}`;
 
 const APP_SHELL = [
@@ -26,6 +26,7 @@ const APP_SHELL = [
   './sync-queue.js',
   './sync-runner.js',
   './foreground-sync.js',
+  './inspection-wakeup.js',
   './map-config.js',
   './swipe-actions.js',
   './entry-filters.js',
@@ -64,6 +65,13 @@ const APP_SHELL = [
   './spot-it-app-icon-v2-192.png',
   './spot-it-app-icon-v2-512.png'
 ];
+
+importScripts('./inspection-wakeup.js');
+self.addEventListener('sync', event => {
+  if(event.tag===SPOTITInspectionWakeup.TAG){
+    event.waitUntil(SPOTITInspectionWakeup.notifyClients(self.clients,self.location.href));
+  }
+});
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

@@ -75,7 +75,7 @@ test('runner and real API use normal snapshots/acknowledgement; synced claim can
 test('production UI is explicit and caches local module; no new cloud transport',()=>{
  const html=fs.readFileSync('index.html','utf8'),sw=fs.readFileSync('sw.js','utf8'),source=fs.readFileSync('guest-claim.js','utf8');
  assert.match(html,/Claim to my workspace/);assert.match(html,/Keep as Guest \/ Cancel/);assert.match(html,/Already claimed/);assert.match(html,/syncRunner\?\.wake\('guest-claimed'\)/);assert.match(html,/navigator.locks.request\('kmtrack-guest-claim-v1'/);
- assert.doesNotMatch(source,/\.from\(|\.insert\(|\.storage\(|deletePhoto/);assert.match(sw,/guest-claim.js/);assert.match(sw,/v235/);
+ assert.doesNotMatch(source,/\.from\(|\.insert\(|\.storage\(|deletePhoto/);assert.match(sw,/guest-claim.js/);assert.match(sw,/v236/);
  assert.ok(html.indexOf('src="./preapproval-review.js"')<html.indexOf('src="./guest-claim.js"'));
 });
 test('first claim can initialize a newly bound empty account workspace',async()=>{const f=fixture();f.storage.removeItem('account');await f.controller.claim(open(f));assert.equal(f.rows.length,1);assert.equal(store.contains(f.storage,'account',f.rows[0]),true);});

@@ -4579,6 +4579,7 @@
   <script src="./photo-pilot.js"></script>
   <script src="./sync-runner.js"></script>
   <script src="./foreground-sync.js"></script>
+  <script src="./inspection-wakeup.js"></script>
   <script src="./map-config.js"></script>
   <script src="vendor/leaflet/leaflet.js"></script>
   <script src="./swipe-actions.js"></script>
@@ -4751,8 +4752,9 @@
 
     // ---------- Serial inspection sync (photos remain local) ----------
     let syncRunner = null;
+    let inspectionWakeup = null;
     const foregroundSync = SPOTITForegroundSync.createScheduler({
-      wake: () => syncRunner?.wake('saved'),
+      wake: () => { inspectionWakeup?.changed(); return syncRunner?.wake('saved'); },
       render: () => renderLog(),
       onError: error => console.error('Foreground sync could not continue', error)
     });
@@ -5134,10 +5136,10 @@
       review: { tone: 'warn', pill: 'Review required', title: 'Records need review', sub: 'Review or claim is required before these records can be submitted.' },
       syncing: { tone: 'warn', pill: 'Submitting…', title: 'Submitting inspections', sub: 'One inspection operation runs at a time. Photos stay local.' },
       failed: { tone: 'warn', pill: 'Retrying', title: 'Retry scheduled', sub: 'Transient failures use a saved retry schedule.' },
-      pending: { tone: 'warn', pill: '{n} pending', title: 'Saved locally / pending', sub: '{n} record(s) await submission.' },
+      pending: { tone: 'warn', pill: 'Waiting to sync', title: 'Saved on device', sub: '{n} record(s) await submission.' },
       offline: { tone: 'warn', pill: 'Waiting for connection', title: 'Waiting for connection', sub: 'Records are safe on this device.' },
       synced: { tone: 'fresh', pill: 'Submitted', title: 'Cloud submissions recorded', sub: 'Inspection rows are submitted. Check each record for its separate photo status.' },
-      local: { tone: 'neutral', pill: 'Saved locally', title: 'Saved locally', sub: 'Records are stored on this device.' }
+      local: { tone: 'neutral', pill: 'Saved on device', title: 'Saved on device', sub: 'Records are stored on this device.' }
     };
 
     function updateSyncStatus() {
@@ -8394,7 +8396,7 @@
       document.getElementById('auth-signout-btn').hidden = state.mode === 'guest';
       document.getElementById('auth-guest-signin-btn').hidden = state.mode !== 'guest';
       updateSyncStatus();
-      if (state.mode === 'approved' && state.cloudVerified) queueMicrotask(() => syncRunner?.wake('verified'));
+      if (state.mode === 'approved' && state.cloudVerified) queueMicrotask(() => { inspectionWakeup?.changed(); syncRunner?.wake('verified'); });
     }
     let authController = null;
     if (globalThis.SPOTITAuth) {
@@ -8438,6 +8440,16 @@
         onChange: () => foregroundSync.changed()
       });
       syncRunner.bindWakeups({ window, document, verify: () => authController.verifyOnline() });
+      inspectionWakeup = SPOTITInspectionWakeup.createController({
+        serviceWorker: navigator.serviceWorker,
+        hasWork: () => authWorkspaceUnlocked && SPOTITSyncRunner.ordered(entries, inspectionContext(),
+          SPOTITLocalStore.snapshotContains(localStorage, activeEntriesStorageKey()))
+          .some(entry => entry.sync_status !== 'needs_review' && entry.sync_attempts < SPOTITSyncRunner.RETRY.MAX_ATTEMPTS),
+        verify: () => authController.verifyOnline(),
+        wake: () => syncRunner.wake('verified'),
+        scope: () => SPOTITInspections.scopeKey(inspectionContext()),
+        visible: () => !document.hidden
+      });
       client.auth.onAuthStateChange(event => {
         if (['SIGNED_OUT','SIGNED_IN','USER_UPDATED'].includes(event)) {
           authController.invalidateSession();
@@ -9315,6 +9327,7 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').then(reg => {
+          navigator.serviceWorker.ready.then(active => inspectionWakeup?.setRegistration(active)).catch(() => {});
           // Don't wait for the browser's own update-check schedule (can be as
           // infrequent as once/day, especially for an installed iOS PWA) —
           // check the server for a newer sw.js every time the app opens.
