@@ -145,7 +145,8 @@ test('path rejects unsafe identities and never includes photoId',()=>{
 test('production local preparation handler durably links manifest, renders status and never verifies or wakes cloud',async()=>{
   const fs=require('fs'),vm=require('vm'),store=require('./local-entry-store'),f=fixture();
   const html=fs.readFileSync('index.html','utf8');
-  const body=html.slice(html.indexOf('    async function prepareLocalPhoto('),html.indexOf('    function activeExportInspectorStorageKey(')).trim();
+  const start=html.indexOf('    async function prepareLocalPhoto(');
+  const body=html.slice(start,html.indexOf('\n    }',start)+6).trim();
   const storage=new Map([['account',JSON.stringify([f.entry])]]);
   const localStorage={getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)};
   let rendered=0;

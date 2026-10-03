@@ -102,10 +102,14 @@
   }
   function label(e){
     if(!e.photoId && !e.photo_upload_manifest && !e.photo_path) return '';
+    // Held originals and local-only decisions never advertise cloud work.
+    if(e.guest_claim_required || e.guest_claim_pending || e.preapproval_review_required || e.submission_review_required || e.sync_status==='local_only') return 'Photo local';
     const status=normalize(e).photo_sync_status;
     if(status==='photo_needs_review') return 'Photo needs review';
     const prefix=e.sync_status==='synced' && e.remote_id===e.id ? 'Inspection submitted · ' : '';
-    return prefix+(status==='photo_synced'?'photo synced':status==='photo_pending'?'photo pending':status==='photo_failed'?'photo failed':'photo local');
+    if(e.photo_sync_status==='photo_uploading' && validManifest(e.photo_upload_manifest)) return 'Photo uploading';
+    if(status==='photo_failed') return e.photo_next_retry_at ? 'Photo retry scheduled' : 'Photo retry needed';
+    return prefix+(status==='photo_synced'?'photo synced':status==='photo_pending'?'photo pending':'photo local');
   }
   function createPreparer(o){
     const clock=o.now||Date.now;

@@ -41,6 +41,39 @@ test('disabled default dispatch and API do no reads, verification, writes or loc
   await assert.rejects(cloud.createApi({client:f.options.client}).readRow(f.m),/disabled/);
   assert.deepEqual(f.calls,[]);assert.equal(JSON.stringify(f.e),before);
 });
+test('manual retry bypasses time only, preserves exact manifest/payload and inspection snapshot',async()=>{
+  const f=await fixture();f.hooks.upload=()=>{throw Error('offline');};await f.run();
+  const identity=JSON.stringify(f.m),payload=f.disk.get(f.m.payload_key).payload,snapshot=JSON.stringify(f.e.submission_snapshot);
+  const scheduled=f.e.photo_next_retry_at;assert.ok(scheduled);delete f.hooks.upload;
+  assert.equal((await sync.createController(f.options).retryNow(f.e)).status,'photo_synced');
+  assert.equal(JSON.stringify(f.e.photo_upload_manifest),identity);assert.equal(f.disk.get(f.m.payload_key).payload,payload);
+  assert.equal(JSON.stringify(f.e.submission_snapshot),snapshot);assert.equal(f.e.sync_status,'synced');
+  assert.equal(f.calls.filter(x=>x==='reserve').length,1);assert.equal(f.e.photo_attempt_count,2);
+});
+test('disabled manual retry preserves schedule and does not verify, read, encode or save',async()=>{
+  const f=await fixture();Object.assign(f.e,{photo_sync_status:'photo_failed',photo_next_retry_at:'2026-10-03T02:00:00Z'});f.persist();
+  const before=JSON.stringify(f.e);assert.equal((await sync.createController({...f.options,enabled:false}).retryNow(f.e)).status,'disabled');
+  assert.equal(JSON.stringify(f.e),before);assert.deepEqual(f.calls,[]);
+});
+test('manual retry cannot release needs review or reset exhausted attempts',async()=>{
+  const f=await fixture();f.e.photo_sync_status='photo_needs_review';f.persist();
+  assert.equal((await sync.createController(f.options).retryNow(f.e)).status,'blocked');assert.deepEqual(f.calls,[]);
+  f.e.photo_sync_status='photo_failed';f.e.photo_attempt_count=8;f.persist();
+  assert.equal((await sync.createController(f.options).retryNow(f.e)).status,'photo_needs_review');assert.deepEqual(f.calls,[]);
+});
+test('manual retry validates retained payload without regeneration before upload',async()=>{
+  const f=await fixture();f.e.photo_sync_status='photo_failed';f.persist();
+  const identity=JSON.stringify(f.m);f.disk.delete(f.m.payload_key);
+  assert.equal((await sync.createController(f.options).retryNow(f.e)).status,'photo_needs_review');
+  assert.equal(JSON.stringify(f.e.photo_upload_manifest),identity);assert.ok(!f.calls.includes('upload'));assert.ok(!f.calls.includes('reserve'));
+});
+test('manual retry uses existing busy guard and leaves schedule until attempt validation',async()=>{
+  const f=await fixture();f.e.photo_sync_status='photo_failed';f.e.photo_next_retry_at='2026-10-03T02:00:00Z';f.persist();
+  let release;f.hooks.verify=()=>new Promise(resolve=>release=resolve);const controller=sync.createController(f.options);
+  const running=controller.retryNow(f.e);await new Promise(r=>setImmediate(r));
+  assert.equal(f.e.photo_next_retry_at,'2026-10-03T02:00:00Z');assert.equal((await controller.retryNow(f.e)).status,'busy');
+  delete f.hooks.verify;release();assert.equal((await running).status,'photo_synced');
+});
 test('null/null reserves conditionally, exact payload uploads, object and final row precede durable ack',async()=>{
   const f=await fixture(),snapshot=structuredClone(f.e.submission_snapshot);
   assert.equal((await f.run()).status,'photo_synced');assert.equal(f.e.sync_status,'synced');assert.deepEqual(f.e.submission_snapshot,snapshot);
@@ -121,7 +154,7 @@ test('production gate static false, no auto dispatch; assets cached; forbidden o
   const html=fs.readFileSync('index.html','utf8'),sw=fs.readFileSync('sw.js','utf8');
   assert.match(html,/const PHOTO_CLOUD_TRANSPORT_ENABLED = false/);assert.doesNotMatch(html,/\.dispatch\(/);
   for(const asset of ['photo-cloud-api.js','photo-sync.js'])assert.ok(sw.includes(asset)&&html.includes(asset));
-  assert.match(sw,/v232/);
+  assert.match(sw,/v233/);
   for(const file of ['photo-cloud-api.js','photo-sync.js'])assert.doesNotMatch(fs.readFileSync(file,'utf8'),/\.remove\(|\.delete\(|\.upsert\(|getPublicUrl|\.insert\(/);
   assert.doesNotMatch(fs.readFileSync('sync-runner.js','utf8'),/SPOTITPhoto|photo-sync|photo-cloud/);
 });

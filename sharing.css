@@ -92,6 +92,9 @@ html:root .inspection-record-list .log-entry.other{border-left-color:#c1707a;}
 .record-photo-actions{grid-column:2;grid-row:2;justify-self:end;}
 .record-photo-actions .entry-actions{margin:0;}
 .record-photo-actions .photo-view-btn{min-height:32px;padding:5px 8px;font-size:10px;}
+.record-photo-status{grid-column:1 / -1;display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0;overflow-wrap:anywhere;}
+.record-photo-status .ds-btn{min-height:32px;padding:5px 8px;font-size:11px;}
+.record-photo-status .ds-btn:disabled{opacity:.55;cursor:default;}
 .inspection-record-list .entry-checkbox{grid-column:3;grid-row:1 / 3;align-self:center;}
 .inspection-record-list .log-entry:not(:has(.record-photo-actions)) .record-context{grid-column:1 / 3;}
 .log-action-footer{position:sticky;bottom:calc(56px + env(safe-area-inset-bottom));z-index:15;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:center;gap:8px;padding:8px;margin-top:10px;border:1px solid var(--border-strong);border-radius:var(--radius-lg);background:var(--panel);box-shadow:var(--shadow-card);}

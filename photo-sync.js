@@ -11,7 +11,7 @@
   function createController(o){
     const enabled=o.enabled===true,now=o.now||Date.now,random=o.random||Math.random;
     let busy=false;
-    async function dispatch(e){
+    async function dispatch(e,manualRetry=false){
       if(!enabled) return {status:'disabled'};
       if(busy) return {status:'busy'};
       busy=true;
@@ -80,7 +80,7 @@
             const attempts=e.photo_attempt_count??0;
             if(!Number.isInteger(attempts)||attempts<0||attempts>=8) cloud.failure('Photo retry limit or counter requires review.');
             if(e.photo_next_retry_at && (!Number.isFinite(Date.parse(e.photo_next_retry_at)))) cloud.failure('Invalid photo retry time.');
-            if(e.photo_next_retry_at&&Date.parse(e.photo_next_retry_at)>now()) return {status:'backoff'};
+            if(!manualRetry&&e.photo_next_retry_at&&Date.parse(e.photo_next_retry_at)>now()) return {status:'backoff'};
             await authorize();await validate();
             // Persist unknown-in-flight state before any cloud dispatch.
             save({photo_sync_status:'photo_uploading',photo_sync_error:'',photo_attempt_count:attempts+1,photo_next_retry_at:null});
@@ -95,6 +95,7 @@
                 cloud.failure('Reservation not confirmed.');
               }
             }
+            save({photo_reserved_path:m.object_path});
             // Every attempt/restart downloads before uploading. Unknown reads
             // never authorize upload; explicit absence permits same-path INSERT.
             let verified=await objectProof();
@@ -141,7 +142,14 @@
         });
       }finally{busy=false;}
     }
-    return {dispatch,isBusy:()=>busy,enabled};
+    // Explicit retry bypasses only time, never review, attempts, identity or
+    // evidence guards. The saved schedule survives until validation succeeds.
+    async function retryNow(e){
+      if(!enabled) return {status:'disabled'};
+      if(photo.normalize(e).photo_sync_status!=='photo_failed') return {status:'blocked',reason:'Review photo issue before retrying.'};
+      return dispatch(e,true);
+    }
+    return {dispatch,retryNow,isBusy:()=>busy,enabled};
   }
   return {LOCK,createController};
 });
