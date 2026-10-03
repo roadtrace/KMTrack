@@ -38,10 +38,19 @@
     let status=entry.photo_sync_status;
     if(m && (!validManifest(m) || m.inspection_id!==entry.id || m.user_id!==entry.user_id || m.team!==entry.team || m.source_photo_id!==entry.photoId || entry.photo_path && entry.photo_path!==m.object_path)) status='photo_needs_review';
     else if(!STATUSES.includes(status)) status=status ? 'photo_needs_review' : m ? 'photo_pending' : entry.photo_path ? 'photo_needs_review' : 'photo_local';
-    // Phase 13B cannot establish verified cloud-object acknowledgement.
-    if(status==='photo_synced' || status==='photo_uploading') status='photo_needs_review';
+    // Interrupted dispatch retains immutable intent and must reconcile before
+    // mutation. A path alone never supplies a durable cloud acknowledgement.
+    if(status==='photo_uploading') status=validManifest(m)?'photo_pending':'photo_needs_review';
+    if(status==='photo_synced' && !validAcknowledgement(entry)) status='photo_needs_review';
     if(status==='photo_pending' && !validManifest(m)) status='photo_needs_review';
     return {photo_sync_status:status,photo_sync_error:typeof entry.photo_sync_error==='string'?entry.photo_sync_error:''};
+  }
+  function validAcknowledgement(e){
+    const m=e.photo_upload_manifest,a=e.photo_cloud_ack;
+    return validManifest(m)&&!!a&&a.version===1&&a.inspection_id===e.id&&a.inspection_id===m.inspection_id&&
+      a.user_id===e.user_id&&a.user_id===m.user_id&&a.team===e.team&&a.team===m.team&&
+      a.object_path===m.object_path&&a.upload_sha256===m.upload_sha256&&e.photo_path===m.object_path&&
+      e.photo_filename===m.photo_filename_intent&&Number.isFinite(Date.parse(a.verified_at));
   }
   function eligibility(e,c,durable,now=Date.now()){
     const no=reason=>({eligible:false,reason});
@@ -96,7 +105,7 @@
     const status=normalize(e).photo_sync_status;
     if(status==='photo_needs_review') return 'Photo needs review';
     const prefix=e.sync_status==='synced' && e.remote_id===e.id ? 'Inspection submitted · ' : '';
-    return prefix+(status==='photo_pending'?'photo pending':status==='photo_failed'?'photo failed':'photo local');
+    return prefix+(status==='photo_synced'?'photo synced':status==='photo_pending'?'photo pending':status==='photo_failed'?'photo failed':'photo local');
   }
   function createPreparer(o){
     const clock=o.now||Date.now;
@@ -116,6 +125,7 @@
         return {status:'photo_needs_review',reason};
       };
       guard();
+      if(normalize(e).photo_sync_status==='photo_synced') return {status:'photo_synced'};
       return o.lock(payloadKey(c.userId,c.profile.team,e.id),async()=>{
         guard();
         try{
@@ -163,5 +173,5 @@
     }
     return {prepare};
   }
-  return {STATUSES,FRESH_MS,path,payloadKey,validManifest,normalize,eligibility,dimensions,sha256,encode,sourceChanged,label,createPreparer};
+  return {STATUSES,FRESH_MS,path,payloadKey,validManifest,validAcknowledgement,normalize,eligibility,dimensions,sha256,encode,sourceChanged,label,createPreparer};
 });

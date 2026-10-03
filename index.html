@@ -4574,6 +4574,8 @@
   <script src="./vendor/supabase/supabase-js-2.117.1.umd.js"></script>
   <script src="./auth.js"></script>
   <script src="./inspection-api.js"></script>
+  <script src="./photo-cloud-api.js"></script>
+  <script src="./photo-sync.js"></script>
   <script src="./sync-runner.js"></script>
   <script src="./map-config.js"></script>
   <script src="vendor/leaflet/leaflet.js"></script>
@@ -4747,6 +4749,28 @@
 
     // ---------- Serial inspection sync (photos remain local) ----------
     let syncRunner = null;
+    // Phase 13C is available only to explicit isolated controller construction.
+    // No production toggle, dispatch callback, timer or inspection-runner hook.
+    const PHOTO_CLOUD_TRANSPORT_ENABLED = false;
+    function createPhotoCloudController(client) {
+      return SPOTITPhotoSync.createController({
+        enabled: PHOTO_CLOUD_TRANSPORT_ENABLED, client,
+        context: inspectionContext, key: activeEntriesStorageKey,
+        verify: () => authController.verifyOnline(), read: getPhoto,
+        durable: localEntryDurable, isCurrent: e => authWorkspaceUnlocked && entries.includes(e),
+        lock: (key, run) => {
+          if (!navigator.locks?.request) throw new Error('Safe photo locking unavailable.');
+          return navigator.locks.request(key, run);
+        },
+        save: (e, changes) => {
+          const before = entries.map(row => ({ ...row }));
+          const after = entries.map(row => row === e ? { ...row, ...changes } : row);
+          SPOTITLocalStore.saveReview(localStorage, activeEntriesStorageKey(), before, after);
+          Object.assign(e, changes);
+          return localEntryDurable(e);
+        }
+      });
+    }
 
     /* The indicator speaks in six states, most actionable first. Every one is read
      * from real data: `navigator.onLine` and the queue's own summary of the records.
