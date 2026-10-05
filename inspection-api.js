@@ -322,5 +322,5 @@
     }
     return { insertOne: entry => serialized(insertOne, entry), reconcileOne: (entry, options) => serialized(value => reconcileOne(value, options), entry), isBusy: () => inFlight, fetchAuthorized, updateAuthorized };
   }
-  return { phTime, dmm, eligible, laneParts, mapEntry, submissionSnapshot, matchesSnapshot, localMatchesSnapshot, acknowledgementReview, scopeKey, classifyFailure, ROW_FIELDS, cloudChanges, createApi };
+  return { phTime, dmm, eligible, laneParts, mapEntry, submissionContent, submissionSnapshot, matchesSnapshot, localMatchesSnapshot, acknowledgementReview, scopeKey, classifyFailure, ROW_FIELDS, cloudChanges, createApi };
 });

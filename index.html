@@ -4574,6 +4574,8 @@
   <script src="./vendor/supabase/supabase-js-2.117.1.umd.js"></script>
   <script src="./auth.js"></script>
   <script src="./inspection-api.js"></script>
+  <script src="./cloud-records.js"></script>
+  <script src="./record-presentation.js"></script>
   <script src="./photo-cloud-api.js"></script>
   <script src="./photo-sync.js"></script>
   <script src="./photo-pilot.js"></script>
@@ -4631,6 +4633,7 @@
     let cloudRowsProfileScope = '';
     let cloudNextOffset = 0;
     let inspectionApi = null;
+    let cloudRecordStore = null; // Phase 14A.1 read model; no UI or automatic loads yet.
     let expresswayBounds = {}; // { "NLEX": ["NB","SB"], "C3-R10 RAMP": ["EB","WB"], ... }
     let userBound = null;      // manually selected direction, e.g. "NB"
 
@@ -5223,6 +5226,7 @@
       if (button) button.disabled = true;
       inspectionScopeGeneration++;
       syncRunner?.invalidate();
+      cloudRecordStore?.invalidate();
       /* Everything durable is already in local storage, so nothing is lost — but
        * this does discard in-memory state, so an open camera draft is not preserved.
        * The active tab and map position ARE restored; see restoreActiveView(). */
@@ -8326,7 +8330,7 @@
     function renderAuthState(state) {
       const scope = value => JSON.stringify([value?.mode, value?.cloudVerified, value?.canUseLocal, value?.userId, value?.profile?.role, value?.profile?.team]);
       if (scope(state) !== scope(authDisplayState)) {
-        inspectionScopeGeneration++; syncRunner?.invalidate(); activePreapprovalDialog?.close(); activeGuestClaimDialog?.close();
+        inspectionScopeGeneration++; syncRunner?.invalidate(); cloudRecordStore?.invalidate(); activePreapprovalDialog?.close(); activeGuestClaimDialog?.close();
         // A private or local preview must not survive an account/workspace change.
         document.getElementById('photo-close')?.click();
       }
@@ -8339,6 +8343,7 @@
       const hadCloudAccess = cloudAccess();
       const previousEntriesKey = activeEntriesStorageKey();
       authDisplayState = state;
+      cloudRecordStore?.syncScope();
       if (state.mode !== 'approved' || !state.cloudVerified || cloudRowsOwnerId && (cloudRowsOwnerId !== state.userId || cloudRowsProfileScope !== `${state.profile?.role}:${state.profile?.team || ''}`)) {
         cloudRows = []; cloudRowsOwnerId = ''; cloudRowsProfileScope = ''; cloudNextOffset = 0;
         document.getElementById('cloud-list').replaceChildren();
@@ -8410,7 +8415,13 @@
         signOut: async () => ({ error: null }),
         onAuthStateChange: () => {}
       } };
-      authController = SPOTITAuth.createController({ client, storage: localStorage, localCount: localWorkspaceCount, onChange: renderAuthState, onInvalidate: () => syncRunner?.invalidate() });
+      authController = SPOTITAuth.createController({ client, storage: localStorage, localCount: localWorkspaceCount, onChange: renderAuthState, onInvalidate: () => { syncRunner?.invalidate(); cloudRecordStore?.invalidate(); } });
+      cloudRecordStore = SPOTITCloudRecords.createStore({ client, verify: () => authController.verifyOnline(),
+        context: inspectionContext, key: activeEntriesStorageKey, online: () => navigator.onLine !== false });
+      window.addEventListener('offline', () => cloudRecordStore.invalidate());
+      window.addEventListener('storage', event => {
+        if (event.key === null || [SPOTITAuth.BINDING_KEY, SPOTITAuth.SESSION_KEY, SPOTITAuth.CACHE_KEY, SPOTITAuth.GUEST_KEY].includes(event.key)) cloudRecordStore.invalidate();
+      });
       photoCloudController = createPhotoCloudController(client);
       pilotPhotoViewer = SPOTITPhotoPilot.createViewer({
         client, context: inspectionContext, key: activeEntriesStorageKey,
