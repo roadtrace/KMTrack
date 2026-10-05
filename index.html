@@ -3896,6 +3896,18 @@
         margin-top: 0;
       }
     }
+    .submitted-record-dialog { width: min(90vw, 520px); max-height: 85vh; overflow: auto; border-radius: 16px; padding: 24px; }
+    .submitted-record-dialog dt { font-weight: 600; margin-top: 10px; }
+    .submitted-record-dialog dd { margin: 4px 0; overflow-wrap: anywhere; }
+    .submitted-record-dialog::backdrop { background: #0008; }
+    #my-record-controls { margin: 12px 0; }
+    #my-record-controls p { font-size: 13px; }
+    .record-divergence { font-size: 13px; font-weight: 600; }
+    html:root #log-list .cloud-only, html:root #log-list .my-device-card { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+    #log-list .cloud-only { cursor: default; }
+    #log-list .cloud-only .record-type, #log-list .my-device-card .record-type { font-weight: 600; }
+    #log-list .cloud-only p, #log-list .my-device-card p { margin: 0; font-size: 13px; }
+    #log-list .cloud-only .record-date, #log-list .my-device-card .record-date { font-size: 12px; }
   </style>
   <link rel="stylesheet" href="radius-system.css">
   <link rel="stylesheet" href="sharing.css">
@@ -4157,8 +4169,8 @@
               <span id="last-time">--</span>
             </div>
             <div class="export-actions">
-              <button class="export-btn" id="export-btn" disabled>Export Excel</button>
-              <button class="export-btn backup-btn" id="backup-btn" disabled>Export Excel with Photos</button>
+              <button class="export-btn" id="export-btn" disabled>Export device records</button>
+              <button class="export-btn backup-btn" id="backup-btn" disabled>Export device records with photos</button>
             </div>
           </div>
           <div class="entry-filters" aria-label="Inspection entry filters">
@@ -4174,9 +4186,9 @@
             <summary>Source / inspector filters</summary>
             <div class="sharing-filter-fields">
               <label>Source<select id="entry-filter-source">
-                  <option value="">All inspections</option>
-                  <option value="mine">My inspections</option>
-                  <option value="imported">Imported inspections</option>
+                  <option value="">My records</option>
+                  <option value="mine">My records</option>
+                  <option value="imported">On this device · Imported</option>
                 </select></label>
               <label>Inspector<select id="entry-filter-inspector">
                   <option value="">All inspectors</option>
@@ -4193,16 +4205,17 @@
             <div id="guest-claim-list"></div>
             <p id="guest-claim-status" role="status"></p>
           </details>
+          <div id="my-record-controls" hidden>
+            <p id="my-record-status" role="status"></p>
+            <button type="button" class="ds-btn ds-btn-quiet" id="my-record-refresh">Refresh My records</button>
+            <button type="button" class="ds-btn ds-btn-quiet" id="my-record-more" hidden>Load more</button>
+            <p>Filters apply to loaded history. Exports and selection use records on this device only. Inspector names are available in Imported records.</p>
+          </div>
           <div id="log-list">
             <div class="log-empty">No defects logged yet</div>
           </div>
         </section>
-        <section class="block" id="cloud-inspections" hidden aria-label="Cloud inspections">
-          <div class="log-header"><h2>Cloud inspections</h2><button type="button" class="ds-btn ds-btn-quiet" id="cloud-refresh">Load cloud records</button></div>
-          <p id="cloud-status" role="status">Cloud records load only when requested. Local records and exports stay separate.</p>
-          <div id="cloud-list"></div>
-          <button type="button" class="ds-btn ds-btn-quiet" id="cloud-more" hidden>Load more</button>
-        </section>
+
       </div>
 
     </main>
@@ -4576,6 +4589,7 @@
   <script src="./inspection-api.js"></script>
   <script src="./cloud-records.js"></script>
   <script src="./record-presentation.js"></script>
+  <script src="./cloud-photo-viewer.js"></script>
   <script src="./photo-cloud-api.js"></script>
   <script src="./photo-sync.js"></script>
   <script src="./photo-pilot.js"></script>
@@ -4586,6 +4600,7 @@
   <script src="vendor/leaflet/leaflet.js"></script>
   <script src="./swipe-actions.js"></script>
   <script src="./entry-filters.js"></script>
+  <script src="./my-records.js"></script>
   <script src="./map-overlays.js"></script>
   <script src="./inspection-sharing.js"></script>
   <script src="./sharing-ui.js"></script>
@@ -4628,12 +4643,10 @@
     const GPS_FRESH_MS = 12000;
     let calibData = [];    // {e, b, k, lat, lon} — loaded from the NLEX network dataset
     let entries = [];      // {id, type, timestamp, lat, lon, km, expressway, bound, lane, photoId, photoFilename, photoTimestamp}
-    let cloudRows = [];   // Ephemeral Phase 11 view; never stored in entries or exported.
-    let cloudRowsOwnerId = '';
-    let cloudRowsProfileScope = '';
-    let cloudNextOffset = 0;
     let inspectionApi = null;
-    let cloudRecordStore = null; // Phase 14A.1 read model; no UI or automatic loads yet.
+    let cloudRecordStore = null;
+    let myRecords = null, cloudPhotoViewer = null, submittedDialog = null;
+    let myRenderPending = false, lastMyCloudRender = '';
     let expresswayBounds = {}; // { "NLEX": ["NB","SB"], "C3-R10 RAMP": ["EB","WB"], ... }
     let userBound = null;      // manually selected direction, e.g. "NB"
 
@@ -4872,56 +4885,83 @@
       return authDisplayState?.mode === 'approved' && authDisplayState.cloudVerified === true && authWorkspaceUnlocked && authDisplayState.profile.approved === true
         && (role === 'administrator' || ['inspector', 'supervisor'].includes(role) && !!authDisplayState.profile.team);
     }
-    function setCloudStatus(message) { document.getElementById('cloud-status').textContent = message; }
-    function renderCloudRows() {
-      const host = document.getElementById('cloud-list');
-      host.replaceChildren();
-      if (!cloudAccess()) return;
-      if (!cloudRows.length) { host.textContent = 'No cloud records loaded.'; return; }
-      for (const row of cloudRows) {
-        const card = document.createElement('div');
-        card.className = 'cloud-inspection-row';
-        const heading = document.createElement('strong');
-        heading.textContent = `${row.defect_type || 'Inspection'} · ${row.expressway || 'Road unset'} · ${row.km_station == null ? 'KM n/a' : `KM ${(row.km_station / 1000).toFixed(3)}`}`;
-        const meta = document.createElement('span');
-        meta.textContent = `${row.inspected_at ? new Date(row.inspected_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) : 'Date unavailable'} · ${row.direction || 'Bound unset'} · Lane ${row.lane_number || row.lane_other || 'unset'}`;
-        card.append(heading, meta);
-        const canEdit = authDisplayState.profile.role === 'supervisor' && row.team === authDisplayState.profile.team || authDisplayState.profile.role === 'inspector' && row.user_id === authDisplayState.userId && row.team === authDisplayState.profile.team;
-        if (canEdit) {
-          const details = document.createElement('details');
-          const summary = document.createElement('summary'); summary.textContent = 'Edit cloud details'; details.append(summary);
-          const form = document.createElement('form');
-          const fields = [['defect_type', 'Defect'], ['expressway', 'Expressway'], ['direction', 'Bound'], ['lane_number', 'Lane number'], ['lane_other', 'Other lane / position'], ['km_station', 'KM metres'], ['interchange_exit', 'Interchange'], ['interchange_segment', 'Interchange segment']];
-          for (const [key, label] of fields) {
-            const wrapper = document.createElement('label'); wrapper.textContent = label;
-            const input = document.createElement('input'); input.name = key; input.value = row[key] == null ? '' : String(row[key]);
-            if (key === 'lane_number' || key === 'km_station') { input.type = 'number'; input.step = '1'; }
-            wrapper.append(input); form.append(wrapper);
-          }
-          const save = document.createElement('button'); save.type = 'submit'; save.className = 'ds-btn ds-btn-primary'; save.textContent = 'Save cloud edit'; form.append(save);
-          form.addEventListener('submit', async event => {
-            event.preventDefault(); save.disabled = true;
-            const userId = authDisplayState?.userId;
-            const profileScope = `${authDisplayState?.profile?.role}:${authDisplayState?.profile?.team || ''}`;
-            try {
-              const changes = {};
-              for (const [key] of fields) {
-                const raw = form.elements.namedItem(key).value.trim();
-                const value = raw === '' ? null : ['lane_number', 'km_station'].includes(key) ? Number(raw) : raw;
-                if (value !== row[key]) changes[key] = value;
-              }
-              if (!Object.keys(changes).length) { setCloudStatus('No cloud changes to save.'); return; }
-              const updated = await inspectionApi.updateAuthorized(row.id, changes, row);
-              if (!cloudAccess() || authDisplayState.userId !== userId || `${authDisplayState.profile.role}:${authDisplayState.profile.team || ''}` !== profileScope) return;
-              cloudRows = cloudRows.map(item => item.id === row.id ? updated : item);
-              renderCloudRows(); setCloudStatus('Cloud inspection updated. Local inspections were not changed.');
-            } catch (error) { if (cloudAccess() && authDisplayState.userId === userId && `${authDisplayState.profile.role}:${authDisplayState.profile.team || ''}` === profileScope) setCloudStatus(`Cloud edit failed: ${error.message || error}`); }
-            finally { save.disabled = false; }
-          });
-          details.append(form); card.append(details);
-        }
-        host.append(card);
+    function setCloudStatus(message) { document.getElementById('my-record-status').textContent = message; }
+    function invalidateMyRecords() {
+      cloudRecordStore?.invalidate(); cloudPhotoViewer?.close(); submittedDialog?.close();
+      document.getElementById('photo-close')?.click();
+      // Clear immediately, before a deferred render or verification can return.
+      document.querySelectorAll('#log-list .cloud-only, #log-list .submitted-detail, #log-list .record-divergence').forEach(el => el.remove());
+      scheduleMyRender();
+    }
+    function scheduleMyRender() {
+      if (myRenderPending) return;
+      myRenderPending = true;
+      setTimeout(() => { myRenderPending = false; renderLog({ cloudOnly: true }); }, 100);
+    }
+    function myLogEnabled() { return !!myRecords && authDisplayState?.mode !== 'guest' && authWorkspaceUnlocked && logRegisterView !== 'inspection'; }
+    function currentMyItem(id) { return myRecords?.records(entries, {}).records.find(item => item.id === id); }
+    function renderMyControls() {
+      const enabled = myLogEnabled(), panel = document.getElementById('my-record-controls');
+      panel.hidden = !enabled;
+      const importedView = getLogFilters().source && getLogFilters().source !== 'mine';
+      document.querySelector('#log-view .log-head-row h2').textContent = enabled ? (importedView ? 'On this device · Imported' : 'My records') : 'Inspection log';
+      const source = document.getElementById('entry-filter-source');
+      if (enabled) for (const [value,label] of [['','My records'],['mine','My records'],['imported','On this device · Imported']]) {
+        const option = source.querySelector(`option[value="${value}"]`); if (option) option.textContent = label;
       }
+      const inspector = document.getElementById('entry-filter-inspector');
+      inspector.disabled = enabled && !importedView;
+      if (inspector.disabled) inspector.value = '';
+      if (!enabled) return;
+      const page = myRecords.snapshot();
+      document.getElementById('my-record-refresh').disabled = !page.scope || page.loading;
+      const more = document.getElementById('my-record-more');
+      more.hidden = !page.loaded || !page.hasMore; more.disabled = !page.scope || page.loading;
+      setCloudStatus(!page.scope ? 'Submitted history needs online account verification. Records on this device remain available.'
+        : page.loading ? 'Loading submitted history…'
+        : page.error ? 'Submitted history could not be refreshed. Records on this device remain available. Try Refresh.'
+        : `${page.rows.length} submitted records loaded${page.evicted ? ' · showing a retained window; Refresh returns to newest records' : ''}${page.lastRefresh ? ' · refreshed ' + new Date(page.lastRefresh).toLocaleTimeString('en-PH') : ''}.`);
+    }
+    function cloudCard(item) {
+      const card = document.createElement('div'), e = SPOTITMyRecords.cloudDisplay(item.cloud);
+      card.className = 'log-entry cloud-only ' + typeClass(e.type);
+      card.innerHTML = `<div class="record-type"><span class="type">${xmlEscape(e.type)}</span></div>
+        <time class="record-date">${xmlEscape(e.timestamp || 'Date unavailable')}</time>
+        <div class="record-context">${xmlEscape(e.expressway || 'Road unset')} · ${xmlEscape(e.bound || 'Bound unset')} · Lane ${xmlEscape(String(e.lane || 'unset'))} · KM ${e.km == null ? 'n/a' : formatKmStation(e.km)}</div>
+        <p>Submitted record · Read only</p>`;
+      const button = document.createElement('button'); button.type = 'button'; button.className = 'ds-btn ds-btn-quiet';
+      button.textContent = 'View submitted details'; button.onclick = () => openSubmittedDetail(item.id);
+      card.append(button); return card;
+    }
+    function openSubmittedDetail(id) {
+      const item = currentMyItem(id); if (!item?.cloud) return;
+      submittedDialog?.close();
+      const dialog = document.createElement('dialog'); submittedDialog = dialog;
+      dialog.className = 'submitted-record-dialog';
+      const row = item.cloud, e = SPOTITMyRecords.cloudDisplay(row);
+      const values = [['Inspection date/time', e.timestamp || 'Unavailable'], ['Defect', e.type], ['Expressway', e.expressway],
+        ['Bound', e.bound], ['Lane', e.lane], ['KM', e.km == null ? 'Unavailable' : formatKmStation(e.km)],
+        ['Coordinates', Number.isFinite(e.lat) && Number.isFinite(e.lon) ? `${e.lat}, ${e.lon}` : 'Unavailable'],
+        ['Photo', row.photo_path ? 'Availability checked when opened' : 'No verified photo available']];
+      dialog.innerHTML = '<h2>Submitted inspection</h2><p>Read only</p><dl>' + values.map(([label,value]) => `<dt>${xmlEscape(label)}</dt><dd>${xmlEscape(String(value ?? 'Unavailable'))}</dd>`).join('') + '</dl><p class="photo-result" role="status"></p>';
+      let preview = null;
+      if (row.photo_path || item.local?.photoId) {
+        const view = document.createElement('button'); view.type = 'button'; view.textContent = 'View photo'; view.className = 'ds-btn ds-btn-quiet';
+        view.onclick = async () => {
+          view.disabled = true; const status = dialog.querySelector('.photo-result'); status.textContent = 'Checking photo…';
+          try {
+            const result = await cloudPhotoViewer.open(item);
+            if (submittedDialog !== dialog || !dialog.open) { cloudPhotoViewer.close(); return; }
+            preview?.remove(); preview = document.createElement('img'); preview.src = result.url; preview.alt = 'Inspection photo';
+            preview.style.maxWidth = '100%'; dialog.append(preview);
+            status.textContent = result.source === 'local' ? 'Photo on this device' : 'Verified submitted photo';
+          } catch (_) { if (dialog.open) status.textContent = 'Photo unavailable. The record remains available.'; }
+          finally { view.disabled = false; }
+        }; dialog.append(view);
+      }
+      const close = document.createElement('button'); close.type = 'button'; close.textContent = 'Close'; close.className = 'ds-btn ds-btn-quiet'; close.onclick = () => dialog.close(); dialog.append(close);
+      dialog.addEventListener('close', () => { cloudPhotoViewer?.close(); dialog.remove(); if (submittedDialog === dialog) submittedDialog = null; });
+      document.body.append(dialog); dialog.showModal();
     }
     function localEntryDurable(entry) {
       return authWorkspaceUnlocked && SPOTITLocalStore.contains(localStorage, activeEntriesStorageKey(), entry);
@@ -5089,36 +5129,8 @@
       } catch (error) { if (cloudAccess() && authDisplayState.userId === userId && activeEntriesStorageKey() === workspaceKey && inspectionScopeGeneration === scopeGeneration) setCloudStatus(`Cloud submission failed: ${error.message || error}. The local inspection and photo remain intact.`); }
       finally { button.disabled = false; if (cloudAccess() && authDisplayState.userId === userId && activeEntriesStorageKey() === workspaceKey && inspectionScopeGeneration === scopeGeneration) renderLog(); }
     }
-    document.getElementById('cloud-refresh').addEventListener('click', async event => {
-      if (!inspectionApi) return;
-      const button = event.currentTarget; button.disabled = true; setCloudStatus('Loading authorized cloud inspections…');
-      const userId = authDisplayState?.userId;
-      const profileScope = `${authDisplayState?.profile?.role}:${authDisplayState?.profile?.team || ''}`;
-      try {
-        const rows = await inspectionApi.fetchAuthorized();
-        if (!cloudAccess() || authDisplayState.userId !== userId || `${authDisplayState.profile.role}:${authDisplayState.profile.team || ''}` !== profileScope) return;
-        cloudRows = rows; cloudRowsOwnerId = userId; cloudRowsProfileScope = `${authDisplayState.profile.role}:${authDisplayState.profile.team || ''}`; cloudNextOffset = rows.length; document.getElementById('cloud-more').hidden = rows.length < 100; renderCloudRows(); setCloudStatus(`${rows.length} cloud inspection${rows.length === 1 ? '' : 's'} loaded. This view is separate from local records and exports.`);
-      } catch (error) {
-        if (cloudAccess() && authDisplayState.userId === userId) {
-          cloudRows = []; cloudRowsOwnerId = ''; cloudRowsProfileScope = ''; cloudNextOffset = 0; document.getElementById('cloud-more').hidden = true; renderCloudRows(); setCloudStatus(`Cloud load failed: ${error.message || error}`);
-        }
-      }
-      finally { button.disabled = false; }
-    });
-    document.getElementById('cloud-more').addEventListener('click', async event => {
-      if (!inspectionApi || !cloudAccess()) return;
-      const button = event.currentTarget; button.disabled = true;
-      const userId = authDisplayState.userId;
-      const profileScope = `${authDisplayState.profile.role}:${authDisplayState.profile.team || ''}`;
-      try {
-        const rows = await inspectionApi.fetchAuthorized({ from: cloudNextOffset });
-        if (!cloudAccess() || authDisplayState.userId !== userId || `${authDisplayState.profile.role}:${authDisplayState.profile.team || ''}` !== profileScope) return;
-        cloudRows.push(...rows.filter(row => !cloudRows.some(existing => existing.id === row.id)));
-        cloudNextOffset += rows.length; button.hidden = rows.length < 100;
-        renderCloudRows(); setCloudStatus(`${cloudRows.length} cloud inspections loaded. Local records and exports remain separate.`);
-      } catch (error) { if (cloudAccess() && authDisplayState.userId === userId) setCloudStatus(`Could not load more cloud inspections: ${error.message || error}`); }
-      finally { button.disabled = false; }
-    });
+    document.getElementById('my-record-refresh').addEventListener('click', () => myRecords?.load(true));
+    document.getElementById('my-record-more').addEventListener('click', () => myRecords?.load(false));
 
     function syncState(counts, online, ready, syncing, localEntries) {
       if (counts.unsaved > 0) return 'unsaved';
@@ -5226,7 +5238,7 @@
       if (button) button.disabled = true;
       inspectionScopeGeneration++;
       syncRunner?.invalidate();
-      cloudRecordStore?.invalidate();
+      invalidateMyRecords();
       /* Everything durable is already in local storage, so nothing is lost — but
        * this does discard in-memory state, so an open camera draft is not preserved.
        * The active tab and map position ARE restored; see restoreActiveView(). */
@@ -7804,6 +7816,7 @@
       });
 
       document.getElementById('photo-close').addEventListener('click', () => {
+        cloudPhotoViewer?.close();
         const modal = document.getElementById('photo-modal');
         modal.classList.remove('show');
         modal.setAttribute('aria-hidden', 'true');
@@ -7848,13 +7861,18 @@
       // active Log-tab filter applied here would show a subset the user cannot clear
       // from that tab, with a count that silently disagrees with the title.
       if (logRegisterView === 'inspection') return accessibleEntries();
-      return SPOTITEntryFilters.filterEntries(accessibleEntries(), getLogFilters());
+      const filters = getLogFilters();
+      if (myLogEnabled() && ['', 'mine'].includes(filters.source || '')) {
+        return SPOTITEntryFilters.filterEntries(accessibleEntries().filter(entry => !entry.user_id || entry.user_id.toLowerCase() === authDisplayState.userId.toLowerCase()), { ...filters, source: 'mine', inspector: '' });
+      }
+      return SPOTITEntryFilters.filterEntries(accessibleEntries(), filters);
     }
     function syncEntryFilterOptions() {
       for (const id of ['entry-filter-type', 'map-entry-type']) {
         const select = document.getElementById(id);
         const previous = select.value;
-        const types = [...new Set(accessibleEntries().map(entry => entry.type).concat(previous || []))].sort();
+        const cloudTypes = id === 'entry-filter-type' && myRecords ? myRecords.snapshot().rows.map(row => row.defect_type).filter(Boolean) : [];
+        const types = [...new Set(accessibleEntries().map(entry => entry.type).concat(cloudTypes, previous || []))].sort();
         select.replaceChildren(new Option('All defects', ''), ...types.map(type => new Option(type, type)));
         select.value = previous;
       }
@@ -8152,7 +8170,14 @@
       updateBulkBar();
     }
 
-    function renderLog() {
+    function renderLog({ cloudOnly = false } = {}) {
+      if (cloudOnly) {
+        renderMyControls();
+        const page = myRecords?.snapshot();
+        const signature = JSON.stringify([page?.scope?.token, page?.revision, logRegisterView, getLogFilters()]);
+        if (signature === lastMyCloudRender) return;
+        lastMyCloudRender = signature;
+      }
       const entryDurable = authWorkspaceUnlocked
         ? SPOTITLocalStore.snapshotContains(localStorage, activeEntriesStorageKey()) : () => false;
       renderGuestClaims();
@@ -8160,10 +8185,14 @@
       syncEntryFilterOptions();
       syncInspectorFilterOptions();
       syncSharingFilters();
-      const visible = visibleEntries();
+      renderMyControls();
+      const myView = myLogEnabled() && ['', 'mine'].includes(getLogFilters().source || '');
+      const projection = myView ? myRecords.records(entries, getLogFilters()) : null;
+      const items = projection?.records || [];
+      const visible = myView ? items.filter(item => item.local).map(item => item.local) : visibleEntries();
       const visibleIds = new Set(visible.map(entry => entry.id));
       selectedEntryIds.forEach(id => { if (!visibleIds.has(id)) selectedEntryIds.delete(id); });
-      updateMapEntries();
+      if (!cloudOnly) updateMapEntries();
       const list = document.getElementById('log-list');
       const exportBtn = document.getElementById('export-btn');
       const backupBtn = document.getElementById('backup-btn');
@@ -8175,28 +8204,32 @@
         : `${available.length} ${available.length === 1 ? 'entry' : 'entries'}`;
       document.getElementById('last-time').textContent = available.length ? `last: ${available[available.length - 1].timestamp.split(' ')[1]}` : '--';
 
-      if (available.length === 0) {
+      if (available.length === 0 && !items.length) {
         list.innerHTML = '<div class="log-empty">No defects logged yet</div>';
         exportBtn.disabled = true;
         backupBtn.disabled = true;
         if (selectMode) exitSelectMode();
         return;
       }
-      exportBtn.disabled = false;
-      backupBtn.disabled = false;
+      exportBtn.disabled = !available.length;
+      backupBtn.disabled = !available.length;
+      if (myView) document.getElementById('count-label').textContent = `${items.length} My records · ${available.length} on this device`;
 
       /* Capture shows the newest few only; the Log tab shows the whole register.
        * `visible` stays the source of truth for every count. */
       const capped = logRegisterView === 'inspection';
       const shown = capped ? visible.slice(-CAPTURE_RECENT_LIMIT) : visible;
       list.innerHTML = '';
-      if (!visible.length) list.innerHTML = '<div class="log-empty">No entries match the current filters.</div>';
-      shown.slice().reverse().forEach((e) => {
+      const renderItems = myView ? items : shown.slice().reverse().map(local => ({ local }));
+      if (!renderItems.length) list.innerHTML = '<div class="log-empty">No entries match the current filters.</div>';
+      renderItems.forEach((item) => {
+        if (!item.local) { list.appendChild(cloudCard(item)); return; }
+        const e = item.local;
         const realIdx = entries.indexOf(e);
         const div = document.createElement('div');
         const row = document.createElement('div');
         const isSelected = selectedEntryIds.has(e.id);
-        div.className = 'log-entry ' + typeClass(e.type) + (selectMode ? ' select-mode' : '') + (isSelected ? ' selected' : '');
+        div.className = 'log-entry ' + typeClass(e.type) + (myView ? ' my-device-card' : '') + (selectMode ? ' select-mode' : '') + (isSelected ? ' selected' : '');
         div.dataset.idx = realIdx;
         if (!selectMode) {
           div.tabIndex = 0;
@@ -8237,12 +8270,15 @@
       <span class="record-lane">${xmlEscape(laneLabel)}</span></div>
       ${photoState.hasPhoto ? `<div class="record-photo-actions">${photoActionsHtml}</div>` : ''}
       ${photoState.hasPhoto ? '<div class="record-photo-status">' : ''}
-      ${photoState.label ? `<span class="import-label" title="${xmlEscape(photoState.detail)}">${xmlEscape(photoState.label)}</span>` : ''}
+      ${photoState.label ? `<span class="import-label" title="${xmlEscape(photoState.detail)}">${xmlEscape(myView ? SPOTITMyRecords.photoStatus(e) : photoState.label)}</span>` : ''}
       ${photoState.unavailable ? `<span class="import-label">${xmlEscape(photoState.unavailable)}</span>` : ''}
       ${!capped && !selectMode && (photoState.review || photoState.retry || photoState.reserved) ? `<button type="button" class="ds-btn ds-btn-quiet photo-issue" data-entry-id="${xmlEscape(e.id)}">Review photo issue</button>` : ''}
       ${!capped && !selectMode && photoState.retry ? `<button type="button" class="ds-btn ds-btn-quiet photo-retry" data-entry-id="${xmlEscape(e.id)}" ${!PHOTO_CLOUD_TRANSPORT_ENABLED ? 'disabled' : ''}>Retry photo</button><span class="import-label">${!PHOTO_CLOUD_TRANSPORT_ENABLED ? 'Photo uploads disabled for pilot' : ''}</span>` : ''}
       ${!capped && !selectMode && !photoCloudController?.isBusy() && authDisplayState && authController && SPOTITPhotoUpload.eligibility(e, inspectionContext(), entryDurable(e)).eligible ? `<button type="button" class="ds-btn ds-btn-quiet photo-prepare" data-entry-id="${xmlEscape(e.id)}">${e.photo_upload_manifest ? 'Check prepared photo locally' : 'Prepare photo locally'}</button>` : ''}
       ${photoState.hasPhoto ? '</div>' : ''}
+      ${myView ? `<p class="record-submission-status">${xmlEscape(SPOTITMyRecords.status(item))}</p>` : ''}
+      ${myView && SPOTITMyRecords.differs(item) ? '<p class="record-divergence">Device and submitted details differ</p>' : ''}
+      ${myView && item.cloud && !selectMode ? `<button type="button" class="ds-btn ds-btn-quiet submitted-detail" data-record-id="${xmlEscape(item.id)}">View submitted details</button>` : ''}
       ${e.guest_claim_required ? '<span class="import-label">Guest inspection requires claim</span>' : ''}
       ${e.preapproval_review_required && !e.guest_claim_required ? '<span class="import-label">Preapproval inspection requires review</span>' : ''}
       ${!capped && !selectMode && authDisplayState && SPOTITPreapprovalReview.reviewable(e, inspectionContext()) && entryDurable(e) ? `<button type="button" class="ds-btn ds-btn-quiet preapproval-review" data-entry-id="${xmlEscape(e.id)}">Review inspection</button>` : ''}
@@ -8294,6 +8330,9 @@
       list.querySelectorAll('.swipe-action.delete').forEach(btn => btn.addEventListener('click', e => {
         e.stopPropagation(); deletionController.remove(+e.currentTarget.dataset.idx, true);
       }));
+      list.querySelectorAll('.submitted-detail').forEach(button => button.addEventListener('click', event => {
+        event.stopPropagation(); openSubmittedDetail(button.dataset.recordId);
+      }));
       wireSwipeRows(list);
       if (selectMode) updateBulkBar();
       updateSyncStatus();
@@ -8330,7 +8369,7 @@
     function renderAuthState(state) {
       const scope = value => JSON.stringify([value?.mode, value?.cloudVerified, value?.canUseLocal, value?.userId, value?.profile?.role, value?.profile?.team]);
       if (scope(state) !== scope(authDisplayState)) {
-        inspectionScopeGeneration++; syncRunner?.invalidate(); cloudRecordStore?.invalidate(); activePreapprovalDialog?.close(); activeGuestClaimDialog?.close();
+        inspectionScopeGeneration++; syncRunner?.invalidate(); invalidateMyRecords(); activePreapprovalDialog?.close(); activeGuestClaimDialog?.close();
         // A private or local preview must not survive an account/workspace change.
         document.getElementById('photo-close')?.click();
       }
@@ -8344,12 +8383,6 @@
       const previousEntriesKey = activeEntriesStorageKey();
       authDisplayState = state;
       cloudRecordStore?.syncScope();
-      if (state.mode !== 'approved' || !state.cloudVerified || cloudRowsOwnerId && (cloudRowsOwnerId !== state.userId || cloudRowsProfileScope !== `${state.profile?.role}:${state.profile?.team || ''}`)) {
-        cloudRows = []; cloudRowsOwnerId = ''; cloudRowsProfileScope = ''; cloudNextOffset = 0;
-        document.getElementById('cloud-list').replaceChildren();
-        document.getElementById('cloud-more').hidden = true;
-        setCloudStatus('Cloud records load only when requested. Local records and exports stay separate.');
-      }
       const teamAllowed = canViewTeamRecords();
       for (const id of ['entry-filter-source', 'map-entry-source', 'map-record-scope']) {
         const select = document.getElementById(id);
@@ -8374,7 +8407,8 @@
         renderLog();
         updateMapEntries();
       }
-      document.getElementById('cloud-inspections').hidden = !cloudAccess();
+      scheduleMyRender();
+      myRecords?.verified();
       renderGuestClaims();
       document.documentElement.classList.toggle('auth-booting', !state.canUseLocal);
       const gate = document.getElementById('auth-gate');
@@ -8415,12 +8449,20 @@
         signOut: async () => ({ error: null }),
         onAuthStateChange: () => {}
       } };
-      authController = SPOTITAuth.createController({ client, storage: localStorage, localCount: localWorkspaceCount, onChange: renderAuthState, onInvalidate: () => { syncRunner?.invalidate(); cloudRecordStore?.invalidate(); } });
+      authController = SPOTITAuth.createController({ client, storage: localStorage, localCount: localWorkspaceCount, onChange: renderAuthState, onInvalidate: () => { syncRunner?.invalidate(); invalidateMyRecords(); } });
       cloudRecordStore = SPOTITCloudRecords.createStore({ client, verify: () => authController.verifyOnline(),
         context: inspectionContext, key: activeEntriesStorageKey, online: () => navigator.onLine !== false });
-      window.addEventListener('offline', () => cloudRecordStore.invalidate());
+      myRecords = SPOTITMyRecords.createController({ store: cloudRecordStore, context: inspectionContext,
+        key: activeEntriesStorageKey, online: () => navigator.onLine !== false,
+        changed: immediate => { if (immediate) invalidateMyRecords(); else scheduleMyRender(); } });
+      cloudPhotoViewer = SPOTITCloudPhotoViewer.createViewer({ client, context: inspectionContext,
+        key: activeEntriesStorageKey, online: () => navigator.onLine !== false, urls: URL,
+        verify: () => authController.verifyOnline(), read: getPhoto,
+        current: item => { const current = currentMyItem(item.id); return !!current && current.cloud === item.cloud && current.local === item.local; } });
+      window.addEventListener('online', () => authController.verifyOnline().then(() => myRecords.verified()).catch(() => myRecords.invalidate()));
+      window.addEventListener('offline', () => myRecords.invalidate());
       window.addEventListener('storage', event => {
-        if (event.key === null || [SPOTITAuth.BINDING_KEY, SPOTITAuth.SESSION_KEY, SPOTITAuth.CACHE_KEY, SPOTITAuth.GUEST_KEY].includes(event.key)) cloudRecordStore.invalidate();
+        if (event.key === null || [SPOTITAuth.BINDING_KEY, SPOTITAuth.SESSION_KEY, SPOTITAuth.CACHE_KEY, SPOTITAuth.GUEST_KEY].includes(event.key)) myRecords.invalidate();
       });
       photoCloudController = createPhotoCloudController(client);
       pilotPhotoViewer = SPOTITPhotoPilot.createViewer({

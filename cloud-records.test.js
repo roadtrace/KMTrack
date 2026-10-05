@@ -155,12 +155,12 @@ test('nullable legacy Team owner remains read-only data; My never includes unown
   const f=fixture();f.setRows([row(1,{user_id:null})]);assert.equal((await f.store.load('team')).rows[0].user_id,null);
   await assert.rejects(f.store.load('my'));
 });
-test('app lifecycle invalidates read store; dormant layer adds no load, Map or export integration',()=>{
+test('app lifecycle invalidates read store; My consumer stays separate from Map/export',()=>{
   const html=fs.readFileSync('index.html','utf8'),sw=fs.readFileSync('sw.js','utf8');
   assert.match(html,/cloudRecordStore = SPOTITCloudRecords.createStore/);
-  assert.match(html,/onInvalidate:.*cloudRecordStore\?\.invalidate/);
-  assert.match(html,/window.addEventListener\('offline', \(\) => cloudRecordStore.invalidate\(\)\)/);
+  assert.match(html,/onInvalidate:.*invalidateMyRecords/);
+  assert.match(html,/window.addEventListener\('offline', \(\) => myRecords.invalidate\(\)\)/);
   assert.doesNotMatch(html,/cloudRecordStore\.load\(/);assert.doesNotMatch(html,/SPOTITRecordPresentation\.mergeMy\(/);
-  assert.match(sw,/'v237'/);for(const name of ['cloud-records.js','record-presentation.js'])assert.ok(sw.includes(`./${name}`)&&html.includes(`./${name}`));
+  assert.match(sw,/'v238'/);for(const name of ['cloud-records.js','record-presentation.js'])assert.ok(sw.includes(`./${name}`)&&html.includes(`./${name}`));
   assert.match(html,/PHOTO_CLOUD_TRANSPORT_ENABLED = false/);
 });

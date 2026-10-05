@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
   dialog.setAttribute('aria-labelledby','export-format-title');
   // The export card's explanatory line moved in here, so the Log tab can show
   // a bare action row instead of a card.
-  dialog.innerHTML = '<h2 id="export-format-title">Export inspections</h2><p id="export-scope"></p><p class="export-hint">Use Excel for review, or a backup for a complete restore.</p><div class="export-format-options"></div><form method="dialog"><button value="cancel">Cancel</button></form>';
+  dialog.innerHTML = '<h2 id="export-format-title">Export records on this device</h2><p id="export-scope"></p><p class="export-hint">Use Excel for review, or a backup for a complete restore.</p><div class="export-format-options"></div><form method="dialog"><button value="cancel">Cancel</button></form>';
   document.body.append(dialog);
   const options = dialog.querySelector('.export-format-options');
   for(const [id,title,description] of [['export-btn','Excel file only','Inspection records without photo files'],['backup-btn','Excel with photos','Native in-cell photos for offline viewing']]){
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
   exportMenu.addEventListener('click',()=>{
     const scope = SPOTITEntryFilters.exportScope(entries,getLogFilters(),selectedEntryIds);
     const kind = selectedEntryIds.size ? 'selected' : Object.values(getLogFilters()).some(Boolean) ? 'filtered' : 'saved';
-    document.getElementById('export-scope').textContent = `Export ${scope.entries.length} ${kind} ${scope.entries.length === 1 ? 'entry' : 'entries'}.`;
+    document.getElementById('export-scope').textContent = `Export ${scope.entries.length} ${kind} ${scope.entries.length === 1 ? 'entry' : 'entries'} on this device. Submitted records from other devices are excluded.`;
     dialog.showModal();
   });
   const filters = document.querySelector('.entry-filters');
@@ -88,7 +88,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelector('.count-divider').hidden=true;
   selectAll.hidden=true;deleteSelected.hidden=true;
   const sync = () => {
-    const visible = visibleEntries(), n = visible.filter(entry=>selectedEntryIds.has(entry.id)).length;
+    const visible = visibleEntries();
+    const shownCount = document.querySelectorAll('#log-list .log-entry').length;
+    const n = visible.filter(entry=>selectedEntryIds.has(entry.id)).length;
     const all = n > 0 && n === visible.length;
     actions.classList.toggle('selection-mode',selectMode);
     toggle.classList.toggle('active',selectMode);
@@ -104,9 +106,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const chip=document.getElementById('log-records-chip');
     if(chip) chip.textContent = selectMode
       ? `${n} of ${visible.length} selected`
-      : `${visible.length} ${visible.length === 1 ? 'record' : 'records'}`;
-    badge.textContent=visible.length.toLocaleString('en-US');
-    badge.setAttribute('aria-label',`${visible.length} ${Object.values(getLogFilters()).some(Boolean)?'filtered ':''}${visible.length===1?'entry':'entries'}`);
+      : `${shownCount} ${shownCount === 1 ? 'record' : 'records'}`;
+    badge.textContent=shownCount.toLocaleString('en-US');
+    badge.setAttribute('aria-label',`${shownCount} loaded records`);
     if(bulkMount) bulkMount.hidden=!selectMode;
     selectAll.hidden=!selectMode;
     deleteSelected.hidden=!selectMode;

@@ -89,13 +89,13 @@ test('actual local photo UI opens local blob even for retry, without cloud calls
   assert.equal(elements.get('photo-preview').src,'blob:local');assert.deepEqual(f.calls,[]);
 });
 test('actual Log markup exposes compact states, review, disabled retry and local/private viewer',()=>{
-  assert.match(html,/const photoState = SPOTITPhotoPilot.presentation\(e\)/);assert.match(html,/xmlEscape\(photoState.label\)/);
+  assert.match(html,/const photoState = SPOTITPhotoPilot.presentation\(e\)/);assert.match(html,/xmlEscape\(myView \? SPOTITMyRecords.photoStatus\(e\) : photoState.label\)/);
   assert.match(html,/xmlEscape\(photoState.unavailable\)/);assert.match(html,/Review photo issue/);assert.match(html,/!PHOTO_CLOUD_TRANSPORT_ENABLED \? 'disabled'/);
   assert.match(html,/Inspection rows are submitted\. Check each record for its separate photo status/);assert.match(html,/<dt>Submitted<\/dt>/);
 });
 test('production gate, independent runner and cached pilot asset remain explicit',()=>{
   const sw=fs.readFileSync('sw.js','utf8');assert.match(html,/const PHOTO_CLOUD_TRANSPORT_ENABLED = false/);assert.doesNotMatch(html,/\.dispatch\(/);
-  assert.match(html,/enabled: PHOTO_CLOUD_TRANSPORT_ENABLED/);assert.match(sw,/'v237'/);assert.ok(sw.includes('./photo-pilot.js')&&html.includes('./photo-pilot.js'));
+  assert.match(html,/enabled: PHOTO_CLOUD_TRANSPORT_ENABLED/);assert.match(sw,/'v238'/);assert.ok(sw.includes('./photo-pilot.js')&&html.includes('./photo-pilot.js'));
   assert.doesNotMatch(fs.readFileSync('sync-runner.js','utf8'),/SPOTITPhoto|photo-pilot|photo-sync/);
   assert.doesNotMatch(fs.readFileSync('photo-pilot.js','utf8'),/\.upload\(|\.update\(|\.remove\(|getPublicUrl|createSignedUrl/);
 });
@@ -137,7 +137,7 @@ test('actual Log renderer retains local preview and separates row/photo state fo
     SPOTITPhotoPilot:pilot,SPOTITPhotoUpload:photo,SPOTITPreapprovalReview:{reviewable:()=>false},authDisplayState:null,authController:null,
     PHOTO_CLOUD_TRANSPORT_ENABLED:false,photoCloudController:null,selectedEntryIds:new Set(),selectMode:false,logRegisterView:'log',CAPTURE_RECENT_LIMIT:10,
     typeClass:()=> 'potholes',localEntryDurable:()=>true,formatKmStation:()=> '12+500',getLogFilters:()=>({}),cloudAccess:()=>false,
-    renderGuestClaims(){},syncEntryFilterOptions(){},syncInspectorFilterOptions(){},syncSharingFilters(){},updateMapEntries(){},wireSwipeRows(){},updateSyncStatus(){}};
+    renderMyControls(){},myLogEnabled:()=>false,renderGuestClaims(){},syncEntryFilterOptions(){},syncInspectorFilterOptions(){},syncSharingFilters(){},updateMapEntries(){},wireSwipeRows(){},updateSyncStatus(){}};
   vm.createContext(context);vm.runInContext(fn('xmlEscape'),context);vm.runInContext(fn('renderLog'),context);context.renderLog();
   const markup=control('log-list').children.map(row=>row.children[0].innerHTML).join('\n');
   for(const label of ['Inspection submitted · photo local','Inspection submitted · photo pending','Photo uploading','Inspection submitted · photo synced','Photo retry needed','Photo needs review'])assert.ok(markup.includes(label),label);

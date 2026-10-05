@@ -92,13 +92,13 @@ test('authorized fetch stays a distinct cloud collection', async () => {
   assert.equal(cloud[0].cloud_source, true); assert.equal(local[0].cloud_source, undefined); assert.equal(local.length, 1);
   f.setState({ mode: 'guest' }); await assert.rejects(f.transport.fetchAuthorized());
 });
-test('app keeps fetched rows separate from local Map, Log, export and the disconnected queue', () => {
+test('app uses memory My projection while keeping Map, exports and runner device-local', () => {
   const source = fs.readFileSync(require.resolve('./inspection-api.js').replace('inspection-api.js', 'index.html'), 'utf8');
-  assert.match(source, /let cloudRows = \[\]/);
+  assert.match(source, /myRecords = SPOTITMyRecords.createController/);
   assert.match(source, /SPOTITSyncRunner\.createRunner\(/);
   assert.match(source, /return canViewTeamRecords\(\) \? entries : entries\.filter/);
-  assert.match(source, /cloudRows = rows; cloudRowsOwnerId = userId/);
-  assert.doesNotMatch(source, /entries\.(?:push|concat)\([^\n]*cloudRows/);
+  assert.match(source, /myRecords.records\(entries, getLogFilters\(\)\)/);
+  assert.doesNotMatch(source, /entries\.(?:push|concat)\([^\n]*(?:cloudRows|page.rows|item.cloud)/);
 });
 test('Inspector own and Supervisor teammate update; nonowner and Admin rejected', async () => {
   const f = fixture(); const original = { id, cloud_source: true, team: 'roadway', user_id: user };
