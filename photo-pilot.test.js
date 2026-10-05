@@ -95,7 +95,7 @@ test('actual Log markup exposes compact states, review, disabled retry and local
 });
 test('production gate, independent runner and cached pilot asset remain explicit',()=>{
   const sw=fs.readFileSync('sw.js','utf8');assert.match(html,/const PHOTO_CLOUD_TRANSPORT_ENABLED = false/);assert.doesNotMatch(html,/\.dispatch\(/);
-  assert.match(html,/enabled: PHOTO_CLOUD_TRANSPORT_ENABLED/);assert.match(sw,/'v238'/);assert.ok(sw.includes('./photo-pilot.js')&&html.includes('./photo-pilot.js'));
+  assert.match(html,/enabled: PHOTO_CLOUD_TRANSPORT_ENABLED/);assert.match(sw,/'v239'/);assert.ok(sw.includes('./photo-pilot.js')&&html.includes('./photo-pilot.js'));
   assert.doesNotMatch(fs.readFileSync('sync-runner.js','utf8'),/SPOTITPhoto|photo-pilot|photo-sync/);
   assert.doesNotMatch(fs.readFileSync('photo-pilot.js','utf8'),/\.upload\(|\.update\(|\.remove\(|getPublicUrl|createSignedUrl/);
 });
@@ -137,7 +137,7 @@ test('actual Log renderer retains local preview and separates row/photo state fo
     SPOTITPhotoPilot:pilot,SPOTITPhotoUpload:photo,SPOTITPreapprovalReview:{reviewable:()=>false},authDisplayState:null,authController:null,
     PHOTO_CLOUD_TRANSPORT_ENABLED:false,photoCloudController:null,selectedEntryIds:new Set(),selectMode:false,logRegisterView:'log',CAPTURE_RECENT_LIMIT:10,
     typeClass:()=> 'potholes',localEntryDurable:()=>true,formatKmStation:()=> '12+500',getLogFilters:()=>({}),cloudAccess:()=>false,
-    renderMyControls(){},myLogEnabled:()=>false,renderGuestClaims(){},syncEntryFilterOptions(){},syncInspectorFilterOptions(){},syncSharingFilters(){},updateMapEntries(){},wireSwipeRows(){},updateSyncStatus(){}};
+    renderTeamWorkspace(){},renderMyControls(){},myLogEnabled:()=>false,renderGuestClaims(){},syncEntryFilterOptions(){},syncInspectorFilterOptions(){},syncSharingFilters(){},updateMapEntries(){},wireSwipeRows(){},updateSyncStatus(){}};
   vm.createContext(context);vm.runInContext(fn('xmlEscape'),context);vm.runInContext(fn('renderLog'),context);context.renderLog();
   const markup=control('log-list').children.map(row=>row.children[0].innerHTML).join('\n');
   for(const label of ['Inspection submitted · photo local','Inspection submitted · photo pending','Photo uploading','Inspection submitted · photo synced','Photo retry needed','Photo needs review'])assert.ok(markup.includes(label),label);

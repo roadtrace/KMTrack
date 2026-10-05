@@ -97,7 +97,7 @@ test('app uses memory My projection while keeping Map, exports and runner device
   assert.match(source, /myRecords = SPOTITMyRecords.createController/);
   assert.match(source, /SPOTITSyncRunner\.createRunner\(/);
   assert.match(source, /return canViewTeamRecords\(\) \? entries : entries\.filter/);
-  assert.match(source, /myRecords.records\(entries, getLogFilters\(\)\)/);
+  assert.match(source, /activeRecordController\(\).records\(entries, getLogFilters\(\)\)/);
   assert.doesNotMatch(source, /entries\.(?:push|concat)\([^\n]*(?:cloudRows|page.rows|item.cloud)/);
 });
 test('Inspector own and Supervisor teammate update; nonowner and Admin rejected', async () => {

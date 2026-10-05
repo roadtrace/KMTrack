@@ -4206,6 +4206,7 @@
             <p id="guest-claim-status" role="status"></p>
           </details>
           <div id="my-record-controls" hidden>
+            <div class="ds-row" role="group" aria-label="Record scope"><button type="button" class="ds-btn ds-btn-quiet" id="log-scope-my" aria-pressed="true">My records</button><button type="button" class="ds-btn ds-btn-quiet" id="log-scope-team" aria-pressed="false">Team records</button></div>
             <p id="my-record-status" role="status"></p>
             <button type="button" class="ds-btn ds-btn-quiet" id="my-record-refresh">Refresh My records</button>
             <button type="button" class="ds-btn ds-btn-quiet" id="my-record-more" hidden>Load more</button>
@@ -4315,11 +4316,21 @@
     <div id="log-host-log"></div>
   </section>
 
-  <section class="app-view tools-view" id="tools-view" role="tabpanel" aria-labelledby="tools-tab" hidden>
+  <section class="app-view team-view" id="team-view" role="tabpanel" aria-labelledby="team-tab" hidden>
+    <div class="ds-view-head"><h2>Team</h2><p>Account, work on this device and submitted history.</p></div>
+    <section class="settings-panel"><h3>Account</h3><p id="team-account"></p><p id="team-authorization" role="status"></p></section>
+    <section class="settings-panel"><h3>Work on this device</h3><p id="team-device-counts"></p><p id="team-connection"></p></section>
+    <section class="settings-panel"><h3>Records</h3><p id="team-loaded-counts"></p><p id="team-refresh-times"></p>
+      <div class="ds-row"><button type="button" class="ds-btn ds-btn-quiet" id="team-open-my">Open My records</button>
+      <button type="button" class="ds-btn ds-btn-quiet" id="team-open-team">Open Team records</button></div>
+    </section>
+  </section>
+
+  <section class="app-view settings-view" id="settings-view" role="tabpanel" aria-labelledby="settings-tab" hidden>
     <div class="ds-view-head">
-      <span class="eyebrow">Local data control</span>
-      <h2>Data tools</h2>
-      <p>SPOT IT keeps field data on this device until you choose to export it.</p>
+      <span class="eyebrow">Instrument configuration</span>
+      <h2>Settings</h2>
+      <p>Make the instrument match your inspection protocol.</p>
     </div>
 
     <section class="tool-card">
@@ -4330,7 +4341,7 @@
             <circle cx="18" cy="5" r="3"></circle>
           </svg></span>
         <div class="tool-copy">
-          <h3>Alignment &amp; calibration</h3>
+          <h3>Network data</h3>
           <p>Stationing and bridge matching read from the network datasets held on this device.</p>
         </div>
       </div>
@@ -4371,7 +4382,7 @@
             <path d="M12 18h.01"></path>
           </svg></span>
         <div class="tool-copy">
-          <h3>Installability</h3>
+          <h3>Installation &amp; offline use</h3>
           <p>For a faster field launch, add SPOT IT to your home screen from the browser menu. Keep location permission
             set to Allow while using.</p>
         </div>
@@ -4385,14 +4396,6 @@
           </svg>Works offline with local storage</div>
       </div>
     </section>
-  </section>
-
-  <section class="app-view settings-view" id="settings-view" role="tabpanel" aria-labelledby="settings-tab" hidden>
-    <div class="ds-view-head">
-      <span class="eyebrow">Instrument configuration</span>
-      <h2>Settings</h2>
-      <p>Make the instrument match your inspection protocol.</p>
-    </div>
 
     <section class="settings-panel auth-settings" aria-labelledby="auth-settings-heading">
       <div class="setting-copy">
@@ -4529,14 +4532,13 @@
       </svg>
       <span>Map</span>
     </button>
-    <button type="button" class="app-tab-btn" id="tools-tab" role="tab" tabindex="-1" aria-selected="false"
-      aria-controls="tools-view" data-app-view="tools">
+    <button type="button" class="app-tab-btn" id="team-tab" role="tab" tabindex="-1" aria-selected="false"
+      aria-controls="team-view" data-app-view="team">
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
-        <path d="M3 5V19A9 3 0 0 0 21 19V5"></path>
-        <path d="M3 12A9 3 0 0 0 21 12"></path>
+        <circle cx="9" cy="8" r="3"></circle>
+        <path d="M3 21v-2a6 6 0 0 1 12 0v2M16 5a3 3 0 0 1 0 6M21 21v-2a6 6 0 0 0-4-5.65"></path>
       </svg>
-      <span>Tools</span>
+      <span>Team</span>
     </button>
     <button type="button" class="app-tab-btn" id="settings-tab" role="tab" tabindex="-1" aria-selected="false"
       aria-controls="settings-view" data-app-view="settings">
@@ -4601,6 +4603,7 @@
   <script src="./swipe-actions.js"></script>
   <script src="./entry-filters.js"></script>
   <script src="./my-records.js"></script>
+  <script src="./team-records.js"></script>
   <script src="./map-overlays.js"></script>
   <script src="./inspection-sharing.js"></script>
   <script src="./sharing-ui.js"></script>
@@ -4646,6 +4649,7 @@
     let inspectionApi = null;
     let cloudRecordStore = null;
     let myRecords = null, cloudPhotoViewer = null, submittedDialog = null;
+    let teamRecords = null, teamPhotoViewer = null, logRecordScope = 'my';
     let myRenderPending = false, lastMyCloudRender = '';
     let expresswayBounds = {}; // { "NLEX": ["NB","SB"], "C3-R10 RAMP": ["EB","WB"], ... }
     let userBound = null;      // manually selected direction, e.g. "NB"
@@ -4887,7 +4891,9 @@
     }
     function setCloudStatus(message) { document.getElementById('my-record-status').textContent = message; }
     function invalidateMyRecords() {
-      cloudRecordStore?.invalidate(); cloudPhotoViewer?.close(); submittedDialog?.close();
+      cloudRecordStore?.invalidate(); cloudPhotoViewer?.close(); teamPhotoViewer?.close(); submittedDialog?.close();
+      if (logRecordScope === 'team') { logRecordScope = 'my'; if (selectMode) exitSelectMode(); selectedEntryIds.clear(); }
+      renderTeamWorkspace();
       document.getElementById('photo-close')?.click();
       // Clear immediately, before a deferred render or verification can return.
       document.querySelectorAll('#log-list .cloud-only, #log-list .submitted-detail, #log-list .record-divergence').forEach(el => el.remove());
@@ -4899,7 +4905,35 @@
       setTimeout(() => { myRenderPending = false; renderLog({ cloudOnly: true }); }, 100);
     }
     function myLogEnabled() { return !!myRecords && authDisplayState?.mode !== 'guest' && authWorkspaceUnlocked && logRegisterView !== 'inspection'; }
-    function currentMyItem(id) { return myRecords?.records(entries, {}).records.find(item => item.id === id); }
+    function activeRecordController() { return logRecordScope === 'team' ? teamRecords : myRecords; }
+    function currentMyItem(id) { return activeRecordController()?.records(entries, {}).records.find(item => item.id === id); }
+    function switchLogScope(scope) {
+      if (scope === 'team' && !cloudRecordStore?.syncScope()) return;
+      cloudPhotoViewer?.close(); teamPhotoViewer?.close(); submittedDialog?.close();
+      if (selectMode) exitSelectMode(); selectedEntryIds.clear();
+      logRecordScope = scope === 'team' ? 'team' : 'my';
+      document.getElementById('entry-filter-source').value = '';
+      document.getElementById('entry-filter-inspector').value = '';
+      if (logRecordScope === 'team') teamRecords?.activate();
+      showAppView('log'); renderLog({ cloudOnly: true });
+    }
+    function renderTeamWorkspace() {
+      if (!teamRecords) return;
+      const set = (id,value) => { const el=document.getElementById(id); if(el && el.textContent!==value) el.textContent=value; };
+      const c=inspectionContext(), scope=cloudRecordStore?.syncScope();
+      const profile=c.canUseLocal ? c.profile : null;
+      set('team-account', c.mode === 'guest' ? 'Guest / Local Mode' : profile ? [profile.full_name || 'Account', profile.role || 'Role unavailable', profile.team || 'No team assigned'].join(' · ') : 'No verified account available');
+      set('team-authorization', scope ? 'Approved · Verified online' : c.mode === 'guest' ? 'Team history requires an approved account.' : profile?.approved === false ? 'Awaiting approval · Local work available' : profile && !profile.team ? 'No team assigned · Team history unavailable' : 'Team history requires connection and online account verification.');
+      const counts=SPOTITTeamRecords.deviceCounts(c.canUseLocal ? entries : [], c.canUseLocal ? SPOTITLocalStore.snapshotContains(localStorage,activeEntriesStorageKey()) : () => false);
+      set('team-device-counts', counts.waiting+' inspections waiting on this device · '+counts.submitted+' submitted from this device · '+counts.review+' need review · '+counts.photosOnDevice+' photos on this device · '+counts.photosWaiting+' photos waiting on this device');
+      set('team-connection', navigator.onLine === false ? 'Offline · Local records remain available' : scope ? 'Connected · Submitted history available' : 'Connected · Verify an approved account to read submitted history');
+      const my=myRecords?.snapshot(),team=teamRecords?.snapshot();
+      set('team-loaded-counts',(my?.rows.length||0)+' My records loaded · '+(team?.rows.length||0)+' team records loaded. Loaded history is not a complete total.');
+      const time=p=>p?.lastRefresh ? new Date(p.lastRefresh).toLocaleString('en-PH',{timeZone:'Asia/Manila'}) : 'Not refreshed';
+      set('team-refresh-times','My: '+time(my)+' · Team: '+time(team));
+      document.getElementById('team-open-my').disabled=!myRecords || !c.canUseLocal || c.mode==='guest';
+      document.getElementById('team-open-team').disabled=!scope;
+    }
     function renderMyControls() {
       const enabled = myLogEnabled(), panel = document.getElementById('my-record-controls');
       panel.hidden = !enabled;
@@ -4912,15 +4946,22 @@
       const inspector = document.getElementById('entry-filter-inspector');
       inspector.disabled = enabled && !importedView;
       if (inspector.disabled) inspector.value = '';
-      if (!enabled) return;
-      const page = myRecords.snapshot();
+      document.getElementById('select-toggle-btn').disabled = enabled && logRecordScope === 'team';
+      if (!enabled) { source.disabled=false; return; }
+      const page = activeRecordController().snapshot();
+      const team = logRecordScope === 'team';
+      document.getElementById('log-scope-my').setAttribute('aria-pressed', String(!team));
+      const teamButton = document.getElementById('log-scope-team'); teamButton.disabled = !cloudRecordStore?.syncScope(); teamButton.setAttribute('aria-pressed', String(team));
+      source.disabled = team;
+      document.getElementById('my-record-refresh').textContent = team ? 'Refresh Team records' : 'Refresh My records';
+      if (team) document.querySelector('#log-view .log-head-row h2').textContent = 'Team records';
       document.getElementById('my-record-refresh').disabled = !page.scope || page.loading;
       const more = document.getElementById('my-record-more');
       more.hidden = !page.loaded || !page.hasMore; more.disabled = !page.scope || page.loading;
       setCloudStatus(!page.scope ? 'Submitted history needs online account verification. Records on this device remain available.'
         : page.loading ? 'Loading submitted history…'
         : page.error ? 'Submitted history could not be refreshed. Records on this device remain available. Try Refresh.'
-        : `${page.rows.length} submitted records loaded${page.evicted ? ' · showing a retained window; Refresh returns to newest records' : ''}${page.lastRefresh ? ' · refreshed ' + new Date(page.lastRefresh).toLocaleTimeString('en-PH') : ''}.`);
+        : `${page.rows.length} ${team ? 'team' : 'submitted'} records loaded${page.evicted ? ' · showing a retained window; Refresh returns to newest records' : ''}${page.lastRefresh ? ' · refreshed ' + new Date(page.lastRefresh).toLocaleTimeString('en-PH') : ''}.`);
     }
     function cloudCard(item) {
       const card = document.createElement('div'), e = SPOTITMyRecords.cloudDisplay(item.cloud);
@@ -4931,10 +4972,13 @@
         <p>Submitted record · Read only</p>`;
       const button = document.createElement('button'); button.type = 'button'; button.className = 'ds-btn ds-btn-quiet';
       button.textContent = 'View submitted details'; button.onclick = () => openSubmittedDetail(item.id);
-      card.append(button); return card;
+      card.append(button);
+      if (item.localContext) { const note=document.createElement('p'); note.textContent='Your record · Also saved on this device. Open My records for device actions.'; card.append(note); }
+      return card;
     }
     function openSubmittedDetail(id) {
       const item = currentMyItem(id); if (!item?.cloud) return;
+      const viewer = logRecordScope === 'team' ? teamPhotoViewer : cloudPhotoViewer;
       submittedDialog?.close();
       const dialog = document.createElement('dialog'); submittedDialog = dialog;
       dialog.className = 'submitted-record-dialog';
@@ -4950,8 +4994,8 @@
         view.onclick = async () => {
           view.disabled = true; const status = dialog.querySelector('.photo-result'); status.textContent = 'Checking photo…';
           try {
-            const result = await cloudPhotoViewer.open(item);
-            if (submittedDialog !== dialog || !dialog.open) { cloudPhotoViewer.close(); return; }
+            const result = await viewer.open(item);
+            if (submittedDialog !== dialog || !dialog.open) { viewer.close(); return; }
             preview?.remove(); preview = document.createElement('img'); preview.src = result.url; preview.alt = 'Inspection photo';
             preview.style.maxWidth = '100%'; dialog.append(preview);
             status.textContent = result.source === 'local' ? 'Photo on this device' : 'Verified submitted photo';
@@ -4960,7 +5004,7 @@
         }; dialog.append(view);
       }
       const close = document.createElement('button'); close.type = 'button'; close.textContent = 'Close'; close.className = 'ds-btn ds-btn-quiet'; close.onclick = () => dialog.close(); dialog.append(close);
-      dialog.addEventListener('close', () => { cloudPhotoViewer?.close(); dialog.remove(); if (submittedDialog === dialog) submittedDialog = null; });
+      dialog.addEventListener('close', () => { viewer?.close(); dialog.remove(); if (submittedDialog === dialog) submittedDialog = null; });
       document.body.append(dialog); dialog.showModal();
     }
     function localEntryDurable(entry) {
@@ -5129,8 +5173,12 @@
       } catch (error) { if (cloudAccess() && authDisplayState.userId === userId && activeEntriesStorageKey() === workspaceKey && inspectionScopeGeneration === scopeGeneration) setCloudStatus(`Cloud submission failed: ${error.message || error}. The local inspection and photo remain intact.`); }
       finally { button.disabled = false; if (cloudAccess() && authDisplayState.userId === userId && activeEntriesStorageKey() === workspaceKey && inspectionScopeGeneration === scopeGeneration) renderLog(); }
     }
-    document.getElementById('my-record-refresh').addEventListener('click', () => myRecords?.load(true));
-    document.getElementById('my-record-more').addEventListener('click', () => myRecords?.load(false));
+    document.getElementById('my-record-refresh').addEventListener('click', () => activeRecordController()?.load(true));
+    document.getElementById('log-scope-my').addEventListener('click', () => switchLogScope('my'));
+    document.getElementById('log-scope-team').addEventListener('click', () => switchLogScope('team'));
+    document.getElementById('team-open-my').addEventListener('click', () => switchLogScope('my'));
+    document.getElementById('team-open-team').addEventListener('click', () => switchLogScope('team'));
+    document.getElementById('my-record-more').addEventListener('click', () => activeRecordController()?.load(false));
 
     function syncState(counts, online, ready, syncing, localEntries) {
       if (counts.unsaved > 0) return 'unsaved';
@@ -6084,6 +6132,7 @@
     function restoreActiveView() {
       let view = null;
       try { view = sessionStorage.getItem(STORAGE_KEY_ACTIVE_VIEW); } catch (e) { /* non-critical */ }
+      view = SPOTITTeamRecords.route(view);
       if (view && APP_VIEW_IDS[view]) showAppView(view);
     }
 
@@ -6277,7 +6326,7 @@
       inspection: 'inspection-view',
       log: 'log-view',
       map: 'map-view',
-      tools: 'tools-view',
+      team: 'team-view',
       settings: 'settings-view'
     };
 
@@ -6323,6 +6372,9 @@
     }
 
     function showAppView(viewName) {
+      viewName = SPOTITTeamRecords.route(viewName);
+      if (!APP_VIEW_IDS[viewName]) viewName = 'settings';
+      if (viewName === 'team') renderTeamWorkspace();
       // Remembered so a page reload — the header refresh — comes back to this view.
       rememberActiveView(viewName);
       Object.keys(APP_VIEW_IDS).forEach(name => {
@@ -7862,6 +7914,7 @@
       // from that tab, with a count that silently disagrees with the title.
       if (logRegisterView === 'inspection') return accessibleEntries();
       const filters = getLogFilters();
+      if (myLogEnabled() && logRecordScope === 'team') return [];
       if (myLogEnabled() && ['', 'mine'].includes(filters.source || '')) {
         return SPOTITEntryFilters.filterEntries(accessibleEntries().filter(entry => !entry.user_id || entry.user_id.toLowerCase() === authDisplayState.userId.toLowerCase()), { ...filters, source: 'mine', inspector: '' });
       }
@@ -7871,7 +7924,7 @@
       for (const id of ['entry-filter-type', 'map-entry-type']) {
         const select = document.getElementById(id);
         const previous = select.value;
-        const cloudTypes = id === 'entry-filter-type' && myRecords ? myRecords.snapshot().rows.map(row => row.defect_type).filter(Boolean) : [];
+        const cloudTypes = id === 'entry-filter-type' && myRecords ? activeRecordController().snapshot().rows.map(row => row.defect_type).filter(Boolean) : [];
         const types = [...new Set(accessibleEntries().map(entry => entry.type).concat(cloudTypes, previous || []))].sort();
         select.replaceChildren(new Option('All defects', ''), ...types.map(type => new Option(type, type)));
         select.value = previous;
@@ -8171,10 +8224,11 @@
     }
 
     function renderLog({ cloudOnly = false } = {}) {
+      renderTeamWorkspace();
       if (cloudOnly) {
         renderMyControls();
-        const page = myRecords?.snapshot();
-        const signature = JSON.stringify([page?.scope?.token, page?.revision, logRegisterView, getLogFilters()]);
+        const page = activeRecordController()?.snapshot();
+        const signature = JSON.stringify([page?.scope?.token, page?.revision, logRecordScope, logRegisterView, getLogFilters()]);
         if (signature === lastMyCloudRender) return;
         lastMyCloudRender = signature;
       }
@@ -8187,7 +8241,7 @@
       syncSharingFilters();
       renderMyControls();
       const myView = myLogEnabled() && ['', 'mine'].includes(getLogFilters().source || '');
-      const projection = myView ? myRecords.records(entries, getLogFilters()) : null;
+      const projection = myView ? activeRecordController().records(entries, getLogFilters()) : null;
       const items = projection?.records || [];
       const visible = myView ? items.filter(item => item.local).map(item => item.local) : visibleEntries();
       const visibleIds = new Set(visible.map(entry => entry.id));
@@ -8211,9 +8265,9 @@
         if (selectMode) exitSelectMode();
         return;
       }
-      exportBtn.disabled = !available.length;
-      backupBtn.disabled = !available.length;
-      if (myView) document.getElementById('count-label').textContent = `${items.length} My records · ${available.length} on this device`;
+      exportBtn.disabled = !available.length || myView && logRecordScope === 'team';
+      backupBtn.disabled = !available.length || myView && logRecordScope === 'team';
+      if (myView) document.getElementById('count-label').textContent = `${items.length} ${logRecordScope === 'team' ? 'Team' : 'My'} records · ${available.length} on this device`;
 
       /* Capture shows the newest few only; the Log tab shows the whole register.
        * `visible` stays the source of truth for every count. */
@@ -8408,7 +8462,7 @@
         updateMapEntries();
       }
       scheduleMyRender();
-      myRecords?.verified();
+      myRecords?.verified(); teamRecords?.verified();
       renderGuestClaims();
       document.documentElement.classList.toggle('auth-booting', !state.canUseLocal);
       const gate = document.getElementById('auth-gate');
@@ -8434,7 +8488,7 @@
       document.getElementById('auth-verify-btn').disabled = navigator.onLine === false;
       document.getElementById('auth-signout-btn').hidden = state.mode === 'guest';
       document.getElementById('auth-guest-signin-btn').hidden = state.mode !== 'guest';
-      updateSyncStatus();
+      updateSyncStatus(); renderTeamWorkspace();
       if (state.mode === 'approved' && state.cloudVerified) queueMicrotask(() => { inspectionWakeup?.changed(); syncRunner?.wake('verified'); });
     }
     let authController = null;
@@ -8455,11 +8509,13 @@
       myRecords = SPOTITMyRecords.createController({ store: cloudRecordStore, context: inspectionContext,
         key: activeEntriesStorageKey, online: () => navigator.onLine !== false,
         changed: immediate => { if (immediate) invalidateMyRecords(); else scheduleMyRender(); } });
+      teamRecords = SPOTITTeamRecords.createController({ store: cloudRecordStore, context: inspectionContext, key: activeEntriesStorageKey, online: () => navigator.onLine !== false, changed: immediate => { if (immediate) invalidateMyRecords(); else scheduleMyRender(); } });
+      teamPhotoViewer = SPOTITCloudPhotoViewer.createTeamViewer({ client, context: inspectionContext, key: activeEntriesStorageKey, online: () => navigator.onLine !== false, urls: URL, verify: () => authController.verifyOnline(), read: getPhoto, current: item => { const current=logRecordScope === 'team' && currentMyItem(item.id); return !!current && current.cloud===item.cloud; } });
       cloudPhotoViewer = SPOTITCloudPhotoViewer.createViewer({ client, context: inspectionContext,
         key: activeEntriesStorageKey, online: () => navigator.onLine !== false, urls: URL,
         verify: () => authController.verifyOnline(), read: getPhoto,
         current: item => { const current = currentMyItem(item.id); return !!current && current.cloud === item.cloud && current.local === item.local; } });
-      window.addEventListener('online', () => authController.verifyOnline().then(() => myRecords.verified()).catch(() => myRecords.invalidate()));
+      window.addEventListener('online', () => authController.verifyOnline().then(() => { myRecords.verified(); teamRecords.verified(); }).catch(() => myRecords.invalidate()));
       window.addEventListener('offline', () => myRecords.invalidate());
       window.addEventListener('storage', event => {
         if (event.key === null || [SPOTITAuth.BINDING_KEY, SPOTITAuth.SESSION_KEY, SPOTITAuth.CACHE_KEY, SPOTITAuth.GUEST_KEY].includes(event.key)) myRecords.invalidate();

@@ -58,6 +58,7 @@ function render(items){
  PHOTO_CLOUD_TRANSPORT_ENABLED:false,photoCloudController:null,selectedEntryIds:new Set(),selectMode:false,logRegisterView:'log',CAPTURE_RECENT_LIMIT:10,
  typeClass:()=> 'potholes',formatKmStation:v=>String(v),getLogFilters:()=>({}),cloudAccess:()=>false,openSubmittedDetail(){},renderMyControls(){},
  renderGuestClaims(){},syncEntryFilterOptions(){},syncInspectorFilterOptions(){},syncSharingFilters(){},updateMapEntries(){},wireSwipeRows(){},updateSyncStatus(){}};
+ c.activeRecordController=()=>c.myRecords;c.logRecordScope='my';c.renderTeamWorkspace=()=>{};
  vm.createContext(c);for(const name of ['xmlEscape','cloudCard','renderLog'])vm.runInContext(fn(name),c);c.renderLog();return {controls,c};
 }
 test('production Log renders cloud-only history and supplies no device mutation controls',async()=>{
