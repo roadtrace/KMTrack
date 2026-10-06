@@ -1,0 +1,32 @@
+/* Shared Light/Dark structure; colors come exclusively from current theme tokens. */
+html:root #settings-view { color:var(--ds-fg); font-family:'Inter',sans-serif; }
+html:root #settings-view [hidden] { display:none !important; }
+html:root #settings-view .ds-view-head { margin:0 0 26px; }
+html:root #settings-view h2 { margin:0; font:700 30px/1.2 'Space Grotesk',sans-serif; letter-spacing:-.035em; }
+html:root #settings-view .ds-view-head p { margin:8px 0 0; font:400 13px/1.5 'Inter',sans-serif; color:var(--ds-fg-muted); }
+#settings-view .more-group { margin:0 0 24px; }
+html:root #settings-view .more-group h3 { margin:0 10px 9px; color:var(--ds-fg-muted); font:600 11px/1.4 'Inter',sans-serif; text-transform:uppercase; letter-spacing:.12em; }
+#settings-view .more-card { overflow:hidden; border:1px solid var(--ds-border); border-radius:16px; background:var(--ds-card); padding:0 10px; }
+html:root #settings-view .more-row { display:flex; align-items:center; gap:13px; width:100%; min-height:76px; margin:0; padding:13px 2px; border:0; border-radius:0; box-shadow:none; background:transparent; color:var(--ds-fg); text-align:left; font:600 15px/1.4 'Inter',sans-serif; }
+html:root #settings-view .more-row + .more-row { border-top:1px solid var(--ds-border); }
+#settings-view .more-icon { display:grid; place-items:center; flex:none; width:44px; height:44px; border-radius:12px; background:var(--ds-card-2); }
+#settings-view .more-row svg { width:23px; height:23px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+#settings-view .more-row .more-chevron { margin-left:auto; width:18px; height:18px; color:var(--ds-fg-muted); flex:none; }
+html:root #settings-view .more-back { min-height:44px; margin:0 0 12px; padding:8px 12px; border:1px solid var(--ds-border); border-radius:12px; background:var(--ds-card); color:var(--ds-fg); font:600 13px/1.4 'Inter',sans-serif; }
+#settings-view .more-screen > h2 { margin-bottom:18px; font-size:25px; }
+html:root #settings-view .more-screen .tool-card, html:root #settings-view .more-screen .settings-panel { margin:0 0 14px; padding:16px; border:1px solid var(--ds-border); border-radius:16px; background:var(--ds-card); box-shadow:none; }
+#settings-view .more-screen h3 { font-family:'Space Grotesk',sans-serif; }
+#settings-view .more-screen p { color:var(--ds-fg-muted); font:400 13px/1.6 'Inter',sans-serif; overflow-wrap:anywhere; }
+#settings-view .more-screen .ds-btn { min-height:44px; }
+html:root #settings-view #theme-toggle { height:44px; }
+html:root #settings-view #theme-toggle .switch-knob { top:12px; }
+html:root #settings-view .setting-field { min-height:44px; }
+#settings-view .more-values { margin:14px 0; border:1px solid var(--ds-border); border-radius:14px; background:var(--ds-card); padding:0 14px; }
+#settings-view .more-values > div { display:grid; gap:6px; padding:12px 0; }
+#settings-view .more-values > div + div { border-top:1px solid var(--ds-border); }
+#settings-view .more-values dt { color:var(--ds-fg-muted); font:500 12px/1.5 'Inter',sans-serif; }
+#settings-view .more-values dd { margin:0; color:var(--ds-fg); font:400 12px/1.6 'DM Mono',monospace; overflow-wrap:anywhere; }
+#settings-view .more-screen .setting-copy { min-width:0; }
+#settings-view .more-row:focus-visible, #settings-view .more-back:focus-visible { outline:2px solid var(--ds-primary); outline-offset:-3px; }
+html:root #settings-tab.active { color:var(--ds-primary); }
+html:root #settings-tab.active::after { background:var(--ds-primary); }

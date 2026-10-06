@@ -3915,6 +3915,7 @@
   <link rel="stylesheet" href="map-overlays.css">
   <link rel="stylesheet" href="design-system.css">
   <link rel="stylesheet" href="log-register.css">
+  <link rel="stylesheet" href="more.css">
 </head>
 
 <body>
@@ -4327,14 +4328,55 @@
     </section>
   </section>
 
-  <section class="app-view settings-view" id="settings-view" role="tabpanel" aria-labelledby="settings-tab" hidden>
-    <div class="ds-view-head">
-      <span class="eyebrow">Instrument configuration</span>
-      <h2>Settings</h2>
-      <p>Make the instrument match your inspection protocol.</p>
-    </div>
-
-    <section class="tool-card">
+  <section class="app-view settings-view" id="settings-view" role="tabpanel" aria-labelledby="settings-tab" hidden><div id="more-home"><div class="ds-view-head"><h2 tabindex="-1" id="more-heading">More</h2><p>Settings, datasets, storage, and diagnostics</p></div><section class="more-group" aria-label="Account"><h3>Account</h3><div class="more-card"><button type="button" class="more-row" data-more-open="profile" aria-controls="more-profile"><span class="more-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg></span><span>Profile &amp; team</span><svg class="more-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button></div></section><section class="more-group" aria-label="Inspection"><h3>Inspection</h3><div class="more-card"><button type="button" class="more-row" data-more-open="location" aria-controls="more-location"><span class="more-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v5m0 10v5M2 12h5m10 0h5"/></svg></span><span>Location &amp; corridor</span><svg class="more-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button><button type="button" class="more-row" data-more-open="datasets" aria-controls="more-datasets"><span class="more-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="7" ry="3"/><path d="M5 5v14c0 4 14 4 14 0V5M5 12c0 4 14 4 14 0"/></svg></span><span>Calibration datasets</span><svg class="more-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button></div></section><section class="more-group" aria-label="Application"><h3>Application</h3><div class="more-card"><button type="button" class="more-row" data-more-open="appearance" aria-controls="more-appearance"><span class="more-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18h2a2 2 0 0 0 0-4h-1a2 2 0 0 1 0-4h4a4 4 0 0 0 4-4c0-4-5-6-9-6z"/><path d="M7 9h.01M11 6h.01M16 7h.01M6 14h.01"/></svg></span><span>Appearance</span><svg class="more-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button><button type="button" class="more-row" data-more-open="storage" aria-controls="more-storage"><span class="more-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14l3 10v6H2v-6L5 4zM2 14h20M6 17h.01M10 17h.01"/></svg></span><span>Storage &amp; offline data</span><svg class="more-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button><button type="button" class="more-row" data-more-open="diagnostics" aria-controls="more-diagnostics"><span class="more-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="m5 14 4-4 4 6 3-8 3 5"/></svg></span><span>Diagnostics</span><svg class="more-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button></div></section></div><section class="more-screen" id="more-profile" aria-labelledby="more-profile-heading" hidden><button type="button" class="more-back" data-more-back>← More</button><h2 id="more-profile-heading" tabindex="-1">Profile &amp; team</h2><section class="settings-panel auth-settings" aria-labelledby="auth-settings-heading">
+      <div class="setting-copy">
+        <h3 id="auth-settings-heading">Account state</h3>
+        <p id="auth-settings-identity">Checking account…</p>
+        <p id="auth-settings-state" role="status">Local inspections remain on this device.</p>
+        <div class="auth-settings-actions">
+          <button type="button" class="ds-btn ds-btn-quiet" id="auth-verify-btn">Verify online</button>
+          <button type="button" class="ds-btn ds-btn-quiet" id="auth-signout-btn">Sign out</button>
+          <button type="button" class="ds-btn ds-btn-primary" id="auth-guest-signin-btn" hidden>Sign in</button>
+        </div>
+      </div>
+    </section><dl id="more-profile-values" class="more-values"></dl><section class="settings-panel">
+      <div class="setting-head">
+        <svg class="setting-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="8" r="5"></circle>
+          <path d="M20 21a8 8 0 0 0-16 0"></path>
+        </svg>
+        <div class="setting-copy">
+          <h3>Inspector identity</h3>
+          <p>Saved with every new capture on this device.</p>
+          <input id="inspector-input" class="setting-field" type="text" autocomplete="off"
+            placeholder="e.g. M. Santos / Team 04">
+        </div>
+      </div>
+    </section></section>
+<section class="more-screen" id="more-location" aria-labelledby="more-location-heading" hidden><button type="button" class="more-back" data-more-back>← More</button><h2 id="more-location-heading" tabindex="-1">Location &amp; corridor</h2><section class="settings-panel">
+      <div class="setting-head">
+        <svg class="setting-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m12 14 4-4"></path>
+          <path d="M3.34 19a10 10 0 1 1 17.32 0"></path>
+        </svg>
+        <div class="setting-copy">
+          <h3>Location confidence</h3>
+          <p>The instrument holds a capture until it has confirmed the road. Current alignment: <span
+              id="settings-alignment-count">0</span> points.</p>
+          <dl class="setting-readouts">
+            <div>
+              <dt>Current accuracy</dt>
+              <dd id="settings-accuracy">--</dd>
+            </div>
+            <div>
+              <dt>Last fix</dt>
+              <dd id="settings-fix-age">--</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </section><p>Allow location while using the app. Corridor and KM stationing use the existing engineering datasets; no corridor is guessed.</p></section>
+<section class="more-screen" id="more-datasets" aria-labelledby="more-datasets-heading" hidden><button type="button" class="more-back" data-more-back>← More</button><h2 id="more-datasets-heading" tabindex="-1">Calibration datasets</h2><section class="tool-card">
       <div class="tool-head">
         <span class="tool-icon"><svg viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="6" cy="19" r="3"></circle>
@@ -4374,9 +4416,24 @@
           </div>
         </details>
       </div>
-    </section>
-
-    <section class="tool-card">
+    </section></section>
+<section class="more-screen" id="more-appearance" aria-labelledby="more-appearance-heading" hidden><button type="button" class="more-back" data-more-back>← More</button><h2 id="more-appearance-heading" tabindex="-1">Appearance</h2><section class="settings-panel">
+      <div class="setting-row">
+        <span class="setting-tile" id="appearance-tile"><svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path
+              d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41">
+            </path>
+          </svg></span>
+        <div class="setting-copy">
+          <h3>Appearance</h3>
+          <p>Use the mode that stays legible in the cab.</p>
+        </div>
+        <button type="button" class="switch" id="theme-toggle" role="switch" aria-checked="false" aria-label="Dark mode"
+          title="Dark mode"><span class="switch-knob" aria-hidden="true"></span></button>
+      </div>
+    </section></section>
+<section class="more-screen" id="more-storage" aria-labelledby="more-storage-heading" hidden><button type="button" class="more-back" data-more-back>← More</button><h2 id="more-storage-heading" tabindex="-1">Storage &amp; offline data</h2><section class="tool-card">
       <div class="tool-head">
         <span class="tool-icon"><svg viewBox="0 0 24 24" aria-hidden="true">
             <rect width="14" height="20" x="5" y="2" rx="2" ry="2"></rect>
@@ -4396,78 +4453,7 @@
             <path d="m9 12 2 2 4-4"></path>
           </svg>Works offline with local storage</div>
       </div>
-    </section>
-
-    <section class="settings-panel auth-settings" aria-labelledby="auth-settings-heading">
-      <div class="setting-copy">
-        <h3 id="auth-settings-heading">Account</h3>
-        <p id="auth-settings-identity">Checking account…</p>
-        <p id="auth-settings-state" role="status">Local inspections remain on this device.</p>
-        <div class="auth-settings-actions">
-          <button type="button" class="ds-btn ds-btn-quiet" id="auth-verify-btn">Verify online</button>
-          <button type="button" class="ds-btn ds-btn-quiet" id="auth-signout-btn">Sign out</button>
-          <button type="button" class="ds-btn ds-btn-primary" id="auth-guest-signin-btn" hidden>Sign in</button>
-        </div>
-      </div>
-    </section>
-
-    <section class="settings-panel">
-      <div class="setting-head">
-        <svg class="setting-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="12" cy="8" r="5"></circle>
-          <path d="M20 21a8 8 0 0 0-16 0"></path>
-        </svg>
-        <div class="setting-copy">
-          <h3>Inspector identity</h3>
-          <p>Saved with every new capture on this device.</p>
-          <input id="inspector-input" class="setting-field" type="text" autocomplete="off"
-            placeholder="e.g. M. Santos / Team 04">
-        </div>
-      </div>
-    </section>
-
-    <section class="settings-panel">
-      <div class="setting-head">
-        <svg class="setting-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="m12 14 4-4"></path>
-          <path d="M3.34 19a10 10 0 1 1 17.32 0"></path>
-        </svg>
-        <div class="setting-copy">
-          <h3>Location confidence</h3>
-          <p>The instrument holds a capture until it has confirmed the road. Current alignment: <span
-              id="settings-alignment-count">0</span> points.</p>
-          <dl class="setting-readouts">
-            <div>
-              <dt>Current accuracy</dt>
-              <dd id="settings-accuracy">--</dd>
-            </div>
-            <div>
-              <dt>Last fix</dt>
-              <dd id="settings-fix-age">--</dd>
-            </div>
-          </dl>
-        </div>
-      </div>
-    </section>
-
-    <section class="settings-panel">
-      <div class="setting-row">
-        <span class="setting-tile" id="appearance-tile"><svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="12" r="4"></circle>
-            <path
-              d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41">
-            </path>
-          </svg></span>
-        <div class="setting-copy">
-          <h3>Appearance</h3>
-          <p>Use the mode that stays legible in the cab.</p>
-        </div>
-        <button type="button" class="switch" id="theme-toggle" role="switch" aria-checked="false" aria-label="Dark mode"
-          title="Dark mode"><span class="switch-knob" aria-hidden="true"></span></button>
-      </div>
-    </section>
-
-    <section class="settings-panel">
+    </section><section class="settings-panel">
       <div class="setting-head">
         <svg class="setting-icon" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"></path>
@@ -4494,8 +4480,8 @@
           <div class="ds-status-line"><span id="storage-status" hidden></span></div>
         </div>
       </div>
-    </section>
-  </section>
+    </section><p>Sign-out preserves inspections and photos. Guest and account workspaces remain separate. Keep this device's data until unsent inspections and local photos are safely backed up.</p><dl id="more-storage-values" class="more-values"></dl></section>
+<section class="more-screen" id="more-diagnostics" aria-labelledby="more-diagnostics-heading" hidden><button type="button" class="more-back" data-more-back>← More</button><h2 id="more-diagnostics-heading" tabindex="-1">Diagnostics</h2><p>Device records only. Photo references do not verify stored image bytes. Inspection submission and photo upload are separate.</p><dl id="more-diagnostic-values" class="more-values" aria-live="polite"></dl><button type="button" class="ds-btn ds-btn-quiet" id="more-diagnostics-refresh">Refresh status</button></section></section>
 
   <nav class="app-tab-bar" role="tablist" aria-label="SPOT IT sections">
     <button type="button" class="app-tab-btn active" id="inspection-tab" role="tab" aria-selected="true"
@@ -4541,7 +4527,7 @@
       </svg>
       <span>Team</span>
     </button>
-    <button type="button" class="app-tab-btn" id="settings-tab" role="tab" tabindex="-1" aria-selected="false"
+    <button type="button" class="app-tab-btn" id="settings-tab" aria-label="More" role="tab" tabindex="-1" aria-selected="false"
       aria-controls="settings-view" data-app-view="settings">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path
@@ -4549,7 +4535,7 @@
         </path>
         <circle cx="12" cy="12" r="3"></circle>
       </svg>
-      <span>Settings</span>
+      <span>More</span>
     </button>
   </nav>
 
@@ -4611,6 +4597,7 @@
   <script src="./sharing-ui.js"></script>
   <script src="./log-register.js"></script>
   <script src="./log-controls.js"></script>
+  <script src="./more.js"></script>
   <script src="./photo-zoom.js"></script>
   <script src="./photo-viewer.js"></script>
   <script src="./location-resolver.js"></script>
@@ -6150,7 +6137,7 @@
     function restoreActiveView() {
       let view = null;
       try { view = sessionStorage.getItem(STORAGE_KEY_ACTIVE_VIEW); } catch (e) { /* non-critical */ }
-      view = SPOTITTeamRecords.route(view);
+      view = SPOTITMore.route(SPOTITTeamRecords.route(view));
       if (view && APP_VIEW_IDS[view]) showAppView(view);
     }
 
@@ -6456,9 +6443,10 @@
     }
 
     function showAppView(viewName) {
-      viewName = SPOTITTeamRecords.route(viewName);
+      viewName = SPOTITMore.route(SPOTITTeamRecords.route(viewName));
       if (!APP_VIEW_IDS[viewName]) viewName = 'settings';
       if (viewName === 'team') renderTeamWorkspace();
+      if (viewName === 'settings') window.moreController?.home();
       // Remembered so a page reload — the header refresh — comes back to this view.
       rememberActiveView(viewName);
       Object.keys(APP_VIEW_IDS).forEach(name => {
@@ -9565,6 +9553,14 @@
       });
     }
 
+    window.moreController = SPOTITMore.mount(document, () => {
+      const local = accessibleEntries();
+      const durable = authWorkspaceUnlocked ? SPOTITLocalStore.snapshotContains(localStorage, activeEntriesStorageKey()) : () => false;
+      return { entries: local.filter(durable), counts: SPOTITSync.summary(local, {durable}), auth: authDisplayState,
+        storageAvailable, online: navigator.onLine !== false, photoTransport: PHOTO_CLOUD_TRANSPORT_ENABLED,
+        alignment: document.getElementById('calib-status').textContent,
+        ramps: document.getElementById('ramp-status').textContent };
+    });
   </script>
 
 
