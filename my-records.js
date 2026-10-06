@@ -8,11 +8,12 @@
   root.SPOTITMyRecords=api;
 })(globalThis,function(presentation,filters,photo){
   'use strict';
+  const manilaTime = new Intl.DateTimeFormat('sv-SE',{
+    timeZone:'Asia/Manila',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false
+  });
   function cloudDisplay(row){
     const date=row.inspected_at?new Date(row.inspected_at):null;
-    const timestamp=date&&!Number.isNaN(+date)?new Intl.DateTimeFormat('sv-SE',{
-      timeZone:'Asia/Manila',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false
-    }).format(date):'';
+    const timestamp=date&&!Number.isNaN(+date)?manilaTime.format(date):'';
     return {type:row.defect_type||'Inspection',timestamp,expressway:row.expressway,
       bound:row.direction,lane:row.lane_number??row.lane_other,km:row.km_station==null?null:row.km_station/1000,
       lat:row.latitude,lon:row.longitude};

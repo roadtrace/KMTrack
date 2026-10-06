@@ -4224,7 +4224,7 @@
 
   <section class="app-view map-view" id="map-view" role="tabpanel" aria-labelledby="map-tab" hidden>
     <div id="osm-map" aria-label="OpenStreetMap showing the current inspection location"></div>
-    <label class="map-workspace-scope"><select id="map-record-scope" aria-label="Map record scope"><option value="">All records</option><option value="mine">My records</option><option value="imported">Team records</option></select></label>
+    <div class="map-workspace-scope"><select id="map-record-scope" aria-label="Map record scope"><option value="my">My records</option><option value="team">Team records</option></select><button type="button" id="map-history-refresh">Refresh</button><button type="button" id="map-history-more">Load more</button><small id="map-history-coverage" role="status"></small></div>
     <div class="map-visible-count" id="map-visible-count" role="status">0 visible</div>
     <div id="map-bound-legend" class="map-bound-legend" aria-label="Map legend"></div>
     <details class="map-workspace-legend" id="map-workspace-legend"><summary>Legend<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="map-workspace-legend-body"><div class="map-workspace-legend-title">Defect types</div><div id="map-type-legend"></div><div class="map-workspace-legend-title">Marker colors · bound</div><div id="map-light-bound-legend" aria-label="Marker bound colors"></div></div></details>
@@ -4604,6 +4604,7 @@
   <script src="./entry-filters.js"></script>
   <script src="./my-records.js"></script>
   <script src="./team-records.js"></script>
+  <script src="./map-records.js"></script>
   <script src="./map-overlays.js"></script>
   <script src="./inspection-sharing.js"></script>
   <script src="./sharing-ui.js"></script>
@@ -4649,6 +4650,9 @@
     let inspectionApi = null;
     let cloudRecordStore = null;
     let myRecords = null, cloudPhotoViewer = null, submittedDialog = null;
+    let mapRecordScope = 'my', mapProjection = [], submittedMapScope = null;
+    let mapProjectionSignature = '', mapProjectionDirty = true;
+    const scheduleMapRender = SPOTITMapRecords.coalescer(() => updateMapEntries());
     let teamRecords = null, teamPhotoViewer = null, logRecordScope = 'my';
     let myRenderPending = false, lastMyCloudRender = '';
     let expresswayBounds = {}; // { "NLEX": ["NB","SB"], "C3-R10 RAMP": ["EB","WB"], ... }
@@ -4892,6 +4896,9 @@
     function setCloudStatus(message) { document.getElementById('my-record-status').textContent = message; }
     function invalidateMyRecords() {
       cloudRecordStore?.invalidate(); cloudPhotoViewer?.close(); teamPhotoViewer?.close(); submittedDialog?.close();
+      submittedMapScope = null; mapRecordScope = 'my'; mapProjection = []; mapProjectionSignature = ''; mapProjectionDirty = true;
+      if (osmEntryLayer) { SPOTITMap.clearEntries(osmEntryLayer); SPOTITMap.legend([], false); updateMapWorkspaceCounts([]); }
+      scheduleMapRender();
       if (logRecordScope === 'team') { logRecordScope = 'my'; if (selectMode) exitSelectMode(); selectedEntryIds.clear(); }
       renderTeamWorkspace();
       document.getElementById('photo-close')?.click();
@@ -4900,6 +4907,7 @@
       scheduleMyRender();
     }
     function scheduleMyRender() {
+      scheduleMapRender();
       if (myRenderPending) return;
       myRenderPending = true;
       setTimeout(() => { myRenderPending = false; renderLog({ cloudOnly: true }); }, 100);
@@ -4976,10 +4984,14 @@
       if (item.localContext) { const note=document.createElement('p'); note.textContent='Your record · Also saved on this device. Open My records for device actions.'; card.append(note); }
       return card;
     }
-    function openSubmittedDetail(id) {
-      const item = currentMyItem(id); if (!item?.cloud) return;
-      const viewer = logRecordScope === 'team' ? teamPhotoViewer : cloudPhotoViewer;
+    function currentPhotoItem(id) {
+      return submittedMapScope ? freshMapItems(submittedMapScope).find(item => item.id.toLowerCase() === id.toLowerCase()) : currentMyItem(id);
+    }
+    function openSubmittedDetail(id, mapScope = null) {
+      const item = mapScope ? freshMapItems(mapScope).find(item => item.id.toLowerCase() === id.toLowerCase()) : currentMyItem(id); if (!item?.cloud) return;
+      const viewer = (mapScope || logRecordScope) === 'team' ? teamPhotoViewer : cloudPhotoViewer;
       submittedDialog?.close();
+      submittedMapScope = mapScope;
       const dialog = document.createElement('dialog'); submittedDialog = dialog;
       dialog.className = 'submitted-record-dialog';
       const row = item.cloud, e = SPOTITMyRecords.cloudDisplay(row);
@@ -5004,7 +5016,7 @@
         }; dialog.append(view);
       }
       const close = document.createElement('button'); close.type = 'button'; close.textContent = 'Close'; close.className = 'ds-btn ds-btn-quiet'; close.onclick = () => dialog.close(); dialog.append(close);
-      dialog.addEventListener('close', () => { viewer?.close(); dialog.remove(); if (submittedDialog === dialog) submittedDialog = null; });
+      dialog.addEventListener('close', () => { viewer?.close(); dialog.remove(); if (submittedDialog === dialog) { submittedDialog = null; submittedMapScope = null; } });
       document.body.append(dialog); dialog.showModal();
     }
     function localEntryDurable(entry) {
@@ -6191,10 +6203,43 @@
       SPOTITMap.renderLandmarks(osmMap, osmLandmarkLayer, [...bridgeData, ...supplementalMapLandmarks]);
     }
 
-    function openMapEntry(id) {
-      const index = entries.findIndex(entry => entry.id === id);
+    function freshMapItems(scope = mapRecordScope) {
+      if (!authWorkspaceUnlocked) return [];
+      if (scope === 'team') return teamRecords?.records(entries, {}).records || [];
+      if (authDisplayState?.mode === 'guest') return SPOTITMapRecords.deviceItems(accessibleEntries());
+      const own = myRecords?.records(entries, {}).records || SPOTITMapRecords.deviceItems(entries.filter(e => !e.importBatchId));
+      return own.concat(SPOTITMapRecords.deviceItems(accessibleEntries().filter(e => e.importBatchId)));
+    }
+    function renderMapHistoryControls() {
+      const scope = cloudRecordStore?.syncScope(), guest = authDisplayState?.mode === 'guest';
+      const select = document.getElementById('map-record-scope');
+      select.value = mapRecordScope; select.hidden = guest;
+      select.querySelector('option[value="team"]').disabled = !scope;
+      const controller = mapRecordScope === 'team' ? teamRecords : myRecords, page = controller?.snapshot();
+      document.getElementById('map-history-refresh').disabled = !scope || !!page?.loading;
+      document.getElementById('map-history-more').disabled = !scope || !page?.loaded || !page?.hasMore || !!page?.loading;
+      document.getElementById('map-history-coverage').textContent = guest ? 'Device records only' : SPOTITMapRecords.coverage(page || {}, mapRecordScope, !!scope);
+      document.getElementById('map-entry-source').disabled = mapRecordScope === 'team';
+      document.getElementById('map-entry-inspector').disabled = mapRecordScope === 'team';
+    }
+    function switchMapScope(scope) {
+      if (scope === 'team' && !cloudRecordStore?.syncScope()) return;
+      cloudPhotoViewer?.close(); teamPhotoViewer?.close(); submittedDialog?.close();
+      submittedMapScope = null; SPOTITMap.selectEntry(null);
+      mapRecordScope = scope === 'team' ? 'team' : 'my';
+      document.getElementById('map-entry-source').value = '';
+      document.getElementById('map-entry-inspector').value = '';
+      if (mapRecordScope === 'team') teamRecords?.activate();
+      mapProjectionDirty = true; updateMapEntries();
+    }
+    function openMapEntry(id, direct = false) {
+      const projected = mapProjection.find(row => row.id === id); if (!projected) return;
+      const coincident = mapProjection.filter(row => row.lat === projected.lat && row.lon === projected.lon);
+      if (!direct && coincident.length > 1) { openMapChoices(coincident); return; }
+      SPOTITMap.selectEntry(id); updateMapEntries();
+      if (!projected.localAction) { openSubmittedDetail(projected.detailId, mapRecordScope); return; }
+      const index = entries.indexOf(projected.item.local);
       if (index >= 0) {
-        SPOTITMap.selectEntry(id);
         const entry = entries[index];
         const markerY = osmMap.latLngToContainerPoint([entry.lat, entry.lon]).y;
         const mapHeight = osmMap.getSize().y;
@@ -6203,8 +6248,31 @@
         openEditModal(index);
       }
     }
+    function openMapChoices(rows) {
+      submittedDialog?.close();
+      const dialog = document.createElement('dialog'); submittedDialog = dialog; submittedMapScope = mapRecordScope;
+      dialog.className = 'submitted-record-dialog';
+      const heading = document.createElement('h2'); heading.textContent = 'Records at this location'; dialog.append(heading);
+      const list = document.createElement('div'); dialog.append(list); let offset = 0;
+      const previous = document.createElement('button'), next = document.createElement('button'), close = document.createElement('button');
+      previous.textContent = 'Previous'; next.textContent = 'Next'; close.textContent = 'Close';
+      const render = () => {
+        list.replaceChildren();
+        rows.slice(offset, offset + 50).forEach(row => {
+          const button = document.createElement('button'); button.type = 'button'; button.className = 'map-location-choice';
+          button.textContent = [row.type, Number.isFinite(row.km) ? formatKmStation(row.km) : 'KM unavailable', row.timestamp || 'Date unavailable', row.readOnly ? 'Read only' : 'On this device'].join(' · ');
+          button.onclick = () => { dialog.close(); openMapEntry(row.id, true); }; list.append(button);
+        });
+        previous.disabled = offset === 0; next.disabled = offset + 50 >= rows.length;
+      };
+      previous.onclick = () => { offset = Math.max(0,offset - 50); render(); }; next.onclick = () => { offset += 50; render(); }; close.onclick = () => dialog.close();
+      for (const button of [previous,next,close]) { button.type = 'button'; button.className = 'ds-btn ds-btn-quiet'; dialog.append(button); }
+      dialog.addEventListener('close', () => { dialog.remove(); if (submittedDialog === dialog) { submittedDialog = null; submittedMapScope = null; } });
+      render(); document.body.append(dialog); dialog.showModal();
+    }
 
     function updateMapEntries() {
+      renderMapHistoryControls();
       const show = document.getElementById('map-show-entries').checked;
       const from = document.getElementById('map-entry-from');
       const to = document.getElementById('map-entry-to');
@@ -6217,7 +6285,6 @@
       document.getElementById('map-light-show-entries').checked = show;
       document.getElementById('map-light-entry-from').value = from.value;
       document.getElementById('map-light-entry-to').value = to.value;
-      document.getElementById('map-record-scope').value = document.getElementById('map-entry-source').value;
       from.disabled = !show;
       to.disabled = !show;
       document.getElementById('map-light-entry-from').disabled = !show;
@@ -6226,13 +6293,23 @@
       to.min = from.value;
       if (!osmMap) return;
       if (!osmEntryLayer) osmEntryLayer = L.layerGroup();
-      osmEntryLayer.clearLayers();
-      if (!show) { osmEntryLayer.remove(); SPOTITMap.legend([], false); updateMapWorkspaceCounts([]); return; }
+      if (!show) { SPOTITMap.clearEntries(osmEntryLayer); osmEntryLayer.remove(); SPOTITMap.legend([], false); updateMapWorkspaceCounts([]); return; }
       osmEntryLayer.addTo(osmMap);
-      const visible = SPOTITEntryFilters.mapEntries(accessibleEntries(), from.value, to.value, type.value, document.getElementById('map-entry-source').value, document.getElementById('map-entry-inspector').value, document.getElementById('map-entry-bound').value);
-      SPOTITMap.legend(visible, true);
-      updateMapWorkspaceCounts(visible);
-      SPOTITMap.renderEntries(osmMap, osmEntryLayer, visible, openMapEntry, formatKmStation);
+      const filter = {from:from.value,to:to.value,type:type.value,source:mapRecordScope === 'team' ? '' : document.getElementById('map-entry-source').value,
+        inspector:mapRecordScope === 'team' ? '' : document.getElementById('map-entry-inspector').value,bound:document.getElementById('map-entry-bound').value};
+      const page = (mapRecordScope === 'team' ? teamRecords : myRecords)?.snapshot();
+      const inputSignature = JSON.stringify([mapRecordScope,page?.scope?.token,page?.revision,filter,authWorkspaceUnlocked,authDisplayState?.mode]);
+      if (mapProjectionDirty || mapProjectionSignature !== inputSignature) {
+        const firstProjection = !mapProjectionSignature;
+        const items = freshMapItems().filter(item => filter.source === 'imported' ? !!item.local?.importBatchId : filter.source === 'mine' ? !item.local?.importBatchId : true);
+        const next = SPOTITMapRecords.project(items, mapRecordScope, {...filter,source:''}).rows;
+        const diff = SPOTITMapRecords.diff(new Map(mapProjection.map(row => [row.id,row])),next);
+        mapProjection = next; mapProjectionSignature = inputSignature; mapProjectionDirty = false;
+        if (firstProjection || diff.added.length || diff.removed.length || diff.changed.length) {
+          SPOTITMap.legend(next, true); updateMapWorkspaceCounts(next);
+        }
+      }
+      SPOTITMap.renderEntries(osmMap, osmEntryLayer, mapProjection, openMapEntry, formatKmStation);
     }
     function updateMapWorkspaceCounts(visible) {
       document.getElementById('map-visible-count').textContent = `${visible.length} visible`;
@@ -6266,9 +6343,10 @@
     document.getElementById('map-entry-source').addEventListener('change', updateMapEntries);
     document.getElementById('map-entry-inspector').addEventListener('change', updateMapEntries);
     document.getElementById('map-record-scope').addEventListener('change', event => {
-      document.getElementById('map-entry-source').value = event.target.value;
-      updateMapEntries();
+      switchMapScope(event.target.value);
     });
+    document.getElementById('map-history-refresh').addEventListener('click', () => (mapRecordScope === 'team' ? teamRecords : myRecords)?.load(true));
+    document.getElementById('map-history-more').addEventListener('click', () => (mapRecordScope === 'team' ? teamRecords : myRecords)?.load(false));
     document.getElementById('map-light-show-entries').addEventListener('change', event => {
       document.getElementById('map-show-entries').checked = event.target.checked;
       updateMapEntries();
@@ -8246,7 +8324,7 @@
       const visible = myView ? items.filter(item => item.local).map(item => item.local) : visibleEntries();
       const visibleIds = new Set(visible.map(entry => entry.id));
       selectedEntryIds.forEach(id => { if (!visibleIds.has(id)) selectedEntryIds.delete(id); });
-      if (!cloudOnly) updateMapEntries();
+      if (!cloudOnly) { mapProjectionDirty = true; updateMapEntries(); }
       const list = document.getElementById('log-list');
       const exportBtn = document.getElementById('export-btn');
       const backupBtn = document.getElementById('backup-btn');
@@ -8438,7 +8516,7 @@
       authDisplayState = state;
       cloudRecordStore?.syncScope();
       const teamAllowed = canViewTeamRecords();
-      for (const id of ['entry-filter-source', 'map-entry-source', 'map-record-scope']) {
+      for (const id of ['entry-filter-source', 'map-entry-source']) {
         const select = document.getElementById(id);
         const option = select?.querySelector('option[value="imported"]');
         if (option) option.disabled = !teamAllowed;
@@ -8510,11 +8588,11 @@
         key: activeEntriesStorageKey, online: () => navigator.onLine !== false,
         changed: immediate => { if (immediate) invalidateMyRecords(); else scheduleMyRender(); } });
       teamRecords = SPOTITTeamRecords.createController({ store: cloudRecordStore, context: inspectionContext, key: activeEntriesStorageKey, online: () => navigator.onLine !== false, changed: immediate => { if (immediate) invalidateMyRecords(); else scheduleMyRender(); } });
-      teamPhotoViewer = SPOTITCloudPhotoViewer.createTeamViewer({ client, context: inspectionContext, key: activeEntriesStorageKey, online: () => navigator.onLine !== false, urls: URL, verify: () => authController.verifyOnline(), read: getPhoto, current: item => { const current=logRecordScope === 'team' && currentMyItem(item.id); return !!current && current.cloud===item.cloud; } });
+      teamPhotoViewer = SPOTITCloudPhotoViewer.createTeamViewer({ client, context: inspectionContext, key: activeEntriesStorageKey, online: () => navigator.onLine !== false, urls: URL, verify: () => authController.verifyOnline(), read: getPhoto, current: item => { const current=(submittedMapScope || logRecordScope) === 'team' && currentPhotoItem(item.id); return !!current && current.cloud===item.cloud; } });
       cloudPhotoViewer = SPOTITCloudPhotoViewer.createViewer({ client, context: inspectionContext,
         key: activeEntriesStorageKey, online: () => navigator.onLine !== false, urls: URL,
         verify: () => authController.verifyOnline(), read: getPhoto,
-        current: item => { const current = currentMyItem(item.id); return !!current && current.cloud === item.cloud && current.local === item.local; } });
+        current: item => { const current = currentPhotoItem(item.id); return !!current && current.cloud === item.cloud && current.local === item.local; } });
       window.addEventListener('online', () => authController.verifyOnline().then(() => { myRecords.verified(); teamRecords.verified(); }).catch(() => myRecords.invalidate()));
       window.addEventListener('offline', () => myRecords.invalidate());
       window.addEventListener('storage', event => {

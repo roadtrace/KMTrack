@@ -95,7 +95,7 @@ test('actual Log markup exposes compact states, review, disabled retry and local
 });
 test('production gate, independent runner and cached pilot asset remain explicit',()=>{
   const sw=fs.readFileSync('sw.js','utf8');assert.match(html,/const PHOTO_CLOUD_TRANSPORT_ENABLED = false/);assert.doesNotMatch(html,/\.dispatch\(/);
-  assert.match(html,/enabled: PHOTO_CLOUD_TRANSPORT_ENABLED/);assert.match(sw,/'v239'/);assert.ok(sw.includes('./photo-pilot.js')&&html.includes('./photo-pilot.js'));
+  assert.match(html,/enabled: PHOTO_CLOUD_TRANSPORT_ENABLED/);assert.match(sw,/'v240'/);assert.ok(sw.includes('./photo-pilot.js')&&html.includes('./photo-pilot.js'));
   assert.doesNotMatch(fs.readFileSync('sync-runner.js','utf8'),/SPOTITPhoto|photo-pilot|photo-sync/);
   assert.doesNotMatch(fs.readFileSync('photo-pilot.js','utf8'),/\.upload\(|\.update\(|\.remove\(|getPublicUrl|createSignedUrl/);
 });
@@ -116,14 +116,14 @@ test('actual workbook builder preserves schema, local image bytes and every phot
 });
 test('actual map pipeline and workspace scope retain status-bearing local rows and exclude Guest imports',async()=>{
   const f=await fixture();Object.assign(f.e,{lat:14.6,lon:121,type:'Potholes',timestamp:'2026-10-03 09:00:00'});
-  const rows=photo.STATUSES.map((status,i)=>({...f.e,id:'local-'+i,photo_sync_status:status}));rows.push({...f.e,id:'imported',importBatchId:'batch'});
+  const rows=photo.STATUSES.map((status,i)=>({...f.e,id:'dddddddd-dddd-4ddd-8ddd-'+String(i).padStart(12,'0'),photo_sync_status:status}));rows.push({...f.e,id:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',importBatchId:'batch'});
   const controls=new Map(),control=id=>{if(!controls.has(id))controls.set(id,{value:'',checked:true,classList:{toggle(){}}});return controls.get(id);};
   let rendered,counts;const context={entries:rows,authDisplayState:{mode:'guest'},document:{getElementById:control},
-    SPOTITEntryFilters:require('./entry-filters'),osmMap:{},osmEntryLayer:{clearLayers(){},addTo(){},remove(){}},
+    SPOTITMapRecords:require('./map-records'),renderMapHistoryControls(){},mapRecordScope:'my',mapProjection:[],mapProjectionSignature:'',mapProjectionDirty:true,authWorkspaceUnlocked:true,myRecords:null,SPOTITEntryFilters:require('./entry-filters'),osmMap:{},osmEntryLayer:{clearLayers(){},addTo(){},remove(){}},
     SPOTITMap:{legend(){},renderEntries:(map,layer,rows)=>rendered=rows},updateMapWorkspaceCounts:rows=>counts=rows,openMapEntry(){},formatKmStation:v=>v};
-  vm.createContext(context);for(const name of ['canViewTeamRecords','accessibleEntries','updateMapEntries'])vm.runInContext(fn(name),context);
+  vm.createContext(context);for(const name of ['canViewTeamRecords','accessibleEntries','freshMapItems','updateMapEntries'])vm.runInContext(fn(name),context);
   context.updateMapEntries();assert.deepEqual(Array.from(rendered,r=>r.id),rows.slice(0,6).map(r=>r.id));assert.equal(counts.length,6);
-  context.authDisplayState.mode='approved';context.updateMapEntries();assert.equal(rendered.length,7);
+  context.authDisplayState.mode='approved';context.mapProjectionDirty=true;context.updateMapEntries();assert.equal(rendered.length,7);assert.equal(rendered.filter(r=>r.imported).length,1);assert.equal(rendered.filter(r=>!r.imported).length,6);
 });
 test('actual Log renderer retains local preview and separates row/photo state for every status',async()=>{
   const f=await fixture();Object.assign(f.e,{lat:14.6,lon:121,type:'Potholes',timestamp:'2026-10-03 09:00:00',expressway:'NLEX',km:12.5,lane:'1'});
