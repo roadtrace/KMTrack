@@ -28,14 +28,11 @@ test('switching tabs re-renders so each mount gets the right amount of list', ()
   assert.match(html, /logRegisterView = viewName;[\s\S]{0,160}?renderLog\(\);/);
 });
 
-test('the Log tab has no search field and no source segments', () => {
-  // Tried and rejected by the owner — do not reinstate.
-  assert.doesNotMatch(html, /id="log-search"/);
-  assert.doesNotMatch(html, /log-segments/);
-  assert.doesNotMatch(html, /wireLogSearchAndSegments/);
-  assert.doesNotMatch(design, /\.log-search\{/);
-  assert.doesNotMatch(design, /\.log-segment\{/);
-  // No dead search plumbing is left behind in the filter module.
+test('Phase 14D adds one Log search and existing-source scope controls without altering Map filters', () => {
+  assert.equal((controls.match(/id="log-search"/g)||[]).length,1);
+  assert.match(controls,/scopes\.append\(\$\('log-scope-my'\),\$\('log-scope-team'\),imported\)/);
+  assert.match(html,/SPOTITLogRegister\.matches/);
+  // Search remains a Log presentation concern, outside shared Map filtering.
   assert.doesNotMatch(filterSrc, /entryHaystack|formatStationShort|query/);
   assert.doesNotMatch(html, /query:search/);
 });

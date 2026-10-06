@@ -3914,6 +3914,7 @@
   <link rel="stylesheet" href="photo-viewer.css">
   <link rel="stylesheet" href="map-overlays.css">
   <link rel="stylesheet" href="design-system.css">
+  <link rel="stylesheet" href="log-register.css">
 </head>
 
 <body>
@@ -4608,6 +4609,7 @@
   <script src="./map-overlays.js"></script>
   <script src="./inspection-sharing.js"></script>
   <script src="./sharing-ui.js"></script>
+  <script src="./log-register.js"></script>
   <script src="./log-controls.js"></script>
   <script src="./photo-zoom.js"></script>
   <script src="./photo-viewer.js"></script>
@@ -4895,6 +4897,7 @@
     }
     function setCloudStatus(message) { document.getElementById('my-record-status').textContent = message; }
     function invalidateMyRecords() {
+      globalThis.window?.closeLogRegisterSheets?.();
       cloudRecordStore?.invalidate(); cloudPhotoViewer?.close(); teamPhotoViewer?.close(); submittedDialog?.close();
       submittedMapScope = null; mapRecordScope = 'my'; mapProjection = []; mapProjectionSignature = ''; mapProjectionDirty = true;
       if (osmEntryLayer) { SPOTITMap.clearEntries(osmEntryLayer); SPOTITMap.legend([], false); updateMapWorkspaceCounts([]); }
@@ -4922,6 +4925,7 @@
       logRecordScope = scope === 'team' ? 'team' : 'my';
       document.getElementById('entry-filter-source').value = '';
       document.getElementById('entry-filter-inspector').value = '';
+      if (scope === 'team') { const photo = document.getElementById('log-photo'); if (photo) photo.value = ''; }
       if (logRecordScope === 'team') teamRecords?.activate();
       showAppView('log'); renderLog({ cloudOnly: true });
     }
@@ -4944,9 +4948,9 @@
     }
     function renderMyControls() {
       const enabled = myLogEnabled(), panel = document.getElementById('my-record-controls');
-      panel.hidden = !enabled;
       const importedView = getLogFilters().source && getLogFilters().source !== 'mine';
-      document.querySelector('#log-view .log-head-row h2').textContent = enabled ? (importedView ? 'On this device · Imported' : 'My records') : 'Inspection log';
+      panel.hidden = !enabled || Boolean(importedView);
+      document.querySelector('#log-view .log-head-row h2').textContent = 'Inspection Log';
       const source = document.getElementById('entry-filter-source');
       if (enabled) for (const [value,label] of [['','My records'],['mine','My records'],['imported','On this device · Imported']]) {
         const option = source.querySelector(`option[value="${value}"]`); if (option) option.textContent = label;
@@ -4962,28 +4966,30 @@
       const teamButton = document.getElementById('log-scope-team'); teamButton.disabled = !cloudRecordStore?.syncScope(); teamButton.setAttribute('aria-pressed', String(team));
       source.disabled = team;
       document.getElementById('my-record-refresh').textContent = team ? 'Refresh Team records' : 'Refresh My records';
-      if (team) document.querySelector('#log-view .log-head-row h2').textContent = 'Team records';
+      window.syncLogRegisterControls?.();
       document.getElementById('my-record-refresh').disabled = !page.scope || page.loading;
       const more = document.getElementById('my-record-more');
       more.hidden = !page.loaded || !page.hasMore; more.disabled = !page.scope || page.loading;
-      setCloudStatus(!page.scope ? 'Submitted history needs online account verification. Records on this device remain available.'
-        : page.loading ? 'Loading submitted history…'
+      const empty = document.querySelector('#log-view #log-list .log-empty');
+      if (empty && !importedView) empty.textContent = SPOTITLogRegister.emptyMessage({scope:team ? 'team' : 'my', filtered:Object.entries(getLogFilters()).some(([key,value]) => key !== 'source' && value), loading:page.loading, loaded:page.loaded, available:!!page.scope});
+      setCloudStatus(!page.scope ? SPOTITLogRegister.historyUnavailable(inspectionContext(), navigator.onLine !== false)
+        : page.loading ? `Loading ${team ? 'Team' : 'My'} submitted history…`
         : page.error ? 'Submitted history could not be refreshed. Records on this device remain available. Try Refresh.'
         : `${page.rows.length} ${team ? 'team' : 'submitted'} records loaded${page.evicted ? ' · showing a retained window; Refresh returns to newest records' : ''}${page.lastRefresh ? ' · refreshed ' + new Date(page.lastRefresh).toLocaleTimeString('en-PH') : ''}.`);
     }
     function cloudCard(item) {
       const card = document.createElement('div'), e = SPOTITMyRecords.cloudDisplay(item.cloud);
       card.className = 'log-entry cloud-only ' + typeClass(e.type);
-      card.innerHTML = `<div class="record-type"><span class="type">${xmlEscape(e.type)}</span></div>
-        <time class="record-date">${xmlEscape(e.timestamp || 'Date unavailable')}</time>
-        <div class="record-context">${xmlEscape(e.expressway || 'Road unset')} · ${xmlEscape(e.bound || 'Bound unset')} · Lane ${xmlEscape(String(e.lane || 'unset'))} · KM ${e.km == null ? 'n/a' : formatKmStation(e.km)}</div>
-        <p>Submitted record · Read only</p>`;
-      const button = document.createElement('button'); button.type = 'button'; button.className = 'ds-btn ds-btn-quiet';
-      button.textContent = 'View submitted details'; button.onclick = () => openSubmittedDetail(item.id);
-      card.append(button);
-      if (item.localContext) { const note=document.createElement('p'); note.textContent='Your record · Also saved on this device. Open My records for device actions.'; card.append(note); }
+      card.innerHTML = SPOTITLogRegister.cardHTML(e, {cloud:true, team:logRecordScope === 'team', photoLabel:item.cloud.photo_path ? 'Photo availability checked in details' : '', notice:item.localContext ? 'Also saved on this device. Use My Records for device actions.' : ''});
+      card.tabIndex = 0; card.setAttribute('role','button');
+      card.setAttribute('aria-label', 'View submitted ' + e.type + ' inspection');
+      card.addEventListener('click', () => openSubmittedDetail(item.id));
+      card.addEventListener('keydown', event => {
+        if (event.target === card && ['Enter',' '].includes(event.key)) { event.preventDefault(); event.stopPropagation(); openSubmittedDetail(item.id); }
+      });
       return card;
     }
+
     function currentPhotoItem(id) {
       return submittedMapScope ? freshMapItems(submittedMapScope).find(item => item.id.toLowerCase() === id.toLowerCase()) : currentMyItem(id);
     }
@@ -7983,8 +7989,9 @@
     // ---------- Multi-select delete mode ----------
     let selectMode = false;
     let selectedEntryIds = new Set();
-    function getLogFilters() {
-      return { from: document.getElementById('entry-filter-from').value, to: document.getElementById('entry-filter-to').value, type: document.getElementById('entry-filter-type').value, source: document.getElementById('entry-filter-source').value, inspector: document.getElementById('entry-filter-inspector').value };
+    function getLogFilters(draft = false) {
+      if (!draft && window.logFilterBaseline) return { ...window.logFilterBaseline };
+      return { from: document.getElementById('entry-filter-from').value, to: document.getElementById('entry-filter-to').value, type: document.getElementById('entry-filter-type').value, source: document.getElementById('entry-filter-source').value, inspector: document.getElementById('entry-filter-inspector').value, ...Object.fromEntries(['search','corridor','bound','lane','photo','status'].map(field => [field, document.getElementById('log-' + field)?.value || ''])) };
     }
     function visibleEntries() {
       // The Capture card has no filter row, so it shows every record. Leaving an
@@ -7994,9 +8001,9 @@
       const filters = getLogFilters();
       if (myLogEnabled() && logRecordScope === 'team') return [];
       if (myLogEnabled() && ['', 'mine'].includes(filters.source || '')) {
-        return SPOTITEntryFilters.filterEntries(accessibleEntries().filter(entry => !entry.user_id || entry.user_id.toLowerCase() === authDisplayState.userId.toLowerCase()), { ...filters, source: 'mine', inspector: '' });
+        return SPOTITEntryFilters.filterEntries(accessibleEntries().filter(entry => !entry.user_id || entry.user_id.toLowerCase() === authDisplayState.userId.toLowerCase()), { ...filters, source: 'mine', inspector: '' }).filter(entry => SPOTITLogRegister.matches(entry, filters));
       }
-      return SPOTITEntryFilters.filterEntries(accessibleEntries(), filters);
+      return SPOTITEntryFilters.filterEntries(accessibleEntries(), filters).filter(entry => SPOTITLogRegister.matches(entry, filters));
     }
     function syncEntryFilterOptions() {
       for (const id of ['entry-filter-type', 'map-entry-type']) {
@@ -8025,11 +8032,23 @@
       document.getElementById('entry-filter-type').value = '';
       document.getElementById('entry-filter-source').value = '';
       document.getElementById('entry-filter-inspector').value = '';
+      for (const field of ['search','corridor','bound','lane','photo','status']) { const input=document.getElementById('log-' + field); if (input) input.value=''; }
       applyEntryFilters();
     });
 
+    let logExportMode = null;
+    function logRegisterItems(filters = getLogFilters()) {
+      const myView = myLogEnabled() && ['', 'mine'].includes(filters.source || '');
+      if (myView) return activeRecordController().records(entries, filters).records.filter(item => SPOTITLogRegister.matches(item.local || SPOTITMyRecords.cloudDisplay(item.cloud), filters, !item.local));
+      return SPOTITEntryFilters.filterEntries(accessibleEntries(), filters).filter(entry => SPOTITLogRegister.matches(entry, filters)).map(local => ({local}));
+    }
     function entriesForExport() {
-      const scope = SPOTITEntryFilters.exportScope(accessibleEntries(), getLogFilters(), selectedEntryIds);
+      const mode = logExportMode; logExportMode = null;
+      if (myLogEnabled() && logRecordScope === 'team') return null;
+      const filters = mode === 'all' ? {} : getLogFilters();
+      const device = mode === 'all' ? accessibleEntries() : logRegisterItems(filters).filter(item => item.local).map(item => item.local);
+      if (mode === 'selected' && !device.some(entry => selectedEntryIds.has(entry.id))) return null;
+      const scope = SPOTITEntryFilters.exportScope(device, filters, mode === 'filtered' || mode === 'all' ? new Set() : selectedEntryIds);
       if (!scope.entries.length) { alert('No entries match the current filters.'); return null; }
       if (scope.restricted && !confirm('Export filtered/selected entries?')) return null;
       // Freeze one consistent export batch before any asynchronous workbook/photo work.
@@ -8320,7 +8339,7 @@
       renderMyControls();
       const myView = myLogEnabled() && ['', 'mine'].includes(getLogFilters().source || '');
       const projection = myView ? activeRecordController().records(entries, getLogFilters()) : null;
-      const items = projection?.records || [];
+      const items = (projection?.records || []).filter(item => SPOTITLogRegister.matches(item.local || SPOTITMyRecords.cloudDisplay(item.cloud), getLogFilters(), !item.local));
       const visible = myView ? items.filter(item => item.local).map(item => item.local) : visibleEntries();
       const visibleIds = new Set(visible.map(entry => entry.id));
       selectedEntryIds.forEach(id => { if (!visibleIds.has(id)) selectedEntryIds.delete(id); });
@@ -8330,6 +8349,11 @@
       const backupBtn = document.getElementById('backup-btn');
       const countMini = document.getElementById('count-mini');
       const available = accessibleEntries();
+      const logFilters = getLogFilters(), page = myView ? activeRecordController().snapshot() : null;
+      const emptyMessage = logRegisterView === 'inspection' ? 'No defects logged yet' : SPOTITLogRegister.emptyMessage({
+        scope:myView && logRecordScope === 'team' ? 'team' : logFilters.source && logFilters.source !== 'mine' ? 'imported' : 'my',
+        filtered:Object.entries(logFilters).some(([key,value]) => key !== 'source' && value), loading:page?.loading, loaded:page?.loaded, available:myView ? !!page?.scope : true
+      });
       if (countMini) countMini.textContent = available.length;
       document.getElementById('count-label').textContent = Object.values(getLogFilters()).some(Boolean)
         ? `${visible.length} of ${available.length} entries`
@@ -8337,7 +8361,7 @@
       document.getElementById('last-time').textContent = available.length ? `last: ${available[available.length - 1].timestamp.split(' ')[1]}` : '--';
 
       if (available.length === 0 && !items.length) {
-        list.innerHTML = '<div class="log-empty">No defects logged yet</div>';
+        list.innerHTML = `<div class="log-empty">${xmlEscape(emptyMessage)}</div>`;
         exportBtn.disabled = true;
         backupBtn.disabled = true;
         if (selectMode) exitSelectMode();
@@ -8353,7 +8377,7 @@
       const shown = capped ? visible.slice(-CAPTURE_RECENT_LIMIT) : visible;
       list.innerHTML = '';
       const renderItems = myView ? items : shown.slice().reverse().map(local => ({ local }));
-      if (!renderItems.length) list.innerHTML = '<div class="log-empty">No entries match the current filters.</div>';
+      if (!renderItems.length) list.innerHTML = `<div class="log-empty">${xmlEscape(emptyMessage)}</div>`;
       renderItems.forEach((item) => {
         if (!item.local) { list.appendChild(cloudCard(item)); return; }
         const e = item.local;
@@ -8417,6 +8441,7 @@
       ${!capped && !selectMode && cloudAccess() && entryDurable(e) && !e.importBatchId && !e.guest_claim_required && !e.preapproval_review_required && !e.submission_review_required && (!e.submission_snapshot || e.submission_retry_allowed === true) && !e.sync_outcome_unknown && !e.remote_id && ['pending','failed'].includes(e.sync_status) ? `<button type="button" class="ds-btn ds-btn-quiet cloud-submit" data-entry-id="${xmlEscape(e.id)}">Submit this inspection</button>` : ''}
       ${checkboxHtml}
     `;
+        if (!capped) SPOTITLogRegister.decorate(div, e, {durable:entryDurable(e), photoLabel:photoState.hasPhoto ? SPOTITMyRecords.photoStatus(e) : photoState.unavailable || '', notice:[photoState.unavailable, photoState.retry && !PHOTO_CLOUD_TRANSPORT_ENABLED ? 'Photo uploads disabled for pilot' : '', e.guest_claim_required ? 'Guest inspection requires claim' : e.preapproval_review_required ? 'Preapproval inspection requires review' : ''].filter(Boolean).join(' · '), differs:myView && SPOTITMyRecords.differs(item)});
         row.innerHTML = `<button type="button" class="swipe-action edit" data-idx="${realIdx}" aria-label="Edit ${xmlEscape(e.type)} entry">Edit</button><button type="button" class="swipe-action delete" data-idx="${realIdx}" aria-label="Delete ${xmlEscape(e.type)} entry">Delete</button>`;
         row.appendChild(div);
         list.appendChild(row);
@@ -8766,7 +8791,7 @@
     });
 
     document.addEventListener('click', (e) => {
-      if (e.target.closest('.swipe-action') || e.target.closest('.photo-view-btn') || e.target.closest('.photo-remove-btn')) return;
+      if (e.target.closest('.swipe-action') || e.target.closest('.photo-view-btn') || e.target.closest('.photo-remove-btn') || e.target.closest('.register-device-actions')) return;
       const card = e.target.closest('.log-entry');
       if (!card || card.dataset.idx === undefined) return;
       if (card.dataset.suppressClick === '1') return;
@@ -8785,7 +8810,7 @@
 
     document.addEventListener('keydown', e => {
       const card = e.target.closest('.log-entry');
-      if (!card || e.target !== card || selectMode || (e.key !== 'Enter' && e.key !== ' ')) return;
+      if (!card || card.dataset.idx === undefined || e.target !== card || selectMode || (e.key !== 'Enter' && e.key !== ' ')) return;
       e.preventDefault();
       openEditModal(Number(card.dataset.idx));
     });

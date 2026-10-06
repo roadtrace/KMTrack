@@ -95,7 +95,7 @@ test('actual Log markup exposes compact states, review, disabled retry and local
 });
 test('production gate, independent runner and cached pilot asset remain explicit',()=>{
   const sw=fs.readFileSync('sw.js','utf8');assert.match(html,/const PHOTO_CLOUD_TRANSPORT_ENABLED = false/);assert.doesNotMatch(html,/\.dispatch\(/);
-  assert.match(html,/enabled: PHOTO_CLOUD_TRANSPORT_ENABLED/);assert.match(sw,/'v240'/);assert.ok(sw.includes('./photo-pilot.js')&&html.includes('./photo-pilot.js'));
+  assert.match(html,/enabled: PHOTO_CLOUD_TRANSPORT_ENABLED/);assert.match(sw,/'v241'/);assert.ok(sw.includes('./photo-pilot.js')&&html.includes('./photo-pilot.js'));
   assert.doesNotMatch(fs.readFileSync('sync-runner.js','utf8'),/SPOTITPhoto|photo-pilot|photo-sync/);
   assert.doesNotMatch(fs.readFileSync('photo-pilot.js','utf8'),/\.upload\(|\.update\(|\.remove\(|getPublicUrl|createSignedUrl/);
 });
@@ -130,16 +130,26 @@ test('actual Log renderer retains local preview and separates row/photo state fo
   const rows=photo.STATUSES.map((status,i)=>({...f.e,id:'local-'+i,photo_sync_status:status}));
   // Each prepared intent must match its row identity.
   for(const row of rows){row.id=ID;row.photo_sync_status==='photo_synced'&&Object.assign(row,{photo_path:f.m.object_path,photo_filename:f.m.photo_filename_intent,photo_cloud_ack:{version:1,inspection_id:ID,user_id:USER,team:'roadway',object_path:f.m.object_path,upload_sha256:f.m.upload_sha256,verified_at:new Date(NOW).toISOString()}});}
-  const element=()=>({dataset:{},classList:{},children:[],appendChild(v){this.children.push(v);},setAttribute(){},addEventListener(){},querySelectorAll(){return [];}});
+  // Model retained button nodes so the production card decorator is exercised.
+  function element(tag='div'){
+    let markup='';const children=[];
+    return {dataset:{},classList:{},children,textContent:'',ownerDocument:{createElement:element},
+      get innerHTML(){return markup+children.map(e=>e.outerHTML||'').join('');},set innerHTML(value){markup=value;children.length=0;},
+      get outerHTML(){return `<${tag}>${this.textContent}${this.innerHTML}</${tag}>`;},
+      appendChild(v){children.push(v);},append(...values){children.push(...values);},setAttribute(){},addEventListener(){},
+      querySelectorAll(selector){return selector==='button'?[...markup.matchAll(/<button\b[^>]*>[\s\S]*?<\/button>/g)].map(m=>({outerHTML:m[0],classList:{contains:name=>m[0].includes('class="'+name)}})):[];}};
+  }
   const controls=new Map(),control=id=>{if(!controls.has(id))controls.set(id,element());return controls.get(id);};
   const context={entries:rows,visibleEntries:()=>rows,accessibleEntries:()=>rows,document:{getElementById:control,createElement:element},
     authWorkspaceUnlocked:true,SPOTITLocalStore:require('./local-entry-store'),localStorage:{getItem:()=>JSON.stringify(rows)},activeEntriesStorageKey:()=> 'account',
-    SPOTITPhotoPilot:pilot,SPOTITPhotoUpload:photo,SPOTITPreapprovalReview:{reviewable:()=>false},authDisplayState:null,authController:null,
+    SPOTITPhotoPilot:pilot,SPOTITPhotoUpload:photo,SPOTITMyRecords:require('./my-records'),SPOTITLogRegister:require('./log-register'),SPOTITPreapprovalReview:{reviewable:()=>false},authDisplayState:null,authController:null,
     PHOTO_CLOUD_TRANSPORT_ENABLED:false,photoCloudController:null,selectedEntryIds:new Set(),selectMode:false,logRegisterView:'log',CAPTURE_RECENT_LIMIT:10,
     typeClass:()=> 'potholes',localEntryDurable:()=>true,formatKmStation:()=> '12+500',getLogFilters:()=>({}),cloudAccess:()=>false,
     renderTeamWorkspace(){},renderMyControls(){},myLogEnabled:()=>false,renderGuestClaims(){},syncEntryFilterOptions(){},syncInspectorFilterOptions(){},syncSharingFilters(){},updateMapEntries(){},wireSwipeRows(){},updateSyncStatus(){}};
   vm.createContext(context);vm.runInContext(fn('xmlEscape'),context);vm.runInContext(fn('renderLog'),context);context.renderLog();
   const markup=control('log-list').children.map(row=>row.children[0].innerHTML).join('\n');
-  for(const label of ['Inspection submitted · photo local','Inspection submitted · photo pending','Photo uploading','Inspection submitted · photo synced','Photo retry needed','Photo needs review'])assert.ok(markup.includes(label),label);
+  for(const label of ['Inspection submitted','Photo on this device','Photo waiting to upload','Photo submitted','Photo waiting to upload · Retry needed','Photo unavailable · Review required'])assert.ok(markup.includes(label),label);
+  // Existing normalization treats interrupted uploading as waiting to reconcile.
+  assert.equal((markup.match(/register-photo-status">Photo waiting to upload</g)||[]).length,2);
   assert.equal((markup.match(/>View Photo</g)||[]).length,6);assert.match(markup,/photo-retry[^>]*disabled/);assert.match(markup,/Review photo issue/);
 });

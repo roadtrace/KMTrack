@@ -53,7 +53,7 @@ function render(items){
  const element=()=>({dataset:{},classList:{},children:[],appendChild(e){this.children.push(e);},append(e){this.children.push(e);},setAttribute(){},addEventListener(){},querySelectorAll(){return [];}});
  const controls=new Map(),control=id=>{if(!controls.has(id))controls.set(id,element());return controls.get(id);};const locals=items.filter(r=>r.local).map(r=>r.local);
  const c={entries:locals,visibleEntries:()=>locals,accessibleEntries:()=>locals,document:{getElementById:control,createElement:element},authWorkspaceUnlocked:true,
- SPOTITLocalStore:{snapshotContains:()=>()=>true},localStorage:{},activeEntriesStorageKey:()=> 'account',myLogEnabled:()=>true,myRecords:{records:()=>({records:items})},SPOTITMyRecords:my,
+ SPOTITLocalStore:{snapshotContains:()=>()=>true},localStorage:{},activeEntriesStorageKey:()=> 'account',myLogEnabled:()=>true,myRecords:{records:()=>({records:items}),snapshot:()=>({scope:{},loaded:true})},SPOTITMyRecords:my,SPOTITLogRegister:require('./log-register'),
  SPOTITPhotoPilot:require('./photo-pilot'),SPOTITPhotoUpload:require('./photo-upload-state'),SPOTITPreapprovalReview:{reviewable:()=>false},authDisplayState:null,authController:null,
  PHOTO_CLOUD_TRANSPORT_ENABLED:false,photoCloudController:null,selectedEntryIds:new Set(),selectMode:false,logRegisterView:'log',CAPTURE_RECENT_LIMIT:10,
  typeClass:()=> 'potholes',formatKmStation:v=>String(v),getLogFilters:()=>({}),cloudAccess:()=>false,openSubmittedDetail(){},renderMyControls(){},

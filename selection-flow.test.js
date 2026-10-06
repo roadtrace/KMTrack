@@ -12,17 +12,15 @@ test('first Select press enters mode without selecting entries',()=>{
   assert.doesNotMatch(handler,/visible\.forEach/);
 });
 
-test('Select stays text-based beside Export and becomes Cancel in selection mode',()=>{
-  // The `.log-action-footer` panel was removed; Select now rides at the right of
-  // the Export/Import data row, with the bulk actions on their own row above it.
+test('Select stays text-based in the register actions and becomes Cancel in selection mode',()=>{
   assert.match(controls,/actions\.append\(toggle\)/);
-  assert.match(controls,/\(bulkMount \|\| actions\)\.append\(selectAll,deleteSelected\)/);
+  assert.match(controls,/bulkMount\.append\(selectAll,deleteSelected\)/);
   // No footer panel is built any more (the comment mentioning it is fine).
   assert.doesNotMatch(controls,/className='log-action-footer'/);
   assert.doesNotMatch(controls,/list\.after\(footer\)/);
-  assert.match(controls,/getElementById\('log-export-actions'\)/);
+  assert.match(controls,/button\('log-data-actions-button','Data Actions'\)/);
   assert.doesNotMatch(controls,/footer\.append\([^)]*exportMenu/);
-  assert.match(controls,/toggle\.textContent = selectMode \? 'Cancel' : 'Select'/);
+  assert.match(controls,/toggle\.textContent\s*=\s*selectMode\s*\?\s*'Cancel'\s*:\s*'Select'/);
   assert.match(controls,/toggle\.removeAttribute\('aria-checked'\)/);
   assert.match(css,/#select-toggle-btn\{[^}]*width:auto[^}]*font-size:12px/);
 });
