@@ -39,5 +39,5 @@ test('actual camera Save waits for local photo durability only, not slow photo p
  await Promise.resolve().then(()=>nav++);assert.equal(nav,1);local.resolve();await saved;assert.equal(puts,2);assert.equal(closed,1);assert.equal(JSON.parse(a.data.get('account')).length,1);assert.equal(a.wakes,0);assert.equal(a.photoCalls,0);a.cloud.resolve();a.photo.resolve();
 });
 test('foreground integration is cached, keeps photo gate disabled and has no background sync',()=>{
- const html=fs.readFileSync('index.html','utf8'),sw=fs.readFileSync('sw.js','utf8');assert.match(html,/PHOTO_CLOUD_TRANSPORT_ENABLED = false/);assert.match(html,/onChange: \(\) => foregroundSync.changed\(\)/);assert.match(sw,/\.\/foreground-sync.js/);assert.match(sw,/v242/);assert.doesNotMatch(fs.readFileSync('foreground-sync.js','utf8'),/SyncManager|serviceWorker|\.register\(/);
+ const html=fs.readFileSync('index.html','utf8'),sw=fs.readFileSync('sw.js','utf8');assert.match(html,/PHOTO_CLOUD_TRANSPORT_ENABLED = false/);assert.match(html,/onChange: \(\) => foregroundSync.changed\(\)/);assert.match(sw,/\.\/foreground-sync.js/);assert.match(sw,/v243/);assert.doesNotMatch(fs.readFileSync('foreground-sync.js','utf8'),/SyncManager|serviceWorker|\.register\(/);
 });

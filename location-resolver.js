@@ -30,8 +30,10 @@
     const switchElapsedMs=options.switchElapsedMs||2500;
     const interchangeHoldMs=options.interchangeHoldMs||30000;
     const interchangeExitKm=options.interchangeExitKm||0.15;
+    const maxFixGapMs=options.maxFixGapMs||12000;
     let confirmedCorridor='',startup=null,pendingSwitch=null,lastFix=null,lastOutput=null;
     let confirmedInterchange=null,interchangePending=null,interchangeLocked=false,exitPending=null;
+    let mainlineBound='',reentryPending=null;
 
     function normalizedInterchange(match){
       if(!match) return null;
@@ -98,19 +100,40 @@
         const accurate=Number.isFinite(input.accuracy)&&input.accuracy<=40;
         const outgoing=best&&best.distance<=0.06?best:null;
         const away=confirmedInterchange&&distanceKm(confirmedInterchange.lastSeenFix,fix)>=interchangeExitKm;
-        if(sameSite||!accurate||!stepIsPlausible||!outgoing||!away){
-          exitPending=null;
-        }else if(exitPending&&exitPending.corridor===outgoing.expressway){
-          exitPending.count++;
-        }else{
-          exitPending={corridor:outgoing.expressway,count:1,startedAt:time,startFix:fix};
+        // Missed-transition recovery, not an inferred gate. Only an unambiguous
+        // return to the previously confirmed NLEX carriageway qualifies. Keep
+        // the old hysteresis for other corridors and any same-site ramp match.
+        const alternative=candidates.find(row=>row.expressway!==best?.expressway);
+        const fresh=lastFix&&time>lastFix.time&&time-lastFix.time<=maxFixGapMs;
+        const strong=confirmedCorridor==='NLEX'&&best?.expressway==='NLEX'
+          &&['NB','SB'].includes(mainlineBound)&&best.bound===mainlineBound
+          &&Number.isFinite(input.accuracy)&&input.accuracy<=20
+          &&best.distance<=0.015&&(!alternative||alternative.distance-best.distance>=0.025)
+          &&!sameSite&&away&&stepIsPlausible&&fresh;
+        if(!strong) reentryPending=null;
+        else if(!reentryPending) reentryPending={fix,time,km:best.km};
+        else {
+          const travel=(best.km-reentryPending.km)*(mainlineBound==='NB'?1:-1);
+          if(travel>=0.01&&distanceKm(reentryPending.fix,fix)>=0.02){
+            confirmedInterchange=null;interchangePending=null;interchangeLocked=false;
+            exitPending=null;pendingSwitch=null;startup=null;reentryPending=null;
+          } else reentryPending={fix,time,km:best.km};
         }
-        if(exitPending&&exitPending.count>=switchFixes
-          &&time-exitPending.startedAt>=Math.max(switchElapsedMs,5000)
-          &&distanceKm(exitPending.startFix,fix)>=switchMovementKm){
-          confirmedCorridor=exitPending.corridor;
-          confirmedInterchange=null;interchangePending=null;
-          interchangeLocked=false;exitPending=null;pendingSwitch=null;startup=null;
+        if(interchangeLocked){
+          if(sameSite||!accurate||!stepIsPlausible||!outgoing||!away){
+            exitPending=null;
+          }else if(exitPending&&exitPending.corridor===outgoing.expressway){
+            exitPending.count++;
+          }else{
+            exitPending={corridor:outgoing.expressway,count:1,startedAt:time,startFix:fix};
+          }
+          if(exitPending&&exitPending.count>=switchFixes
+            &&time-exitPending.startedAt>=Math.max(switchElapsedMs,5000)
+            &&distanceKm(exitPending.startFix,fix)>=switchMovementKm){
+            confirmedCorridor=exitPending.corridor;
+            confirmedInterchange=null;interchangePending=null;
+            interchangeLocked=false;exitPending=null;pendingSwitch=null;startup=null;
+          }
         }
       }
 
@@ -149,6 +172,9 @@
       const competitive=!!(result&&alternative&&alternative.distance-result.distance<0.025);
       const confirmed=!!confirmedCorridor;
       const uncertain=!confirmed||!!pendingSwitch||competitive||!stepIsPlausible;
+      if(!interchangeLocked&&confirmedCorridor==='NLEX'&&result?.distance<=0.015
+        &&Number.isFinite(input.accuracy)&&input.accuracy<=20&&!uncertain
+        &&['NB','SB'].includes(result.bound)) mainlineBound=result.bound;
       lastFix={...fix,time};
       lastOutput={result,confirmed,confirmedCorridor,uncertain,
         reason:!confirmed?'Confirming road':pendingSwitch?'Confirming connection':!stepIsPlausible?'Ignoring implausible GPS movement':competitive?'Overlapping roads nearby':'',
@@ -161,6 +187,7 @@
     }
 
     function markStale(reason='GPS signal unavailable'){
+      reentryPending=null;
       if(!lastOutput) return {result:null,confirmed:false,confirmedCorridor,uncertain:true,reason,interchange:null,saveAllowed:false,fresh:false};
       lastOutput={...lastOutput,uncertain:true,reason,saveAllowed:false,fresh:false};
       return lastOutput;

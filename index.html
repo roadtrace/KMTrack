@@ -4022,18 +4022,6 @@
               </div>
             </div>
 
-            <div class="instrument-interchange">
-              <svg class="metric-icon interchange-icon" viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="16" y="16" width="6" height="6" rx="1"></rect>
-                <rect x="2" y="16" width="6" height="6" rx="1"></rect>
-                <rect x="9" y="2" width="6" height="6" rx="1"></rect>
-                <path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"></path>
-                <path d="M12 12V8"></path>
-              </svg>
-              <span>Interchange identity</span>
-              <strong class="ramp-tag" id="ramp-tag"></strong>
-            </div>
-
             <div class="nearby-asset" aria-live="polite">
               <div class="nearby-asset-body">
                 <div class="kmlabel">Nearby bridge</div>
@@ -6408,7 +6396,7 @@
     // The two tabs show different AMOUNTS of it: Capture shows only the newest few
     // (enough to delete a mistake on the spot), Log shows the full register and owns
     // the search. The cap is applied per-mount in renderLog(), not by a second list.
-    const CAPTURE_RECENT_LIMIT = 10;
+    const CAPTURE_RECENT_LIMIT = 3;
     let logRegisterView = 'inspection';
 
     function mountLogRegister(viewName) {
@@ -6746,28 +6734,16 @@
     }
 
     function updateRampReadout(interchange) {
-      const rampEl = document.getElementById('ramp-tag');
-      if (!interchange) {
-        rampEl.classList.remove('show');
-        rampEl.textContent = '';
-        updateInstrumentNearbySummary();
-        return;
-      }
-      rampEl.textContent = interchange.name;
-      rampEl.classList.add('show');
       updateInstrumentNearbySummary();
     }
 
     function updateInstrumentNearbySummary() {
       const summary = document.getElementById('instrument-nearby');
-      const rampEl = document.getElementById('ramp-tag');
       const bridgeName = document.getElementById('nearby-asset-name');
       const bridgeStation = document.getElementById('nearby-asset-station');
       if (!summary) return;
       let text = '';
-      if (rampEl && rampEl.classList.contains('show') && rampEl.textContent.trim()) {
-        text = `Near ${rampEl.textContent.trim()}`;
-      } else if (bridgeName && bridgeStation) {
+      if (bridgeName && bridgeStation) {
         const name = bridgeName.textContent.trim();
         const station = bridgeStation.textContent.trim();
         const unavailable = /^(loading|waiting|bridge data unavailable|no upcoming|no nearby)/i.test(name);
@@ -7982,16 +7958,22 @@
       return { from: document.getElementById('entry-filter-from').value, to: document.getElementById('entry-filter-to').value, type: document.getElementById('entry-filter-type').value, source: document.getElementById('entry-filter-source').value, inspector: document.getElementById('entry-filter-inspector').value, ...Object.fromEntries(['search','corridor','bound','lane','photo','status'].map(field => [field, document.getElementById('log-' + field)?.value || ''])) };
     }
     function visibleEntries() {
-      // The Capture card has no filter row, so it shows every record. Leaving an
+      // Capture shows today's local inspections without Log filters. Leaving an
       // active Log-tab filter applied here would show a subset the user cannot clear
       // from that tab, with a count that silently disagrees with the title.
-      if (logRegisterView === 'inspection') return accessibleEntries();
+      if (logRegisterView === 'inspection') return captureTodayEntries();
       const filters = getLogFilters();
       if (myLogEnabled() && logRecordScope === 'team') return [];
       if (myLogEnabled() && ['', 'mine'].includes(filters.source || '')) {
         return SPOTITEntryFilters.filterEntries(accessibleEntries().filter(entry => !entry.user_id || entry.user_id.toLowerCase() === authDisplayState.userId.toLowerCase()), { ...filters, source: 'mine', inspector: '' }).filter(entry => SPOTITLogRegister.matches(entry, filters));
       }
       return SPOTITEntryFilters.filterEntries(accessibleEntries(), filters).filter(entry => SPOTITLogRegister.matches(entry, filters));
+    }
+    function captureTodayEntries() {
+      if (!authWorkspaceUnlocked) return [];
+      const owner = String(authDisplayState?.userId || '').toLowerCase();
+      const local = accessibleEntries().filter(e => !e.user_id || String(e.user_id).toLowerCase() === owner);
+      return SPOTITLogRegister.todayRecords(local, fullTimestamp().slice(0,10));
     }
     function syncEntryFilterOptions() {
       for (const id of ['entry-filter-type', 'map-entry-type']) {
@@ -8338,11 +8320,13 @@
       const countMini = document.getElementById('count-mini');
       const available = accessibleEntries();
       const logFilters = getLogFilters(), page = myView ? activeRecordController().snapshot() : null;
-      const emptyMessage = logRegisterView === 'inspection' ? 'No defects logged yet' : SPOTITLogRegister.emptyMessage({
+      const emptyMessage = logRegisterView === 'inspection' ? 'No inspections recorded today' : SPOTITLogRegister.emptyMessage({
         scope:myView && logRecordScope === 'team' ? 'team' : logFilters.source && logFilters.source !== 'mine' ? 'imported' : 'my',
         filtered:Object.entries(logFilters).some(([key,value]) => key !== 'source' && value), loading:page?.loading, loaded:page?.loaded, available:myView ? !!page?.scope : true
       });
       if (countMini) countMini.textContent = available.length;
+      const todayBadge = document.getElementById('log-count-badge');
+      if (todayBadge && logRegisterView === 'inspection') todayBadge.textContent = visible.length.toLocaleString('en-US');
       document.getElementById('count-label').textContent = Object.values(getLogFilters()).some(Boolean)
         ? `${visible.length} of ${available.length} entries`
         : `${available.length} ${available.length === 1 ? 'entry' : 'entries'}`;
@@ -8362,9 +8346,9 @@
       /* Capture shows the newest few only; the Log tab shows the whole register.
        * `visible` stays the source of truth for every count. */
       const capped = logRegisterView === 'inspection';
-      const shown = capped ? visible.slice(-CAPTURE_RECENT_LIMIT) : visible;
+      const shown = capped ? visible.slice(0, CAPTURE_RECENT_LIMIT) : visible;
       list.innerHTML = '';
-      const renderItems = myView ? items : shown.slice().reverse().map(local => ({ local }));
+      const renderItems = myView ? items : (capped ? shown : shown.slice().reverse()).map(local => ({ local }));
       if (!renderItems.length) list.innerHTML = `<div class="log-empty">${xmlEscape(emptyMessage)}</div>`;
       renderItems.forEach((item) => {
         if (!item.local) { list.appendChild(cloudCard(item)); return; }

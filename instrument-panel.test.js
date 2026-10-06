@@ -27,7 +27,7 @@ test('every element the readout JS writes to still exists',()=>{
   for(const id of [
     'km-value','acc','lat','lon','gps-status',
     'current-location-label',
-    'segment-tag','ramp-tag','nearby-asset-name','nearby-asset-station',
+    'segment-tag','nearby-asset-name','nearby-asset-station',
     'nearby-asset-distance','bridge-filter-toggle','bridge-filter-options',
   ]){
     assert.ok(html.includes(`id="${id}"`),`missing #${id}`);
@@ -65,7 +65,7 @@ test('the station leads, and the engineering detail is collapsed',()=>{
   // Coordinates, direction, interchange and bridge are collapsed by default, but
   // keep their IDs so every existing writer still finds them.
   const details = html.slice(html.indexOf('id="instrument-details"'),html.indexOf('id="defect-section"'));
-  for(const id of ['bound-toggle','bound-auto-status','lat','lon','ramp-tag','nearby-asset-name']){
+  for(const id of ['bound-toggle','bound-auto-status','lat','lon','nearby-asset-name']){
     assert.ok(details.includes(`id="${id}"`),`#${id} must be inside the collapsed detail`);
   }
   assert.match(html,/<details class="instrument-details" id="instrument-details">/);

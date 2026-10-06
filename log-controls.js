@@ -43,7 +43,11 @@ document.addEventListener('DOMContentLoaded', () => {
   sheet.querySelector('.register-sheet-note').append(' Device-photo filters show device records only; submitted photo availability is checked in details.');
   const field=(label,input)=>{const row=document.createElement('label');row.className='register-filter-row';const title=document.createElement('span');title.textContent=label;row.append(title,input);fields.append(row);return row;};
   const dates=document.createElement('div'); dates.className='register-date-range';
-  const from=$('entry-filter-from'),to=$('entry-filter-to'); dates.append(from,to);
+  const from=$('entry-filter-from'),to=$('entry-filter-to');
+  for (const [title,input] of [['From',from],['To',to]]) {
+    const label=document.createElement('label'); label.className='register-date-control';
+    const text=document.createElement('span');text.textContent=title;label.append(text,input);dates.append(label);
+  }
   const dateRow=document.createElement('fieldset');dateRow.className='register-date-field';dateRow.innerHTML='<legend>Date range</legend>';dateRow.append(dates);fields.append(dateRow);
   field('Defect type',$('entry-filter-type'));
   const select=(name,label,options)=>{const input=document.createElement('select');input.id='log-'+name; input.setAttribute('aria-label',label);input.replaceChildren(...options.map(([v,t])=>new Option(t,v)));return field(label,input);};
@@ -101,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
   dataButton.addEventListener('click',()=>{$('log-export-scope').value=selectedEntryIds.size?'selected':'filtered';exportScopeCount();data.showModal();});
   $('log-export-scope').onchange=exportScopeCount;
   for(const element of view.querySelectorAll('.log-data-row,.log-hint-row'))if(!element.contains(bulkMount)&&!element.contains(actions))element.hidden=true;
-  const names={from:'From',to:'To',type:'Defect',inspector:'Inspector',corridor:'Corridor',bound:'Bound',lane:'Lane',photo:'Device photo',status:'Inspection',search:'Search'};
+  const names={type:'Defect',inspector:'Inspector',corridor:'Corridor',bound:'Bound',lane:'Lane',photo:'Device photo',status:'Inspection',search:'Search'};
   function sync(){
     const f=getLogFilters(),team=myLogEnabled()&&logRecordScope==='team',archive=Boolean(f.source&&!['mine'].includes(f.source));
     $('log-scope-my').textContent=authDisplayState?.mode==='guest'?'Device records':'My Records';
@@ -111,12 +115,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const n=visible.filter(e=>selectedEntryIds.has(e.id)).length;
     actions.classList.toggle('selection-mode',selectMode);toggle.textContent=selectMode?'Cancel':'Select';toggle.classList.toggle('active',selectMode);toggle.removeAttribute('aria-checked');toggle.setAttribute('aria-label',selectMode?'Cancel entry selection':'Select multiple device records');toggle.disabled=team||!visible.length;
     $('log-records-chip').textContent=selectMode?`${n} of ${visible.length} selected`:`${shownCount} ${shownCount===1?'inspection':'inspections'}`;
-    badge.textContent=shownCount.toLocaleString('en-US');bulkMount.hidden=!selectMode;selectAll.hidden=!selectMode;deleteSelected.hidden=!selectMode;deleteSelected.textContent=`Delete (${n})`;deleteSelected.disabled=!n;
+    badge.textContent=(logRegisterView==='inspection'?visible.length:shownCount).toLocaleString('en-US');bulkMount.hidden=!selectMode;selectAll.hidden=!selectMode;deleteSelected.hidden=!selectMode;deleteSelected.textContent=`Delete (${n})`;deleteSelected.disabled=!n;
     const total=logRegisterItems({source:f.source||''}).length;
     coverage.textContent=team?`Filtered from ${total} loaded team records`:myLogEnabled()&&!archive?`From ${total} device and loaded records`:`From ${total} records on this device`;
     if(archive) $('my-record-status').textContent='Imported archive · Records and photos on this device.';
     else if(!myLogEnabled()) $('my-record-status').textContent=SPOTITLogRegister.historyUnavailable(inspectionContext(),navigator.onLine!==false);
-    chips.replaceChildren();for(const [key,label]of Object.entries(names)){if(!f[key])continue;const id=key==='search'||['corridor','bound','lane','photo','status'].includes(key)?'log-'+key:'entry-filter-'+key;const input=$(id),value=input.tagName==='SELECT'?input.selectedOptions[0]?.textContent||f[key]:f[key];const chip=button('',`${label}: ${value} ×`);chip.setAttribute('aria-label',`Remove ${label.toLowerCase()} filter`);chip.onclick=()=>{input.value='';applyEntryFilters();};chips.append(chip);}
+    chips.replaceChildren();
+    if(f.from||f.to){
+      const chip=button('log-date-chip','');chip.classList.add('register-date-chip');
+      chip.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4M17 3v4M3 11h18"/></svg>';
+      const text=document.createElement('span');text.textContent=SPOTITLogRegister.dateRange(f.from,f.to);chip.append(text,document.createTextNode(' ×'));
+      chip.setAttribute('aria-label',`Remove date range filter: ${text.textContent}`);
+      chip.onclick=()=>{from.value='';to.value='';applyEntryFilters();};chips.append(chip);
+    }
+    for(const [key,label]of Object.entries(names)){if(!f[key])continue;const id=key==='search'||['corridor','bound','lane','photo','status'].includes(key)?'log-'+key:'entry-filter-'+key;const input=$(id),value=input.tagName==='SELECT'?input.selectedOptions[0]?.textContent||f[key]:f[key];const chip=button('',`${label}: ${value} ×`);chip.setAttribute('aria-label',`Remove ${label.toLowerCase()} filter`);chip.onclick=()=>{input.value='';applyEntryFilters();};chips.append(chip);}
     if(f.source&&!['mine','imported'].includes(f.source)){const chip=button('','Import batch ×');chip.onclick=()=>{$('entry-filter-source').value='imported';applyEntryFilters();};chips.append(chip);}
     if(chips.children.length){const clear=button('log-clear-all','Clear all');clear.onclick=()=>{restoreFilters({source:archive?'imported':f.source});applyEntryFilters();};chips.append(clear);}chips.hidden=!chips.children.length;
     if(data.open)exportScopeCount();

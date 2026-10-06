@@ -46,10 +46,10 @@ test('footer actions keep equal geometry and date filters have no obsolete check
   assert.doesNotMatch(css,/log-date-filters[^}]*44px 44px/);
 });
 
-test('inspection heading uses a filtered-count badge and hides the legacy count row',()=>{
+test('inspection heading counts all today records and hides the legacy count row',()=>{
   assert.match(controls,/badge\.id='log-count-badge'/);
   assert.match(controls,/const shownCount = document\.querySelectorAll\('#log-list \.log-entry'\)\.length/);
-  assert.match(controls,/badge\.textContent=shownCount\.toLocaleString\('en-US'\)/);
+  assert.match(controls,/badge\.textContent=\(logRegisterView==='inspection'\?visible.length:shownCount\)\.toLocaleString\('en-US'\)/);
   assert.match(controls,/legacyCount\.hidden=true/);
   assert.match(css,/\.log-count-badge\{[^}]*min-width:24px;height:24px[^}]*border-radius:var\(--radius-full\)[^}]*box-shadow:[^}]*transform:translate\(-1px,-9px\)/);
   assert.match(css,/\.count-bar\[hidden\]\{display:none!important;/);

@@ -5,7 +5,7 @@
   root.SPOTITMore = api;
 })(globalThis, function() {
   'use strict';
-  const BUILD = 'v242';
+  const BUILD = 'v243';
   function route(value) {
     return ['more', 'settings-tab', 'settings-view', 'tools', 'tools-tab', 'tools-view'].includes(value) ? 'settings' : value;
   }

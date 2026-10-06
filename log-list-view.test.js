@@ -10,9 +10,9 @@ const controls = fs.readFileSync(require.resolve('./log-controls.js'), 'utf8');
 const filterSrc = fs.readFileSync(require.resolve('./entry-filters.js'), 'utf8');
 
 test('the Capture tab is capped; the Log tab owns the full list', () => {
-  assert.match(html, /const CAPTURE_RECENT_LIMIT = 10;/);
+  assert.match(html, /const CAPTURE_RECENT_LIMIT = 3;/);
   assert.match(html, /const capped = logRegisterView === 'inspection';/);
-  assert.match(html, /visible\.slice\(-CAPTURE_RECENT_LIMIT\)/);
+  assert.match(html, /visible\.slice\(0, CAPTURE_RECENT_LIMIT\)/);
   // The cap must not be a second renderer.
   assert.equal((html.match(/id="log-list"/g) || []).length, 1, 'exactly one list');
   assert.equal((html.match(/function renderLog\(/g) || []).length, 1, 'exactly one renderer');

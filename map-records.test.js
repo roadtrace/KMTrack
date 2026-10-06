@@ -64,7 +64,7 @@ test('Map scope stays independent of Log, clears selection, and activates bounde
 test('Map has no transport/persistence/export or eager photo download and landmarks stay separate',()=>{
  assert.doesNotMatch(fs.readFileSync('map-records.js','utf8'),/localStorage|\.from\(|\.insert\(|\.upload\(/);
  assert.doesNotMatch(fn('updateMapEntries'),/download|\.storage|export|renderLandmarks/);assert.match(fn('updateMapLandmarks'),/osmLandmarkLayer/);
- assert.match(html,/PHOTO_CLOUD_TRANSPORT_ENABLED = false/);assert.match(fs.readFileSync('sw.js','utf8'),/'v242'/);
+ assert.match(html,/PHOTO_CLOUD_TRANSPORT_ENABLED = false/);assert.match(fs.readFileSync('sw.js','utf8'),/'v243'/);
 });
 function rendererFixture(zoom=15){
  const elements=[],node=(tag)=>{const n={tag,children:[],style:{setProperty(){}},dataset:{},classList:{toggle(){},add(){}},setAttribute(){},append(...items){this.children.push(...items);}};elements.push(n);return n;};

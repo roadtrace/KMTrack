@@ -52,6 +52,32 @@
     const metres = Math.round(Number(value) * 1000);
     return `${Math.floor(metres / 1000)}+${String(metres % 1000).padStart(3,'0')}`;
   }
+  // Calendar strings stay calendar strings: no UTC conversion or DST shift.
+  function dateRange(from = '', to = '') {
+    const parts = value => {
+      const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+      if (!match) return null;
+      const [, year, month, day] = match;
+      const date = new Date(Date.UTC(+year, +month - 1, +day));
+      if (date.toISOString().slice(0,10) !== value) return null;
+      return {year, month, day: +day, label: date.toLocaleString('en-US', {month:'short', timeZone:'UTC'})};
+    };
+    const a = parts(from), b = parts(to);
+    const full = p => `${p.label} ${p.day}, ${p.year}`;
+    if (!a || !b) return a ? `From ${full(a)}` : b ? `Through ${full(b)}` : '';
+    if (from === to) return full(a);
+    if (a.year !== b.year) return `${full(a)} – ${full(b)}`;
+    if (a.month === b.month) return `${a.label} ${a.day} – ${b.day}, ${a.year}`;
+    return `${a.label} ${a.day} – ${b.label} ${b.day}, ${a.year}`;
+  }
+  function todayRecords(entries, day) {
+    return entries.filter(e => !e.importBatchId && !e.cloud_source && String(e.timestamp || '').slice(0,10) === day)
+      .slice().sort((a,b) => String(b.timestamp).localeCompare(String(a.timestamp)) || String(a.id || '').localeCompare(String(b.id || '')));
+  }
+  function evidence(e, {cloud = false, team = false, durable = true} = {}) {
+    if (cloud || team || !durable) return 'Evidence';
+    return String(e.photoId || '').trim() ? 'Photo' : 'No photo';
+  }
   function cardHTML(e, {cloud = false, team = false, durable = true, photoLabel = '', notice = '', differs = false} = {}) {
     const state = inspectionState(e, cloud);
     const date = e.timestamp ? new Date(String(e.timestamp).replace(' ','T') + '+08:00') : null;
@@ -60,7 +86,7 @@
     const station = e.km == null ? (e.interchange || 'KM unavailable') : `KM ${km(e.km)}`;
     const secondary = [lane, e.inspector || '', time].filter(Boolean).join(' · ');
     const source = [team ? 'Team record · Read only' : cloud ? 'Submitted record · Read only' : e.importBatchId ? e.importLabel || 'Device archive' : e.expressway || 'Corridor unset', notice].filter(Boolean).join(' · ');
-    return `<div class="register-card-main"><span class="register-evidence" aria-hidden="true">${e.photoId && !cloud ? '▧' : '▤'}</span><div class="register-card-copy"><div class="register-primary"><strong>${escape(e.type || 'Inspection')}</strong><span> · </span><span class="register-km">${escape(station)}</span>${e.bound ? ` <span>${escape(e.bound)}</span>` : ''}</div><div class="register-secondary">${escape(secondary)}</div><div class="register-source">${escape(source)}</div></div><span class="register-chevron" aria-hidden="true">›</span></div><div class="register-statuses"><span class="register-status state-${state.key}">${escape(state.label)}</span>${photoLabel ? `<span class="register-photo-status">${escape(photoLabel)}</span>` : ''}${!durable ? '<span class="register-alert">Not saved · export before closing</span>' : ''}${differs ? '<span class="register-alert">Device and submitted details differ</span>' : ''}</div>`;
+    return `<div class="register-card-main"><span class="register-evidence"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.5"/><path d="m3 17 5-5 4 4 4-6 5 7"/></svg><span>${evidence(e, {cloud, team, durable})}</span></span><div class="register-card-copy"><div class="register-primary"><strong>${escape(e.type || 'Inspection')}</strong><span> · </span><span class="register-km">${escape(station)}</span>${e.bound ? ` <span>${escape(e.bound)}</span>` : ''}</div><div class="register-secondary">${escape(secondary)}</div><div class="register-source">${escape(source)}</div></div><span class="register-chevron" aria-hidden="true">›</span></div><div class="register-statuses"><span class="register-status state-${state.key}">${escape(state.label)}</span>${photoLabel ? `<span class="register-photo-status">${escape(photoLabel)}</span>` : ''}${!durable ? '<span class="register-alert">Not saved · export before closing</span>' : ''}${differs ? '<span class="register-alert">Device and submitted details differ</span>' : ''}</div>`;
   }
   function decorate(card, e, options) {
     // Move the existing controls; retain their IDs, guards and event wiring.
@@ -75,5 +101,5 @@
       details.append(summary, ...actions); card.append(details);
     }
   }
-  return {matches, inspectionState, cardHTML, decorate, km, historyUnavailable, emptyMessage};
+  return {matches, inspectionState, cardHTML, decorate, km, historyUnavailable, emptyMessage, dateRange, todayRecords, evidence};
 });
