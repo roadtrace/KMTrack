@@ -4,7 +4,7 @@
 // since the app already manages its own offline copy of that file and
 // the in-app "Reload dataset" button needs a real network attempt.
 
-const CACHE_VERSION = 'v243'; // bump this string whenever you deploy changes, to force an update
+const CACHE_VERSION = 'v245'; // bump this string whenever you deploy changes, to force an update
 const CACHE_NAME = `spotit-shell-${CACHE_VERSION}`;
 
 const APP_SHELL = [
@@ -53,6 +53,7 @@ const APP_SHELL = [
   './photo-viewer.css',
   './photo-zoom.js',
   './photo-viewer.js',
+  './legacy-matcher.js',
   './location-resolver.js',
   './manifest.json',
   './bridges.json',

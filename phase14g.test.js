@@ -145,7 +145,11 @@ test('mainline traffic and ramp entry retain original primary-station behavior',
 test('redundant interchange UI is gone; bridge functionality and Team remain unchanged',()=>{
   assert.doesNotMatch(html,/Interchange identity|id="ramp-tag"|Near \$\{rampEl/);
   for(const name of ['updateBridgeReadout','computeKmStation','computeCorridorCandidates','renderTeamWorkspace','switchTeamSection','updateMapEntries']) {
-    if(html.includes('    function '+name+'('))assert.equal(fn(html,name),fn(baseline('index.html'),name));
+    if (['computeKmStation','computeCorridorCandidates'].includes(name)) {
+      const original = fn(baseline('index.html'),name).replace(/\bcalibData\b/g,'getCalibration()').replace('locationResolver.state().confirmedCorridor','getConfirmedCorridor()');
+      assert.ok(fs.readFileSync('legacy-matcher.js','utf8').replaceAll('\r\n','\n').includes(original));
+      assert.match(fn(html,name),new RegExp('return legacyMatcher\\.'+name+'\\('));
+    } else if(html.includes('    function '+name+'('))assert.equal(fn(html,name),fn(baseline('index.html'),name));
   }
   const team=s=>s.slice(s.indexOf('<section class="app-view team-view"'),s.indexOf('<section class="app-view settings-view"'));
   assert.equal(team(html),team(baseline('index.html')));

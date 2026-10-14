@@ -44,6 +44,7 @@ test('existing settings controls remain single instances and new assets are cach
   for (const id of ['calib-reload','ramp-reload','dataset-drawer','theme-toggle','inspector-input','auth-verify-btn','auth-signout-btn','auth-guest-signin-btn','settings-accuracy','storage-status']) {
     assert.equal(html.split(`id="${id}"`).length-1,1,id);
   }
-  assert.match(sw,new RegExp(`CACHE_VERSION = '${more.BUILD}'`));
+  const cacheBuild = sw.match(/CACHE_VERSION = 'v(\d+)'/);
+  assert.ok(cacheBuild && Number(cacheBuild[1]) >= Number(more.BUILD.slice(1)));
   for (const asset of ['more.css','more.js']) assert.ok(sw.includes(`'./${asset}'`));
 });

@@ -3,6 +3,7 @@ const ui=require('./log-register'),filters=require('./entry-filters');
 const html=fs.readFileSync('index.html','utf8').replaceAll('\r\n','\n'),css=fs.readFileSync('log-register.css','utf8');
 const git=file=>require('node:child_process').execFileSync('git',['-c','safe.directory='+process.cwd().replaceAll('\\','/'),'show','HEAD:'+file],{encoding:'utf8'}).replaceAll('\r\n','\n');
 const baseline=git('index.html');
+function sharedStyle(source){const start=source.indexOf('<style>');assert.ok(start>=0,'shared style opening');const end=source.indexOf('</style>',start);assert.ok(end>start,'shared style closing');return source.slice(start,end);}
 function fn(source,name){const start=source.indexOf('    function '+name+'(');assert.ok(start>=0,name);const line=source.slice(start,source.indexOf('\n',start));return line.trim().endsWith('}')?line:source.slice(start,source.indexOf('\n    }',start)+6);}
 const entry={id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',type:'Potholes',timestamp:'2026-10-06 10:42:00',km:29.38,bound:'NB',lane:'2',expressway:'NLEX',inspector:'Moises',interchange:'Bocaue',notes:'Shoulder near exit',sync_status:'local_only'};
 for(const term of ['pothole','29+380','KM 29+380','29.38','moises','nlex','Bocaue','shoulder'])test('human field search: '+term,()=>assert.equal(ui.matches(entry,{search:term}),true));
@@ -20,7 +21,15 @@ test('existing local popup markup, handlers and shared theme styles remain byte-
   const editHandlers=s=>s.slice(s.indexOf('    let editPhotoObjectUrl'),s.indexOf('    // ---------- Excel'));
   assert.equal(editHandlers(html),editHandlers(baseline));
   assert.equal(fs.readFileSync('design-system.css','utf8').replaceAll('\r\n','\n'),git('design-system.css'));
-  assert.equal(html.slice(html.indexOf('<style>'),html.indexOf('</style>')),baseline.slice(baseline.indexOf('<style>'),baseline.indexOf('</style>')));
+  assert.equal(sharedStyle(html),sharedStyle(baseline));
+});
+test('B01 preview style isolation preserves scope and the shared-style guard detects changes',()=>{
+  const preview=html.match(/<style id="b01-preview-styles">([\s\S]*?)<\/style>/);assert.ok(preview);
+  const body=preview[1].replace(/\/\*[\s\S]*?\*\//g,'');const rules=[...body.matchAll(/([^{}]+)\{([^{}]*)\}/g)];assert.equal(rules.length,9);
+  for(const rule of rules)assert.match(rule[1].trim(),/^\.b01-preview-[a-z-]+(?: (?:h3|p|button))?$/);
+  assert.equal(body.replace(/([^{}]+)\{([^{}]*)\}/g,'').trim(),'');
+  assert.ok(html.indexOf(preview[0])<html.indexOf('<style>'));
+  assert.notEqual(sharedStyle(html.replace('font-display: swap;','font-display: block;')),sharedStyle(baseline));
 });
 test('submitted details, private viewer guards and Map implementation remain identical',()=>{
   for(const name of ['openSubmittedDetail','currentPhotoItem','currentMyItem','freshMapItems','updateMapEntries','switchMapScope','openMapEntry'])assert.equal(fn(html,name),fn(baseline,name));
@@ -39,7 +48,7 @@ test('applied filters remain fixed during an uncommitted filter draft',()=>{
   const inputs=new Map(),c={window:{logFilterBaseline:{type:'Cracks',source:'imported'}},document:{getElementById:id=>inputs.get(id)||{value:''}}};inputs.set('entry-filter-type',{value:'Potholes'});vm.createContext(c);vm.runInContext(fn(html,'getLogFilters'),c);assert.equal(c.getLogFilters().type,'Cracks');assert.equal(c.getLogFilters(true).type,'Potholes');
 });
 test('new styles are scoped to Log and dedicated sheets, never the existing popup or Map',()=>{assert.doesNotMatch(css,/#edit-modal|#map-view|\.entry-sheet|\.modal-backdrop/);assert.match(css,/register-sheet-footer[\s\S]*position:sticky/);assert.match(css,/data-theme="light"/);assert.match(css,/min-height:44px/);});
-test('cache v243 contains both new deployed assets and photo gate remains off',()=>{const sw=fs.readFileSync('sw.js','utf8');assert.match(sw,/CACHE_VERSION = 'v243'/);for(const file of ['log-register.js','log-register.css'])assert.ok(sw.includes("'./"+file+"'"));assert.match(html,/PHOTO_CLOUD_TRANSPORT_ENABLED = false/);});
+test('cache v245 contains both new deployed assets and photo gate remains off',()=>{const sw=fs.readFileSync('sw.js','utf8');assert.match(sw,/CACHE_VERSION = 'v245'/);for(const file of ['log-register.js','log-register.css'])assert.ok(sw.includes("'./"+file+"'"));assert.match(html,/PHOTO_CLOUD_TRANSPORT_ENABLED = false/);});
 test('history unavailable states distinguish connection, Guest, auth, approval, team, verification and permission',()=>{
   const c={canUseLocal:true,mode:'approved',cloudVerified:true,profile:{approved:true,team:'roadway'}};
   for(const [context,online,text]of [[c,false,'Offline'],[{mode:'guest'},true,'Guest local mode'],[{},true,'Sign in'],[{...c,profile:{approved:false}},true,'approval'],[{...c,profile:{approved:true}},true,'No team'],[{...c,cloudVerified:false},true,'Verify'],[c,true,'permission']])assert.ok(ui.historyUnavailable(context,online).includes(text));
