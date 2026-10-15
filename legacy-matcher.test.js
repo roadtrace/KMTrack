@@ -70,7 +70,8 @@ test('extraction retains original bodies with only explicit dependency substitut
   assert.ok(source.includes(original),name);
  }
  const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
- const restored=require('./test-fixtures/legacy-matcher-restore.cjs').restore(html.replace(/<section class="more-group" id="gpskm-developer-tools"[\s\S]*?<\/section>/, '').replace(/\n  <script id="gpskm-developer-gate">[\s\S]*?<\/script>\n/, '\n'));
+ const reviewed=require('./test-fixtures/stationing-review-restore.cjs').restore(html);
+ const restored=require('./test-fixtures/legacy-matcher-restore.cjs').restore(reviewed.replace(/<section class="more-group" id="gpskm-developer-tools"[\s\S]*?<\/section>/, '').replace(/\n  <script id="gpskm-developer-gate">[\s\S]*?<\/script>\n/, '\n'));
  assert.equal(require('node:crypto').createHash('sha256').update(restored).digest('hex'),fixture.index_sha256);
 });
 test('shared pure helpers exact defaults and edge numeric results',()=>{
@@ -130,7 +131,7 @@ test('browser API and minimal app wiring load without IO',()=>{
  assert.equal((html.match(/src="\.\/legacy-matcher\.js"/g)||[]).length,1);
  assert.ok(html.indexOf('src="./legacy-matcher.js"')<html.indexOf('class GeoKalmanFilter'));
  assert.ok(html.indexOf('const legacyMatcher =')<html.indexOf('async function loadCalibrationDataset'));
- assert.ok(sw.includes("'./legacy-matcher.js'"));assert.ok(sw.includes("CACHE_VERSION = 'v245'"));
+ assert.ok(sw.includes("'./legacy-matcher.js'"));assert.ok(sw.includes("CACHE_VERSION = 'v246'"));
  assert.doesNotMatch(fs.readFileSync(modulePath,'utf8'),/\b(?:fetch|localStorage|indexedDB|navigator|document|Date|setTimeout|require)\s*[.(]/);
 });
 test('actual app delegates and capture functions preserve the frozen outputs',()=>{

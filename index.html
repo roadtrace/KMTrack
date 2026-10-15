@@ -4376,7 +4376,7 @@
           </dl>
         </div>
       </div>
-    </section><p>Allow location while using the app. Corridor and KM stationing use the existing engineering datasets; no corridor is guessed.</p></section>
+    </section><p>Allow location while using the app. Corridor and KM stationing use the existing engineering datasets; no corridor is guessed.</p><section id="stationing-review-panel" class="tool-card" hidden aria-labelledby="stationing-review-heading"><h3 id="stationing-review-heading">Provisional stationing review</h3><p>Uses the active calibration reference, not approved reconstructed geometry. Physical carriageway, grade and station accuracy remain unverified. Operational KM, direction and saved inspections stay unchanged.</p><button type="button" id="stationing-review-toggle" class="ds-btn ds-btn-quiet">Enable provisional review</button><p id="stationing-review-status" role="status" aria-live="polite">Disabled</p><dl id="stationing-review-values" class="more-values"></dl></section></section>
 <section class="more-screen" id="more-datasets" aria-labelledby="more-datasets-heading" hidden><button type="button" class="more-back" data-more-back>← More</button><h2 id="more-datasets-heading" tabindex="-1">Calibration datasets</h2><section class="tool-card">
       <div class="tool-head">
         <span class="tool-icon"><svg viewBox="0 0 24 24" aria-hidden="true">
@@ -4603,6 +4603,7 @@
   <script src="./photo-viewer.js"></script>
   <script src="./legacy-matcher.js"></script>
   <script src="./location-resolver.js"></script>
+  <script src="./stationing-review-controller.js"></script>
   <script>
     class GeoKalmanFilter {
       constructor() {
@@ -4636,6 +4637,7 @@
     let gpsFreshnessTimer = null;
     let gpsPermissionDenied = false;
     const GPS_FRESH_MS = 12000;
+    let stationingReview = null; // Explicit non-production review only; never operational authority.
     let calibData = [];    // {e, b, k, lat, lon} — loaded from the NLEX network dataset
     let entries = [];      // {id, type, timestamp, lat, lon, km, expressway, bound, lane, photoId, photoFilename, photoTimestamp}
     let inspectionApi = null;
@@ -5432,7 +5434,9 @@
 
     function gridKey(lat, lon) { return SPOTITLegacyMatcher.gridKey(lat, lon); }
     function buildSpatialIndex() {
-      return legacyMatcher.buildSpatialIndex();
+      const result = legacyMatcher.buildSpatialIndex();
+      try { if (stationingReview?.enabled()) stationingReview.referenceChanged(); } catch (_) { /* review cannot affect legacy index */ }
+      return result;
     }
 
     async function loadCalibrationDataset(forceNetwork) {
@@ -6573,6 +6577,7 @@
       gpsStatus.className = 'status warn';
       setGpsCaptureReady(false);
       updateReadout();
+      try { if (stationingReview?.enabled()) stationingReview.invalidate(); } catch (_) { /* diagnostic isolation */ }
     }
 
     function formatKmStation(km) {
@@ -6753,6 +6758,90 @@
       'SFEX': { increasing: 'SB', decreasing: 'NB' }
     };
 
+    // Review uses a separate worker and cannot select/write operational or inspection values.
+    function stationingReviewAllowed() {
+      try {
+        const local = ['127.0.0.1','localhost','[::1]','::1'].includes(location.hostname);
+        const preview = location.hostname === 'stationing-app-review.kmtrack-gpskm-synthetic.pages.dev';
+        return window === window.top && ['http:','https:'].includes(location.protocol)
+          && (local || preview) && location.hash === '#kmtrack-stationing-review-v1';
+      } catch (_) { return false; }
+    }
+    function renderStationingReview(result) {
+      const target = document.getElementById('stationing-review-values');
+      if (!target) return;
+      const range = result.stationRange;
+      const station = range ? (range.minKm === range.maxKm ? `KM ${range.minKm.toFixed(3)}` : `KM ${range.minKm.toFixed(3)} to ${range.maxKm.toFixed(3)}`) : 'Withheld - see ambiguity/review status';
+      const choices = result.candidates.filter(row => row.expressway === result.selectedReferenceCorridor)
+        .map(row => `${row.bound}: KM ${row.km.toFixed(3)} (${row.distanceM.toFixed(1)} m to sample)`).join('; ');
+      const values = [
+        ['Status', result.status], ['Station - provisional reference', station],
+        ['Travel direction - provisional', result.travelDirection.value || 'Unknown - insufficient/contradictory movement'],
+        ['Reference bound', result.referenceBoundStatus], ['Physical carriageway', 'Not determined'],
+        ['Current operational selection', userBound || 'Not selected'], ['Bound alternatives', choices || 'None'],
+        ['Evidence limits', result.reasons.join('; ')], ['Reference revision', result.revision]
+      ];
+      const geometry = result.reconstruction;
+      if (geometry) values.push(
+        ['QGIS evidence status', geometry.status],
+        ['QGIS movement', geometry.movement || 'UNKNOWN'],
+        ['QGIS match stability', geometry.stability?.status || 'MATCH_WITHHELD'],
+        ['QGIS current match', geometry.stability?.currentMatchAvailable ? `${geometry.stability.currentCandidate.bound} way ${geometry.stability.currentCandidate.wayId} - provisional` : 'Withheld - current geometry, movement or continuity not established'],
+        ['QGIS last retained candidate - context only', geometry.stability?.retainedCandidate ? `${geometry.stability.retainedCandidate.bound} way ${geometry.stability.retainedCandidate.wayId} / fragment ${geometry.stability.retainedCandidate.fragment}` : 'None'],
+        ['QGIS stability confirmation', geometry.stability ? `${geometry.stability.consistentObservations}/${geometry.stability.requiredObservations} observations; ${(geometry.stability.elapsedMs/1000).toFixed(1)} s; ${geometry.stability.movementM.toFixed(1)} m movement; ${geometry.stability.continuity}` : 'Unavailable'],
+        ['QGIS stability explanation', geometry.stability?.reasons.join('; ') || 'No stability evidence'],
+        ['QGIS directional hint - provisional', geometry.boundHint || 'Withheld / unknown'],
+        ['QGIS candidate matches', geometry.candidates.map(c => `${c.bound} way ${c.wayId} / fragment ${c.fragment}: ${c.distanceM.toFixed(1)} m; nodes ${c.nodes.join(' to ')}; ${c.movement}; ${c.reasons.join(', ') || 'proximity only'}`).join('; ') || 'None in retained coverage'],
+        ['Provisional review-zone gates', geometry.gates.map(g => `${g.anchor}: ${g.phase}, ${g.distanceM.toFixed(1)} m; connectivity UNKNOWN`).join('; ') || 'None nearby'],
+        ['Interchange context', geometry.interchanges.map(r => `${r.name} (${r.id}): ${r.distanceM.toFixed(1)} m; direction/connectivity UNKNOWN`).join('; ') || 'None nearby'],
+        ['QGIS rejection / hold reasons', geometry.reasons.join('; ') || 'Proximity only'],
+        ['Excluded source ways', geometry.excludedWays.map(w => `${w.bound} ${w.wayId}: ${w.reasons.join(', ')}`).join('; ') || 'None'],
+        ['Station reference separation', 'KM above comes only from current calibration. Reconstructed geometry has no stationing anchors; no geometry-derived KM.'],
+        ['QGIS source basis', 'B02.16 retained per-way ordered coordinates, B02.23B branch/merge review and B02.24 unresolved anchors. No fragment joins, grade or traversability approved.']
+      );
+      target.replaceChildren(...values.map(([label,value]) => {
+        const row = document.createElement('div'), dt = document.createElement('dt'), dd = document.createElement('dd');
+        dt.textContent = label; dd.textContent = value; row.append(dt,dd); return row;
+      }));
+    }
+    function stationingReviewController() {
+      if (!stationingReview) stationingReview = SPOTITStationingReviewController.create({
+        makeWorker: () => new Worker('./stationing-review-worker.js'),
+        getReference: () => ({rows:calibData, conventions:EXPRESSWAY_BOUND_BY_TREND}), now: () => Date.now(),
+        setTimer: (fn,ms) => globalThis.setTimeout(fn,ms), clearTimer: id => globalThis.clearTimeout(id),
+        onResult: renderStationingReview,
+        onReset: () => document.getElementById('stationing-review-values').replaceChildren(),
+        onStatus: (text,enabled) => {
+          document.getElementById('stationing-review-status').textContent = text;
+          document.getElementById('stationing-review-toggle').textContent = enabled ? 'Disable provisional review' : 'Enable provisional review';
+          if (!enabled) document.getElementById('stationing-review-values').replaceChildren();
+        }
+      });
+      return stationingReview;
+    }
+    function queueStationingReview(position) {
+      try {
+        if (!stationingReview?.enabled() || !stationingReviewAllowed()) return;
+        const raw = position.coords;
+        stationingReview.observe({lat:raw.latitude,lon:raw.longitude,accuracy:raw.accuracy,timestamp:position.timestamp,speed:raw.speed,heading:raw.heading},
+          {confirmedCorridor:currentResolvedLocation?.confirmedCorridor || '',manualBound:userBound || '',interchange:isInterchangeLocationMode(),operationalUncertain:currentResolvedLocation?.uncertain === true});
+      } catch (_) { /* never change legacy readouts, capture eligibility, stored values or submission */ }
+    }
+    function refreshStationingReviewGate() {
+      const panel = document.getElementById('stationing-review-panel');
+      if (!panel) return;
+      const allowed = stationingReviewAllowed(); panel.hidden = !allowed;
+      if (!allowed && stationingReview?.enabled()) stationingReview.disable();
+    }
+    try {
+      document.getElementById('stationing-review-toggle').onclick = () => {
+        if (!stationingReviewAllowed()) return;
+        const review = stationingReviewController(); review.enabled() ? review.disable() : review.enable();
+      };
+      globalThis.addEventListener('hashchange', refreshStationingReviewGate);
+      refreshStationingReviewGate();
+    } catch (_) { /* optional view must never affect application startup */ }
+
     let trendLastKm = null;
     let trendLastExpressway = null;
     let trendEstablished = false;
@@ -6865,6 +6954,7 @@
           clearTimeout(gpsFreshnessTimer);
           gpsFreshnessTimer = setTimeout(() => markGpsUncertain('GPS signal delayed — holding the last confirmed road'), GPS_FRESH_MS);
           updateReadout();
+          queueStationingReview(pos); // queued only after all operational GPS/readout work
         },
         (err) => {
           // 1 === PERMISSION_DENIED. The panel needs to tell "not allowed" apart

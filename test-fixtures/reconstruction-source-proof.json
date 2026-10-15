@@ -1,0 +1,13 @@
+{
+  "bundleSHA256": "3a22fa98a41a1141c20f08d2a6973791282f1f3ba1da0f82a6415f4cfbdd9a40",
+  "sources": {
+    "output/nlex-b02-b06-reconstruction-B0216-20261009/candidate-NB-ways.geojson": "f5877eea50371481a777cd688069f2d1394f6ca1b8b662cf801bfa04ff4325a5",
+    "output/nlex-b02-b06-reconstruction-B0216-20261009/candidate-NB-chain.geojson": "6c3915f0ffdae356242d848e0e0eda8c3fa5ce65d0c87efbec15ccb1f4a85ec6",
+    "output/nlex-b02-b06-reconstruction-B0216-20261009/candidate-SB-ways.geojson": "f1164b278dc577ccce08e54df1382232a50cb3ea6ba9729ff8efed7bcbf12c97",
+    "output/nlex-b02-b06-reconstruction-B0216-20261009/candidate-SB-chain.geojson": "5c0d5de9ed6d0a7c4860964140e2996a85b50ea120f69f24e30348e6860f85ac",
+    "output/nlex-crossing-grade-review-B0224-20261013-588d196f5d/decision-anchor-coverage.json": "2d02f78b67f05b4f180aa94e978cf107c4b963b5b6e0953990b0d3b4f67c0046",
+    "output/nlex-branch-merge-correction-B0223B-20261012-41f6a9f92c/six-node-incidence-matrix.json": "acf135394d60c873a5945507e8a06c1ae424999365ca6c12be3fd340f1440246",
+    "interchanges.json": "1c9c58d4279ac9b1d3f8c774b87a3e3ed070fc5a313bb4e31da0dfd1792f6ec9"
+  },
+  "basis": "Bundle coordinates and ordered IDs independently verified against the retained original sources before this branch; exact bundle SHA256 locks that evidence without publishing historical reports."
+}
