@@ -1,0 +1,2655 @@
+{
+  "identifiedSites": 21,
+  "sourceSegments": 448,
+  "applicableGeometryTerminalApproaches": 215,
+  "generatedGates": 252,
+  "usableGeometryGates": 234,
+  "physicallyVerifiedGates": 0,
+  "reviewedDirectionalApproaches": 15,
+  "unresolvedDirectionalSlots": 13,
+  "scope": "All sites in retained inventory, not certified complete inventory of NLEX",
+  "inventory": [
+    {
+      "site": "nlex_angeles",
+      "name": "Angeles Interchange",
+      "sourceSegments": 35,
+      "terminalApproaches": 22,
+      "gates": 24,
+      "usableGeometryGates": 24,
+      "reviewedApproaches": [],
+      "directionalSlots": [
+        {
+          "slot": "NB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "NB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        }
+      ],
+      "gaps": [
+        "Physical entry/exit completeness and maintenance not established"
+      ],
+      "sourceAttributeCounts": {
+        "ramp": 4,
+        "bound": 4,
+        "seg_type": 35
+      },
+      "availableSourceSegments": 35,
+      "unavailableSourceSegments": []
+    },
+    {
+      "site": "nlex_balagtas_plaridel_by_pass",
+      "name": "Balagtas Interchange (Plaridel By-pass)",
+      "sourceSegments": 12,
+      "terminalApproaches": 24,
+      "gates": 26,
+      "usableGeometryGates": 26,
+      "reviewedApproaches": [],
+      "directionalSlots": [
+        {
+          "slot": "NB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "NB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_EXIT",
+          "status": "UNRESOLVED_ROLE_OR_APPLICABILITY"
+        }
+      ],
+      "gaps": [
+        "Physical entry/exit completeness and maintenance not established"
+      ],
+      "sourceAttributeCounts": {
+        "ramp": 4,
+        "bound": 4,
+        "seg_type": 12
+      },
+      "availableSourceSegments": 12,
+      "unavailableSourceSegments": []
+    },
+    {
+      "site": "nlex_balintawak",
+      "name": "Balintawak Interchange",
+      "sourceSegments": 4,
+      "terminalApproaches": 8,
+      "gates": 8,
+      "usableGeometryGates": 8,
+      "reviewedApproaches": [],
+      "directionalSlots": [
+        {
+          "slot": "NB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "NB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        }
+      ],
+      "gaps": [
+        "Physical entry/exit completeness and maintenance not established"
+      ],
+      "sourceAttributeCounts": {
+        "ramp": 4,
+        "bound": 4,
+        "seg_type": 4
+      },
+      "availableSourceSegments": 4,
+      "unavailableSourceSegments": []
+    },
+    {
+      "site": "nlex_bocaue",
+      "name": "Bocaue Interchange",
+      "sourceSegments": 30,
+      "terminalApproaches": 7,
+      "gates": 10,
+      "usableGeometryGates": 8,
+      "reviewedApproaches": [],
+      "directionalSlots": [
+        {
+          "slot": "NB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "NB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        }
+      ],
+      "gaps": [
+        "Physical entry/exit completeness and maintenance not established",
+        "USER_REMOVED_GEOMETRY: nlex_bocaue_169;nlex_bocaue_815;nlex_bocaue_816"
+      ],
+      "sourceAttributeCounts": {
+        "ramp": 25,
+        "bound": 25,
+        "seg_type": 30
+      },
+      "availableSourceSegments": 27,
+      "unavailableSourceSegments": [
+        "nlex_bocaue_169",
+        "nlex_bocaue_815",
+        "nlex_bocaue_816"
+      ]
+    },
+    {
+      "site": "nlex_burol_tabang_spur_overpass",
+      "name": "Burol (Tabang Spur Overpass) Interchange",
+      "sourceSegments": 2,
+      "terminalApproaches": 4,
+      "gates": 6,
+      "usableGeometryGates": 6,
+      "reviewedApproaches": [],
+      "directionalSlots": [
+        {
+          "slot": "NB_ENTRY",
+          "status": "UNRESOLVED_ROLE_OR_APPLICABILITY"
+        },
+        {
+          "slot": "NB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_EXIT",
+          "status": "UNRESOLVED_ROLE_OR_APPLICABILITY"
+        }
+      ],
+      "gaps": [
+        "Physical entry/exit completeness and maintenance not established"
+      ],
+      "sourceAttributeCounts": {
+        "ramp": 2,
+        "bound": 2,
+        "seg_type": 2
+      },
+      "availableSourceSegments": 2,
+      "unavailableSourceSegments": []
+    },
+    {
+      "site": "nlex_dau",
+      "name": "Dau Interchange",
+      "sourceSegments": 32,
+      "terminalApproaches": 17,
+      "gates": 19,
+      "usableGeometryGates": 17,
+      "reviewedApproaches": [],
+      "directionalSlots": [
+        {
+          "slot": "NB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "NB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        }
+      ],
+      "gaps": [
+        "Physical entry/exit completeness and maintenance not established",
+        "USER_REMOVED_GEOMETRY: nlex_dau_388;nlex_dau_396"
+      ],
+      "sourceAttributeCounts": {
+        "ramp": 25,
+        "bound": 25,
+        "seg_type": 32
+      },
+      "availableSourceSegments": 30,
+      "unavailableSourceSegments": [
+        "nlex_dau_388",
+        "nlex_dau_396"
+      ]
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "name": "Harbor Link (Smart Connect) Interchange",
+      "sourceSegments": 34,
+      "terminalApproaches": 9,
+      "gates": 10,
+      "usableGeometryGates": 9,
+      "reviewedApproaches": [
+        {
+          "id": "nlex_harbor_link_smart_connect_nb_entry",
+          "bound": "NB",
+          "transition": "ENTRY",
+          "source": "nlex_harbor_link_smart_connect_303",
+          "status": "REVIEW",
+          "confidence": "MEDIUM"
+        },
+        {
+          "id": "nlex_harbor_link_smart_connect_nb_exit",
+          "bound": "NB",
+          "transition": "EXIT",
+          "source": "nlex_harbor_link_smart_connect_073",
+          "status": "REVIEW",
+          "confidence": "MEDIUM"
+        }
+      ],
+      "directionalSlots": [
+        {
+          "slot": "NB_ENTRY",
+          "status": "REVIEWED_SOURCE_MAPPING_NOT_APPROVAL"
+        },
+        {
+          "slot": "NB_EXIT",
+          "status": "REVIEWED_SOURCE_MAPPING_NOT_APPROVAL"
+        },
+        {
+          "slot": "SB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        }
+      ],
+      "gaps": [
+        "Physical entry/exit completeness and maintenance not established",
+        "USER_REMOVED_GEOMETRY: nlex_harbor_link_smart_connect_303"
+      ],
+      "sourceAttributeCounts": {
+        "ramp": 17,
+        "bound": 34,
+        "seg_type": 34
+      },
+      "availableSourceSegments": 33,
+      "unavailableSourceSegments": [
+        "nlex_harbor_link_smart_connect_303"
+      ]
+    },
+    {
+      "site": "nlex_lawang_bato",
+      "name": "Lawang Bato Exit",
+      "sourceSegments": 1,
+      "terminalApproaches": 2,
+      "gates": 4,
+      "usableGeometryGates": 4,
+      "reviewedApproaches": [],
+      "directionalSlots": [
+        {
+          "slot": "NB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "NB_EXIT",
+          "status": "UNRESOLVED_ROLE_OR_APPLICABILITY"
+        },
+        {
+          "slot": "SB_ENTRY",
+          "status": "UNRESOLVED_ROLE_OR_APPLICABILITY"
+        },
+        {
+          "slot": "SB_EXIT",
+          "status": "UNRESOLVED_ROLE_OR_APPLICABILITY"
+        }
+      ],
+      "gaps": [
+        "Physical entry/exit completeness and maintenance not established"
+      ],
+      "sourceAttributeCounts": {
+        "ramp": 1,
+        "bound": 1,
+        "seg_type": 1
+      },
+      "availableSourceSegments": 1,
+      "unavailableSourceSegments": []
+    },
+    {
+      "site": "nlex_lingunan",
+      "name": "Lingunan Exit",
+      "sourceSegments": 2,
+      "terminalApproaches": 2,
+      "gates": 4,
+      "usableGeometryGates": 4,
+      "reviewedApproaches": [],
+      "directionalSlots": [
+        {
+          "slot": "NB_ENTRY",
+          "status": "UNRESOLVED_ROLE_OR_APPLICABILITY"
+        },
+        {
+          "slot": "NB_EXIT",
+          "status": "UNRESOLVED_ROLE_OR_APPLICABILITY"
+        },
+        {
+          "slot": "SB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        }
+      ],
+      "gaps": [
+        "Physical entry/exit completeness and maintenance not established"
+      ],
+      "sourceAttributeCounts": {
+        "ramp": 2,
+        "bound": 2,
+        "seg_type": 2
+      },
+      "availableSourceSegments": 2,
+      "unavailableSourceSegments": []
+    },
+    {
+      "site": "nlex_marilao",
+      "name": "Marilao Interchange",
+      "sourceSegments": 23,
+      "terminalApproaches": 15,
+      "gates": 17,
+      "usableGeometryGates": 17,
+      "reviewedApproaches": [
+        {
+          "id": "nlex_marilao_nb_entry",
+          "bound": "NB",
+          "transition": "ENTRY",
+          "source": "nlex_marilao_167",
+          "status": "REVIEW",
+          "confidence": "MEDIUM"
+        },
+        {
+          "id": "nlex_marilao_nb_exit",
+          "bound": "NB",
+          "transition": "EXIT",
+          "source": "nlex_marilao_036",
+          "status": "REVIEW",
+          "confidence": "MEDIUM"
+        },
+        {
+          "id": "nlex_marilao_sb_entry",
+          "bound": "SB",
+          "transition": "ENTRY",
+          "source": "nlex_marilao_687",
+          "status": "REVIEW",
+          "confidence": "MEDIUM"
+        }
+      ],
+      "directionalSlots": [
+        {
+          "slot": "NB_ENTRY",
+          "status": "REVIEWED_SOURCE_MAPPING_NOT_APPROVAL"
+        },
+        {
+          "slot": "NB_EXIT",
+          "status": "REVIEWED_SOURCE_MAPPING_NOT_APPROVAL"
+        },
+        {
+          "slot": "SB_ENTRY",
+          "status": "REVIEWED_SOURCE_MAPPING_NOT_APPROVAL"
+        },
+        {
+          "slot": "SB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        }
+      ],
+      "gaps": [
+        "Physical entry/exit completeness and maintenance not established"
+      ],
+      "sourceAttributeCounts": {
+        "ramp": 20,
+        "bound": 20,
+        "seg_type": 23
+      },
+      "availableSourceSegments": 23,
+      "unavailableSourceSegments": []
+    },
+    {
+      "site": "nlex_meycauayan",
+      "name": "Meycauayan Interchange",
+      "sourceSegments": 33,
+      "terminalApproaches": 15,
+      "gates": 17,
+      "usableGeometryGates": 12,
+      "reviewedApproaches": [
+        {
+          "id": "nlex_meycauayan_nb_entry",
+          "bound": "NB",
+          "transition": "ENTRY",
+          "source": "nlex_meycauayan_597",
+          "status": "REVIEW",
+          "confidence": "MEDIUM"
+        },
+        {
+          "id": "nlex_meycauayan_nb_exit",
+          "bound": "NB",
+          "transition": "EXIT",
+          "source": "nlex_meycauayan_014",
+          "status": "REVIEW",
+          "confidence": "MEDIUM"
+        },
+        {
+          "id": "nlex_meycauayan_sb_entry",
+          "bound": "SB",
+          "transition": "ENTRY",
+          "source": "nlex_meycauayan_788",
+          "status": "REVIEW",
+          "confidence": "MEDIUM"
+        }
+      ],
+      "directionalSlots": [
+        {
+          "slot": "NB_ENTRY",
+          "status": "REVIEWED_SOURCE_MAPPING_NOT_APPROVAL"
+        },
+        {
+          "slot": "NB_EXIT",
+          "status": "REVIEWED_SOURCE_MAPPING_NOT_APPROVAL"
+        },
+        {
+          "slot": "SB_ENTRY",
+          "status": "REVIEWED_SOURCE_MAPPING_NOT_APPROVAL"
+        },
+        {
+          "slot": "SB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        }
+      ],
+      "gaps": [
+        "Physical entry/exit completeness and maintenance not established",
+        "USER_REMOVED_GEOMETRY: nlex_meycauayan_597;nlex_meycauayan_788"
+      ],
+      "sourceAttributeCounts": {
+        "ramp": 32,
+        "bound": 32,
+        "seg_type": 33
+      },
+      "availableSourceSegments": 31,
+      "unavailableSourceSegments": [
+        "nlex_meycauayan_597",
+        "nlex_meycauayan_788"
+      ]
+    },
+    {
+      "site": "nlex_paso_de_blas_valenzuela",
+      "name": "Paso de Blas (Valenzuela) Interchange",
+      "sourceSegments": 17,
+      "terminalApproaches": 10,
+      "gates": 12,
+      "usableGeometryGates": 11,
+      "reviewedApproaches": [
+        {
+          "id": "nlex_paso_de_blas_valenzuela_nb_entry",
+          "bound": "NB",
+          "transition": "ENTRY",
+          "source": "nlex_paso_de_blas_valenzuela_165",
+          "status": "REVIEW",
+          "confidence": "MEDIUM"
+        },
+        {
+          "id": "nlex_paso_de_blas_valenzuela_nb_exit",
+          "bound": "NB",
+          "transition": "EXIT",
+          "source": "nlex_paso_de_blas_valenzuela_070",
+          "status": "REVIEW",
+          "confidence": "MEDIUM"
+        },
+        {
+          "id": "nlex_paso_de_blas_valenzuela_sb_entry",
+          "bound": "SB",
+          "transition": "ENTRY",
+          "source": "nlex_paso_de_blas_valenzuela_616",
+          "status": "REVIEW",
+          "confidence": "MEDIUM"
+        },
+        {
+          "id": "nlex_paso_de_blas_valenzuela_sb_exit",
+          "bound": "SB",
+          "transition": "EXIT",
+          "source": "nlex_paso_de_blas_valenzuela_067",
+          "status": "REVIEW",
+          "confidence": "MEDIUM"
+        }
+      ],
+      "directionalSlots": [
+        {
+          "slot": "NB_ENTRY",
+          "status": "REVIEWED_SOURCE_MAPPING_NOT_APPROVAL"
+        },
+        {
+          "slot": "NB_EXIT",
+          "status": "REVIEWED_SOURCE_MAPPING_NOT_APPROVAL"
+        },
+        {
+          "slot": "SB_ENTRY",
+          "status": "REVIEWED_SOURCE_MAPPING_NOT_APPROVAL"
+        },
+        {
+          "slot": "SB_EXIT",
+          "status": "REVIEWED_SOURCE_MAPPING_NOT_APPROVAL"
+        }
+      ],
+      "gaps": [
+        "Physical entry/exit completeness and maintenance not established",
+        "USER_REMOVED_GEOMETRY: nlex_paso_de_blas_valenzuela_068"
+      ],
+      "sourceAttributeCounts": {
+        "ramp": 16,
+        "bound": 16,
+        "seg_type": 17
+      },
+      "availableSourceSegments": 16,
+      "unavailableSourceSegments": [
+        "nlex_paso_de_blas_valenzuela_068"
+      ]
+    },
+    {
+      "site": "nlex_philippine_arena",
+      "name": "Philippine Arena Interchange",
+      "sourceSegments": 12,
+      "terminalApproaches": 6,
+      "gates": 8,
+      "usableGeometryGates": 8,
+      "reviewedApproaches": [],
+      "directionalSlots": [
+        {
+          "slot": "NB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "NB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        }
+      ],
+      "gaps": [
+        "Physical entry/exit completeness and maintenance not established"
+      ],
+      "sourceAttributeCounts": {
+        "ramp": 12,
+        "bound": 12,
+        "seg_type": 12
+      },
+      "availableSourceSegments": 12,
+      "unavailableSourceSegments": []
+    },
+    {
+      "site": "nlex_pulilan",
+      "name": "Pulilan Interchange",
+      "sourceSegments": 35,
+      "terminalApproaches": 10,
+      "gates": 12,
+      "usableGeometryGates": 8,
+      "reviewedApproaches": [],
+      "directionalSlots": [
+        {
+          "slot": "NB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "NB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        }
+      ],
+      "gaps": [
+        "Physical entry/exit completeness and maintenance not established",
+        "USER_REMOVED_GEOMETRY: nlex_pulilan_021"
+      ],
+      "sourceAttributeCounts": {
+        "ramp": 34,
+        "bound": 34,
+        "seg_type": 35
+      },
+      "availableSourceSegments": 34,
+      "unavailableSourceSegments": [
+        "nlex_pulilan_021"
+      ]
+    },
+    {
+      "site": "nlex_san_fernando",
+      "name": "San Fernando Interchange",
+      "sourceSegments": 49,
+      "terminalApproaches": 15,
+      "gates": 17,
+      "usableGeometryGates": 16,
+      "reviewedApproaches": [],
+      "directionalSlots": [
+        {
+          "slot": "NB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "NB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        }
+      ],
+      "gaps": [
+        "Physical entry/exit completeness and maintenance not established"
+      ],
+      "sourceAttributeCounts": {
+        "ramp": 48,
+        "bound": 48,
+        "seg_type": 49
+      },
+      "availableSourceSegments": 49,
+      "unavailableSourceSegments": []
+    },
+    {
+      "site": "nlex_san_simon",
+      "name": "San Simon Interchange",
+      "sourceSegments": 27,
+      "terminalApproaches": 9,
+      "gates": 11,
+      "usableGeometryGates": 11,
+      "reviewedApproaches": [],
+      "directionalSlots": [
+        {
+          "slot": "NB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "NB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        }
+      ],
+      "gaps": [
+        "Physical entry/exit completeness and maintenance not established"
+      ],
+      "sourceAttributeCounts": {
+        "ramp": 26,
+        "bound": 26,
+        "seg_type": 27
+      },
+      "availableSourceSegments": 27,
+      "unavailableSourceSegments": []
+    },
+    {
+      "site": "nlex_santa_rita",
+      "name": "Santa Rita Interchange",
+      "sourceSegments": 43,
+      "terminalApproaches": 13,
+      "gates": 15,
+      "usableGeometryGates": 15,
+      "reviewedApproaches": [],
+      "directionalSlots": [
+        {
+          "slot": "NB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "NB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        }
+      ],
+      "gaps": [
+        "Physical entry/exit completeness and maintenance not established"
+      ],
+      "sourceAttributeCounts": {
+        "ramp": 42,
+        "bound": 42,
+        "seg_type": 43
+      },
+      "availableSourceSegments": 43,
+      "unavailableSourceSegments": []
+    },
+    {
+      "site": "nlex_sctex_spur_nle",
+      "name": "SCTEX Spur (NLE) Interchange",
+      "sourceSegments": 2,
+      "terminalApproaches": 4,
+      "gates": 6,
+      "usableGeometryGates": 5,
+      "reviewedApproaches": [],
+      "directionalSlots": [
+        {
+          "slot": "NB_ENTRY",
+          "status": "UNRESOLVED_ROLE_OR_APPLICABILITY"
+        },
+        {
+          "slot": "NB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_EXIT",
+          "status": "UNRESOLVED_ROLE_OR_APPLICABILITY"
+        }
+      ],
+      "gaps": [
+        "Physical entry/exit completeness and maintenance not established"
+      ],
+      "sourceAttributeCounts": {
+        "ramp": 2,
+        "bound": 2,
+        "seg_type": 2
+      },
+      "availableSourceSegments": 2,
+      "unavailableSourceSegments": []
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "name": "Sindalan/Mexico Interchange",
+      "sourceSegments": 36,
+      "terminalApproaches": 10,
+      "gates": 12,
+      "usableGeometryGates": 11,
+      "reviewedApproaches": [],
+      "directionalSlots": [
+        {
+          "slot": "NB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "NB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        }
+      ],
+      "gaps": [
+        "Physical entry/exit completeness and maintenance not established"
+      ],
+      "sourceAttributeCounts": {
+        "ramp": 7,
+        "bound": 7,
+        "seg_type": 36
+      },
+      "availableSourceSegments": 36,
+      "unavailableSourceSegments": []
+    },
+    {
+      "site": "nlex_sta_ines",
+      "name": "Sta. Ines Interchange",
+      "sourceSegments": 9,
+      "terminalApproaches": 7,
+      "gates": 8,
+      "usableGeometryGates": 8,
+      "reviewedApproaches": [],
+      "directionalSlots": [
+        {
+          "slot": "NB_ENTRY",
+          "status": "UNRESOLVED_ROLE_OR_APPLICABILITY"
+        },
+        {
+          "slot": "NB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_EXIT",
+          "status": "UNRESOLVED_ROLE_OR_APPLICABILITY"
+        }
+      ],
+      "gaps": [
+        "Physical entry/exit completeness and maintenance not established"
+      ],
+      "sourceAttributeCounts": {
+        "ramp": 5,
+        "bound": 5,
+        "seg_type": 9
+      },
+      "availableSourceSegments": 9,
+      "unavailableSourceSegments": []
+    },
+    {
+      "site": "nlex_tambubong",
+      "name": "Tambubong Exit",
+      "sourceSegments": 10,
+      "terminalApproaches": 6,
+      "gates": 6,
+      "usableGeometryGates": 6,
+      "reviewedApproaches": [
+        {
+          "id": "nlex_tambubong_nb_entry",
+          "bound": "NB",
+          "transition": "ENTRY",
+          "source": "nlex_tambubong_604",
+          "status": "REVIEW",
+          "confidence": "HIGH"
+        },
+        {
+          "id": "nlex_tambubong_sb_entry",
+          "bound": "SB",
+          "transition": "ENTRY",
+          "source": "nlex_tambubong_605",
+          "status": "REVIEW",
+          "confidence": "HIGH"
+        },
+        {
+          "id": "nlex_tambubong_nb_exit",
+          "bound": "NB",
+          "transition": "EXIT",
+          "source": "nlex_tambubong_603",
+          "status": "REVIEW",
+          "confidence": "HIGH"
+        }
+      ],
+      "directionalSlots": [
+        {
+          "slot": "NB_ENTRY",
+          "status": "REVIEWED_SOURCE_MAPPING_NOT_APPROVAL"
+        },
+        {
+          "slot": "NB_EXIT",
+          "status": "REVIEWED_SOURCE_MAPPING_NOT_APPROVAL"
+        },
+        {
+          "slot": "SB_ENTRY",
+          "status": "REVIEWED_SOURCE_MAPPING_NOT_APPROVAL"
+        },
+        {
+          "slot": "SB_EXIT",
+          "status": "UNRESOLVED_ROLE_OR_APPLICABILITY"
+        }
+      ],
+      "gaps": [
+        "Physical entry/exit completeness and maintenance not established"
+      ],
+      "sourceAttributeCounts": {
+        "ramp": 10,
+        "bound": 10,
+        "seg_type": 10
+      },
+      "availableSourceSegments": 10,
+      "unavailableSourceSegments": []
+    }
+  ],
+  "gaps": [
+    {
+      "site": "nlex_angeles",
+      "source": "nlex_angeles_008",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_angeles",
+      "source": "nlex_angeles_047",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_angeles",
+      "source": "nlex_angeles_065",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_angeles",
+      "source": "nlex_angeles_066",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_angeles",
+      "source": "nlex_angeles_075",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_angeles",
+      "source": "nlex_angeles_151",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_angeles",
+      "source": "nlex_angeles_619",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_angeles",
+      "source": "nlex_angeles_621",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_angeles",
+      "source": "nlex_angeles_623",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_angeles",
+      "source": "nlex_angeles_624",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_angeles",
+      "source": "nlex_angeles_625",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_angeles",
+      "source": "nlex_angeles_626",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_angeles",
+      "source": "nlex_angeles_627",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_angeles",
+      "source": "nlex_angeles_712",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_angeles",
+      "source": "nlex_angeles_713",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_angeles",
+      "source": "nlex_angeles_714",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_angeles",
+      "source": "nlex_angeles_715",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_angeles",
+      "source": "nlex_angeles_716",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_angeles",
+      "source": "nlex_angeles_927",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_angeles",
+      "source": "nlex_angeles_928",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_169",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_185",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_186",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_208",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_209",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_243",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_662",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_663",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_664",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_665",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_689",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_690",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_691",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_797",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_799",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_800",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_801",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_803",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_804",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_805",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_813",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_814",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_817",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_burol_tabang_spur_overpass",
+      "source": "PATH:SB-987966589",
+      "reason": "DIRECTED_DEPARTURE_INSUFFICIENT_BEFORE_OR_AFTER_SOURCE"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_382",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_383",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_384",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_385",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_386",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_387",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_389",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_390",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_391",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_392",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_393",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_395",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_397",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_401",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_671",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_672",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_673",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_674",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_675",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_676",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_072",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_077",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_079",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_080",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_084",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_085",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_140",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_141",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_170",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_171",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_172",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_173",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_174",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_175",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_176",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_178",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_179",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_246",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_248",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_793",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_794",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_795",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_854",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_855",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_857",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_marilao",
+      "source": "nlex_marilao_004",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_marilao",
+      "source": "nlex_marilao_156",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_marilao",
+      "source": "nlex_marilao_168",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_marilao",
+      "source": "nlex_marilao_672",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_marilao",
+      "source": "nlex_marilao_673",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_marilao",
+      "source": "nlex_marilao_675",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_marilao",
+      "source": "nlex_marilao_688",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_marilao",
+      "source": "nlex_marilao_782",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_marilao",
+      "source": "nlex_marilao_783",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_marilao",
+      "source": "nlex_marilao_821",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_marilao",
+      "source": "nlex_marilao_822",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_004",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_011",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_012",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_225",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_577",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_578",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_579",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_580",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_585",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_586",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_587",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_588",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_589",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_590",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_595",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_596",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_599",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_600",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_913",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_paso_de_blas_valenzuela",
+      "source": "nlex_paso_de_blas_valenzuela_069",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_paso_de_blas_valenzuela",
+      "source": "nlex_paso_de_blas_valenzuela_070",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_paso_de_blas_valenzuela",
+      "source": "nlex_paso_de_blas_valenzuela_681",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_paso_de_blas_valenzuela",
+      "source": "nlex_paso_de_blas_valenzuela_682",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_paso_de_blas_valenzuela",
+      "source": "nlex_paso_de_blas_valenzuela_683",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_paso_de_blas_valenzuela",
+      "source": "nlex_paso_de_blas_valenzuela_684",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_paso_de_blas_valenzuela",
+      "source": "nlex_paso_de_blas_valenzuela_791",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_paso_de_blas_valenzuela",
+      "source": "nlex_paso_de_blas_valenzuela_792",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_paso_de_blas_valenzuela",
+      "source": "nlex_paso_de_blas_valenzuela_798",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_philippine_arena",
+      "source": "nlex_philippine_arena_181",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_philippine_arena",
+      "source": "nlex_philippine_arena_182",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_philippine_arena",
+      "source": "nlex_philippine_arena_599",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_philippine_arena",
+      "source": "nlex_philippine_arena_601",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_philippine_arena",
+      "source": "nlex_philippine_arena_846",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_philippine_arena",
+      "source": "nlex_philippine_arena_847",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_022",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_024",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_310",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_312",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_313",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_314",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_316",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_317",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_318",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_322",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_323",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_410",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_411",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_412",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_413",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_414",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_415",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_416",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_417",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_418",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_419",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_420",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_422",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_779",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_906",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_907",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_149",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_199",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_206",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_207",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_208",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_209",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_272",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_273",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_278",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_279",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_280",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_531",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_532",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_534",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_535",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_537",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_538",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_540",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_541",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_542",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_543",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_544",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_546",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_547",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_548",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_551",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_552",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_553",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_713",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_714",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_715",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_716",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_717",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_897",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_907",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "PATH:NB-724636313",
+      "reason": "DIRECTED_DEPARTURE_INSUFFICIENT_BEFORE_OR_AFTER_SOURCE"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "PATH:NB-632727337",
+      "reason": "DIRECTED_DEPARTURE_INSUFFICIENT_BEFORE_OR_AFTER_SOURCE"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_211",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_739",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_740",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_741",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_742",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_743",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_744",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_745",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_746",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_747",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_748",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_750",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_805",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_806",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_807",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_808",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_809",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_810",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_816",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_043",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_062",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_215",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_216",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_217",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_218",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_556",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_557",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_558",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_559",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_560",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_561",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_562",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_563",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_564",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_565",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_566",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_567",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_568",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_569",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_570",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_571",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_572",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_573",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_825",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_826",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_827",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_828",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_829",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_830",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_831",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_832",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "PATH:NB-726021675",
+      "reason": "DIRECTED_DEPARTURE_INSUFFICIENT_BEFORE_OR_AFTER_SOURCE"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "PATH:NB-331332630",
+      "reason": "DIRECTED_DEPARTURE_INSUFFICIENT_BEFORE_OR_AFTER_SOURCE"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_059",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_098",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_103",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_184",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_506",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_507",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_508",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_510",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_511",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_512",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_513",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_515",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_516",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_518",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_519",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_520",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_521",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_522",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_523",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_524",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_525",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_526",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_527",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_898",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_899",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_900",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_901",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sta_ines",
+      "source": "nlex_sta_ines_048",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sta_ines",
+      "source": "nlex_sta_ines_916",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_sta_ines",
+      "source": "nlex_sta_ines_937",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_tambubong",
+      "source": "nlex_tambubong_606",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_tambubong",
+      "source": "nlex_tambubong_838",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_tambubong",
+      "source": "nlex_tambubong_839",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_tambubong",
+      "source": "nlex_tambubong_840",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_tambubong",
+      "source": "nlex_tambubong_861",
+      "reason": "INTERNAL_OR_CLOSED_SEGMENT_NO_TERMINAL_BOUNDARY"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_598",
+      "gate": "NSG:nlex_meycauayan_598:A",
+      "reason": "INSUFFICIENT_SOURCE_APPROACH_LENGTH"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_601",
+      "gate": "NSG:nlex_meycauayan_601:B",
+      "reason": "INSUFFICIENT_SOURCE_APPROACH_LENGTH"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_653",
+      "gate": "NSG:nlex_meycauayan_653:A",
+      "reason": "INSUFFICIENT_SOURCE_APPROACH_LENGTH"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_319",
+      "gate": "NSG:nlex_pulilan_319:A",
+      "reason": "INSUFFICIENT_SOURCE_APPROACH_LENGTH"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_320",
+      "gate": "NSG:nlex_pulilan_320:A",
+      "reason": "INSUFFICIENT_SOURCE_APPROACH_LENGTH"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_321",
+      "gate": "NSG:nlex_pulilan_321:B",
+      "reason": "INSUFFICIENT_SOURCE_APPROACH_LENGTH"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_549",
+      "gate": "NSG:nlex_san_fernando_549:B",
+      "reason": "INSUFFICIENT_SOURCE_APPROACH_LENGTH"
+    },
+    {
+      "site": "nlex_sctex_spur_nle",
+      "source": "nlex_sctex_spur_nle_001",
+      "gate": "NSG:nlex_sctex_spur_nle_001:A",
+      "reason": "OPPOSES_EXPLICIT_SOURCE_TRAVEL"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_528",
+      "gate": "NSG:nlex_sindalan_mexico_528:B",
+      "reason": "INSUFFICIENT_SOURCE_APPROACH_LENGTH"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_021",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_paso_de_blas_valenzuela",
+      "source": "nlex_paso_de_blas_valenzuela_068",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_169",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_303",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_388",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_396",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_597",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_788",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_815",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_816",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    }
+  ],
+  "maintenanceNotes": [
+    {
+      "site": "nlex_balintawak",
+      "approach": "SHORT_BLUE_NB_RAMP",
+      "maintenance": "USER_CONFIRMED_NLEX_MAINTAINED",
+      "mapping": "NO_SEPARATE_VERIFIED_FEATURE"
+    },
+    {
+      "site": "nlex_balintawak",
+      "approach": "LONG_RED_SERVICE_ROAD",
+      "maintenance": "USER_CONFIRMED_LGU_OUTSIDE_NLEX_MAINTENANCE",
+      "mapping": "EASTERN_004_POSSIBLE_NOT_CONFIRMED"
+    }
+  ],
+  "additionalHeadingInventory": {
+    "source": "Column Heading NLEX ICs.gpkg",
+    "features": 946,
+    "unassignedFeatures": 942,
+    "unassignedNamedLabels": [
+      "Subic-Tipo Expressway",
+      "DAU Interchange"
+    ],
+    "extraIdentifiedSites": [],
+    "limitation": "Unassigned raw features are not identified additional interchange approaches; site/role/geometry attribution remains unsupported."
+  },
+  "geometryRevision": {
+    "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges",
+    "sourceFileSHA256": "911c1f3addb477826fd444a5dc9b5702cf39463c160df7002a039c7567b2c1af",
+    "sourceWALSHA256": "f4f5de4cc23a30650d6842301b3002e5df9b6aab715116b291b81cda8a6bf2cb",
+    "snapshotSHA256": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+    "date": "2026-10-20",
+    "scope": "All saved manual edits; ten NULL geometries intentionally excluded per user confirmation",
+    "sourceRecords": 448,
+    "availableGeometry": 438,
+    "removedGeometry": 10,
+    "coordinatePolicy": "Exact EPSG:4326 source doubles; no rounding, simplification or inferred connections",
+    "provisional": true,
+    "engineeringApproval": false
+  },
+  "sourceAttributeSummary": {
+    "ramp": {
+      "<NULL>": 110,
+      "NB Exit Ramp": 97,
+      "SB Entry Ramp": 102,
+      "NB Entry Ramp": 73,
+      "SB Exit Ramp": 66
+    },
+    "seg_type": {
+      "connector_road": 93,
+      "exit_ramp": 163,
+      "entry_ramp": 175,
+      "auxiliary_lane": 17
+    },
+    "bound": {
+      "<NULL>": 93,
+      "NB": 173,
+      "SB": 171,
+      "WB": 4,
+      "EB": 7
+    },
+    "travel": {
+      "<NULL>": 447,
+      "forward": 1
+    }
+  },
+  "attributeUse": {
+    "NB_SB": "Supported gate bound metadata; not a physical carriageway or travel-order approval",
+    "entry_ramp_exit_ramp": "Mapped to existing gate transition ENTRY/EXIT; no occupancy-entry classifier added",
+    "connector_road_auxiliary_lane": "Retained source context only, never promoted to entry/exit or maintenance ownership",
+    "EB_WB": "Preserved exactly in source attributes; unsupported gate direction remains UNKNOWN",
+    "travel": "Only existing explicit forward restriction used; missing travel is not inferred from bound"
+  },
+  "availableSourceSegments": 438,
+  "unavailableSourceSegments": [
+    {
+      "id": "nlex_pulilan_021",
+      "site": "nlex_pulilan",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_paso_de_blas_valenzuela_068",
+      "site": "nlex_paso_de_blas_valenzuela",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_bocaue_169",
+      "site": "nlex_bocaue",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_harbor_link_smart_connect_303",
+      "site": "nlex_harbor_link_smart_connect",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_dau_388",
+      "site": "nlex_dau",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_dau_396",
+      "site": "nlex_dau",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_meycauayan_597",
+      "site": "nlex_meycauayan",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_meycauayan_788",
+      "site": "nlex_meycauayan",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_bocaue_815",
+      "site": "nlex_bocaue",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_bocaue_816",
+      "site": "nlex_bocaue",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    }
+  ],
+  "gateUpdate": {
+    "movedEndpoints": [
+      "NSG:nlex_angeles_040:A",
+      "NSG:nlex_angeles_048:A",
+      "NSG:nlex_angeles_064:B",
+      "NSG:nlex_angeles_152:B",
+      "NSG:nlex_balagtas_plaridel_by_pass_006:B",
+      "NSG:nlex_balagtas_plaridel_by_pass_005:B",
+      "NSG:nlex_balagtas_plaridel_by_pass_636:A",
+      "NSG:nlex_bocaue_007:A",
+      "NSG:nlex_burol_tabang_spur_overpass_007:B",
+      "NSG:nlex_dau_394:A",
+      "NSG:nlex_dau_940:A",
+      "NSG:nlex_harbor_link_smart_connect_078:B",
+      "NSG:nlex_harbor_link_smart_connect_195:B",
+      "NSG:nlex_harbor_link_smart_connect_247:B",
+      "NSG:nlex_lawang_bato_097:A",
+      "NSG:nlex_lingunan_240:A",
+      "NSG:nlex_lingunan_894:B",
+      "NSG:nlex_marilao_167:B",
+      "NSG:nlex_marilao_687:B",
+      "NSG:nlex_meycauayan_581:A",
+      "NSG:nlex_paso_de_blas_valenzuela_616:B",
+      "NSG:nlex_philippine_arena_188:B",
+      "NSG:nlex_philippine_arena_600:B",
+      "NSG:nlex_philippine_arena_608:A",
+      "NSG:nlex_pulilan_023:A",
+      "NSG:nlex_pulilan_311:B",
+      "NSG:nlex_pulilan_315:B",
+      "NSG:nlex_san_fernando_040:A",
+      "NSG:nlex_san_fernando_041:A",
+      "NSG:nlex_san_fernando_052:B",
+      "NSG:nlex_san_fernando_533:B",
+      "NSG:nlex_san_simon_047:B",
+      "NSG:nlex_san_simon_048:A",
+      "NSG:nlex_san_simon_058:A",
+      "NSG:nlex_san_simon_749:B",
+      "NSG:nlex_santa_rita_050:A",
+      "NSG:nlex_santa_rita_051:B",
+      "NSG:nlex_santa_rita_221:B",
+      "NSG:nlex_santa_rita_222:A",
+      "NSG:nlex_sctex_spur_nle_002:B",
+      "NSG:nlex_sctex_spur_nle_001:A",
+      "NSG:nlex_sindalan_mexico_064:B",
+      "NSG:nlex_sindalan_mexico_104:A",
+      "NSG:nlex_sindalan_mexico_509:A",
+      "NSG:nlex_tambubong_603:A",
+      "NSG:nlex_tambubong_604:B"
+    ],
+    "disabledMissingSource": [
+      "NSG:nlex_bocaue_815:B",
+      "NSG:nlex_bocaue_816:B",
+      "NSG:nlex_dau_388:B",
+      "NSG:nlex_dau_396:B",
+      "NSG:nlex_harbor_link_smart_connect_303:B",
+      "NSG:nlex_meycauayan_597:B",
+      "NSG:nlex_meycauayan_788:B",
+      "NSG:nlex_paso_de_blas_valenzuela_068:B",
+      "NSG:nlex_pulilan_021:A"
+    ],
+    "extraWithheld": []
+  }
+}

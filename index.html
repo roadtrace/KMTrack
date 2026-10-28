@@ -4603,6 +4603,8 @@
   <script src="./photo-viewer.js"></script>
   <script src="./legacy-matcher.js"></script>
   <script src="./location-resolver.js"></script>
+  <script src="./stationing-review-controller.js"></script>
+  <script src="./capture-location.js"></script>
   <script>
     class GeoKalmanFilter {
       constructor() {
@@ -4629,13 +4631,15 @@
       }
     }
     const gpsFilter = new GeoKalmanFilter();
-    const locationResolver = SPOTITLocation.createResolver();
+    const captureLocation = SPOTITCaptureLocation.create();
+    let captureLocationReady = false;
 
     let currentPos = null; // {lat, lon, acc, timestamp, fresh}; coordinates are Kalman-smoothed
     let currentResolvedLocation = null;
     let gpsFreshnessTimer = null;
     let gpsPermissionDenied = false;
     const GPS_FRESH_MS = 12000;
+    let stationingReview = null; // Shared network engine for readout, capture and camera snapshots.
     let calibData = [];    // {e, b, k, lat, lon} — loaded from the NLEX network dataset
     let entries = [];      // {id, type, timestamp, lat, lon, km, expressway, bound, lane, photoId, photoFilename, photoTimestamp}
     let inspectionApi = null;
@@ -4647,7 +4651,8 @@
     let teamRecords = null, teamPhotoViewer = null, logRecordScope = 'my';
     let myRenderPending = false, lastMyCloudRender = '';
     let expresswayBounds = {}; // { "NLEX": ["NB","SB"], "C3-R10 RAMP": ["EB","WB"], ... }
-    let userBound = null;      // manually selected direction, e.g. "NB"
+    let userBound = null;      // selected direction, e.g. "NB"
+    let boundManuallySelected = false;
 
     // ---------- Photo storage (IndexedDB) ----------
     // Photos are stored separately from the localStorage entry log — a JPEG per
@@ -5427,12 +5432,17 @@
     // Initialize before cache-hit dataset loading; callbacks retain live bindings.
     const GRID_SIZE = SPOTITLegacyMatcher.GRID_SIZE;
     const legacyMatcher = SPOTITLegacyMatcher.createMatcher(
-      () => calibData, () => locationResolver.state().confirmedCorridor
+      () => calibData, () => currentResolvedLocation?.confirmedCorridor
     );
 
     function gridKey(lat, lon) { return SPOTITLegacyMatcher.gridKey(lat, lon); }
     function buildSpatialIndex() {
-      return legacyMatcher.buildSpatialIndex();
+      const result = legacyMatcher.buildSpatialIndex();
+      try {
+        if (stationingReview?.enabled()) stationingReview.referenceChanged();
+        else if (captureLocationReady && !stationingReview && stationingReviewAllowed() && calibData.length) stationingReviewController().enable();
+      } catch (_) { /* review cannot affect legacy index */ }
+      return result;
     }
 
     async function loadCalibrationDataset(forceNetwork) {
@@ -6531,23 +6541,11 @@
     }
 
     function resolvedLocationCanSave() {
-      if (!currentPos || !currentPos.fresh || !currentResolvedLocation?.saveAllowed) return false;
-      const result = currentResolvedLocation.result;
-      return !!result && (isInterchangeLocationMode() || result.distance <= offNetworkThresholdKm(currentPos.acc));
+      return !!resolvedEntrySnapshot();
     }
 
     function resolvedEntrySnapshot() {
-      if (!resolvedLocationCanSave()) return null;
-      const result = currentResolvedLocation.result;
-      const interchangeMode = isInterchangeLocationMode();
-      return {
-        lat: currentPos.lat, lon: currentPos.lon,
-        km: interchangeMode ? null : result.km,
-        expressway: result.expressway,
-        bound: userBound || '',
-        interchange: interchangeMode ? currentResolvedLocation.interchange.name : '',
-        interchangeSegment: interchangeMode ? interchangeSegmentLabel() : ''
-      };
+      return captureLocation.snapshot({position:currentPos,now:Date.now(),bound:userBound || ''});
     }
 
     function setGpsCaptureReady(ready) {
@@ -6557,10 +6555,8 @@
 
     function resolveFreshLocation(speedMs) {
       if (!currentPos) return null;
-      currentResolvedLocation = locationResolver.resolve({
-        lat: currentPos.lat, lon: currentPos.lon, accuracy: currentPos.acc, timestamp: currentPos.timestamp,
-        speed: speedMs, candidates: computeCorridorCandidates(currentPos.lat, currentPos.lon),
-        interchange: nearestRamp(currentPos.lat, currentPos.lon, locationResolver.state().interchange?.siteId)
+      currentResolvedLocation = captureLocation.beginFix({
+        lat:currentPos.rawLat,lon:currentPos.rawLon,accuracy:currentPos.acc,timestamp:currentPos.timestamp
       });
       setGpsCaptureReady(resolvedLocationCanSave());
       return currentResolvedLocation;
@@ -6568,11 +6564,12 @@
 
     function markGpsUncertain(message) {
       if (currentPos) currentPos.fresh = false;
-      currentResolvedLocation = locationResolver.markStale(message);
+      currentResolvedLocation = captureLocation.invalidate(message);
       gpsStatus.textContent = message;
       gpsStatus.className = 'status warn';
       setGpsCaptureReady(false);
       updateReadout();
+      try { if (stationingReview?.enabled()) stationingReview.invalidate(); } catch (_) { /* diagnostic isolation */ }
     }
 
     function formatKmStation(km) {
@@ -6680,8 +6677,9 @@
         tagEl.textContent = `${result.expressway} · ${displayBound}`;
         tagEl.classList.remove('faroff');
       }
-      if (currentPos.fresh && resolution.confirmed && !isOffMappedNetwork) {
-        detectBoundFromTrend(result.expressway, result.km);
+      if (currentPos.fresh && resolution.confirmed && !interchangeMode && result.bound && !userBound && !boundManuallySelected) {
+        userBound = result.bound;
+        saveBound();
       }
       updateBridgeReadout(currentPos.lat, currentPos.lon, result, isOffMappedNetwork && !interchangeMode);
       renderBoundToggle(result.expressway);
@@ -6753,6 +6751,60 @@
       'SFEX': { increasing: 'SB', decreasing: 'NB' }
     };
 
+    // One network calculation supplies the main readout and every new capture.
+    function stationingReviewAllowed() {
+      return typeof Worker === 'function' && typeof SPOTITStationingReviewController !== 'undefined';
+    }
+    function renderStationingReview(result) {
+      const resolved = captureLocation.accept(result,result.reviewFixTimestamp,Date.now());
+      if (!resolved) return;
+      currentResolvedLocation = resolved;
+      const movementBound = resolved.result?.bound;
+      if (movementBound && !resolved.interchangeLocked && !boundManuallySelected) {
+        userBound = movementBound;
+        trendEstablished = true;
+        saveBound();
+      }
+      setGpsCaptureReady(resolvedLocationCanSave());
+      gpsStatus.textContent = resolved.saveAllowed ? 'GPS locked - updating live' : resolved.reason;
+      gpsStatus.className = resolved.saveAllowed ? 'status ok' : 'status warn';
+      updateReadout();
+    }
+    function stationingReviewController() {
+      if (!stationingReview) stationingReview = SPOTITStationingReviewController.create({
+        makeWorker: () => new Worker('./stationing-review-worker.js'),
+        getReference: () => ({rows:calibData, conventions:EXPRESSWAY_BOUND_BY_TREND}), now: () => Date.now(),
+        setTimer: (fn,ms) => globalThis.setTimeout(fn,ms), clearTimer: id => globalThis.clearTimeout(id),
+        onResult: renderStationingReview,
+        onReset: () => {
+          currentResolvedLocation = captureLocation.invalidate('Locating road');
+          setGpsCaptureReady(false);
+          if (currentPos) updateReadout();
+        },
+        onStatus: (text,enabled) => {
+          if (!enabled) {
+            currentResolvedLocation = captureLocation.invalidate('Location unavailable');
+            setGpsCaptureReady(false);
+            if (currentPos) updateReadout();
+          }
+        }
+      });
+      return stationingReview;
+    }
+    function queueStationingReview(position) {
+      try {
+        if (!stationingReview?.enabled() || !stationingReviewAllowed()) return;
+        const raw = position.coords;
+        stationingReview.observe({lat:raw.latitude,lon:raw.longitude,accuracy:raw.accuracy,timestamp:position.timestamp,speed:raw.speed,heading:raw.heading},
+          {manualBound:userBound || '',interchange:false});
+      } catch (_) {
+        currentResolvedLocation = captureLocation.invalidate('Location unavailable');
+        setGpsCaptureReady(false);
+      }
+    }
+    captureLocationReady = true;
+    if (stationingReviewAllowed() && calibData.length) stationingReviewController().enable();
+
     let trendLastKm = null;
     let trendLastExpressway = null;
     let trendEstablished = false;
@@ -6818,6 +6870,7 @@
       // ramp with only EB/WB) — don't let it silently attach to this corridor.
       if (options && userBound && !options.includes(userBound)) {
         userBound = null;
+        boundManuallySelected = false;
         saveBound();
       }
       const signature = options.join('|');
@@ -6830,6 +6883,7 @@
           btn.textContent = opt;
           btn.dataset.bound = opt;
           btn.addEventListener('click', () => {
+            boundManuallySelected = true;
             userBound = opt;
             saveBound();
             renderBoundToggle(expressway);
@@ -6856,7 +6910,7 @@
           if (currentPos && fixTimestamp <= currentPos.timestamp) return;
           const speedMs = (typeof pos.coords.speed === 'number' && pos.coords.speed >= 0) ? pos.coords.speed : null;
           const smoothed = gpsFilter.process(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy, pos.timestamp, speedMs);
-          currentPos = { lat: smoothed.lat, lon: smoothed.lon, acc: pos.coords.accuracy, timestamp: fixTimestamp, fresh: true };
+          currentPos = { lat: smoothed.lat, lon: smoothed.lon, rawLat: pos.coords.latitude, rawLon: pos.coords.longitude, acc: pos.coords.accuracy, timestamp: fixTimestamp, fresh: true };
           const resolution = resolveFreshLocation(speedMs);
           gpsStatus.textContent = resolution?.confirmed
             ? (resolution.uncertain ? 'GPS locked — road retained while connection is confirmed' : 'GPS locked — updating live')
@@ -6865,6 +6919,7 @@
           clearTimeout(gpsFreshnessTimer);
           gpsFreshnessTimer = setTimeout(() => markGpsUncertain('GPS signal delayed — holding the last confirmed road'), GPS_FRESH_MS);
           updateReadout();
+          queueStationingReview(pos); // shared network result updates readout and capture together
         },
         (err) => {
           // 1 === PERMISSION_DENIED. The panel needs to tell "not allowed" apart
@@ -7502,6 +7557,17 @@
     }
 
     async function buildStampedPhotoBlob(entry) {
+      if (cameraEditTargetIndex === null) {
+        const snapshot = resolvedEntrySnapshot();
+        if (!snapshot) {
+          cameraErrorEl.textContent = 'Waiting for a fresh location before taking a photo.';
+          cameraErrorEl.classList.add('show');
+          return null;
+        }
+        Object.assign(entry, snapshot);
+        updateCameraOverlay(entry);
+      }
+      entry = {...entry}; // Freeze metadata with the frame, before asynchronous image work.
       if (!cameraStream || !cameraVideo.videoWidth) {
         cameraErrorEl.textContent = 'Camera is not ready yet. Please wait a moment and try again.';
         cameraErrorEl.classList.add('show');
@@ -7534,7 +7600,7 @@
 
       const stamp = captureDate;
       const filename = `SpotIt_${entry.type.replace(/[^a-z0-9]+/gi, '_')}_${stamp.getFullYear()}${pad(stamp.getMonth() + 1)}${pad(stamp.getDate())}_${pad(stamp.getHours())}${pad(stamp.getMinutes())}${pad(stamp.getSeconds())}.jpg`;
-      return { blob, filename, stamp, rawBlob };
+      return { blob, filename, stamp, rawBlob, captureEntry:entry };
     }
 
     function blobToImage(blob) {
@@ -7588,6 +7654,7 @@
       const result = await buildStampedPhotoBlob(entry);
       cameraShutterBtn.disabled = false;
       if (!result) return;
+      Object.assign(entry, result.captureEntry);
       showCaptureReview(result.blob, result.rawBlob, result.filename, result.stamp);
     }
 
@@ -7613,7 +7680,7 @@
         await putPhoto(photoId, result.blob);
         await putPhoto(photoId + ':raw', result.rawBlob);
         entries.push(SPOTITEntry.createEntry({
-          ...cameraDraftEntry,
+          ...result.captureEntry,
           preapproval_review_required: captureNeedsPreapproval(),
           guest_claim_required: authDisplayState?.mode === 'guest',
           timestamp: fullTimestamp(),
