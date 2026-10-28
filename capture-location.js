@@ -8,12 +8,16 @@
   let fix=null,completed=null,output=null;
   const unavailable=reason=>({result:null,confirmed:false,confirmedCorridor:'',uncertain:true,reason,interchange:null,interchangeLocked:false,saveAllowed:false,fresh:false});
   function invalidate(reason='Waiting for location'){
-   completed=null;output=output?{...output,uncertain:true,reason,saveAllowed:false,fresh:false}:unavailable(reason);return output;
+   completed=null;output=output?{...output,pending:false,uncertain:true,reason,saveAllowed:false,fresh:false}:unavailable(reason);return output;
   }
   function beginFix(next){
    if(!next||![next.lat,next.lon,next.accuracy,next.timestamp].every(finite)||Math.abs(next.lat)>90||Math.abs(next.lon)>180||next.accuracy<0){fix=null;return invalidate('Location unavailable');}
    fix={...next};completed=null;
-   output=output?{...output,saveAllowed:false,uncertain:true,reason:'Updating location',fresh:true}:unavailable('Locating road');
+   const age=output?next.timestamp-output.fixTimestamp:Infinity;
+   // Keep the last completed, still-fresh presentation during routine worker
+   // latency. snapshot() remains locked to the new fix until it is processed.
+   const retain=output?.confirmed&&!output.uncertain&&output.fresh&&age>=0&&age<=MAX_AGE;
+   output=retain?{...output,pending:true,saveAllowed:false}:output?{...output,pending:true,saveAllowed:false,uncertain:true,reason:'Updating location',fresh:false}:unavailable('Locating road');
    return output;
   }
   function accept(review,timestamp,now){
@@ -29,7 +33,7 @@
    const interchange=held&&info?.siteId&&info.name?{siteId:info.siteId,name:info.name,segment:info.segment||'Ramp / interchange roadway',segmentId:info.segmentId||''}:null;
    const usable=!!corridor&&(held?!!interchange:finite(km)&&!review.roadAmbiguous&&distance<=Math.max(.05,Math.min(fix.accuracy,40)/1000+.045));
    const result=corridor?{expressway:corridor,km:held?null:km,distance,bound:review.travelDirection?.value||''}:null;
-   output={result,confirmed:usable,confirmedCorridor:corridor||'',uncertain:!usable,reason:usable?'':held?'Locating interchange':'Locating station',interchange,interchangeLocked:!!interchange,saveAllowed:usable,fresh:true,fixTimestamp:timestamp};
+   output={result,confirmed:usable,confirmedCorridor:corridor||'',uncertain:!usable,reason:usable?'':held?'Locating interchange':'Locating station',interchange,interchangeLocked:!!interchange,pending:false,saveAllowed:usable,fresh:true,fixTimestamp:timestamp};
    completed=timestamp;return output;
   }
   function snapshot({position,now,bound=''}){

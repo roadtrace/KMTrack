@@ -1494,6 +1494,11 @@
       pointer-events: none;
     }
 
+    /* A routine worker update must not dim buttons or insert the GPS gate. */
+    #defect-section.gps-updating .defect-category {
+      pointer-events: none;
+    }
+
     #defect-section.gps-pending .defect-gate {
       display: block;
       background: rgba(217, 119, 47, .14);
@@ -6550,7 +6555,13 @@
 
     function setGpsCaptureReady(ready) {
       const section = document.getElementById('defect-section');
-      if (section) section.classList.toggle('gps-pending', !ready);
+      if (!section) return;
+      const resolution = currentResolvedLocation;
+      const age = Date.now() - resolution?.fixTimestamp;
+      const updating = !ready && resolution?.pending === true && resolution.confirmed
+        && !resolution.uncertain && resolution.fresh && currentPos?.fresh && age >= 0 && age <= GPS_FRESH_MS;
+      section.classList.toggle('gps-pending', !ready && !updating);
+      section.classList.toggle('gps-updating', !!updating);
     }
 
     function resolveFreshLocation(speedMs) {

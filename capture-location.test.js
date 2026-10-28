@@ -21,6 +21,13 @@ test('pending, late, stale, failed and mismatched fixes cannot leak a previous l
  assert.equal(m.accept(result(true),10000,11000),null);assert.equal(snapshot(m,{...fix,timestamp:11000},11000),null);
  m.accept(result(),11000,11000);m.invalidate('Worker unavailable');assert.equal(snapshot(m,{...fix,timestamp:11000},11000),null);
 });
+test('ordinary worker updates retain the completed readout without authorizing a pending capture',()=>{
+ const m=Capture.create();m.beginFix(fix);const accepted=m.accept(result(true),10000,10000);
+ const pending=m.beginFix({...fix,timestamp:11000});
+ assert.equal(pending.pending,true);assert.equal(pending.confirmed,accepted.confirmed);assert.equal(pending.uncertain,accepted.uncertain);assert.equal(pending.reason,accepted.reason);assert.deepEqual(pending.interchange,accepted.interchange);
+ assert.equal(pending.saveAllowed,false);assert.equal(snapshot(m,{...fix,timestamp:11000},11000),null);
+ m.invalidate('GPS lost');const unavailable=m.beginFix({...fix,timestamp:12000});assert.equal(unavailable.uncertain,true);assert.equal(unavailable.fresh,false);
+});
 test('ambiguous stations are withheld rather than averaged, and manual direction is preserved',()=>{
  const m=Capture.create();m.beginFix(fix);const ambiguous=result();ambiguous.stationRange.maxKm=13.2;m.accept(ambiguous,10000,10000);assert.equal(snapshot(m),null);
  m.accept(result(),10000,10000);assert.equal(snapshot(m,fix,10000,'NB').bound,'NB');
@@ -28,9 +35,9 @@ test('ambiguous stations are withheld rather than averaged, and manual direction
 });
 function block(start,end){const a=html.indexOf(start),b=html.indexOf(end,a);assert(a>=0&&b>a,start);return html.slice(a,b);}
 function app(){
- const nodes=new Map();const el=id=>{if(!nodes.has(id))nodes.set(id,{textContent:'',dataset:{},classList:{add(){},remove(){},toggle(){}},closest(){return this;}});return nodes.get(id);};
+ const nodes=new Map();const el=id=>{if(!nodes.has(id))nodes.set(id,{textContent:'',dataset:{},classList:{values:new Set(),add(v){this.values.add(v);},remove(v){this.values.delete(v);},toggle(v,on){if(on)this.values.add(v);else this.values.delete(v);},contains(v){return this.values.has(v);}},closest(){return this;}});return nodes.get(id);};
  let clock=10000,observed=[],workerRequests=0,alerts=[];
- const ctx=vm.createContext({Date:{now:()=>clock},document:{getElementById:el},Worker:function(){},SPOTITCaptureLocation:Capture,SPOTITLocation:require('./location-resolver'),SPOTITEntry:require('./entry-model'),SPOTITStationingReviewController:{create:options=>({enable(){workerRequests++;},enabled:()=>true,observe:(...args)=>observed.push(args)})},calibData:[fix],captureLocation:Capture.create(),captureLocationReady:false,currentPos:{...fix,rawLat:fix.lat,rawLon:fix.lon,acc:fix.accuracy,fresh:true},currentResolvedLocation:null,stationingReview:null,EXPRESSWAY_BOUND_BY_TREND:{},userBound:'',boundManuallySelected:false,trendEstablished:false,gpsStatus:el('gps-status'),setTimeout(){},clearTimeout(){},updateReadout(){},saveBound(){},alert:m=>alerts.push(m),entries:[],fullTimestamp:()=> '2026-10-28 12:00:00',captureNeedsPreapproval:()=>false,authDisplayState:{mode:'guest'},inspectorName:'Test',saveEntries:()=>true,foregroundSync:{changed(){}},cameraEditTargetIndex:null,cameraStream:null,cameraVideo:{videoWidth:0},cameraErrorEl:el('camera-error'),updateCameraOverlay(){}});
+ const ctx=vm.createContext({Date:{now:()=>clock},document:{getElementById:el},Worker:function(){},SPOTITCaptureLocation:Capture,SPOTITLocation:require('./location-resolver'),SPOTITEntry:require('./entry-model'),SPOTITStationingReviewController:{create:options=>({enable(){workerRequests++;},enabled:()=>true,observe:(...args)=>observed.push(args)})},calibData:[fix],captureLocation:Capture.create(),captureLocationReady:false,currentPos:{...fix,rawLat:fix.lat,rawLon:fix.lon,acc:fix.accuracy,fresh:true},currentResolvedLocation:null,stationingReview:null,EXPRESSWAY_BOUND_BY_TREND:{},GPS_FRESH_MS:12000,userBound:'',boundManuallySelected:false,trendEstablished:false,gpsStatus:el('gps-status'),setTimeout(){},clearTimeout(){},updateReadout(){},saveBound(){},alert:m=>alerts.push(m),entries:[],fullTimestamp:()=> '2026-10-28 12:00:00',captureNeedsPreapproval:()=>false,authDisplayState:{mode:'guest'},inspectorName:'Test',saveEntries:()=>true,foregroundSync:{changed(){}},cameraEditTargetIndex:null,cameraStream:null,cameraVideo:{videoWidth:0},cameraErrorEl:el('camera-error'),updateCameraOverlay(){}});
  vm.runInContext(block('    function resolvedLocationCanSave()', '    function markGpsUncertain('),ctx);
  vm.runInContext(block('    // One network calculation', '    let trendLastKm = null;'),ctx);
  vm.runInContext(block('    function logDefect(', '    // ---------- Sound feedback'),ctx);
@@ -44,6 +51,15 @@ test('actual app runs shared network engine without Preview controls, fragments 
  for(const text of ['stationing-review-panel','experimental-match-detail','preview/experimental-readout','passenger-preview.js','Experimental - provisional'])assert(!html.includes(text),text);
  a.ctx.queueStationingReview({coords:{latitude:fix.lat,longitude:fix.lon,accuracy:8,speed:0,heading:null},timestamp:10000});
  assert.equal(a.observed.length,1);assert.equal(a.observed[0][0].lat,fix.lat);
+});
+test('actual Capture controls do not dim or insert the GPS gate during routine worker updates',()=>{
+ const a=app();a.accept(result(true));const classes=a.el('defect-section').classList;
+ assert(!classes.contains('gps-pending'));assert(!classes.contains('gps-updating'));
+ a.advance();a.ctx.resolveFreshLocation(null);
+ assert(!classes.contains('gps-pending'));assert(classes.contains('gps-updating'));
+ assert.equal(a.ctx.resolvedEntrySnapshot(),null);
+ a.ctx.currentResolvedLocation=a.ctx.captureLocation.invalidate('GPS lost');a.ctx.setGpsCaptureReady(false);
+ assert(classes.contains('gps-pending'));assert(!classes.contains('gps-updating'));
 });
 test('actual defect record and camera draft use the same accepted interchange and station',()=>{
  const a=app();a.accept(result(true));a.ctx.logDefect('Crack','1');let saved=a.ctx.entries.at(-1),camera=a.ctx.getCameraSnapshot('Crack');
