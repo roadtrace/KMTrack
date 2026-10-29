@@ -12,8 +12,8 @@ rules. It is still in git history if it is ever wanted back:
 git show <commit-before-removal>:DESIGN.md
 ```
 
-Functional knowledge lives in its own files: `PRODUCT.md`, `SHARING.md`,
-`MAP_LANDMARKS.md`.
+Functional knowledge lives in its own files: `PRODUCT.md`, `docs/guides/SHARING.md`,
+`docs/guides/MAP_LANDMARKS.md`.
 
 ---
 

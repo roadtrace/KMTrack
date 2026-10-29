@@ -50,7 +50,7 @@ SPOT IT turns a device's live location into road-network inspection context—in
 - PWA identity and platform description: `manifest.json`.
 - Network and structure datasets: `calibration.json` and `bridges.json`.
 - Product marks: `spot it app icon.svg`, the four `spot it header*.svg` lockups, and the generated PWA icon PNGs.
-- Import/export contract and operational limits: `SHARING.md`.
+- Import/export contract and operational limits: `docs/guides/SHARING.md`.
 - Working rules and process: `AGENTS.md`. There is no design baseline to
   preserve, and no separate radius rules file — both were retired on 2026-09-18.
 - No testimonials, performance benchmarks, customer claims, or formal accessibility certification are established; future work must not fabricate them.
