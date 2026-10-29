@@ -4024,7 +4024,8 @@
 
         <!-- 2. Road identity and bound, then 3. the station. -->
         <div class="instrument-station">
-          <span class="segment-tag" id="segment-tag">--</span>
+          <div class="instrument-road"><span class="segment-tag" id="segment-tag">--</span>
+            <span id="capture-segment-label" class="capture-segment-label" hidden></span></div>
           <div class="kmvalue" id="km-value">--.---</div>
           <div class="station-caption" id="current-location-label">Station</div>
           <div class="instrument-nearby" id="instrument-nearby" hidden></div>
@@ -4622,6 +4623,7 @@
   <script src="./src/capture-location.js"></script>
   <script src="./src/network-stop-gates.js"></script>
   <script src="./src/manual-location.js"></script>
+  <script src="./src/capture-lanes.js"></script>
   <script>
     class GeoKalmanFilter {
       constructor() {
@@ -4650,6 +4652,8 @@
     const gpsFilter = new GeoKalmanFilter();
     const captureLocation = SPOTITCaptureLocation.create();
     const manualLocation = SPOTITManualLocation.create();
+    const captureLanes = SPOTITCaptureLanes.create();
+    let captureLanePressed = false;
     try { manualLocation.setMode(localStorage.getItem('nlex_capture_mode_v1') || ''); } catch (_) {}
     let captureLocationReady = false;
 
@@ -6715,6 +6719,7 @@
     }
 
     function updateReadout() {
+      updateCaptureLaneLayout();
       if (!currentPos) return;
       updateOsmLocation();
       document.getElementById('lat').textContent = currentPos.lat.toFixed(6);
@@ -6895,6 +6900,7 @@
     }
     function refreshManualLocation() {
       document.querySelectorAll('[data-location-mode]').forEach(button => button.setAttribute('aria-pressed',String(button.dataset.locationMode === manualLocation.mode())));
+      updateCaptureLaneLayout();
       if (currentPos?.fresh) { resolveFreshLocation(null); updateReadout(); }
     }
     document.querySelectorAll('[data-location-mode]').forEach(button => button.addEventListener('click',() => {
@@ -8944,7 +8950,52 @@
     });
 
 
-    // ---------- Quick lane-log buttons (the 16 number buttons + 4 "Others", all haptic-backed checkboxes) ----------
+    function updateCaptureLaneLayout() {
+      const section = document.getElementById('defect-section');
+      if (!section) return;
+      const resolution = currentResolvedLocation;
+      const ready = !!currentPos?.fresh && !!resolution?.confirmed && !resolution.uncertain && resolvedLocationCanSave();
+      const layout = captureLanes.update({mode:manualLocation.mode(), ready,
+        expressway:resolution?.result?.expressway, km:resolution?.result?.km,
+        interchange:isInterchangeLocationMode(), busy:captureLanePressed ||
+          !!document.querySelector('.modal-backdrop.open, dialog[open], body.camera-open')});
+      const badge = document.getElementById('capture-segment-label');
+      badge.textContent = ['1','2','3'].includes(layout) && ready ? `Seg ${layout}` : '';
+      badge.hidden = !badge.textContent;
+      if (section.dataset.laneLayout === layout) return;
+      section.dataset.laneLayout = layout;
+      const choices = SPOTITCaptureLanes.choices(layout);
+      section.querySelectorAll('.lane-btn-row').forEach(row => {
+        [...row.children].forEach((button, index) => {
+          const input = button.querySelector('.lane-log-trigger');
+          if (!input) return;
+          const other = button.classList.contains('others-btn');
+          const value = other ? 'Others' : choices[index];
+          button.hidden = !value;
+          input.dataset.lane = value || '';
+          let title = button.querySelector('.capture-lane-title');
+          if (!title) {
+            [...button.childNodes].filter(node => node.nodeType === 3).forEach(node => node.remove());
+            title = document.createElement('span'); title.className = 'capture-lane-title'; button.append(title);
+          }
+          title.textContent = other ? layout === 'interchange' ? 'Other / Overpass / Underpass' : 'Other location / lane' : value || '';
+          const helper = button.querySelector('.others-sub');
+          if (helper) { helper.hidden = layout === 'interchange'; button.append(helper); }
+        });
+      });
+    }
+    document.getElementById('defect-section').addEventListener('pointerdown', event => {
+      if (event.target.closest('.lane-btn')) captureLanePressed = true;
+    });
+    const releaseCaptureLane = () => setTimeout(() => { captureLanePressed = false; updateCaptureLaneLayout(); }, 0);
+    document.addEventListener('pointerup', releaseCaptureLane);
+    document.addEventListener('pointercancel', releaseCaptureLane);
+    window.addEventListener('blur', releaseCaptureLane);
+    document.getElementById('defect-section').addEventListener('keydown', event => {
+      if (event.target.closest('.lane-btn') && [' ', 'Enter'].includes(event.key)) captureLanePressed = true;
+    });
+    document.addEventListener('keyup', event => { if ([' ', 'Enter'].includes(event.key)) releaseCaptureLane(); });
+    // The same checkbox handlers serve numbered lanes and named ramp positions.
     document.querySelectorAll('.lane-log-trigger').forEach(cb => {
       cb.addEventListener('change', () => {
         if (logDefect(cb.dataset.defect, cb.dataset.lane)) playConfirmSound();

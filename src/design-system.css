@@ -1788,6 +1788,11 @@ html[data-theme="light"] .map-theme-toggle {
   color: var(--ds-fg-muted);
 }
 
+/* These helper labels sit on bright defect buttons, even in dark mode. */
+html:not([data-theme="light"]) .lane-btn.others-btn .others-sub {
+  color: #14202b;
+}
+
 .defect-gate {
   background: var(--ds-accent);
   border: 1px solid var(--ds-border);
@@ -3019,3 +3024,21 @@ html:root #map-view .map-history-filter { display: flex; flex-wrap: wrap; gap: 8
 html:root #map-view .map-history-filter select { width: 100%; min-height: 44px; }
 html:root #map-view .map-history-filter button { min-height: 44px; flex: 1; }
 html:root #map-view .map-history-filter small { flex-basis: 100%; color: var(--ds-fg-muted); overflow-wrap: anywhere; }
+
+/* Location-aware capture grids keep a fixed footprint in each display mode. */
+.instrument-road { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; }
+.capture-segment-label { color: var(--ds-fg-muted); font: 600 12px/1.4 var(--font-ui); }
+.capture-segment-label::before { content: '\00b7'; margin-right: 6px; }
+#defect-section[data-lane-layout] .lane-btn-row { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: 44px 44px 44px; gap: 8px; }
+#defect-section[data-lane-layout] .lane-btn { min-height: 0; height: 100%; padding: 6px; }
+#defect-section[data-lane-layout] .lane-btn[hidden], #defect-section [hidden] { display: none; }
+#defect-section[data-lane-layout] .others-btn { grid-column: 1 / -1; grid-row: 3; }
+#defect-section[data-lane-layout] .capture-lane-title { pointer-events: none; }
+#defect-section[data-lane-layout="2"] .lane-btn:not(.others-btn):nth-child(3) { grid-column: 1 / -1; }
+#defect-section[data-lane-layout="3"] .lane-btn:not(.others-btn):nth-child(-n+2) { grid-row: 1 / span 2; }
+#defect-section[data-lane-layout="interchange"] .lane-btn:not(.others-btn) { font-family: var(--font-ui); font-size: 14px; }
+#defect-section.focused[data-lane-layout] .focused-category .lane-btn-row { grid-template-rows: 96px 96px 64px; gap: 10px; }
+#defect-section.focused[data-lane-layout] .focused-category .lane-btn { min-height: 0; height: 100%; }
+#defect-section.focused[data-lane-layout="interchange"] .focused-category .lane-btn:not(.others-btn) { font-size: clamp(16px, 4.5vw, 23px); }
+#defect-section[data-lane-layout] .others-btn .capture-lane-title { font-size: 12px; }
+#defect-section.focused[data-lane-layout] .others-btn .capture-lane-title { font-size: 15px; }
