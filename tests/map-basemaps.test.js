@@ -53,10 +53,12 @@ test('light keeps the CARTO raster, authenticates tile requests, and stays behin
   const end = html.indexOf('function initOsmMap()',start);
   assert.ok(start >= 0 && end > start);
   const layers = [];
-  const map = {};
+  const map = {attributionControl:{removeAttribution(){}}};
+  const nodes=new Map();
   const context = vm.createContext({
     osmMap:map,osmBaseLayer:null,osmVectorLayer:null,
-    document:{documentElement:{dataset:{theme:'light'}}},
+    document:{baseURI:'https://example.invalid/',documentElement:{dataset:{theme:'light'}},getElementById:id=>{if(!nodes.has(id))nodes.set(id,{});return nodes.get(id);}},
+    SPOTITOfflineMap:require('../src/offline-map'),navigator:{onLine:true},fetch(){throw Error('unexpected fetch');},window:{addEventListener(){}},setTimeout(){},
     L:{tileLayer(url,options){
       const layer = {url,options,removed:false,addTo(target){assert.equal(target,map);return this;},remove(){this.removed=true;},bringToBack(){this.behindOverlays=true;}};
       layers.push(layer);
@@ -76,6 +78,8 @@ test('light keeps the CARTO raster, authenticates tile requests, and stays behin
   assert.equal(layers[0].behindOverlays,true);
   assert.equal(layers[0].removed,false);
   assert.equal(context.osmMap,map);
+  context.updateOsmBasemap();
+  assert.equal(layers.length,1,'same-theme refresh reuses the existing layer');
 });
 
 test('dark uses the MapTiler vector style — not a raster tile layer, not an iframe', () => {

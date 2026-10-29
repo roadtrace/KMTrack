@@ -28,7 +28,11 @@ The builder includes the runtime shell, calibration, required MapTiler assets an
 
 ## Current status
 
-Prepared locally on 29 October 2026. Cloudflare account/dashboard access is unavailable to this session. Nothing has been deployed, no repository visibility or DNS settings have changed, and the old site remains untouched.
+The user deployed https://kmtrack.pages.dev/ on 29 October 2026. Read-only HTTPS verification found all 86 public app assets exactly match committed source at e039593. The root page returns HTTP 200; no-cache applies to the root page and service worker, and the configured nosniff and referrer-policy headers are present. Requests for README.md, .git/config and a test file return the application HTML fallback rather than those files.
+
+MapTiler initially returned HTTP 403 with "Key usage restricted" for the Cloudflare origin. The user subsequently confirmed the map works. The origin restriction fix has not been independently rechecked; preserve the existing key restrictions and old GitHub origin during the transition.
+
+No GPS, sign-in, real inspection writes, repository visibility changes, DNS changes, or data transfer were performed during verification. Supabase email/account flows and phone field behavior remain unverified. Cloudflare dashboard access is still unavailable to this session. Retain the old site until the data and account transition is agreed.
 
 ## References
 

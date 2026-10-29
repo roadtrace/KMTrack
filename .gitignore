@@ -12,3 +12,44 @@ output/playwright/
 
 # Local brand review renders (not application assets).
 mark-review/
+
+# Local session handoffs; keep shared agent instructions and skills visible.
+/.codex/HANDOFF.md
+/.claude/HANDOFF.md
+/COMMIT_MESSAGE*.txt
+
+# Accidental Windows cache directory (literal name, not an environment variable).
+/%SystemDrive%/
+
+# Reusable upload copies and the separate local Preview worktree.
+/preview-upload/
+/output/passenger-stationing-preview-*/
+
+# Generated release copies, temporary checkouts and integration backups.
+/output/release-candidate-*/
+/output/commit-preparation-*/
+/output/capture-integration-*/
+/output/main-preview-integration-*/
+/output/kmtrack-stationing-integration-candidate-*/
+
+# Packaged Preview app copies; retain adjacent GIS sources, scripts and audits.
+/output/stationing-review-application-*/*preview*/
+/output/stationing-review-application-*/*review-local*/
+/output/stationing-review-application-*/passenger-stop-fix*/
+
+# Generated archives, test logs and screenshots within artifact directories.
+/output/**/*.zip
+/output/**/*.tap
+/output/**/*.png
+/docs/visual-audit-*/*.png
+
+# Tool runtime caches, not engineering databases or source fixtures.
+node_modules/
+__pycache__/
+*.pyc
+
+# Generated deployment output and local verification runs.
+/output/cloudflare-pages/
+/output/structure-refactor-*/
+/output/manual-mode-*/
+/output/glitch-review-*/

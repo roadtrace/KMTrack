@@ -1485,11 +1485,17 @@
     /* Defect buttons are visibly disabled until GPS actually locks, instead
      of silently doing nothing (or relying on a per-tap alert) — makes it
      obvious *why* taps aren't logging rather than looking broken. */
-    .location-mode { display:flex; gap:8px; margin-bottom:12px; }
-    .location-mode button { min-height:44px; padding:8px 14px; border:1px solid var(--border, #46515f); border-radius:8px; background:var(--surface, #293441); color:inherit; font:inherit; font-size:13px; font-weight:700; touch-action:manipulation; user-select:none; }
+    .location-mode { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:10px 0 0; }
+    .location-mode button { width:100%; min-height:44px; padding:8px 10px; border:1px solid var(--border-strong); border-radius:8px; background:var(--panel-raised); color:var(--ds-fg); font:inherit; font-size:13px; font-weight:700; text-align:center; touch-action:manipulation; user-select:none; -webkit-tap-highlight-color:transparent; }
+    .location-mode button:focus-visible { outline:2px solid var(--ds-ring); outline-offset:3px; }
     .location-mode button[aria-pressed="true"] { background:#ffbf00; color:#14202b; border-color:#ffbf00; }
     .location-mode button:active { opacity:.75; }
     #nearby-interchange-choice { width:100%; min-height:44px; font-size:16px; margin:8px 0; }
+    .offline-map-controls { position:absolute; z-index:800; left:12px; top:60px; max-width:min(340px,calc(100% - 24px)); padding:10px; border:1px solid var(--border); border-radius:10px; background:var(--surface, #1e2936); color:var(--text, #eef2f6); font-size:12px; }
+    .offline-map-controls summary { cursor:pointer; font-weight:700; }
+    .offline-map-controls p { margin:8px 0; }
+    .offline-map-controls div { display:flex; flex-wrap:wrap; gap:6px; }
+    .offline-map-controls button { min-height:44px; padding:8px; border-radius:6px; touch-action:manipulation; }
     .defect-gate {
       display: none;
     }
@@ -4023,14 +4029,14 @@
 
         <!-- 2. Road identity and bound, then 3. the station. -->
         <div class="instrument-station">
-          <div class="location-mode" role="group" aria-label="Capture location mode">
-            <button type="button" data-location-mode="mainline" aria-pressed="false">Mainline</button>
-            <button type="button" data-location-mode="interchange" aria-pressed="false">Interchange</button>
-          </div>
           <span class="segment-tag" id="segment-tag">--</span>
           <div class="kmvalue" id="km-value">--.---</div>
           <div class="station-caption" id="current-location-label">Station</div>
           <div class="instrument-nearby" id="instrument-nearby" hidden></div>
+          <div class="location-mode" role="group" aria-label="Capture location mode">
+            <button type="button" data-location-mode="mainline" aria-pressed="false">Mainline</button>
+            <button type="button" data-location-mode="interchange" aria-pressed="false">Interchange</button>
+          </div>
         </div>
 
         <!-- 4. Secondary engineering detail, collapsed by default. -->
@@ -4241,6 +4247,7 @@
 
   <section class="app-view map-view" id="map-view" role="tabpanel" aria-labelledby="map-tab" hidden>
     <div id="osm-map" aria-label="OpenStreetMap showing the current inspection location"></div>
+    <details class="offline-map-controls"><summary id="offline-map-summary">Offline map</summary><p>Save NLEX inspection geometry for use without a connection. Includes available calibration lines and interchanges, not street-map tiles or complete road coverage.</p><div><button type="button" id="offline-map-save">Save inspection map</button><button type="button" id="offline-map-use" disabled>Use saved map</button><button type="button" id="offline-map-online">Use online map</button><button type="button" id="offline-map-remove" disabled>Remove saved map</button></div><p id="offline-map-status" role="status" aria-live="polite">Checking saved map...</p><p id="offline-map-active" hidden>Saved inspection geometry - no street-map background</p></details>
     <div class="map-workspace-scope"><select id="map-record-scope" aria-label="Map record scope"><option value="my">My records</option><option value="team">Team records</option></select><button type="button" id="map-history-refresh">Refresh</button><button type="button" id="map-history-more">Load more</button><small id="map-history-coverage" role="status"></small></div>
     <div class="map-visible-count" id="map-visible-count" role="status">0 visible</div>
     <div id="map-bound-legend" class="map-bound-legend" aria-label="Map legend"></div>
@@ -4601,6 +4608,7 @@
   <script src="./src/foreground-sync.js"></script>
   <script src="./src/inspection-wakeup.js"></script>
   <script src="./src/map-config.js"></script>
+  <script src="./src/offline-map.js"></script>
   <script src="public/vendor/leaflet/leaflet.js"></script>
   <script src="./src/swipe-actions.js"></script>
   <script src="./src/entry-filters.js"></script>
@@ -5013,11 +5021,44 @@
       const dialog = document.createElement('dialog'); submittedDialog = dialog;
       dialog.className = 'submitted-record-dialog';
       const row = item.cloud, e = SPOTITMyRecords.cloudDisplay(row);
-      const values = [['Inspection date/time', e.timestamp || 'Unavailable'], ['Defect', e.type], ['Expressway', e.expressway],
-        ['Bound', e.bound], ['Lane', e.lane], ['KM', e.km == null ? 'Unavailable' : formatKmStation(e.km)],
-        ['Coordinates', Number.isFinite(e.lat) && Number.isFinite(e.lon) ? `${e.lat}, ${e.lon}` : 'Unavailable'],
-        ['Photo', row.photo_path ? 'Availability checked when opened' : 'No verified photo available']];
-      dialog.innerHTML = '<h2>Submitted inspection</h2><p>Read only</p><dl>' + values.map(([label,value]) => `<dt>${xmlEscape(label)}</dt><dd>${xmlEscape(String(value ?? 'Unavailable'))}</dd>`).join('') + '</dl><p class="photo-result" role="status"></p>';
+      const teamView = (mapScope || logRecordScope) === 'team';
+      const editableIndex = () => {
+        const context = inspectionContext();
+        if (teamView || !context.canUseLocal || !context.userId || context.workspaceUserId !== context.userId || !item.local
+          || row.user_id?.toLowerCase() !== context.userId.toLowerCase()) return -1;
+        return entries.findIndex(entry => entry.id === item.local.id
+          && entry.user_id?.toLowerCase() === context.userId.toLowerCase() && localEntryDurable(entry));
+      };
+      const sheet = document.querySelector('#edit-modal .entry-sheet').cloneNode(true);
+      const nodes = Object.fromEntries([...sheet.querySelectorAll('[id]')].map(node => [node.id, node]));
+      sheet.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
+      sheet.querySelectorAll('label[for]').forEach(node => node.removeAttribute('for'));
+      sheet.removeAttribute('role'); sheet.removeAttribute('aria-modal'); sheet.removeAttribute('aria-labelledby');
+      nodes['edit-modal-title'].textContent = e.type;
+      nodes['edit-modal-title'].id = 'submitted-inspection-title';
+      dialog.setAttribute('aria-labelledby', 'submitted-inspection-title');
+      nodes['edit-entry-date'].textContent = e.timestamp || 'Unavailable';
+      const badge = document.createElement('p'); badge.className = 'submitted-mode';
+      badge.textContent = teamView ? 'Read only' : 'Your inspection';
+      sheet.querySelector('.entry-sheet-header > div').append(badge);
+      sheet.querySelector('.entry-map-summary')?.remove();
+      const fields = [e.expressway, e.km == null ? 'Unavailable' : formatKmStation(e.km), e.bound, e.lane];
+      sheet.querySelectorAll('.entry-sheet-field').forEach((field, index) => {
+        field.querySelectorAll('.entry-editable').forEach(node => node.remove());
+        const value = document.createElement('strong'); value.className = 'submitted-value';
+        value.textContent = String(fields[index] ?? 'Unavailable'); field.append(value);
+      });
+      nodes['edit-entry-gps'].textContent = Number.isFinite(e.lat) && Number.isFinite(e.lon)
+        ? `${e.lat.toFixed(7)}, ${e.lon.toFixed(7)}` : 'Unavailable';
+      nodes['edit-entry-inspector'].textContent = item.local?.inspector || 'Not recorded';
+      const photoSection = sheet.querySelector('.entry-sheet-photo');
+      photoSection.querySelector('.edit-photo-row').remove();
+      const status = document.createElement('p'); status.className = 'photo-result'; status.setAttribute('role', 'status');
+      status.textContent = row.photo_path || item.local?.photoId ? 'Photo available to view' : 'No verified photo available';
+      photoSection.append(status);
+      const actions = sheet.querySelector('.entry-sheet-actions'); actions.replaceChildren();
+      nodes['edit-close'].onclick = () => dialog.close();
+      dialog.classList.add('inspection-detail-sheet'); dialog.replaceChildren(sheet);
       let preview = null;
       if (row.photo_path || item.local?.photoId) {
         const view = document.createElement('button'); view.type = 'button'; view.textContent = 'View photo'; view.className = 'ds-btn ds-btn-quiet';
@@ -5027,13 +5068,24 @@
             const result = await viewer.open(item);
             if (submittedDialog !== dialog || !dialog.open) { viewer.close(); return; }
             preview?.remove(); preview = document.createElement('img'); preview.src = result.url; preview.alt = 'Inspection photo';
-            preview.style.maxWidth = '100%'; dialog.append(preview);
+            preview.style.maxWidth = '100%'; photoSection.append(preview);
             status.textContent = result.source === 'local' ? 'Photo on this device' : 'Verified submitted photo';
           } catch (_) { if (dialog.open) status.textContent = 'Photo unavailable. The record remains available.'; }
           finally { view.disabled = false; }
-        }; dialog.append(view);
+        }; photoSection.append(view);
       }
-      const close = document.createElement('button'); close.type = 'button'; close.textContent = 'Close'; close.className = 'ds-btn ds-btn-quiet'; close.onclick = () => dialog.close(); dialog.append(close);
+      const close = document.createElement('button'); close.type = 'button'; close.textContent = 'Close'; close.className = 'ds-btn ds-btn-quiet'; close.onclick = () => dialog.close(); actions.append(close);
+      if (!teamView) {
+        const edit = document.createElement('button'); edit.type = 'button'; edit.textContent = 'Edit'; edit.className = 'submitted-edit';
+        edit.disabled = editableIndex() < 0;
+        if (edit.disabled) {
+          const hint = document.createElement('p'); hint.className = 'submitted-edit-hint';
+          hint.textContent = 'Editing requires your saved record on its original device and an unlocked account workspace.';
+          sheet.querySelector('.entry-sheet-scroll').append(hint);
+        }
+        edit.onclick = () => { const index = editableIndex(); if (index < 0) { edit.disabled = true; return; } dialog.close(); openEditModal(index, true); };
+        actions.append(edit);
+      }
       dialog.addEventListener('close', () => { viewer?.close(); dialog.remove(); if (submittedDialog === dialog) { submittedDialog = null; submittedMapScope = null; } });
       document.body.append(dialog); dialog.showModal();
     }
@@ -6011,6 +6063,41 @@
     let osmVectorLayer = null;
     let mapTilerSdkPromise = null;
     let syncVectorCamera = null;
+    let activeBasemapKey = '';
+    let offlineMapSelected = false, offlineGeometryLayer = null, offlineMapSaved = null, offlineRenderEpoch = 0;
+    const offlineMapPack = SPOTITOfflineMap.create({caches:globalThis.caches,fetch:(...args)=>fetch(...args),crypto:globalThis.crypto,baseURL:document.baseURI});
+    async function refreshOfflineMapStatus() {
+      try { offlineMapSaved = await offlineMapPack.read(); } catch (_) { offlineMapSaved = null; }
+      const status=document.getElementById('offline-map-status');
+      status.textContent=offlineMapSaved ? 'Saved on this device - '+(offlineMapSaved.manifest.bytes/1048576).toFixed(1)+' MB - '+new Date(offlineMapSaved.manifest.savedAt).toLocaleDateString() : 'Not saved. Download while connected.';
+      document.getElementById('offline-map-use').disabled=!offlineMapSaved;
+      document.getElementById('offline-map-remove').disabled=!offlineMapSaved;
+    }
+    async function showSavedInspectionMap() {
+      const epoch=++offlineRenderEpoch;
+      try { offlineMapSaved=await offlineMapPack.read(); } catch (_) { offlineMapSaved=null; }
+      if(epoch!==offlineRenderEpoch||!osmMap||!(offlineMapSelected||navigator.onLine===false))return;
+      if(offlineGeometryLayer){offlineGeometryLayer.remove();offlineGeometryLayer=null;}
+      document.getElementById('offline-map-active').hidden=false;
+      document.getElementById('offline-map-summary').textContent=offlineMapSaved?'Saved map active':'Offline - no saved map';
+      if(!offlineMapSaved){document.getElementById('offline-map-status').textContent='Offline map not saved. Connect and save it first.';return;}
+      offlineGeometryLayer=L.geoJSON(offlineMapSaved.geojson,{interactive:false,style:feature=>({color:feature.properties.kind==='reference'?'#269fa6':'#ffbf00',weight:feature.properties.kind==='reference'?4:3,opacity:.85})}).addTo(osmMap);
+      osmMap.attributionControl.addAttribution('Inspection geometry - calibration reference and retained GIS; not surveyed road membership');
+    }
+    document.getElementById('offline-map-save').onclick=async()=>{
+      const controls=['offline-map-save','offline-map-use','offline-map-remove','offline-map-online'].map(id=>document.getElementById(id));controls.forEach(b=>b.disabled=true);
+      try { await offlineMapPack.save((done,total)=>{document.getElementById('offline-map-status').textContent='Saving inspection map '+done+'/'+total+'...';});await refreshOfflineMapStatus();if(offlineMapSelected||navigator.onLine===false)updateOsmBasemap(true); }
+      catch(error){try{offlineMapSaved=await offlineMapPack.read();}catch(_){offlineMapSaved=null;}document.getElementById('offline-map-status').textContent=error.name==='QuotaExceededError'?'Not enough device storage. Inspection records and photos were not removed.':error.message;}
+      finally { controls[0].disabled=false;controls[3].disabled=false;controls[1].disabled=!offlineMapSaved;controls[2].disabled=!offlineMapSaved; }
+    };
+    document.getElementById('offline-map-use').onclick=()=>{offlineMapSelected=true;updateOsmBasemap(true);};
+    document.getElementById('offline-map-online').onclick=()=>{offlineMapSelected=false;updateOsmBasemap(true);};
+    document.getElementById('offline-map-remove').onclick=async()=>{try{await offlineMapPack.remove();offlineMapSelected=false;await refreshOfflineMapStatus();updateOsmBasemap(true);}catch(_){document.getElementById('offline-map-status').textContent='Could not remove the saved map.';}};
+    refreshOfflineMapStatus();
+    window.addEventListener('online',()=>updateOsmBasemap(true));
+    window.addEventListener('offline',()=>updateOsmBasemap(true));
+    const warmMapEngine=()=>{if(navigator.onLine!==false&&document.documentElement.dataset.theme!=='light')ensureMapTilerSdk().catch(()=>{});};
+    if(typeof requestIdleCallback==='function')requestIdleCallback(warmMapEngine,{timeout:4000});else setTimeout(warmMapEngine,1500);
 
     function ensureMapTilerSdk() {
       if (mapTilerSdkPromise) return mapTilerSdkPromise;
@@ -6036,6 +6123,7 @@
         sdk.onerror = () => reject(new Error('MapTiler SDK failed to load'));
         document.head.append(sdk);
       });
+      mapTilerSdkPromise.catch(()=>{mapTilerSdkPromise=null;});
       return mapTilerSdkPromise;
     }
 
@@ -6049,9 +6137,13 @@
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>'
       }).addTo(osmMap);
       osmBaseLayer.bringToBack();
+      activeBasemapKey=theme;
     }
 
     function clearBasemaps() {
+      activeBasemapKey='';offlineRenderEpoch++;
+      if(offlineGeometryLayer){offlineGeometryLayer.remove();offlineGeometryLayer=null;}
+      if(osmMap)osmMap.attributionControl.removeAttribution('Inspection geometry - calibration reference and retained GIS; not surveyed road membership');
       if (osmVectorLayer && osmMap) {
         // The vendored MapTiler Leaflet plugin leaves its logo and attribution
         // behind on removal; clear only those plugin-owned elements on a switch.
@@ -6069,11 +6161,16 @@
 
     /* Nothing here touches the map's view: adding or removing a Leaflet layer leaves
      * the center and zoom alone, so switching themes preserves both. */
-    function updateOsmBasemap() {
+    function updateOsmBasemap(force = false) {
       if (!osmMap) return;
       const theme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
-
-      clearBasemaps();
+      const key=(offlineMapSelected||navigator.onLine===false)?'offline':theme;
+      if(!force&&activeBasemapKey===key)return;
+      clearBasemaps();activeBasemapKey=key;
+      document.getElementById('offline-map-active').hidden=key!=='offline';
+      document.getElementById('offline-map-summary').textContent=key==='offline'?'Saved inspection map':'Offline map';
+      const requestEpoch=offlineRenderEpoch;
+      if(key==='offline'){showSavedInspectionMap();return;}
 
       if (theme !== 'dark') {
         addRasterBasemap(theme);
@@ -6082,7 +6179,7 @@
 
       ensureMapTilerSdk().then(() => {
         // The theme may have flipped again while the SDK was loading.
-        if (!osmMap || document.documentElement.dataset.theme === 'light') return;
+        if (!osmMap || requestEpoch!==offlineRenderEpoch || offlineMapSelected || navigator.onLine===false || document.documentElement.dataset.theme === 'light') return;
         clearBasemaps();
         const layer = L.maptilerLayer({
           style: SPOTITMapConfig.styleUrl,
@@ -6103,6 +6200,7 @@
           updateInterval: 0
         }).addTo(osmMap);
         osmVectorLayer = layer;
+        activeBasemapKey='dark';
         /* Drive the GL camera from Leaflet.
          *
          * The vendored plugin (v1.0.0) predates this SDK. Its _transformGL() assigns
@@ -6132,7 +6230,7 @@
           let vectorReady = false;
           vectorMap.once('load', () => { vectorReady = true; });
           window.setTimeout(() => {
-            if (vectorReady || !osmMap || osmVectorLayer !== layer) return;
+            if (vectorReady || !osmMap || offlineMapSelected || navigator.onLine===false || osmVectorLayer !== layer) return;
             if (document.documentElement.dataset.theme === 'light') return;
             console.warn('MapTiler style did not load; using the raster dark basemap');
             clearBasemaps();
@@ -8249,7 +8347,7 @@
         const online = navigator.onLine !== false;
         tilesPill.classList.toggle('status-fresh', online);
         tilesPill.classList.toggle('status-warn', !online);
-        tilesText.textContent = online ? 'Map tiles available' : 'Map tiles unavailable';
+        tilesText.textContent = online ? 'Online map enabled' : 'Online tiles unavailable ? saved map may be used';
       }
     }
 
@@ -9200,7 +9298,7 @@
       }
     }
 
-    function openEditModal(index) {
+    function openEditModal(index, activateEdit = false) {
       const entry = entries[index];
       if (!entry) return;
       editingEntryIndex = index;
@@ -9224,6 +9322,25 @@
         ? `${Number(entry.lat).toFixed(7)}, ${Number(entry.lon).toFixed(7)}` : 'No GPS fix captured';
       document.getElementById('edit-entry-inspector').textContent = entry.inspector || 'Not recorded';
       const modal = document.getElementById('edit-modal');
+      modal.querySelector('.entry-view-actions')?.remove();
+      modal.querySelector('.entry-view-label')?.remove();
+      const setEditing = editing => {
+        modal.querySelectorAll('select, input, #edit-photo-add-btn, #edit-photo-remove-btn').forEach(control => { control.disabled = !editing; });
+        document.getElementById('edit-save').hidden = !editing;
+        document.getElementById('edit-delete').hidden = !editing;
+        modal.querySelector('.entry-view-actions')?.toggleAttribute('hidden', editing);
+        modal.querySelector('.entry-view-label')?.toggleAttribute('hidden', editing);
+      };
+      if (!activateEdit) {
+        const label = document.createElement('p'); label.className = 'entry-view-label'; label.textContent = 'Your inspection';
+        modal.querySelector('.entry-sheet-header > div').append(label);
+        const actions = document.createElement('div'); actions.className = 'entry-view-actions';
+        const close = document.createElement('button'); close.type = 'button'; close.textContent = 'Close'; close.onclick = closeEditModal;
+        const edit = document.createElement('button'); edit.type = 'button'; edit.textContent = 'Edit'; edit.className = 'lane-save';
+        edit.onclick = () => setEditing(true);
+        actions.append(close, edit); modal.querySelector('.entry-sheet-actions').append(actions);
+      }
+      setEditing(activateEdit);
       const fromMap = document.querySelector('.app-tab-btn.active')?.dataset.appView === 'map';
       modal.classList.toggle('from-map', fromMap);
       modal.classList.toggle('map-compact', fromMap);

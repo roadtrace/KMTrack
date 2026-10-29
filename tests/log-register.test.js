@@ -14,14 +14,15 @@ for(const [patch,key]of [[{sync_status:'pending'},'waiting'],[{sync_status:'sync
 test('inspection submission does not depend on photo acknowledgement or enabled transport',()=>{assert.equal(ui.inspectionState({...entry,sync_status:'synced',remote_id:entry.id,photo_sync_status:'photo_pending'}).label,'Inspection submitted');assert.notEqual(ui.inspectionState({...entry,sync_status:'synced',remote_id:'different'}).key,'submitted');});
 test('cards escape all human text and omit raw identities',()=>{const s=ui.cardHTML({...entry,type:'<img onerror="oops">',notes:'secret',photo_path:'private-path',importLabel:'<archive>'},{photoLabel:'Photo on device'});assert.match(s,/&lt;img/);assert.doesNotMatch(s,/<img|onerror="|aaaaaaaa|private-path|secret/);assert.match(s,/KM 29\+380/);assert.match(s,/Lane 2/);});
 test('cloud cards convey readonly submitted status without device mutation affordances',()=>{const s=ui.cardHTML(entry,{cloud:true,team:true});assert.match(s,/Team record · Read only/);assert.match(s,/Inspection submitted/);assert.doesNotMatch(s,/data-idx|checkbox|Save|Delete|Synced/);});
-test('existing local popup markup, handlers and shared theme styles remain byte-identical',()=>{
-  for(const name of ['openEditModal','closeEditModal','populateEditExpresswaySelect','populateEditBoundSelect','sizeEntryEditableControls'])assert.equal(fn(html,name),fn(baseline,name));
+test('local inspection view preserves editor markup and requires explicit Edit activation',()=>{
+  for(const name of ['closeEditModal','populateEditExpresswaySelect','populateEditBoundSelect','sizeEntryEditableControls'])assert.equal(fn(html,name),fn(baseline,name));
   const popup=s=>s.slice(s.indexOf('  <div id="edit-modal"'),s.indexOf('</body>'));
   assert.equal(popup(html),popup(baseline));
-  const editHandlers=s=>s.slice(s.indexOf('    let editPhotoObjectUrl'),s.indexOf('    // ---------- Excel'));
-  assert.equal(editHandlers(html),editHandlers(baseline));
-  assert.equal(fs.readFileSync('src/design-system.css','utf8').replaceAll('\r\n','\n'),git('src/design-system.css'));
-  assert.equal(sharedStyle(html),sharedStyle(baseline));
+  const edit=fn(html,'openEditModal');
+  assert.match(edit,/activateEdit = false/);assert.match(edit,/control.disabled = !editing/);
+  assert.match(edit,/edit.onclick = .*setEditing\(true\)/);assert.match(edit,/setEditing\(activateEdit\)/);
+  const style=fs.readFileSync('src/design-system.css','utf8');
+  assert.match(style,/inspection-detail-sheet/);assert.match(style,/var\(--panel-raised\)/);
 });
 test('B01 preview style isolation preserves scope and the shared-style guard detects changes',()=>{
   const preview=html.match(/<style id="b01-preview-styles">([\s\S]*?)<\/style>/);assert.ok(preview);
@@ -31,8 +32,14 @@ test('B01 preview style isolation preserves scope and the shared-style guard det
   assert.ok(html.indexOf(preview[0])<html.indexOf('<style>'));
   assert.notEqual(sharedStyle(html.replace('font-display: swap;','font-display: block;')),sharedStyle(baseline));
 });
-test('submitted details, private viewer guards and Map implementation remain identical',()=>{
-  for(const name of ['openSubmittedDetail','currentPhotoItem','currentMyItem','freshMapItems','updateMapEntries','switchMapScope','openMapEntry'])assert.equal(fn(html,name),fn(baseline,name));
+test('submitted details retain private viewer guards and independent readonly Team scope',()=>{
+  for(const name of ['currentPhotoItem','currentMyItem','freshMapItems','updateMapEntries','switchMapScope','openMapEntry'])assert.equal(fn(html,name),fn(baseline,name));
+  const detail=fn(html,'openSubmittedDetail');
+  assert.match(detail,/teamView \? 'Read only' : 'Your inspection'/);
+  assert.match(detail,/if \(!teamView\)/);assert.match(detail,/if \(teamView \|\|/);
+  assert.match(detail,/submittedDialog !== dialog \|\| !dialog.open/);
+  assert.match(detail,/row.user_id\?\.toLowerCase\(\) !== context.userId.toLowerCase\(\)/);
+  assert.match(detail,/localEntryDurable\(entry\)/);assert.match(detail,/openEditModal\(index, true\)/);
   for(const file of ['src/my-records.js','src/team-records.js','src/cloud-records.js','src/cloud-photo-viewer.js','src/map-records.js','src/map-overlays.js','src/map-overlays.css','src/entry-filters.js','src/inspection-sharing.js','src/sharing-ui.js'])assert.equal(fs.readFileSync(file,'utf8').replaceAll('\r\n','\n'),git(file));
 });
 function exportContext(mode='filtered',selected=[]){
@@ -48,7 +55,7 @@ test('applied filters remain fixed during an uncommitted filter draft',()=>{
   const inputs=new Map(),c={window:{logFilterBaseline:{type:'Cracks',source:'imported'}},document:{getElementById:id=>inputs.get(id)||{value:''}}};inputs.set('entry-filter-type',{value:'Potholes'});vm.createContext(c);vm.runInContext(fn(html,'getLogFilters'),c);assert.equal(c.getLogFilters().type,'Cracks');assert.equal(c.getLogFilters(true).type,'Potholes');
 });
 test('new styles are scoped to Log and dedicated sheets, never the existing popup or Map',()=>{assert.doesNotMatch(css,/#edit-modal|#map-view|\.entry-sheet|\.modal-backdrop/);assert.match(css,/register-sheet-footer[\s\S]*position:sticky/);assert.match(css,/data-theme="light"/);assert.match(css,/min-height:44px/);});
-test('cache v245 contains both new deployed assets and photo gate remains off',()=>{const sw=fs.readFileSync('sw.js','utf8');assert.match(sw,/CACHE_VERSION = 'v245'/);for(const file of ['src/log-register.js','src/log-register.css'])assert.ok(sw.includes("'./"+file+"'"));assert.match(html,/PHOTO_CLOUD_TRANSPORT_ENABLED = false/);});
+test('cache v253 contains both new deployed assets and photo gate remains off',()=>{const sw=fs.readFileSync('sw.js','utf8');assert.match(sw,/CACHE_VERSION = 'v253'/);for(const file of ['src/log-register.js','src/log-register.css'])assert.ok(sw.includes("'./"+file+"'"));assert.match(html,/PHOTO_CLOUD_TRANSPORT_ENABLED = false/);});
 test('history unavailable states distinguish connection, Guest, auth, approval, team, verification and permission',()=>{
   const c={canUseLocal:true,mode:'approved',cloudVerified:true,profile:{approved:true,team:'roadway'}};
   for(const [context,online,text]of [[c,false,'Offline'],[{mode:'guest'},true,'Guest local mode'],[{},true,'Sign in'],[{...c,profile:{approved:false}},true,'approval'],[{...c,profile:{approved:true}},true,'No team'],[{...c,cloudVerified:false},true,'Verify'],[c,true,'permission']])assert.ok(ui.historyUnavailable(context,online).includes(text));
