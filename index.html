@@ -4336,12 +4336,31 @@
   </section>
 
   <section class="app-view team-view" id="team-view" role="tabpanel" aria-labelledby="team-tab" hidden>
-    <div class="ds-view-head"><h2>Team</h2><p>Account, work on this device and submitted history.</p></div>
-    <section class="settings-panel"><h3>Account</h3><p id="team-account"></p><p id="team-authorization" role="status"></p></section>
-    <section class="settings-panel"><h3>Work on this device</h3><p id="team-device-counts"></p><p id="team-connection"></p></section>
-    <section class="settings-panel"><h3>Records</h3><p id="team-loaded-counts"></p><p id="team-refresh-times"></p>
-      <div class="ds-row"><button type="button" class="ds-btn ds-btn-quiet" id="team-open-my">Open My records</button>
-      <button type="button" class="ds-btn ds-btn-quiet" id="team-open-team">Open Team records</button></div>
+    <div class="team-heading"><div><h2>Team</h2><p>Your account, sync status, and team records.</p></div><span class="team-heading-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span></div>
+    <section class="team-card team-account-card" aria-labelledby="team-account">
+      <div class="team-identity"><span class="team-avatar" id="team-avatar" aria-hidden="true">?</span><div class="team-identity-copy"><h3 id="team-account">Account</h3><p id="team-role">Checking account</p><p id="team-name"></p></div><span class="team-badge" id="team-approval">Checking</span></div>
+      <div class="team-session"><span id="team-session-state">Checking account</span><span id="team-address"></span></div>
+      <p class="team-note" id="team-authorization" role="status"></p>
+    </section>
+    <section class="team-card" aria-labelledby="team-sync-title">
+      <div class="team-card-heading"><span class="team-icon team-icon-amber"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17H5a4 4 0 0 1-.8-7.92A8 8 0 0 1 19.5 8a4.5 4.5 0 0 1-.5 9h-2M12 21V11m-4 4 4-4 4 4"/></svg></span><div><h3 id="team-sync-title">Synchronization</h3><p id="team-sync-description">Inspections and photos stay on this device.</p></div><span class="team-badge" id="team-sync-badge"></span></div>
+      <div class="team-sync-totals"><span><strong id="team-submitted">0</strong> submitted</span><span><strong id="team-waiting">0</strong> waiting</span></div>
+      <progress id="team-sync-progress" max="1" value="0" aria-label="Inspection submission progress"></progress>
+      <button type="button" class="team-sync-button" id="team-sync-now" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17H5a4 4 0 0 1-.8-7.92A8 8 0 0 1 19.5 8a4.5 4.5 0 0 1-.5 9h-2M12 21V11m-4 4 4-4 4 4"/></svg><span id="team-sync-action">Sync now</span></button>
+      <div class="team-connection-note"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg><p id="team-connection" role="status"></p></div>
+      <p class="team-note" id="team-device-counts"></p>
+    </section>
+    <section class="team-card" aria-labelledby="team-records-title">
+      <div class="team-card-heading"><span class="team-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h6"/></svg></span><div><h3 id="team-records-title">Team inspections</h3><p>Access your team's submitted inspection records.</p></div></div>
+      <dl class="team-stat-list"><div><dt><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 4 16 4 16 0V5M4 12c0 4 16 4 16 0"/></svg>Loaded team records</dt><dd id="team-loaded-count">&mdash;</dd></div><div><dt><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Last refreshed</dt><dd id="team-refresh-time">Not refreshed</dd></div></dl>
+      <p class="team-note" id="team-loaded-counts"></p>
+      <p class="team-note" id="team-refresh-times"></p>
+      <button type="button" class="team-record-link" id="team-open-team" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span><strong>View team records</strong><small>Read-only submitted history</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
+      <button type="button" class="team-my-link" id="team-open-my" disabled>View my records <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
+    </section>
+    <section class="team-card" aria-labelledby="team-permissions-title">
+      <div class="team-card-heading"><span class="team-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6zM12 7v9"/></svg></span><div><h3 id="team-permissions-title">Permissions</h3><p>Your current access and team role.</p></div></div>
+      <dl class="team-permissions"><div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><dt>Team role</dt><dd id="team-permission-role">Not available</dd></div><div><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><dt>Data access</dt><dd id="team-permission-access">Not available</dd></div></dl>
     </section>
   </section>
 
@@ -4948,20 +4967,46 @@
     }
     function renderTeamWorkspace() {
       if (!teamRecords) return;
-      const set = (id,value) => { const el=document.getElementById(id); if(el && el.textContent!==value) el.textContent=value; };
+      const set = (id,value) => { const el=document.getElementById(id); if(el && el.textContent!==String(value)) el.textContent=String(value); };
       const c=inspectionContext(), scope=cloudRecordStore?.syncScope();
-      const profile=c.canUseLocal ? c.profile : null;
-      set('team-account', c.mode === 'guest' ? 'Guest / Local Mode' : profile ? [profile.full_name || 'Account', profile.role || 'Role unavailable', profile.team || 'No team assigned'].join(' · ') : 'No verified account available');
-      set('team-authorization', scope ? 'Approved · Verified online' : c.mode === 'guest' ? 'Team history requires an approved account.' : profile?.approved === false ? 'Awaiting approval · Local work available' : profile && !profile.team ? 'No team assigned · Team history unavailable' : 'Team history requires connection and online account verification.');
+      const profile=c.canUseLocal ? c.profile : null, guest=c.mode === 'guest', online=navigator.onLine !== false;
+      const role={inspector:'Inspector',supervisor:'Supervisor',administrator:'Administrator'}[profile?.role] || 'Role unavailable';
+      const name=guest ? 'Guest' : profile?.full_name || 'Account';
+      set('team-account',name); set('team-avatar',Array.from(name.trim())[0]?.toUpperCase() || '?');
+      set('team-role',guest ? 'Local mode' : role); set('team-name',profile?.team || (guest ? 'Work saved on this device' : 'No team assigned'));
+      set('team-address',c.canUseLocal && !guest ? c.email || 'Email unavailable' : 'Local inspections stay on this device');
+      set('team-session-state',guest ? 'Guest access' : c.mode === 'offline-recent' ? 'Offline access' : c.canUseLocal ? 'Signed in' : 'Account unavailable');
+      const approval=document.getElementById('team-approval');
+      set('team-approval',guest ? 'Local only' : profile?.approved === true ? 'Approved' : profile?.approved === false ? 'Pending' : 'Verify account');
+      approval.dataset.tone=profile?.approved === true ? 'approved' : guest ? 'neutral' : 'waiting';
+      const authorization=scope ? 'Approved account verified online.' : guest ? 'Sign in with an approved account to access team history.' : profile?.approved === false ? 'Awaiting approval. Local work remains available.' : profile && !profile.team ? 'No team assigned. Team history is unavailable.' : 'Connect and verify your account to access team history.';
+      set('team-authorization',authorization);
+      document.getElementById('team-authorization').hidden=!!scope;
       const counts=SPOTITTeamRecords.deviceCounts(c.canUseLocal ? entries : [], c.canUseLocal ? SPOTITLocalStore.snapshotContains(localStorage,activeEntriesStorageKey()) : () => false);
-      set('team-device-counts', counts.waiting+' inspections waiting on this device · '+counts.submitted+' submitted from this device · '+counts.review+' need review · '+counts.photosOnDevice+' photos on this device · '+counts.photosWaiting+' photos waiting on this device');
-      set('team-connection', navigator.onLine === false ? 'Offline · Local records remain available' : scope ? 'Connected · Submitted history available' : 'Connected · Verify an approved account to read submitted history');
-      const my=myRecords?.snapshot(),team=teamRecords?.snapshot();
-      set('team-loaded-counts',(my?.rows.length||0)+' My records loaded · '+(team?.rows.length||0)+' team records loaded. Loaded history is not a complete total.');
-      const time=p=>p?.lastRefresh ? new Date(p.lastRefresh).toLocaleString('en-PH',{timeZone:'Asia/Manila'}) : 'Not refreshed';
-      set('team-refresh-times','My: '+time(my)+' · Team: '+time(team));
-      document.getElementById('team-open-my').disabled=!myRecords || !c.canUseLocal || c.mode==='guest';
+      set('team-device-counts',counts.review+' need review / '+counts.photosOnDevice+' photos on this device / '+counts.photosWaiting+' photos not submitted');
+      set('team-submitted',counts.submitted); set('team-waiting',counts.waiting);
+      const total=counts.submitted+counts.waiting+counts.review, progress=document.getElementById('team-sync-progress');
+      progress.max=Math.max(1,total); progress.value=counts.submitted;
+      progress.setAttribute('aria-valuetext',counts.submitted+' submitted, '+counts.waiting+' waiting, '+counts.review+' needing review');
+      const runner=syncRunner?.status(), running=runner?.running === true;
+      const ready=online && !!syncRunner?.ready() && SPOTITSync.accountEligible(c);
+      set('team-sync-badge',running ? 'Syncing' : counts.review ? 'Review required' : counts.waiting ? counts.waiting+' waiting' : ready ? 'No queue' : 'Local only');
+      document.getElementById('team-sync-badge').dataset.tone=running || counts.review || counts.waiting ? 'waiting' : 'neutral';
+      set('team-sync-description','Eligible inspections submit while the app is open. Photos stay on this device.');
+      set('team-connection',!online ? 'Connection unavailable. Records remain on this device.' : !ready ? 'Account verification is required for submission. Guest and review records remain held.' : runner?.paused ? 'Submission paused. Verify your account or review the held record.' : runner?.waitingUntil > Date.now() ? 'A retry is scheduled. Uncertain submissions reconcile first.' : running ? 'Submitting eligible inspections. Keep the app open.' : counts.waiting ? 'Connected. Eligible inspections can be submitted.' : 'No inspections waiting to submit.');
+      document.getElementById('team-sync-now').disabled=running || !ready || !counts.waiting;
+      set('team-sync-action',running ? 'Syncing...' : 'Sync now');
+      const team=teamRecords?.snapshot();
+      set('team-loaded-count',scope && team?.loaded ? team.rows.length : 'Not loaded');
+      const time=p=>p?.lastRefresh ? new Date(p.lastRefresh).toLocaleString('en-PH',{timeZone:'Asia/Manila',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'Not refreshed';
+      set('team-refresh-time',scope ? time(team) : 'Not available');
+      set('team-loaded-counts',scope ? (team?.rows.length||0)+' team records loaded. Loaded history is not a complete total.' : authorization);
+      set('team-refresh-times',scope && team?.error ? 'History refresh failed. Previously loaded records may be shown.' : scope && team?.loading ? 'Refreshing team history...' : '');
+      document.getElementById('team-refresh-times').hidden=!document.getElementById('team-refresh-times').textContent;
+      document.getElementById('team-open-my').disabled=!myRecords || !c.canUseLocal || guest;
       document.getElementById('team-open-team').disabled=!scope;
+      set('team-permission-role',guest ? 'Guest' : role);
+      set('team-permission-access',scope ? 'Team history (read only)' : c.canUseLocal ? 'Local records only' : 'Account verification required');
     }
     function renderMyControls() {
       const enabled = myLogEnabled(), panel = document.getElementById('my-record-controls');
@@ -5257,6 +5302,13 @@
     document.getElementById('log-scope-team').addEventListener('click', () => switchLogScope('team'));
     document.getElementById('team-open-my').addEventListener('click', () => switchLogScope('my'));
     document.getElementById('team-open-team').addEventListener('click', () => switchLogScope('team'));
+    document.getElementById('team-sync-now').addEventListener('click', async () => {
+      const button=document.getElementById('team-sync-now'); if (button.disabled) return;
+      button.disabled=true;
+      try { await syncNow(); } finally { renderTeamWorkspace(); }
+    });
+    window.addEventListener('online', renderTeamWorkspace);
+    window.addEventListener('offline', renderTeamWorkspace);
     document.getElementById('my-record-more').addEventListener('click', () => activeRecordController()?.load(false));
 
     function syncState(counts, online, ready, syncing, localEntries) {
