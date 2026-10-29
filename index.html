@@ -15,10 +15,10 @@
     } catch (e) { /* theme preference is non-critical */ }
     document.documentElement.classList.add('auth-booting');
   </script>
-  <link rel="icon" type="image/svg+xml" href="spot it app icon.svg">
-  <link rel="apple-touch-icon" sizes="180x180" href="spot-it-app-icon-v2-180.png">
+  <link rel="icon" type="image/svg+xml" href="public/spot it app icon.svg">
+  <link rel="apple-touch-icon" sizes="180x180" href="public/spot-it-app-icon-v2-180.png">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="public/vendor/leaflet/leaflet.css">
   <title>SPOT IT — Road Inspection Log</title>
   <style id="b01-preview-styles">
     /* B01 local preview only: no selectors affect existing map controls. */
@@ -36,7 +36,7 @@
   <style>
     @font-face {
       font-family: 'Inter';
-      src: url('fonts/InterVariable.woff2') format('woff2');
+      src: url('public/fonts/InterVariable.woff2') format('woff2');
       font-style: normal;
       font-weight: 100 900;
       font-display: swap;
@@ -3932,13 +3932,13 @@
     #log-list .cloud-only p, #log-list .my-device-card p { margin: 0; font-size: 13px; }
     #log-list .cloud-only .record-date, #log-list .my-device-card .record-date { font-size: 12px; }
   </style>
-  <link rel="stylesheet" href="radius-system.css">
-  <link rel="stylesheet" href="sharing.css">
-  <link rel="stylesheet" href="photo-viewer.css">
-  <link rel="stylesheet" href="map-overlays.css">
-  <link rel="stylesheet" href="design-system.css">
-  <link rel="stylesheet" href="log-register.css">
-  <link rel="stylesheet" href="more.css">
+  <link rel="stylesheet" href="src/radius-system.css">
+  <link rel="stylesheet" href="src/sharing.css">
+  <link rel="stylesheet" href="src/photo-viewer.css">
+  <link rel="stylesheet" href="src/map-overlays.css">
+  <link rel="stylesheet" href="src/design-system.css">
+  <link rel="stylesheet" href="src/log-register.css">
+  <link rel="stylesheet" href="src/more.css">
 </head>
 
 <body>
@@ -3946,7 +3946,7 @@
   <div class="top-shell">
     <header>
       <div class="header-brand">
-        <img class="header-logo" id="header-logo" src="spot it header logo dark mode.svg" alt="Spot It">
+        <img class="header-logo" id="header-logo" src="public/spot it header logo dark mode.svg" alt="Spot It">
         <div class="header-context" id="header-map-context" hidden>
           <div class="map-road-match" id="map-workspace-road">Road match unconfirmed</div>
           <div class="map-title" id="map-km-station">KM --.---</div>
@@ -4581,46 +4581,46 @@
     </div>
   </section>
 
-  <script src="./photo-upload-state.js"></script>
-  <script src="./entry-model.js"></script>
-  <script src="./local-entry-store.js"></script>
-  <script src="./sync-queue.js"></script>
-  <script src="./preapproval-review.js"></script>
-  <script src="./guest-claim.js"></script>
-  <script src="./auth-config.js"></script>
-  <script src="./vendor/supabase/supabase-js-2.117.1.umd.js"></script>
-  <script src="./auth.js"></script>
-  <script src="./inspection-api.js"></script>
-  <script src="./cloud-records.js"></script>
-  <script src="./record-presentation.js"></script>
-  <script src="./cloud-photo-viewer.js"></script>
-  <script src="./photo-cloud-api.js"></script>
-  <script src="./photo-sync.js"></script>
-  <script src="./photo-pilot.js"></script>
-  <script src="./sync-runner.js"></script>
-  <script src="./foreground-sync.js"></script>
-  <script src="./inspection-wakeup.js"></script>
-  <script src="./map-config.js"></script>
-  <script src="vendor/leaflet/leaflet.js"></script>
-  <script src="./swipe-actions.js"></script>
-  <script src="./entry-filters.js"></script>
-  <script src="./my-records.js"></script>
-  <script src="./team-records.js"></script>
-  <script src="./map-records.js"></script>
-  <script src="./map-overlays.js"></script>
-  <script src="./inspection-sharing.js"></script>
-  <script src="./sharing-ui.js"></script>
-  <script src="./log-register.js"></script>
-  <script src="./log-controls.js"></script>
-  <script src="./more.js"></script>
-  <script src="./photo-zoom.js"></script>
-  <script src="./photo-viewer.js"></script>
-  <script src="./legacy-matcher.js"></script>
-  <script src="./location-resolver.js"></script>
-  <script src="./stationing-review-controller.js"></script>
-  <script src="./capture-location.js"></script>
-  <script src="./network-stop-gates.js"></script>
-  <script src="./manual-location.js"></script>
+  <script src="./src/photo-upload-state.js"></script>
+  <script src="./src/entry-model.js"></script>
+  <script src="./src/local-entry-store.js"></script>
+  <script src="./src/sync-queue.js"></script>
+  <script src="./src/preapproval-review.js"></script>
+  <script src="./src/guest-claim.js"></script>
+  <script src="./src/auth-config.js"></script>
+  <script src="./public/vendor/supabase/supabase-js-2.117.1.umd.js"></script>
+  <script src="./src/auth.js"></script>
+  <script src="./src/inspection-api.js"></script>
+  <script src="./src/cloud-records.js"></script>
+  <script src="./src/record-presentation.js"></script>
+  <script src="./src/cloud-photo-viewer.js"></script>
+  <script src="./src/photo-cloud-api.js"></script>
+  <script src="./src/photo-sync.js"></script>
+  <script src="./src/photo-pilot.js"></script>
+  <script src="./src/sync-runner.js"></script>
+  <script src="./src/foreground-sync.js"></script>
+  <script src="./src/inspection-wakeup.js"></script>
+  <script src="./src/map-config.js"></script>
+  <script src="public/vendor/leaflet/leaflet.js"></script>
+  <script src="./src/swipe-actions.js"></script>
+  <script src="./src/entry-filters.js"></script>
+  <script src="./src/my-records.js"></script>
+  <script src="./src/team-records.js"></script>
+  <script src="./src/map-records.js"></script>
+  <script src="./src/map-overlays.js"></script>
+  <script src="./src/inspection-sharing.js"></script>
+  <script src="./src/sharing-ui.js"></script>
+  <script src="./src/log-register.js"></script>
+  <script src="./src/log-controls.js"></script>
+  <script src="./src/more.js"></script>
+  <script src="./src/photo-zoom.js"></script>
+  <script src="./src/photo-viewer.js"></script>
+  <script src="./src/legacy-matcher.js"></script>
+  <script src="./src/location-resolver.js"></script>
+  <script src="./src/stationing-review-controller.js"></script>
+  <script src="./src/capture-location.js"></script>
+  <script src="./src/network-stop-gates.js"></script>
+  <script src="./src/manual-location.js"></script>
   <script>
     class GeoKalmanFilter {
       constructor() {
@@ -5482,7 +5482,7 @@
           }
         }
         statusEl.textContent = 'Downloading NLEX network alignment...';
-        const res = await fetch('calibration.json', { cache: 'no-store' });
+        const res = await fetch('public/calibration.json', { cache: 'no-store' });
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const text = await res.text();
         calibData = sanitizeCalibData(JSON.parse(text));
@@ -5622,7 +5622,7 @@
           }
         }
         statusEl.textContent = 'Loading interchange line dataset...';
-        const res = await fetch('interchanges.json', { cache: 'no-store' });
+        const res = await fetch('public/interchanges.json', { cache: 'no-store' });
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const text = await res.text();
         rampData = sanitizeRampData(JSON.parse(text));
@@ -5860,7 +5860,7 @@
 
     async function loadBridgeDataset() {
       try {
-        const response = await fetch('bridges.json', { cache: 'no-store' });
+        const response = await fetch('public/bridges.json', { cache: 'no-store' });
         if (!response.ok) throw new Error('HTTP ' + response.status);
         bridgeData = sanitizeBridgeData(await response.json());
         updateMapLandmarks();
@@ -6212,7 +6212,7 @@
       osmMap.on('moveend', rememberMapView);
       osmMap.on('zoomend', rememberMapView);
       updateMapLandmarks();
-      fetch('map-landmarks.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(data => { if (!Array.isArray(data.assets)) throw new Error('Invalid landmark dataset'); supplementalMapLandmarks = data.assets; updateMapLandmarks(); }).catch(err => console.warn('Additional interchange markers unavailable', err));
+      fetch('public/map-landmarks.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(data => { if (!Array.isArray(data.assets)) throw new Error('Invalid landmark dataset'); supplementalMapLandmarks = data.assets; updateMapLandmarks(); }).catch(err => console.warn('Additional interchange markers unavailable', err));
       updateOsmLocation();
       updateMapEntries();
       attachB01Preview(osmMap);
@@ -6463,8 +6463,8 @@
       const isMap = viewName === 'map';
       const isLight = document.documentElement.dataset.theme === 'light';
       logo.src = isMap
-        ? (isLight ? 'spot it header map logo light mode.svg' : 'spot it header map logo dark mode.svg')
-        : (isLight ? 'spot it header logo light mode.svg' : 'spot it header logo dark mode.svg');
+        ? (isLight ? 'public/spot it header map logo light mode.svg' : 'public/spot it header map logo dark mode.svg')
+        : (isLight ? 'public/spot it header logo light mode.svg' : 'public/spot it header logo dark mode.svg');
       logo.dataset.logoContext = isMap ? 'map' : 'default';
       logo.alt = isMap ? 'Spot It map' : 'Spot It';
       context.hidden = !isMap;
@@ -6807,7 +6807,7 @@
     }
     function stationingReviewController() {
       if (!stationingReview) stationingReview = SPOTITStationingReviewController.create({
-        makeWorker: () => new Worker('./stationing-review-worker.js'),
+        makeWorker: () => new Worker('./src/stationing-review-worker.js'),
         getReference: () => ({rows:calibData, conventions:EXPRESSWAY_BOUND_BY_TREND}), now: () => Date.now(),
         setTimer: (fn,ms) => globalThis.setTimeout(fn,ms), clearTimer: id => globalThis.clearTimeout(id),
         onResult: renderStationingReview,
@@ -6854,7 +6854,7 @@
         picker.hidden=choices.length<2;
       } else { const picker=document.getElementById('nearby-interchange-choice');if(picker)picker.hidden=true; }
     }));
-    fetch('./stationing-reconstruction-evidence-user-edits-20261020.json').then(r=>{if(!r.ok)throw Error('GIS unavailable');return r.json();}).then(model=>{manualLocation.load(model);refreshManualLocation();}).catch(()=>{});
+    fetch('./public/stationing-reconstruction-evidence-user-edits-20261020.json').then(r=>{if(!r.ok)throw Error('GIS unavailable');return r.json();}).then(model=>{manualLocation.load(model);refreshManualLocation();}).catch(()=>{});
     refreshManualLocation();
     captureLocationReady = true;
     if (stationingReviewAllowed() && calibData.length) stationingReviewController().enable();

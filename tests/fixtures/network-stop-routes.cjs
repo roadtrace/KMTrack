@@ -1,0 +1,5 @@
+'use strict';
+const G=require('../../src/network-stop-gates.js');
+function pointAt(cs,offset){for(let i=1;i<cs.length;i++){const n=G.distance(cs[i-1],cs[i]);if(offset<=n){const t=Math.max(0,offset/n);return [cs[i-1][0]+(cs[i][0]-cs[i-1][0])*t,cs[i-1][1]+(cs[i][1]-cs[i-1][1])*t];}offset-=n;}return cs.at(-1);}
+function route(feature,context,start=100000){const g=feature.properties,c=feature.geometry.coordinates,source=context.sources.find(s=>s.id===g.source_id),projection=G.project(c,source.coordinates),isA=g.kind==='RAMP_TERMINAL_DEPARTURE'&&g.approach.includes('TERMINAL_A'),offsets=[-60,-40,-20,15,30,45,60];return offsets.map((offset,i)=>{let p;if(g.kind==='ALIGNMENT_DEPARTURE'||offset<0)p=pointAt(source.coordinates,projection.progressM+offset*(isA?-1:1));else {const b=g.bearing_deg*Math.PI/180;p=[c[0]+offset*Math.sin(b)/(111195*Math.cos(c[1]*Math.PI/180)),c[1]+offset*Math.cos(b)/111195];}return {lon:p[0],lat:p[1],accuracy:3,timestamp:start+i*2000,speed:10,heading:null};});}
+module.exports={pointAt,route};

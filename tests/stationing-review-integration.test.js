@@ -1,0 +1,21 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
+const html=fs.readFileSync(path.join(__dirname, '..','index.html'),'utf8');
+test('real worker script and actual controller exchange mathematical fixtures asynchronously',async()=>{
+ const Controller=require('../src/stationing-review-controller.js'),API=require('../src/stationing-review.js'),Legacy=require('../src/legacy-matcher.js');let w,output;const timers=new Set();const model=[{e:'NLEX',b:'NB',k:10,lat:0,lon:0},{e:'NLEX',b:'SB',k:10,lat:0,lon:0}];
+ const client=Controller.create({makeWorker:()=>{w={terminated:false,postMessage(m){queueMicrotask(()=>{if(!w.terminated)ctx.self.onmessage({data:structuredClone(m)});});},terminate(){this.terminated=true;}};const ctx=vm.createContext({importScripts(){},SPOTITStationingReview:API,SPOTITLegacyMatcher:Legacy,self:{postMessage(m){queueMicrotask(()=>w.onmessage?.({data:structuredClone(m)}));}}});vm.runInContext(fs.readFileSync(path.join(__dirname, '..','src/stationing-review-worker.js'),'utf8'),ctx);return w;},getReference:()=>({rows:model,conventions:{}}),now:()=>1000,setTimer:fn=>{timers.add(fn);return fn;},clearTimer:fn=>timers.delete(fn),onResult:r=>output=r,onStatus(){}});
+ client.enable();client.observe({lat:0,lon:0,accuracy:3,timestamp:1000});await new Promise(resolve=>setImmediate(resolve));assert.equal(output.status,'AMBIGUOUS_REFERENCE_BOUND');assert.equal(output.operational.km,null);assert.equal(output.operationalUsePermitted,false);client.disable();assert.equal(w.terminated,true);assert.equal(timers.size,0);
+});
+
+test('actual service-worker install caches review dependencies and serves cached modules offline without evaluation',async()=>{
+ const handlers={},stored=new Map();let skipped=0,networkCalls=0,claimed=0;const removed=[];
+ const cache={addAll:async names=>{for(const n of names){assert.ok(fs.existsSync(path.join(__dirname, '..',n==='./'?'index.html':n)));stored.set(n,{asset:n});}},put:async()=>{throw Error('unexpected cache write');}};
+ const ctx=vm.createContext({URL,importScripts(){},self:{location:{origin:'http://localhost:8123',href:'http://localhost:8123/sw.js'},addEventListener:(n,fn)=>handlers[n]=fn,skipWaiting:()=>skipped++,clients:{claim:()=>claimed++}},SPOTITInspectionWakeup:{},caches:{open:async n=>{assert.equal(n,'spotit-shell-v251');return cache;},keys:async()=>['spotit-shell-v245','spotit-shell-v251'],delete:async n=>removed.push(n),match:async req=>stored.get(typeof req==='string'?req:'./'+new URL(req.url).pathname.slice(1))},fetch:async()=>{networkCalls++;throw Error('SIMULATED_OFFLINE');}});
+ vm.runInContext(fs.readFileSync(path.join(__dirname, '..','sw.js'),'utf8'),ctx);let pending;handlers.install({waitUntil:p=>pending=p});await pending;assert.equal(skipped,1);
+ for(const n of ['src/stationing-review.js','src/stationing-review-controller.js','src/stationing-review-worker.js','src/network-stop-gates.js','public/network-stop-context.json','public/network-stop-gates.geojson','public/stationing-reconstruction-evidence-user-edits-20261020.json','src/capture-location.js']){let response;handlers.fetch({request:{method:'GET',url:'http://localhost:8123/'+n},respondWith:p=>response=p});assert.equal((await response).asset,'./'+n);}
+ assert.equal(networkCalls,0);assert.equal(ctx.SPOTITStationingReview,undefined);handlers.activate({waitUntil:p=>pending=p});await pending;assert.deepEqual(removed,['spotit-shell-v245']);assert.equal(claimed,1);
+});
+
+test('actual controller invalidation clears displayed stale diagnostics before resetting its worker',()=>{
+ let displayed='old hint',workers=[];const c=require('../src/stationing-review-controller.js').create({makeWorker:()=>{const w={postMessage(){},terminate(){}};workers.push(w);return w;},getReference:()=>({rows:[{e:'NLEX',b:'NB',k:10,lat:0,lon:0}]}),now:()=>1000,setTimer:()=>1,clearTimer(){},onResult:r=>displayed=r,onStatus(){},onReset:()=>displayed=null});c.enable();displayed='NB';c.invalidate();assert.equal(displayed,null);assert.equal(workers.length,2);displayed='SB';c.referenceChanged();assert.equal(displayed,null);c.disable();assert.equal(displayed,null);
+});
