@@ -58,7 +58,7 @@ test('light keeps the CARTO raster, authenticates tile requests, and stays behin
   const context = vm.createContext({
     osmMap:map,osmBaseLayer:null,osmVectorLayer:null,
     document:{baseURI:'https://example.invalid/',documentElement:{dataset:{theme:'light'}},getElementById:id=>{if(!nodes.has(id))nodes.set(id,{});return nodes.get(id);}},
-    SPOTITOfflineMap:require('../src/offline-map'),navigator:{onLine:true},fetch(){throw Error('unexpected fetch');},window:{addEventListener(){}},setTimeout(){},
+    navigator:{onLine:true},fetch(){throw Error('unexpected fetch');},window:{addEventListener(){}},setTimeout(){},
     L:{tileLayer(url,options){
       const layer = {url,options,removed:false,addTo(target){assert.equal(target,map);return this;},remove(){this.removed=true;},bringToBack(){this.behindOverlays=true;}};
       layers.push(layer);

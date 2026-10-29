@@ -1491,11 +1491,6 @@
     .location-mode button[aria-pressed="true"] { background:#ffbf00; color:#14202b; border-color:#ffbf00; }
     .location-mode button:active { opacity:.75; }
     #nearby-interchange-choice { width:100%; min-height:44px; font-size:16px; margin:8px 0; }
-    .offline-map-controls { position:absolute; z-index:800; left:12px; top:60px; max-width:min(340px,calc(100% - 24px)); padding:10px; border:1px solid var(--border); border-radius:10px; background:var(--surface, #1e2936); color:var(--text, #eef2f6); font-size:12px; }
-    .offline-map-controls summary { cursor:pointer; font-weight:700; }
-    .offline-map-controls p { margin:8px 0; }
-    .offline-map-controls div { display:flex; flex-wrap:wrap; gap:6px; }
-    .offline-map-controls button { min-height:44px; padding:8px; border-radius:6px; touch-action:manipulation; }
     .defect-gate {
       display: none;
     }
@@ -4247,8 +4242,6 @@
 
   <section class="app-view map-view" id="map-view" role="tabpanel" aria-labelledby="map-tab" hidden>
     <div id="osm-map" aria-label="OpenStreetMap showing the current inspection location"></div>
-    <details class="offline-map-controls"><summary id="offline-map-summary">Offline map</summary><p>Save NLEX inspection geometry for use without a connection. Includes available calibration lines and interchanges, not street-map tiles or complete road coverage.</p><div><button type="button" id="offline-map-save">Save inspection map</button><button type="button" id="offline-map-use" disabled>Use saved map</button><button type="button" id="offline-map-online">Use online map</button><button type="button" id="offline-map-remove" disabled>Remove saved map</button></div><p id="offline-map-status" role="status" aria-live="polite">Checking saved map...</p><p id="offline-map-active" hidden>Saved inspection geometry - no street-map background</p></details>
-    <div class="map-workspace-scope"><select id="map-record-scope" aria-label="Map record scope"><option value="my">My records</option><option value="team">Team records</option></select><button type="button" id="map-history-refresh">Refresh</button><button type="button" id="map-history-more">Load more</button><small id="map-history-coverage" role="status"></small></div>
     <div class="map-visible-count" id="map-visible-count" role="status">0 visible</div>
     <div id="map-bound-legend" class="map-bound-legend" aria-label="Map legend"></div>
     <details class="map-workspace-legend" id="map-workspace-legend"><summary>Legend<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="map-workspace-legend-body"><div class="map-workspace-legend-title">Defect types</div><div id="map-type-legend"></div><div class="map-workspace-legend-title">Marker colors · bound</div><div id="map-light-bound-legend" aria-label="Marker bound colors"></div></div></details>
@@ -4272,6 +4265,7 @@
             <path d="M4 5h16l-6 7v6l-4 2v-8z" />
           </svg><span id="map-filter-count" class="map-filter-count" hidden>0</span></summary>
         <div class="map-filter-options">
+          <div class="map-history-filter"><select id="map-record-scope" aria-label="Map record scope"><option value="my">My records</option><option value="team">Team records</option></select><button type="button" id="map-history-refresh">Refresh</button><button type="button" id="map-history-more">Load more</button><small id="map-history-coverage" role="status"></small></div>
           <label class="map-light-filter-field"><input type="checkbox" id="map-light-show-entries" checked>Show records</label>
           <label class="map-light-filter-field">From<input type="date" id="map-light-entry-from" aria-label="Map from date"></label>
           <label class="map-light-filter-field">To<input type="date" id="map-light-entry-to" aria-label="Map to date"></label>
@@ -4608,7 +4602,6 @@
   <script src="./src/foreground-sync.js"></script>
   <script src="./src/inspection-wakeup.js"></script>
   <script src="./src/map-config.js"></script>
-  <script src="./src/offline-map.js"></script>
   <script src="public/vendor/leaflet/leaflet.js"></script>
   <script src="./src/swipe-actions.js"></script>
   <script src="./src/entry-filters.js"></script>
@@ -6064,38 +6057,7 @@
     let mapTilerSdkPromise = null;
     let syncVectorCamera = null;
     let activeBasemapKey = '';
-    let offlineMapSelected = false, offlineGeometryLayer = null, offlineMapSaved = null, offlineRenderEpoch = 0;
-    const offlineMapPack = SPOTITOfflineMap.create({caches:globalThis.caches,fetch:(...args)=>fetch(...args),crypto:globalThis.crypto,baseURL:document.baseURI});
-    async function refreshOfflineMapStatus() {
-      try { offlineMapSaved = await offlineMapPack.read(); } catch (_) { offlineMapSaved = null; }
-      const status=document.getElementById('offline-map-status');
-      status.textContent=offlineMapSaved ? 'Saved on this device - '+(offlineMapSaved.manifest.bytes/1048576).toFixed(1)+' MB - '+new Date(offlineMapSaved.manifest.savedAt).toLocaleDateString() : 'Not saved. Download while connected.';
-      document.getElementById('offline-map-use').disabled=!offlineMapSaved;
-      document.getElementById('offline-map-remove').disabled=!offlineMapSaved;
-    }
-    async function showSavedInspectionMap() {
-      const epoch=++offlineRenderEpoch;
-      try { offlineMapSaved=await offlineMapPack.read(); } catch (_) { offlineMapSaved=null; }
-      if(epoch!==offlineRenderEpoch||!osmMap||!(offlineMapSelected||navigator.onLine===false))return;
-      if(offlineGeometryLayer){offlineGeometryLayer.remove();offlineGeometryLayer=null;}
-      document.getElementById('offline-map-active').hidden=false;
-      document.getElementById('offline-map-summary').textContent=offlineMapSaved?'Saved map active':'Offline - no saved map';
-      if(!offlineMapSaved){document.getElementById('offline-map-status').textContent='Offline map not saved. Connect and save it first.';return;}
-      offlineGeometryLayer=L.geoJSON(offlineMapSaved.geojson,{interactive:false,style:feature=>({color:feature.properties.kind==='reference'?'#269fa6':'#ffbf00',weight:feature.properties.kind==='reference'?4:3,opacity:.85})}).addTo(osmMap);
-      osmMap.attributionControl.addAttribution('Inspection geometry - calibration reference and retained GIS; not surveyed road membership');
-    }
-    document.getElementById('offline-map-save').onclick=async()=>{
-      const controls=['offline-map-save','offline-map-use','offline-map-remove','offline-map-online'].map(id=>document.getElementById(id));controls.forEach(b=>b.disabled=true);
-      try { await offlineMapPack.save((done,total)=>{document.getElementById('offline-map-status').textContent='Saving inspection map '+done+'/'+total+'...';});await refreshOfflineMapStatus();if(offlineMapSelected||navigator.onLine===false)updateOsmBasemap(true); }
-      catch(error){try{offlineMapSaved=await offlineMapPack.read();}catch(_){offlineMapSaved=null;}document.getElementById('offline-map-status').textContent=error.name==='QuotaExceededError'?'Not enough device storage. Inspection records and photos were not removed.':error.message;}
-      finally { controls[0].disabled=false;controls[3].disabled=false;controls[1].disabled=!offlineMapSaved;controls[2].disabled=!offlineMapSaved; }
-    };
-    document.getElementById('offline-map-use').onclick=()=>{offlineMapSelected=true;updateOsmBasemap(true);};
-    document.getElementById('offline-map-online').onclick=()=>{offlineMapSelected=false;updateOsmBasemap(true);};
-    document.getElementById('offline-map-remove').onclick=async()=>{try{await offlineMapPack.remove();offlineMapSelected=false;await refreshOfflineMapStatus();updateOsmBasemap(true);}catch(_){document.getElementById('offline-map-status').textContent='Could not remove the saved map.';}};
-    refreshOfflineMapStatus();
-    window.addEventListener('online',()=>updateOsmBasemap(true));
-    window.addEventListener('offline',()=>updateOsmBasemap(true));
+    let basemapRenderEpoch = 0;
     const warmMapEngine=()=>{if(navigator.onLine!==false&&document.documentElement.dataset.theme!=='light')ensureMapTilerSdk().catch(()=>{});};
     if(typeof requestIdleCallback==='function')requestIdleCallback(warmMapEngine,{timeout:4000});else setTimeout(warmMapEngine,1500);
 
@@ -6141,9 +6103,7 @@
     }
 
     function clearBasemaps() {
-      activeBasemapKey='';offlineRenderEpoch++;
-      if(offlineGeometryLayer){offlineGeometryLayer.remove();offlineGeometryLayer=null;}
-      if(osmMap)osmMap.attributionControl.removeAttribution('Inspection geometry - calibration reference and retained GIS; not surveyed road membership');
+      activeBasemapKey='';basemapRenderEpoch++;
       if (osmVectorLayer && osmMap) {
         // The vendored MapTiler Leaflet plugin leaves its logo and attribution
         // behind on removal; clear only those plugin-owned elements on a switch.
@@ -6164,13 +6124,10 @@
     function updateOsmBasemap(force = false) {
       if (!osmMap) return;
       const theme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
-      const key=(offlineMapSelected||navigator.onLine===false)?'offline':theme;
+      const key=theme;
       if(!force&&activeBasemapKey===key)return;
       clearBasemaps();activeBasemapKey=key;
-      document.getElementById('offline-map-active').hidden=key!=='offline';
-      document.getElementById('offline-map-summary').textContent=key==='offline'?'Saved inspection map':'Offline map';
-      const requestEpoch=offlineRenderEpoch;
-      if(key==='offline'){showSavedInspectionMap();return;}
+      const requestEpoch=basemapRenderEpoch;
 
       if (theme !== 'dark') {
         addRasterBasemap(theme);
@@ -6179,7 +6136,7 @@
 
       ensureMapTilerSdk().then(() => {
         // The theme may have flipped again while the SDK was loading.
-        if (!osmMap || requestEpoch!==offlineRenderEpoch || offlineMapSelected || navigator.onLine===false || document.documentElement.dataset.theme === 'light') return;
+        if (!osmMap || requestEpoch!==basemapRenderEpoch || navigator.onLine===false || document.documentElement.dataset.theme === 'light') return;
         clearBasemaps();
         const layer = L.maptilerLayer({
           style: SPOTITMapConfig.styleUrl,
@@ -6230,7 +6187,7 @@
           let vectorReady = false;
           vectorMap.once('load', () => { vectorReady = true; });
           window.setTimeout(() => {
-            if (vectorReady || !osmMap || offlineMapSelected || navigator.onLine===false || osmVectorLayer !== layer) return;
+            if (vectorReady || !osmMap || navigator.onLine===false || osmVectorLayer !== layer) return;
             if (document.documentElement.dataset.theme === 'light') return;
             console.warn('MapTiler style did not load; using the raster dark basemap');
             clearBasemaps();
@@ -8347,7 +8304,7 @@
         const online = navigator.onLine !== false;
         tilesPill.classList.toggle('status-fresh', online);
         tilesPill.classList.toggle('status-warn', !online);
-        tilesText.textContent = online ? 'Online map enabled' : 'Online tiles unavailable ? saved map may be used';
+        tilesText.textContent = online ? 'Online map enabled' : 'Online tiles unavailable';
       }
     }
 

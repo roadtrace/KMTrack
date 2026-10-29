@@ -4,11 +4,10 @@
 // since the app already manages its own offline copy of that file and
 // the in-app "Reload dataset" button needs a real network attempt.
 
-const CACHE_VERSION = 'v253'; // bump this string whenever you deploy changes, to force an update
+const CACHE_VERSION = 'v254'; // bump this string whenever you deploy changes, to force an update
 const CACHE_NAME = `spotit-shell-${CACHE_VERSION}`;
 
 const APP_SHELL = [
-  './src/offline-map.js',
   './public/vendor/maptiler/maptiler-sdk.css',
   './public/vendor/maptiler/maptiler-sdk.umd.min.js',
   './public/vendor/maptiler/leaflet-maptilersdk.js',
