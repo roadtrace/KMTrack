@@ -1485,6 +1485,11 @@
     /* Defect buttons are visibly disabled until GPS actually locks, instead
      of silently doing nothing (or relying on a per-tap alert) — makes it
      obvious *why* taps aren't logging rather than looking broken. */
+    .location-mode { display:flex; gap:8px; margin-bottom:12px; }
+    .location-mode button { min-height:44px; padding:8px 14px; border:1px solid var(--border, #46515f); border-radius:8px; background:var(--surface, #293441); color:inherit; font:inherit; font-size:13px; font-weight:700; touch-action:manipulation; user-select:none; }
+    .location-mode button[aria-pressed="true"] { background:#ffbf00; color:#14202b; border-color:#ffbf00; }
+    .location-mode button:active { opacity:.75; }
+    #nearby-interchange-choice { width:100%; min-height:44px; font-size:16px; margin:8px 0; }
     .defect-gate {
       display: none;
     }
@@ -4018,6 +4023,10 @@
 
         <!-- 2. Road identity and bound, then 3. the station. -->
         <div class="instrument-station">
+          <div class="location-mode" role="group" aria-label="Capture location mode">
+            <button type="button" data-location-mode="mainline" aria-pressed="false">Mainline</button>
+            <button type="button" data-location-mode="interchange" aria-pressed="false">Interchange</button>
+          </div>
           <span class="segment-tag" id="segment-tag">--</span>
           <div class="kmvalue" id="km-value">--.---</div>
           <div class="station-caption" id="current-location-label">Station</div>
@@ -4610,6 +4619,8 @@
   <script src="./location-resolver.js"></script>
   <script src="./stationing-review-controller.js"></script>
   <script src="./capture-location.js"></script>
+  <script src="./network-stop-gates.js"></script>
+  <script src="./manual-location.js"></script>
   <script>
     class GeoKalmanFilter {
       constructor() {
@@ -4637,6 +4648,8 @@
     }
     const gpsFilter = new GeoKalmanFilter();
     const captureLocation = SPOTITCaptureLocation.create();
+    const manualLocation = SPOTITManualLocation.create();
+    try { manualLocation.setMode(localStorage.getItem('nlex_capture_mode_v1') || ''); } catch (_) {}
     let captureLocationReady = false;
 
     let currentPos = null; // {lat, lon, acc, timestamp, fresh}; coordinates are Kalman-smoothed
@@ -6550,6 +6563,11 @@
     }
 
     function resolvedEntrySnapshot() {
+      if (manualLocation.mode()) {
+        const r = currentResolvedLocation;
+        if (!currentPos?.fresh || !r?.saveAllowed || r.fixTimestamp !== currentPos.timestamp || Date.now()-r.fixTimestamp > GPS_FRESH_MS) return null;
+        return {lat:currentPos.rawLat,lon:currentPos.rawLon,km:r.interchange ? null : r.result.km,expressway:r.result.expressway,bound:userBound || '',interchange:r.interchange?.name || '',interchangeSegment:r.interchange?.segment || ''};
+      }
       return captureLocation.snapshot({position:currentPos,now:Date.now(),bound:userBound || ''});
     }
 
@@ -6566,6 +6584,11 @@
 
     function resolveFreshLocation(speedMs) {
       if (!currentPos) return null;
+      if (manualLocation.mode()) {
+        currentResolvedLocation = manualLocation.resolve({lat:currentPos.rawLat,lon:currentPos.rawLon,accuracy:currentPos.acc,timestamp:currentPos.timestamp},computeCorridorCandidates(currentPos.rawLat,currentPos.rawLon),Date.now());
+        setGpsCaptureReady(resolvedLocationCanSave());
+        return currentResolvedLocation;
+      }
       currentResolvedLocation = captureLocation.beginFix({
         lat:currentPos.rawLat,lon:currentPos.rawLon,accuracy:currentPos.acc,timestamp:currentPos.timestamp
       });
@@ -6575,7 +6598,7 @@
 
     function markGpsUncertain(message) {
       if (currentPos) currentPos.fresh = false;
-      currentResolvedLocation = captureLocation.invalidate(message);
+      currentResolvedLocation = manualLocation.mode() && currentResolvedLocation ? {...currentResolvedLocation,fresh:false,saveAllowed:false,uncertain:true,reason:message} : captureLocation.invalidate(message);
       gpsStatus.textContent = message;
       gpsStatus.className = 'status warn';
       setGpsCaptureReady(false);
@@ -6653,7 +6676,7 @@
       if (!result) {
         kmEl.textContent = '--.---';
         updateMapKmStation();
-        tagEl.textContent = calibData.length ? '--' : 'dataset not loaded';
+        tagEl.textContent = manualLocation.mode() ? resolution?.reason || 'Waiting for GPS' : calibData.length ? '--' : 'dataset not loaded';
         tagEl.classList.remove('faroff');
         post.classList.remove('interchange-mode');
         locationLabel.textContent = 'Station';
@@ -6767,6 +6790,7 @@
       return typeof Worker === 'function' && typeof SPOTITStationingReviewController !== 'undefined';
     }
     function renderStationingReview(result) {
+      if (manualLocation.mode()) return;
       const resolved = captureLocation.accept(result,result.reviewFixTimestamp,Date.now());
       if (!resolved) return;
       currentResolvedLocation = resolved;
@@ -6788,12 +6812,13 @@
         setTimer: (fn,ms) => globalThis.setTimeout(fn,ms), clearTimer: id => globalThis.clearTimeout(id),
         onResult: renderStationingReview,
         onReset: () => {
+          if (manualLocation.mode()) return;
           currentResolvedLocation = captureLocation.invalidate('Locating road');
           setGpsCaptureReady(false);
           if (currentPos) updateReadout();
         },
         onStatus: (text,enabled) => {
-          if (!enabled) {
+          if (!enabled && !manualLocation.mode()) {
             currentResolvedLocation = captureLocation.invalidate('Location unavailable');
             setGpsCaptureReady(false);
             if (currentPos) updateReadout();
@@ -6804,7 +6829,7 @@
     }
     function queueStationingReview(position) {
       try {
-        if (!stationingReview?.enabled() || !stationingReviewAllowed()) return;
+        if (manualLocation.mode() || !stationingReview?.enabled() || !stationingReviewAllowed()) return;
         const raw = position.coords;
         stationingReview.observe({lat:raw.latitude,lon:raw.longitude,accuracy:raw.accuracy,timestamp:position.timestamp,speed:raw.speed,heading:raw.heading},
           {manualBound:userBound || '',interchange:false});
@@ -6813,6 +6838,24 @@
         setGpsCaptureReady(false);
       }
     }
+    function refreshManualLocation() {
+      document.querySelectorAll('[data-location-mode]').forEach(button => button.setAttribute('aria-pressed',String(button.dataset.locationMode === manualLocation.mode())));
+      if (currentPos?.fresh) { resolveFreshLocation(null); updateReadout(); }
+    }
+    document.querySelectorAll('[data-location-mode]').forEach(button => button.addEventListener('click',() => {
+      manualLocation.setMode(button.dataset.locationMode);
+      try { localStorage.setItem('nlex_capture_mode_v1',manualLocation.mode()); } catch (_) {}
+      refreshManualLocation();
+      if (manualLocation.mode() === 'interchange' && currentPos?.fresh) {
+        const choices = manualLocation.nearby({lat:currentPos.rawLat,lon:currentPos.rawLon});
+        let picker = document.getElementById('nearby-interchange-choice');
+        if (!picker) { picker=document.createElement('select');picker.id='nearby-interchange-choice';picker.setAttribute('aria-label','Nearby interchange');document.querySelector('.location-mode').after(picker);picker.addEventListener('change',()=>{manualLocation.selectSite(picker.value);refreshManualLocation();}); }
+        picker.replaceChildren(...choices.map(c=>{const option=document.createElement('option');option.value=c.source.site;option.textContent=c.source.name+' ('+Math.round(c.distanceM)+' m)';return option;}));
+        picker.hidden=choices.length<2;
+      } else { const picker=document.getElementById('nearby-interchange-choice');if(picker)picker.hidden=true; }
+    }));
+    fetch('./stationing-reconstruction-evidence-user-edits-20261020.json').then(r=>{if(!r.ok)throw Error('GIS unavailable');return r.json();}).then(model=>{manualLocation.load(model);refreshManualLocation();}).catch(()=>{});
+    refreshManualLocation();
     captureLocationReady = true;
     if (stationingReviewAllowed() && calibData.length) stationingReviewController().enable();
 

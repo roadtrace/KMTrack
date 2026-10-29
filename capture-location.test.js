@@ -37,7 +37,7 @@ function block(start,end){const a=html.indexOf(start),b=html.indexOf(end,a);asse
 function app(){
  const nodes=new Map();const el=id=>{if(!nodes.has(id))nodes.set(id,{textContent:'',dataset:{},classList:{values:new Set(),add(v){this.values.add(v);},remove(v){this.values.delete(v);},toggle(v,on){if(on)this.values.add(v);else this.values.delete(v);},contains(v){return this.values.has(v);}},closest(){return this;}});return nodes.get(id);};
  let clock=10000,observed=[],workerRequests=0,alerts=[];
- const ctx=vm.createContext({Date:{now:()=>clock},document:{getElementById:el},Worker:function(){},SPOTITCaptureLocation:Capture,SPOTITLocation:require('./location-resolver'),SPOTITEntry:require('./entry-model'),SPOTITStationingReviewController:{create:options=>({enable(){workerRequests++;},enabled:()=>true,observe:(...args)=>observed.push(args)})},calibData:[fix],captureLocation:Capture.create(),captureLocationReady:false,currentPos:{...fix,rawLat:fix.lat,rawLon:fix.lon,acc:fix.accuracy,fresh:true},currentResolvedLocation:null,stationingReview:null,EXPRESSWAY_BOUND_BY_TREND:{},GPS_FRESH_MS:12000,userBound:'',boundManuallySelected:false,trendEstablished:false,gpsStatus:el('gps-status'),setTimeout(){},clearTimeout(){},updateReadout(){},saveBound(){},alert:m=>alerts.push(m),entries:[],fullTimestamp:()=> '2026-10-28 12:00:00',captureNeedsPreapproval:()=>false,authDisplayState:{mode:'guest'},inspectorName:'Test',saveEntries:()=>true,foregroundSync:{changed(){}},cameraEditTargetIndex:null,cameraStream:null,cameraVideo:{videoWidth:0},cameraErrorEl:el('camera-error'),updateCameraOverlay(){}});
+ const ctx=vm.createContext({Date:{now:()=>clock},document:{getElementById:el,querySelectorAll:()=>[]},Worker:function(){},SPOTITCaptureLocation:Capture,SPOTITLocation:require('./location-resolver'),SPOTITEntry:require('./entry-model'),SPOTITStationingReviewController:{create:options=>({enable(){workerRequests++;},enabled:()=>true,observe:(...args)=>observed.push(args)})},calibData:[fix],manualLocation:require('./manual-location').create(),fetch:()=>Promise.reject(Error('test offline')),captureLocation:Capture.create(),captureLocationReady:false,currentPos:{...fix,rawLat:fix.lat,rawLon:fix.lon,acc:fix.accuracy,fresh:true},currentResolvedLocation:null,stationingReview:null,EXPRESSWAY_BOUND_BY_TREND:{},GPS_FRESH_MS:12000,userBound:'',boundManuallySelected:false,trendEstablished:false,gpsStatus:el('gps-status'),setTimeout(){},clearTimeout(){},updateReadout(){},saveBound(){},alert:m=>alerts.push(m),entries:[],fullTimestamp:()=> '2026-10-28 12:00:00',captureNeedsPreapproval:()=>false,authDisplayState:{mode:'guest'},inspectorName:'Test',saveEntries:()=>true,foregroundSync:{changed(){}},cameraEditTargetIndex:null,cameraStream:null,cameraVideo:{videoWidth:0},cameraErrorEl:el('camera-error'),updateCameraOverlay(){}});
  vm.runInContext(block('    function resolvedLocationCanSave()', '    function markGpsUncertain('),ctx);
  vm.runInContext(block('    // One network calculation', '    let trendLastKm = null;'),ctx);
  vm.runInContext(block('    function logDefect(', '    // ---------- Sound feedback'),ctx);
@@ -60,6 +60,15 @@ test('actual Capture controls do not dim or insert the GPS gate during routine w
  assert.equal(a.ctx.resolvedEntrySnapshot(),null);
  a.ctx.currentResolvedLocation=a.ctx.captureLocation.invalidate('GPS lost');a.ctx.setGpsCaptureReady(false);
  assert(classes.contains('gps-pending'));assert(!classes.contains('gps-updating'));
+});
+test('manual interchange supplies real capture records and ignores late automatic results',()=>{
+ const a=app(),model=require('./stationing-reconstruction-evidence-user-edits-20261020.json');a.ctx.manualLocation.load(model);
+ const source=model.interchanges.find(r=>r.site==='nlex_meycauayan'),[lon,lat]=source.coordinates[0];a.ctx.currentPos={lat,lon,rawLat:lat,rawLon:lon,acc:5,timestamp:10000,fresh:true};a.ctx.computeCorridorCandidates=()=>[];
+ a.ctx.manualLocation.setMode('interchange');a.ctx.resolveFreshLocation(null);a.ctx.logDefect('Crack','1');
+ assert.equal(a.ctx.entries[0].interchange,'Meycauayan Interchange');assert.equal(a.ctx.entries[0].km,null);
+ a.ctx.renderStationingReview({...result(),reviewFixTimestamp:10000});assert.equal(a.ctx.resolvedEntrySnapshot().interchange,'Meycauayan Interchange');
+ a.ctx.queueStationingReview({get coords(){throw Error('manual selection must skip worker');}});assert.equal(a.observed.length,0);
+ a.ctx.computeCorridorCandidates=()=>[{expressway:'NLEX',km:20.2,distance:.002,bound:'NB'}];a.ctx.manualLocation.setMode('mainline');a.ctx.resolveFreshLocation(null);a.ctx.logDefect('Crack','2');assert.equal(a.ctx.entries[1].km,20.2);assert.equal(a.ctx.entries[1].interchange,'');
 });
 test('actual defect record and camera draft use the same accepted interchange and station',()=>{
  const a=app();a.accept(result(true));a.ctx.logDefect('Crack','1');let saved=a.ctx.entries.at(-1),camera=a.ctx.getCameraSnapshot('Crack');
