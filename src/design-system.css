@@ -3132,3 +3132,17 @@ html:root #map-view .map-history-filter small { flex-basis: 100%; color: var(--d
 #manual-location-toggle .switch-knob { top:10px; left:4px; width:24px; height:24px; background:var(--ds-primary-fg); }
 #manual-location-toggle[aria-checked="true"] .switch-knob { transform:translateX(32px); }
 @media(prefers-reduced-motion:reduce) { #manual-location-toggle .switch-knob, #theme-toggle .switch-knob { transition:none; } }
+
+/* Startup branding: one quick sweep, then rest while account checking continues. */
+.loading-brand { position: relative; width: 112px; aspect-ratio: 825 / 797; margin: 0 auto 24px; }
+.loading-brand img { display: block; width: 100%; height: auto; }
+.loading-brand .loading-logo-light { display: none; }
+[data-theme="light"] .loading-brand .loading-logo-dark { display: none; }
+[data-theme="light"] .loading-brand .loading-logo-light { display: block; }
+.loading-logo-shine { position: absolute; inset: 0; overflow: hidden; -webkit-mask: url('../public/loading-logo-dark.svg') center / contain no-repeat; mask: url('../public/loading-logo-dark.svg') center / contain no-repeat; }
+[data-theme="light"] .loading-logo-shine { -webkit-mask-image: url('../public/loading-logo-light.svg'); mask-image: url('../public/loading-logo-light.svg'); }
+.loading-logo-shine::after { content: ''; position: absolute; inset: -20% -60%; background: linear-gradient(110deg, transparent 40%, rgba(255,255,255,.85) 50%, transparent 60%); transform: translateX(-100%); }
+.auth-gate[data-state="checking"] .loading-logo-shine::after { animation: loading-logo-sweep 2s linear infinite; }
+.auth-gate[data-state="checking"] .auth-gate-card { text-align: center; }
+@keyframes loading-logo-sweep { 0% { transform: translateX(-100%); } 15%, 100% { transform: translateX(100%); } }
+@media (prefers-reduced-motion: reduce) { .auth-gate[data-state="checking"] .loading-logo-shine::after { animation: none; } }

@@ -15,7 +15,7 @@ After publishing and verifying the demo, put its HTTPS URL in `src/presentation-
 - All storage access is namespaced, including local/session storage and IndexedDB photo databases. A separate origin provides another boundary. Reset clears only that demo namespace and its photo store.
 - Production auth configuration and Supabase SDK are excluded. Guest permissions remain real; no fake approval or scope is injected. The Sample team card and simulated submission animation are explicitly fictional and cannot upload anything.
 - Fetch/XHR allow only GETs to the demo origin and the existing raster basemap hosts. WebSocket and beacon writes are blocked. Deployment headers further restrict connections, forms, camera, microphone and geolocation. No production worker is registered.
-- Prepared scenarios select the app's existing Mainline/Interchange mode for a reliable walkthrough. Inspectors can turn its manual switch off to explore the real automatic engine. No resolver result, capture eligibility or KM value is fabricated directly.
+- Each demo session starts with Manual Mainline/Interchange turned off and uses the existing automatic engine. Changing scenarios preserves the current manual setting; inspectors can enable the switch in Location details when needed. No resolver result, capture eligibility or KM value is fabricated directly.
 - Category camera actions use a visibly labelled, code-drawn sample illustration. Photos use the real isolated IndexedDB store and existing stamp function. New records identify `DEMO - Guest inspector`; export filenames carry `DEMO_`.
 - Sample Team records are kept separate from Guest inspections. Simulated sync never changes Guest records into genuine submitted records.
 

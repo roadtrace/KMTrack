@@ -4580,8 +4580,9 @@
     </button>
   </nav>
 
-  <section class="auth-gate" id="auth-gate" role="dialog" aria-modal="true" aria-labelledby="auth-gate-title">
+  <section class="auth-gate" id="auth-gate" data-state="checking" role="dialog" aria-modal="true" aria-labelledby="auth-gate-title">
     <div class="auth-gate-card">
+      <div class="loading-brand" aria-hidden="true"><img class="loading-logo-dark" src="public/loading-logo-dark.svg" width="825" height="797" alt=""><img class="loading-logo-light" src="public/loading-logo-light.svg" width="825" height="797" alt=""><span class="loading-logo-shine"></span></div>
       <span class="eyebrow">SPOT IT account</span>
       <h2 id="auth-gate-title">Checking account…</h2>
       <p id="auth-gate-message" role="status">Your local inspections and photos will remain on this device.</p>
@@ -8782,6 +8783,7 @@
       renderGuestClaims();
       document.documentElement.classList.toggle('auth-booting', !state.canUseLocal);
       const gate = document.getElementById('auth-gate');
+      gate.dataset.state = state.mode;
       gate.hidden = state.canUseLocal;
       const titles = { 'signed-out': registrationOpen ? 'Create account' : 'Sign in', 'registration-pending': 'Account created', 'binding-required': 'Confirm local workspace', 'account-mismatch': 'Different account', 'storage-error': 'Storage unavailable' };
       document.getElementById('auth-gate-title').textContent = titles[state.mode] || 'Checking account…';

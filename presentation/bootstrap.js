@@ -13,6 +13,7 @@
   const idb=window.indexedDB;
   Object.defineProperty(window,'indexedDB',{value:{open:(name,version)=>idb.open(prefix+name,version),deleteDatabase:name=>idb.deleteDatabase(prefix+name)}});
   localStorage.setItem('kmtrack_guest_mode_v1','true');
+  localStorage.setItem('nlex_capture_mode_v1','');
   Object.defineProperty(navigator,'serviceWorker',{value:{controller:null,register:()=>Promise.reject(new Error('Presentation build has no production service worker')),getRegistration:async()=>undefined,addEventListener(){},ready:new Promise(()=>{})}});
   const allowed=url=>url.origin===location.origin || url.protocol==='https:' && /^(?:[abc]\.basemaps\.cartocdn\.com|basemaps\.cartocdn\.com)$/.test(url.hostname);
   const fetchOriginal=window.fetch.bind(window);
