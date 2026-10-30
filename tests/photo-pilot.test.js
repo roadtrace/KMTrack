@@ -95,7 +95,7 @@ test('actual Log markup exposes compact states, review, disabled retry and local
 });
 test('production gate, independent runner and cached pilot asset remain explicit',()=>{
   const sw=fs.readFileSync('sw.js','utf8');assert.match(html,/const PHOTO_CLOUD_TRANSPORT_ENABLED = false/);assert.doesNotMatch(html,/\.dispatch\(/);
-  assert.match(html,/enabled: PHOTO_CLOUD_TRANSPORT_ENABLED/);assert.match(sw,/'v262'/);assert.ok(sw.includes('./src/photo-pilot.js')&&html.includes('./src/photo-pilot.js'));
+  assert.match(html,/enabled: PHOTO_CLOUD_TRANSPORT_ENABLED/);assert.match(sw,/'v265'/);assert.ok(sw.includes('./src/photo-pilot.js')&&html.includes('./src/photo-pilot.js'));
   assert.doesNotMatch(fs.readFileSync('src/sync-runner.js','utf8'),/SPOTITPhoto|photo-pilot|photo-sync/);
   assert.doesNotMatch(fs.readFileSync('src/photo-pilot.js','utf8'),/\.upload\(|\.update\(|\.remove\(|getPublicUrl|createSignedUrl/);
 });

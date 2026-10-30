@@ -3133,18 +3133,25 @@ html:root #map-view .map-history-filter small { flex-basis: 100%; color: var(--d
 #manual-location-toggle[aria-checked="true"] .switch-knob { transform:translateX(32px); }
 @media(prefers-reduced-motion:reduce) { #manual-location-toggle .switch-knob, #theme-toggle .switch-knob { transition:none; } }
 
-/* Crisp vector branding above the account card; sweep during loading and sign-in. */
+/* Account startup and sign-in use the existing simple vector marks. */
 .auth-gate-stack { width: min(100%, 420px); margin: auto; }
 .auth-gate-stack .auth-gate-card { width: 100%; }
-.loading-brand { position: relative; width: 112px; aspect-ratio: 825 / 797; margin: 0 auto 28px; }
-.loading-brand img { display: block; width: 100%; height: auto; }
+.loading-brand { width: 112px; aspect-ratio: 825 / 797; margin: 0 auto 28px; }
+.loading-brand svg { display: block; width: 100%; height: auto; overflow: visible; }
 .loading-brand .loading-logo-light { display: none; }
 [data-theme="light"] .loading-brand .loading-logo-dark { display: none; }
 [data-theme="light"] .loading-brand .loading-logo-light { display: block; }
-.loading-logo-shine { position: absolute; inset: 0; overflow: hidden; -webkit-mask: url('../public/loading-logo-dark.svg') center / contain no-repeat; mask: url('../public/loading-logo-dark.svg') center / contain no-repeat; }
-[data-theme="light"] .loading-logo-shine { -webkit-mask-image: url('../public/loading-logo-light.svg'); mask-image: url('../public/loading-logo-light.svg'); }
-.loading-logo-shine::after { content: ''; position: absolute; inset: -20% -60%; background: linear-gradient(110deg, transparent 40%, rgba(255,255,255,.85) 50%, transparent 60%); transform: translateX(-100%); }
-.auth-gate:is([data-state="checking"], [data-state="signed-out"]) .loading-logo-shine::after { animation: loading-logo-sweep 2s linear infinite; }
-.auth-gate[data-state="checking"] .auth-gate-card { text-align: center; }
-@keyframes loading-logo-sweep { 0% { transform: translateX(-100%); } 30%, 100% { transform: translateX(100%); } }
-@media (prefers-reduced-motion: reduce) { .auth-gate:is([data-state="checking"], [data-state="signed-out"]) .loading-logo-shine::after { animation: none; } }
+.loading-brand path { fill: var(--logo-ink); stroke: var(--logo-ink); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 100; stroke-dashoffset: 0; animation: logo-trace 1.6s linear both; }
+.auth-gate[data-state="checking"] .loading-brand path { animation: logo-trace-loading 3.2s linear infinite; }
+@keyframes logo-trace { 0% { stroke-dashoffset: 100; fill-opacity: 0; } 70% { stroke-dashoffset: 0; fill-opacity: 0; } 100% { stroke-dashoffset: 0; fill-opacity: 1; } }
+@keyframes logo-trace-loading { 0% { stroke-dashoffset: 100; fill-opacity: 0; opacity: 1; } 35% { stroke-dashoffset: 0; fill-opacity: 0; } 50%, 90% { stroke-dashoffset: 0; fill-opacity: 1; opacity: 1; } 100% { stroke-dashoffset: 0; fill-opacity: 1; opacity: 0; } }
+.startup-progress { display: none; }
+.auth-gate[data-state="checking"] .startup-progress { display: grid; justify-items: center; gap: 16px; }
+.startup-ring { width: 24px; height: 24px; border: 2px solid var(--ds-border); border-top-color: var(--line-yellow); border-radius: 50%; animation: startup-spin .9s linear infinite; }
+@keyframes startup-spin { to { transform: rotate(360deg); } }
+.startup-delay { max-width: 260px; margin: 0; text-align: center; color: var(--ds-fg-muted); font: 500 13px/1.5 var(--font-ui); opacity: 0; animation: startup-delay 0s 8s forwards; }
+@keyframes startup-delay { to { opacity: 1; } }
+/* Keep the real checking status accessible without showing the account card. */
+.auth-gate[data-state="checking"] .auth-gate-card { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.auth-gate[data-state="checking"] .auth-gate-card button { visibility: hidden; }
+@media (prefers-reduced-motion: reduce) { .loading-brand path, .auth-gate[data-state="checking"] .loading-brand path, .startup-ring { animation: none; } }

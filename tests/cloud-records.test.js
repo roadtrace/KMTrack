@@ -149,7 +149,7 @@ test('foreign rows, invalid order, duplicate IDs and malformed timestamps fail c
 });
 test('Team accepts teammate within current team; query does not confer writes',async()=>{
   const f=fixture();f.setRows([row(1,{user_id:other})]);assert.equal((await f.store.load('team')).rows.length,1);
-  assert.doesNotMatch(fs.readFileSync('src/cloud-records.js','utf8'),/\.(insert|update|upsert|delete|rpc|channel)\(|localStorage|indexedDB|\.storage\(/);
+  assert.doesNotMatch(fs.readFileSync('src/cloud-records.js','utf8'),/\.(insert|update|upsert|delete|channel)\(|localStorage|indexedDB|\.storage\(/);
 });
 test('nullable legacy Team owner remains read-only data; My never includes unowned records',async()=>{
   const f=fixture();f.setRows([row(1,{user_id:null})]);assert.equal((await f.store.load('team')).rows[0].user_id,null);
@@ -161,6 +161,16 @@ test('app lifecycle invalidates read store; My consumer stays separate from Map/
   assert.match(html,/onInvalidate:.*invalidateMyRecords/);
   assert.match(html,/window.addEventListener\('offline', \(\) => myRecords.invalidate\(\)\)/);
   assert.doesNotMatch(html,/cloudRecordStore\.load\(/);assert.doesNotMatch(html,/SPOTITRecordPresentation\.mergeMy\(/);
-  assert.match(sw,/'v262'/);for(const name of ['src/cloud-records.js','src/record-presentation.js'])assert.ok(sw.includes(`./${name}`)&&html.includes(`./${name}`));
+  assert.match(sw,/'v265'/);for(const name of ['src/cloud-records.js','src/record-presentation.js'])assert.ok(sw.includes(`./${name}`)&&html.includes(`./${name}`));
   assert.match(html,/PHOTO_CLOUD_TRANSPORT_ENABLED = false/);
+});
+
+test('owner names match both inspection and owner; missing lookup keeps records readable',async()=>{
+ const f=fixture();f.setRows([row(2,{user_id:other}),row(1)]);f.current.profile.full_name='Viewer name';
+ f.client.rpc=async(name,args)=>{assert.equal(name,'inspection_owner_names');assert.deepEqual(args.inspection_ids,[id(2),id(1)]);return {data:[{inspection_id:id(2),owner_id:other,display_name:'  Colleague name  '},{inspection_id:id(1),owner_id:other,display_name:'Wrong owner'}]};};
+ let page=await f.store.load('team');assert.equal(page.rows[0].inspector_display_name,'Colleague name');assert.equal(page.rows[1].inspector_display_name,'Viewer name');
+ f.client.rpc=async()=>({error:{code:'PGRST202'}});page=await f.store.load('team',{refresh:true});assert.equal(page.rows[0].inspector_display_name,'');assert.equal(page.rows[1].inspector_display_name,'Viewer name');
+});
+test('late owner name lookup cannot publish after account scope changes',async()=>{
+ const f=fixture(),pending=deferred();f.setRows([row(1)]);f.client.rpc=()=>pending.promise;const loading=f.store.load('team');await new Promise(r=>setImmediate(r));f.setContext({...context(),scopeGeneration:2});pending.resolve({data:[{inspection_id:id(1),owner_id:user,display_name:'Private name'}]});await assert.rejects(loading);assert.equal(f.store.snapshot('team').rows.length,0);
 });

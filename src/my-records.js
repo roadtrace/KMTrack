@@ -14,7 +14,7 @@
   function cloudDisplay(row){
     const date=row.inspected_at?new Date(row.inspected_at):null;
     const timestamp=date&&!Number.isNaN(+date)?manilaTime.format(date):'';
-    return {type:row.defect_type||'Inspection',timestamp,expressway:row.expressway,
+    return {inspector:row.inspector_display_name || '',type:row.defect_type||'Inspection',timestamp,expressway:row.expressway,
       bound:row.direction,lane:row.lane_number??row.lane_other,km:row.km_station==null?null:row.km_station/1000,
       lat:row.latitude,lon:row.longitude};
   }

@@ -136,7 +136,21 @@
             page.push(Object.freeze(row));
           }
           currentRequest();
-          const consumed = page.slice(0, PAGE_SIZE);
+          // Display metadata only; never part of an inspection submission snapshot.
+          const visible = page.slice(0, PAGE_SIZE), names = new Map();
+          if (visible.length && typeof client.rpc === 'function') {
+            try {
+              const owners = await client.rpc('inspection_owner_names', { inspection_ids: visible.map(row => row.id) }, { get: true });
+              currentRequest();
+              if (!owners.error && Array.isArray(owners.data)) for (const name of owners.data) {
+                const row = visible.find(row => row.id === name.inspection_id && row.user_id === name.owner_id);
+                if (row && typeof name.display_name === 'string' && name.display_name.trim()) names.set(row.id, name.display_name.trim());
+              }
+            } catch (_) { currentRequest(); /* Keep records readable if the optional lookup is unavailable. */ }
+          }
+          const ownProfile = context()?.profile;
+          const consumed = visible.map(row => Object.freeze({ ...row, inspector_display_name: names.get(row.id)
+            || (row.user_id === captured.userId && ownProfile?.id?.toLowerCase() === captured.userId ? String(ownProfile.full_name || '').trim() : '') }));
           const pages = refresh ? [] : state.pages.slice();
           if (consumed.length) pages.push(Object.freeze(consumed));
           const evicted = (!refresh && state.evicted) || pages.length > MAX_PAGES;
