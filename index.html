@@ -4029,7 +4029,7 @@
           <div class="kmvalue" id="km-value">--.---</div>
           <div class="station-caption" id="current-location-label">Station</div>
           <div class="instrument-nearby" id="instrument-nearby" hidden></div>
-          <div class="location-mode" role="group" aria-label="Capture location mode">
+          <div class="location-mode" id="capture-location-modes" role="group" aria-label="Capture location mode">
             <button type="button" data-location-mode="mainline" aria-pressed="false">Mainline</button>
             <button type="button" data-location-mode="interchange" aria-pressed="false">Interchange</button>
           </div>
@@ -4048,6 +4048,10 @@
                 <div class="kmlabel"><span>Direction status</span></div>
                 <div class="bound-toggle" id="bound-toggle"><span class="bound-hint">Detecting direction…</span></div>
                 <div class="bound-auto-status" id="bound-auto-status"></div>
+              </div>
+              <div class="manual-location-setting">
+                <span class="kmlabel" id="manual-location-label">Manual Mainline/Interchange</span>
+                <button type="button" class="switch" id="manual-location-toggle" role="switch" aria-checked="false" aria-labelledby="manual-location-label" aria-controls="capture-location-modes"><span class="switch-knob" aria-hidden="true"></span></button>
               </div>
             </div>
 
@@ -6697,6 +6701,7 @@
       if (!currentPos) return null;
       if (manualLocation.mode()) {
         currentResolvedLocation = manualLocation.resolve({lat:currentPos.rawLat,lon:currentPos.rawLon,accuracy:currentPos.acc,timestamp:currentPos.timestamp},computeCorridorCandidates(currentPos.rawLat,currentPos.rawLon),Date.now());
+        applyLegacyBoundTrend(currentResolvedLocation);
         setGpsCaptureReady(resolvedLocationCanSave());
         return currentResolvedLocation;
       }
@@ -6823,10 +6828,6 @@
         tagEl.textContent = `${result.expressway} · ${displayBound}`;
         tagEl.classList.remove('faroff');
       }
-      if (currentPos.fresh && resolution.confirmed && !interchangeMode && result.bound && !userBound && !boundManuallySelected) {
-        userBound = result.bound;
-        saveBound();
-      }
       updateBridgeReadout(currentPos.lat, currentPos.lon, result, isOffMappedNetwork && !interchangeMode);
       renderBoundToggle(result.expressway);
       updateBoundAutoStatus(result.expressway);
@@ -6906,12 +6907,7 @@
       const resolved = captureLocation.accept(result,result.reviewFixTimestamp,Date.now());
       if (!resolved) return;
       currentResolvedLocation = resolved;
-      const movementBound = resolved.result?.bound;
-      if (movementBound && !resolved.interchangeLocked && !boundManuallySelected) {
-        userBound = movementBound;
-        trendEstablished = true;
-        saveBound();
-      }
+      applyLegacyBoundTrend(resolved);
       setGpsCaptureReady(resolvedLocationCanSave());
       gpsStatus.textContent = resolved.saveAllowed ? 'GPS locked - updating live' : resolved.reason;
       gpsStatus.className = resolved.saveAllowed ? 'status ok' : 'status warn';
@@ -6951,11 +6947,31 @@
       }
     }
     function refreshManualLocation() {
+      const enabled=!!manualLocation.mode();
+      const toggle=document.getElementById('manual-location-toggle');
+      if(toggle)toggle.setAttribute('aria-checked',String(enabled));
+      const controls=document.getElementById('capture-location-modes'); if(controls)controls.hidden=!enabled;
+      const picker=document.getElementById('nearby-interchange-choice'); if(picker&&!enabled)picker.hidden=true;
       document.querySelectorAll('[data-location-mode]').forEach(button => button.setAttribute('aria-pressed',String(button.dataset.locationMode === manualLocation.mode())));
       updateCaptureLaneLayout();
       if (currentPos?.fresh) { resolveFreshLocation(null); updateReadout(); }
     }
+    document.getElementById('manual-location-toggle').addEventListener('click', () => {
+      const previous=manualLocation.mode();
+      let next='';
+      if(previous) { try { localStorage.setItem('nlex_last_manual_mode_v1',previous); } catch (_) {} }
+      else { try { next=localStorage.getItem('nlex_last_manual_mode_v1') || 'mainline'; } catch (_) { next='mainline'; } }
+      if(!['mainline','interchange',''].includes(next))next='mainline';
+      resetBoundTrend();
+      manualLocation.setMode(next);
+      try { localStorage.setItem('nlex_capture_mode_v1',next); } catch (_) {}
+      captureLocation.invalidate('Locating road');
+      if(!next)stationingReview?.invalidate();
+      refreshManualLocation();
+      if(!next&&currentPos?.fresh)queueStationingReview({timestamp:currentPos.timestamp,coords:{latitude:currentPos.rawLat,longitude:currentPos.rawLon,accuracy:currentPos.acc,speed:null,heading:null}});
+    });
     document.querySelectorAll('[data-location-mode]').forEach(button => button.addEventListener('click',() => {
+      resetBoundTrend();
       manualLocation.setMode(button.dataset.locationMode);
       try { localStorage.setItem('nlex_capture_mode_v1',manualLocation.mode()); } catch (_) {}
       refreshManualLocation();
@@ -6977,6 +6993,14 @@
     let trendEstablished = false;
     const MIN_TREND_DELTA_KM = 0.02; // ~20 m — ignore GPS-noise-level wobble before committing to a direction
 
+    function resetBoundTrend() {
+      trendLastKm=null; trendLastExpressway=null; trendEstablished=false;
+    }
+    function applyLegacyBoundTrend(resolution) {
+      if(resolution?.interchangeLocked) { resetBoundTrend(); return; }
+      if(!resolution?.fresh || !resolution.confirmed || resolution.uncertain || !Number.isFinite(resolution.result?.km))return;
+      detectBoundFromTrend(resolution.result.expressway,resolution.result.km);
+    }
     function detectBoundFromTrend(expressway, km) {
       if (trendLastExpressway !== expressway) {
         // New corridor (or first fix ever) — can't tell direction from a single

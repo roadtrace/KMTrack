@@ -715,8 +715,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.6137811,
-          15.1622786
+          120.6132193,
+          15.1626579
         ]
       },
       "properties": {
@@ -729,11 +729,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_angeles_064",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:68",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Entry Ramp",
-        "bearing_deg": 134.86506158165446,
+        "bearing_deg": 105.11927528884144,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -741,9 +741,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.6137811,
-        "source_lat": 15.1622786,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
+        "source_lon": 120.6132193,
+        "source_lat": 15.1626579,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "SB Entry Ramp",
@@ -759,8 +759,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.6136815,
-          15.1630387
+          120.6140518,
+          15.1628663
         ]
       },
       "properties": {
@@ -773,11 +773,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_angeles_152",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:156",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Entry Ramp",
-        "bearing_deg": 306.5631392668894,
+        "bearing_deg": 255.641136184496,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -785,9 +785,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.6136815,
-        "source_lat": 15.1630387,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
+        "source_lon": 120.6140518,
+        "source_lat": 15.1628663,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "NB Entry Ramp",
@@ -1249,7 +1249,7 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_balagtas_plaridel_by_pass_006",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:8",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Entry Ramp",
@@ -1263,7 +1263,7 @@
         "engineering_approval": 0,
         "source_lon": 120.89791966477101,
         "source_lat": 14.835461332473479,
-        "edit_note": "",
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "SB Entry Ramp",
@@ -1279,8 +1279,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.90009697356767,
-          14.834543199054423
+          120.89933880043266,
+          14.8348422110925
         ]
       },
       "properties": {
@@ -1293,11 +1293,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_balagtas_plaridel_by_pass_006",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:8",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Entry Ramp",
-        "bearing_deg": 113.93900266987441,
+        "bearing_deg": 98.5801975919602,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -1305,9 +1305,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.90009697356767,
-        "source_lat": 14.834543199054423,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
+        "source_lon": 120.89933880043266,
+        "source_lat": 14.8348422110925,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "SB Entry Ramp",
@@ -1337,7 +1337,7 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_balagtas_plaridel_by_pass_005",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:9",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Entry Ramp",
@@ -1351,7 +1351,7 @@
         "engineering_approval": 0,
         "source_lon": 120.89892935791336,
         "source_lat": 14.837440505758073,
-        "edit_note": "",
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "NB Entry Ramp",
@@ -1367,8 +1367,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.89753913156537,
-          14.836370327226366
+          120.89800208497411,
+          14.836630938204909
         ]
       },
       "properties": {
@@ -1381,11 +1381,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_balagtas_plaridel_by_pass_005",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:9",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Entry Ramp",
-        "bearing_deg": 249.24096526531437,
+        "bearing_deg": 227.24880350598264,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -1393,9 +1393,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.89753913156537,
-        "source_lat": 14.836370327226366,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
+        "source_lon": 120.89800208497411,
+        "source_lat": 14.836630938204909,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "NB Entry Ramp",
@@ -1777,12 +1777,12 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_balagtas_plaridel_by_pass_636",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:641",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Exit Ramp",
         "bearing_deg": 122.42031748780988,
-        "enabled": 1,
+        "enabled": 0,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
         "maintenance": "UNKNOWN",
@@ -1791,8 +1791,8 @@
         "engineering_approval": 0,
         "source_lon": 120.9005593,
         "source_lat": 14.8346602,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
-        "verification": "NOT_FIELD_VERIFIED",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
+        "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "NB Exit Ramp",
           "seg_type": "exit_ramp",
@@ -1821,12 +1821,12 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_balagtas_plaridel_by_pass_636",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:641",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Exit Ramp",
         "bearing_deg": 302.42038090991576,
-        "enabled": 1,
+        "enabled": 0,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
         "maintenance": "UNKNOWN",
@@ -1835,8 +1835,8 @@
         "engineering_approval": 0,
         "source_lon": 120.8996975,
         "source_lat": 14.8351893,
-        "edit_note": "",
-        "verification": "NOT_FIELD_VERIFIED",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
+        "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "NB Exit Ramp",
           "seg_type": "exit_ramp",
@@ -2209,7 +2209,7 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_balintawak_004",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:943",
-        "source_hash": "25935e4f774ea3d3a9cd37f92aab74a124657dc3f85260a149e70b057c165c4d",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Entry Ramp",
@@ -2223,7 +2223,7 @@
         "engineering_approval": 0,
         "source_lon": 121.00143003897335,
         "source_lat": 14.657524961759146,
-        "edit_note": "",
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "NB Entry Ramp",
@@ -2239,8 +2239,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          121.00032002473792,
-          14.65881918846737
+          121.00062111190557,
+          14.658372119130018
         ]
       },
       "properties": {
@@ -2253,11 +2253,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_balintawak_004",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:943",
-        "source_hash": "25935e4f774ea3d3a9cd37f92aab74a124657dc3f85260a149e70b057c165c4d",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Entry Ramp",
-        "bearing_deg": 351.81178350065073,
+        "bearing_deg": 285.1147463189719,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -2265,9 +2265,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 121.00032002473792,
-        "source_lat": 14.65881918846737,
-        "edit_note": "",
+        "source_lon": 121.00062111190557,
+        "source_lat": 14.658372119130018,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "NB Entry Ramp",
@@ -2297,7 +2297,7 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_balintawak_003",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:944",
-        "source_hash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Exit Ramp",
@@ -2311,7 +2311,7 @@
         "engineering_approval": 0,
         "source_lon": 121.0007711824672,
         "source_lat": 14.657530717194021,
-        "edit_note": "",
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "NB Exit Ramp",
@@ -2327,8 +2327,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          121.00026253929543,
-          14.65801417318298
+          121.00034930967082,
+          14.658139354553452
         ]
       },
       "properties": {
@@ -2341,11 +2341,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_balintawak_003",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:944",
-        "source_hash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Exit Ramp",
-        "bearing_deg": 216.33418530518819,
+        "bearing_deg": 241.2190039601195,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -2353,9 +2353,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 121.00026253929543,
-        "source_lat": 14.65801417318298,
-        "edit_note": "",
+        "source_lon": 121.00034930967082,
+        "source_lat": 14.658139354553452,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "NB Exit Ramp",
@@ -2459,8 +2459,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.99996508714818,
-          14.659152304944287
+          120.99989187491856,
+          14.658913227002806
         ]
       },
       "properties": {
@@ -2473,11 +2473,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_balintawak_001",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:946",
-        "source_hash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Exit Ramp",
-        "bearing_deg": 13.525709885539186,
+        "bearing_deg": 40.93572386088414,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -2485,9 +2485,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.99996508714818,
-        "source_lat": 14.659152304944287,
-        "edit_note": "",
+        "source_lon": 120.99989187491856,
+        "source_lat": 14.658913227002806,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "SB Exit Ramp",
@@ -2517,7 +2517,7 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_balintawak_001",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:946",
-        "source_hash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Exit Ramp",
@@ -2531,7 +2531,7 @@
         "engineering_approval": 0,
         "source_lon": 120.99915006826473,
         "source_lat": 14.657503378877056,
-        "edit_note": "",
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "SB Exit Ramp",
@@ -2547,8 +2547,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.9415112,
-          14.8047117
+          120.9407908,
+          14.8053791
         ]
       },
       "properties": {
@@ -2561,11 +2561,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_bocaue_007",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:34",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Exit Ramp",
-        "bearing_deg": 131.48758457446218,
+        "bearing_deg": 143.63430390159397,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -2573,9 +2573,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.9415112,
-        "source_lat": 14.8047117,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
+        "source_lon": 120.9407908,
+        "source_lat": 14.8053791,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "NB Exit Ramp",
@@ -2591,8 +2591,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.9381341,
-          14.8095412
+          120.9384372,
+          14.8087646
         ]
       },
       "properties": {
@@ -2605,11 +2605,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_bocaue_008",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:35",
-        "source_hash": "25935e4f774ea3d3a9cd37f92aab74a124657dc3f85260a149e70b057c165c4d",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Exit Ramp",
-        "bearing_deg": 349.4128336717036,
+        "bearing_deg": 335.58392584514667,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -2617,9 +2617,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.9381341,
-        "source_lat": 14.8095412,
-        "edit_note": "",
+        "source_lon": 120.9384372,
+        "source_lat": 14.8087646,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "SB Exit Ramp",
@@ -2693,7 +2693,7 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_bocaue_815",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:820",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Entry Ramp",
@@ -2707,7 +2707,7 @@
         "engineering_approval": 0,
         "source_lon": 120.9385943,
         "source_lat": 14.8090165,
-        "edit_note": "Disabled: user intentionally removed source geometry; historical marker retained for review only.",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
         "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "NB Entry Ramp",
@@ -2737,7 +2737,7 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_bocaue_816",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:821",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Entry Ramp",
@@ -2751,7 +2751,7 @@
         "engineering_approval": 0,
         "source_lon": 120.9440666,
         "source_lat": 14.798626,
-        "edit_note": "Disabled: user intentionally removed source geometry; historical marker retained for review only.",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
         "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "SB Entry Ramp",
@@ -2975,8 +2975,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.90429257364846,
-          14.832662744518476
+          120.9037814944035,
+          14.833036293335905
         ]
       },
       "properties": {
@@ -2989,11 +2989,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_burol_tabang_spur_overpass_008",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:4",
-        "source_hash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Exit Ramp",
-        "bearing_deg": 127.09281350016295,
+        "bearing_deg": 141.60603440426695,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -3001,9 +3001,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.90429257364846,
-        "source_lat": 14.832662744518476,
-        "edit_note": "",
+        "source_lon": 120.9037814944035,
+        "source_lat": 14.833036293335905,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "NB Exit Ramp",
@@ -3033,7 +3033,7 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_burol_tabang_spur_overpass_008",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:4",
-        "source_hash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Exit Ramp",
@@ -3047,7 +3047,7 @@
         "engineering_approval": 0,
         "source_lon": 120.90042831594289,
         "source_lat": 14.833283317199607,
-        "edit_note": "",
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "NB Exit Ramp",
@@ -3077,7 +3077,7 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_burol_tabang_spur_overpass_007",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:5",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Entry Ramp",
@@ -3091,7 +3091,7 @@
         "engineering_approval": 0,
         "source_lon": 120.90049687535382,
         "source_lat": 14.833186917676606,
-        "edit_note": "",
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "SB Entry Ramp",
@@ -3107,8 +3107,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.90347993593431,
-          14.832691035522869
+          120.90304258240053,
+          14.832846653748097
         ]
       },
       "properties": {
@@ -3121,11 +3121,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_burol_tabang_spur_overpass_007",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:5",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Entry Ramp",
-        "bearing_deg": 111.1858900299776,
+        "bearing_deg": 107.27363480192304,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -3133,9 +3133,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.90347993593431,
-        "source_lat": 14.832691035522869,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
+        "source_lon": 120.90304258240053,
+        "source_lat": 14.832846653748097,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "SB Entry Ramp",
@@ -3685,7 +3685,7 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_dau_388",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:389",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Entry Ramp",
@@ -3699,7 +3699,7 @@
         "engineering_approval": 0,
         "source_lon": 120.6045887,
         "source_lat": 15.1780807,
-        "edit_note": "Disabled: user intentionally removed source geometry; historical marker retained for review only.",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
         "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "SB Entry Ramp",
@@ -3773,7 +3773,7 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_dau_396",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:397",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Entry Ramp",
@@ -3787,7 +3787,7 @@
         "engineering_approval": 0,
         "source_lon": 120.6042296,
         "source_lat": 15.1792527,
-        "edit_note": "Disabled: user intentionally removed source geometry; historical marker retained for review only.",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
         "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "NB Entry Ramp",
@@ -4059,8 +4059,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          121.0050248,
-          14.6934718
+          121.0044946,
+          14.6935421
         ]
       },
       "properties": {
@@ -4073,11 +4073,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_harbor_link_smart_connect_071",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:100",
-        "source_hash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Entry Ramp",
-        "bearing_deg": 97.80513472175238,
+        "bearing_deg": 96.8512256029345,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -4085,9 +4085,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 121.0050248,
-        "source_lat": 14.6934718,
-        "edit_note": "",
+        "source_lon": 121.0044946,
+        "source_lat": 14.6935421,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "NB Entry Ramp",
@@ -4117,12 +4117,12 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_harbor_link_smart_connect_073",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:102",
-        "source_hash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "nlex_harbor_link_smart_connect_nb_exit",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Exit Ramp",
         "bearing_deg": 186.71408203642784,
-        "enabled": 1,
+        "enabled": 0,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
         "maintenance": "UNKNOWN",
@@ -4131,8 +4131,8 @@
         "engineering_approval": 0,
         "source_lon": 121.0009437,
         "source_lat": 14.6899924,
-        "edit_note": "",
-        "verification": "NOT_FIELD_VERIFIED",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
+        "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "NB Exit Ramp",
           "seg_type": "exit_ramp",
@@ -4147,8 +4147,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          121.0006478,
-          14.691508
+          121.000381,
+          14.6926947
         ]
       },
       "properties": {
@@ -4161,11 +4161,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_harbor_link_smart_connect_074",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:103",
-        "source_hash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "auxiliary_lane",
-        "bearing_deg": 165.8586379343701,
+        "bearing_deg": 168.9034052442678,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -4173,9 +4173,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 121.0006478,
-        "source_lat": 14.691508,
-        "edit_note": "",
+        "source_lon": 121.000381,
+        "source_lat": 14.6926947,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": null,
@@ -4191,8 +4191,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          121.0005485,
-          14.690802
+          121.0003098,
+          14.6911572
         ]
       },
       "properties": {
@@ -4205,11 +4205,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_harbor_link_smart_connect_078",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:107",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Entry Ramp",
-        "bearing_deg": 150.18357498848252,
+        "bearing_deg": 136.1329908885824,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -4217,9 +4217,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 121.0005485,
-        "source_lat": 14.690802,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
+        "source_lon": 121.0003098,
+        "source_lat": 14.6911572,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "SB Entry Ramp",
@@ -4249,12 +4249,12 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_harbor_link_smart_connect_177",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:191",
-        "source_hash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Entry Ramp",
         "bearing_deg": 275.1344679902902,
-        "enabled": 1,
+        "enabled": 0,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
         "maintenance": "UNKNOWN",
@@ -4263,8 +4263,8 @@
         "engineering_approval": 0,
         "source_lon": 120.9956404,
         "source_lat": 14.6934459,
-        "edit_note": "",
-        "verification": "NOT_FIELD_VERIFIED",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
+        "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "SB Entry Ramp",
           "seg_type": "entry_ramp",
@@ -4293,12 +4293,12 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_harbor_link_smart_connect_195",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:209",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Exit Ramp",
         "bearing_deg": 90.15817317723224,
-        "enabled": 1,
+        "enabled": 0,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
         "maintenance": "UNKNOWN",
@@ -4307,8 +4307,8 @@
         "engineering_approval": 0,
         "source_lon": 121.0047557,
         "source_lat": 14.6932832,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
-        "verification": "NOT_FIELD_VERIFIED",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
+        "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "NB Exit Ramp",
           "seg_type": "exit_ramp",
@@ -4337,12 +4337,12 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_harbor_link_smart_connect_247",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:256",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Exit Ramp",
         "bearing_deg": 267.1144982065623,
-        "enabled": 1,
+        "enabled": 0,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
         "maintenance": "UNKNOWN",
@@ -4351,8 +4351,8 @@
         "engineering_approval": 0,
         "source_lon": 120.9973562,
         "source_lat": 14.6936071,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
-        "verification": "NOT_FIELD_VERIFIED",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
+        "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "SB Exit Ramp",
           "seg_type": "exit_ramp",
@@ -4381,12 +4381,12 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_harbor_link_smart_connect_264",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:273",
-        "source_hash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Exit Ramp",
         "bearing_deg": 344.9736406297931,
-        "enabled": 1,
+        "enabled": 0,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
         "maintenance": "UNKNOWN",
@@ -4395,8 +4395,8 @@
         "engineering_approval": 0,
         "source_lon": 120.9992875,
         "source_lat": 14.6962294,
-        "edit_note": "",
-        "verification": "NOT_FIELD_VERIFIED",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
+        "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "SB Exit Ramp",
           "seg_type": "exit_ramp",
@@ -4425,7 +4425,7 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_harbor_link_smart_connect_303",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:310",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "nlex_harbor_link_smart_connect_nb_entry",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Entry Ramp",
@@ -4439,7 +4439,7 @@
         "engineering_approval": 0,
         "source_lon": 120.9994608,
         "source_lat": 14.696291,
-        "edit_note": "Disabled: user intentionally removed source geometry; historical marker retained for review only.",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
         "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "NB Entry Ramp",
@@ -4707,8 +4707,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.9852578,
-          14.7221314
+          120.9850924,
+          14.7223513
         ]
       },
       "properties": {
@@ -4721,11 +4721,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_lingunan_894",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:893",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Entry Ramp",
-        "bearing_deg": 143.96536934539608,
+        "bearing_deg": 107.76511887963386,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -4733,9 +4733,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.9852578,
-        "source_lat": 14.7221314,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
+        "source_lon": 120.9850924,
+        "source_lat": 14.7223513,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "SB Entry Ramp",
@@ -5007,8 +5007,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.9567511,
-          14.7754834
+          120.9565926,
+          14.7759291
         ]
       },
       "properties": {
@@ -5021,11 +5021,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_marilao_036",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:63",
-        "source_hash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "nlex_marilao_nb_exit",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Exit Ramp",
-        "bearing_deg": 161.02390808184487,
+        "bearing_deg": 169.07979790399804,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -5033,9 +5033,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.9567511,
-        "source_lat": 14.7754834,
-        "edit_note": "",
+        "source_lon": 120.9565926,
+        "source_lat": 14.7759291,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "NB Exit Ramp",
@@ -5051,8 +5051,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.9559656,
-          14.7765682
+          120.956144,
+          14.7760884
         ]
       },
       "properties": {
@@ -5065,11 +5065,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_marilao_085",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:111",
-        "source_hash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Exit Ramp",
-        "bearing_deg": 340.22523935092744,
+        "bearing_deg": 340.6696996240739,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -5077,9 +5077,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.9559656,
-        "source_lat": 14.7765682,
-        "edit_note": "",
+        "source_lon": 120.956144,
+        "source_lat": 14.7760884,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "SB Exit Ramp",
@@ -5109,12 +5109,12 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_marilao_167",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:181",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "nlex_marilao_nb_entry",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Entry Ramp",
         "bearing_deg": 306.375038013236,
-        "enabled": 1,
+        "enabled": 0,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
         "maintenance": "UNKNOWN",
@@ -5123,8 +5123,8 @@
         "engineering_approval": 0,
         "source_lon": 120.9562138,
         "source_lat": 14.7766876,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
-        "verification": "NOT_FIELD_VERIFIED",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
+        "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "NB Entry Ramp",
           "seg_type": "entry_ramp",
@@ -5271,8 +5271,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.9574609,
-          14.7736066
+          120.9569646,
+          14.7742134
         ]
       },
       "properties": {
@@ -5285,11 +5285,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_marilao_687",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:693",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "nlex_marilao_sb_entry",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Entry Ramp",
-        "bearing_deg": 145.72318517629833,
+        "bearing_deg": 127.83957765723494,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -5297,9 +5297,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.9574609,
-        "source_lat": 14.7736066,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
+        "source_lon": 120.9569646,
+        "source_lat": 14.7742134,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "SB Entry Ramp",
@@ -5703,8 +5703,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.9725535,
-          14.7457505
+          120.9725665,
+          14.7456892
         ]
       },
       "properties": {
@@ -5717,11 +5717,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_meycauayan_581",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:587",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Exit Ramp",
-        "bearing_deg": 348.73057746983267,
+        "bearing_deg": 349.7295839943482,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -5729,9 +5729,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.9725535,
-        "source_lat": 14.7457505,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
+        "source_lon": 120.9725665,
+        "source_lat": 14.7456892,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "SB Exit Ramp",
@@ -5937,7 +5937,7 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_meycauayan_597",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:600",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "nlex_meycauayan_nb_entry",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Entry Ramp",
@@ -5951,7 +5951,7 @@
         "engineering_approval": 0,
         "source_lon": 120.9716256,
         "source_lat": 14.747949,
-        "edit_note": "Disabled: user intentionally removed source geometry; historical marker retained for review only.",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
         "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "NB Entry Ramp",
@@ -6113,7 +6113,7 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_meycauayan_788",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:789",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "nlex_meycauayan_sb_entry",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Entry Ramp",
@@ -6127,7 +6127,7 @@
         "engineering_approval": 0,
         "source_lon": 120.9739843,
         "source_lat": 14.7431405,
-        "edit_note": "Disabled: user intentionally removed source geometry; historical marker retained for review only.",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
         "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "SB Entry Ramp",
@@ -6311,8 +6311,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.991425,
-          14.7107918
+          120.9919769,
+          14.7096574
         ]
       },
       "properties": {
@@ -6325,11 +6325,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_paso_de_blas_valenzuela_067",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:96",
-        "source_hash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "nlex_paso_de_blas_valenzuela_sb_exit",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Exit Ramp",
-        "bearing_deg": 336.42399884179207,
+        "bearing_deg": 338.78889120800744,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -6337,9 +6337,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.991425,
-        "source_lat": 14.7107918,
-        "edit_note": "",
+        "source_lon": 120.9919769,
+        "source_lat": 14.7096574,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "SB Exit Ramp",
@@ -6369,7 +6369,7 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_paso_de_blas_valenzuela_067",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:96",
-        "source_hash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "nlex_paso_de_blas_valenzuela_sb_exit",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Exit Ramp",
@@ -6383,7 +6383,7 @@
         "engineering_approval": 0,
         "source_lon": 120.9925038,
         "source_lat": 14.7081484,
-        "edit_note": "",
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "SB Exit Ramp",
@@ -6413,7 +6413,7 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_paso_de_blas_valenzuela_068",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:97",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Entry Ramp",
@@ -6427,7 +6427,7 @@
         "engineering_approval": 0,
         "source_lon": 120.9918884,
         "source_lat": 14.7103794,
-        "edit_note": "Disabled: user intentionally removed source geometry; historical marker retained for review only.",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
         "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "NB Entry Ramp",
@@ -6545,12 +6545,12 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_paso_de_blas_valenzuela_616",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:618",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "nlex_paso_de_blas_valenzuela_sb_entry",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Entry Ramp",
         "bearing_deg": 145.01294808238345,
-        "enabled": 1,
+        "enabled": 0,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
         "maintenance": "UNKNOWN",
@@ -6559,8 +6559,8 @@
         "engineering_approval": 0,
         "source_lon": 120.9934498,
         "source_lat": 14.7069012,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
-        "verification": "NOT_FIELD_VERIFIED",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
+        "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "SB Entry Ramp",
           "seg_type": "entry_ramp",
@@ -6589,12 +6589,12 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_paso_de_blas_valenzuela_617",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:619",
-        "source_hash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Exit Ramp",
         "bearing_deg": 160.11912870271135,
-        "enabled": 1,
+        "enabled": 0,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
         "maintenance": "UNKNOWN",
@@ -6603,8 +6603,8 @@
         "engineering_approval": 0,
         "source_lon": 120.9939273,
         "source_lat": 14.7065512,
-        "edit_note": "",
-        "verification": "NOT_FIELD_VERIFIED",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
+        "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "NB Exit Ramp",
           "seg_type": "exit_ramp",
@@ -6831,8 +6831,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.9472992,
-          14.7934805
+          120.9478703,
+          14.793363
         ]
       },
       "properties": {
@@ -6845,11 +6845,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_philippine_arena_188",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:202",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Entry Ramp",
-        "bearing_deg": 298.7706012197459,
+        "bearing_deg": 263.3486407246299,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -6857,9 +6857,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.9472992,
-        "source_lat": 14.7934805,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
+        "source_lon": 120.9478703,
+        "source_lat": 14.793363,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "NB Entry Ramp",
@@ -6919,8 +6919,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.9450704,
-          14.7967253
+          120.9454054,
+          14.7959071
         ]
       },
       "properties": {
@@ -6933,11 +6933,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_philippine_arena_598",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:605",
-        "source_hash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Exit Ramp",
-        "bearing_deg": 344.1547899387655,
+        "bearing_deg": 332.27801147292917,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -6945,9 +6945,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.9450704,
-        "source_lat": 14.7967253,
-        "edit_note": "",
+        "source_lon": 120.9454054,
+        "source_lat": 14.7959071,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "SB Exit Ramp",
@@ -6977,12 +6977,12 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_philippine_arena_600",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:607",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Entry Ramp",
         "bearing_deg": 122.35744518881262,
-        "enabled": 1,
+        "enabled": 0,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
         "maintenance": "UNKNOWN",
@@ -6991,8 +6991,8 @@
         "engineering_approval": 0,
         "source_lon": 120.947618,
         "source_lat": 14.791848,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
-        "verification": "NOT_FIELD_VERIFIED",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
+        "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "SB Entry Ramp",
           "seg_type": "entry_ramp",
@@ -7007,8 +7007,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.94856737236849,
-          14.790946253910308
+          120.94792740454852,
+          14.792082425401437
         ]
       },
       "properties": {
@@ -7021,11 +7021,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_philippine_arena_608",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:615",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Exit Ramp",
-        "bearing_deg": 151.31382099171526,
+        "bearing_deg": 172.21370025245847,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -7033,9 +7033,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.94856737236849,
-        "source_lat": 14.790946253910308,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
+        "source_lon": 120.94792740454852,
+        "source_lat": 14.792082425401437,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "NB Exit Ramp",
@@ -7277,7 +7277,7 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_pulilan_021",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:36",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Exit Ramp",
@@ -7291,7 +7291,7 @@
         "engineering_approval": 0,
         "source_lon": 120.8189618,
         "source_lat": 14.9062008,
-        "edit_note": "Disabled: user intentionally removed source geometry; historical marker retained for review only.",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
         "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "NB Exit Ramp",
@@ -7321,12 +7321,12 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_pulilan_023",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:38",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Exit Ramp",
         "bearing_deg": 329.46711657229764,
-        "enabled": 1,
+        "enabled": 0,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
         "maintenance": "UNKNOWN",
@@ -7335,8 +7335,8 @@
         "engineering_approval": 0,
         "source_lon": 120.8153209,
         "source_lat": 14.9100201,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
-        "verification": "NOT_FIELD_VERIFIED",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
+        "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "SB Exit Ramp",
           "seg_type": "exit_ramp",
@@ -7365,12 +7365,12 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_pulilan_311",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:319",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Entry Ramp",
         "bearing_deg": 306.82715954881184,
-        "enabled": 1,
+        "enabled": 0,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
         "maintenance": "UNKNOWN",
@@ -7379,8 +7379,8 @@
         "engineering_approval": 0,
         "source_lon": 120.8160824,
         "source_lat": 14.9096748,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
-        "verification": "NOT_FIELD_VERIFIED",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
+        "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "NB Entry Ramp",
           "seg_type": "entry_ramp",
@@ -7409,12 +7409,12 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_pulilan_315",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:323",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Entry Ramp",
         "bearing_deg": 132.9764574677455,
-        "enabled": 1,
+        "enabled": 0,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
         "maintenance": "UNKNOWN",
@@ -7423,8 +7423,8 @@
         "engineering_approval": 0,
         "source_lon": 120.8182132374186,
         "source_lat": 14.906716396690483,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
-        "verification": "NOT_FIELD_VERIFIED",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
+        "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "SB Entry Ramp",
           "seg_type": "entry_ramp",
@@ -7783,8 +7783,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.69222508982675,
-          15.052393886057805
+          120.69265196491365,
+          15.051839141695215
         ]
       },
       "properties": {
@@ -7797,11 +7797,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_san_fernando_040",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:53",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Exit Ramp",
-        "bearing_deg": 322.0391703594544,
+        "bearing_deg": 320.7446553102929,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -7809,9 +7809,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.69222508982675,
-        "source_lat": 15.052393886057805,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
+        "source_lon": 120.69265196491365,
+        "source_lat": 15.051839141695215,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "SB Exit Ramp",
@@ -7827,8 +7827,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.6943203,
-          15.0504351
+          120.6942299,
+          15.050575
         ]
       },
       "properties": {
@@ -7841,11 +7841,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_san_fernando_041",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:54",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Exit Ramp",
-        "bearing_deg": 148.69906685313288,
+        "bearing_deg": 152.95356220193696,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -7853,9 +7853,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.6943203,
-        "source_lat": 15.0504351,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
+        "source_lon": 120.6942299,
+        "source_lat": 15.050575,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "NB Exit Ramp",
@@ -7929,12 +7929,12 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_san_fernando_052",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:65",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Entry Ramp",
         "bearing_deg": 129.56357737805507,
-        "enabled": 1,
+        "enabled": 0,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
         "maintenance": "UNKNOWN",
@@ -7943,8 +7943,8 @@
         "engineering_approval": 0,
         "source_lon": 120.6965878,
         "source_lat": 15.0474262,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
-        "verification": "NOT_FIELD_VERIFIED",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
+        "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "SB Entry Ramp",
           "seg_type": "entry_ramp",
@@ -8017,12 +8017,12 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_san_fernando_533",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:541",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Entry Ramp",
         "bearing_deg": 312.50207928302706,
-        "enabled": 1,
+        "enabled": 0,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
         "maintenance": "UNKNOWN",
@@ -8031,8 +8031,8 @@
         "engineering_approval": 0,
         "source_lon": 120.6927873,
         "source_lat": 15.0522552,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
-        "verification": "NOT_FIELD_VERIFIED",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
+        "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "NB Entry Ramp",
           "seg_type": "entry_ramp",
@@ -8581,12 +8581,12 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_san_simon_047",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:61",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Entry Ramp",
         "bearing_deg": 324.09033291245777,
-        "enabled": 1,
+        "enabled": 0,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
         "maintenance": "UNKNOWN",
@@ -8595,8 +8595,8 @@
         "engineering_approval": 0,
         "source_lon": 120.7489701,
         "source_lat": 14.9922993,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
-        "verification": "NOT_FIELD_VERIFIED",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
+        "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "NB Entry Ramp",
           "seg_type": "entry_ramp",
@@ -8669,12 +8669,12 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_san_simon_058",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:72",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Exit Ramp",
         "bearing_deg": 333.7016932324332,
-        "enabled": 1,
+        "enabled": 0,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
         "maintenance": "UNKNOWN",
@@ -8683,8 +8683,8 @@
         "engineering_approval": 0,
         "source_lon": 120.748202,
         "source_lat": 14.9929754,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
-        "verification": "NOT_FIELD_VERIFIED",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
+        "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "SB Exit Ramp",
           "seg_type": "exit_ramp",
@@ -8713,12 +8713,12 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_san_simon_749",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:756",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Entry Ramp",
         "bearing_deg": 144.92259561612815,
-        "enabled": 1,
+        "enabled": 0,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
         "maintenance": "UNKNOWN",
@@ -8727,8 +8727,8 @@
         "engineering_approval": 0,
         "source_lon": 120.7509953,
         "source_lat": 14.9879235,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
-        "verification": "NOT_FIELD_VERIFIED",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
+        "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "SB Entry Ramp",
           "seg_type": "entry_ramp",
@@ -8999,8 +8999,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.8605593,
-          14.8614045
+          120.8602255,
+          14.8617736
         ]
       },
       "properties": {
@@ -9013,11 +9013,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_santa_rita_050",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:66",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Exit Ramp",
-        "bearing_deg": 132.5612236818297,
+        "bearing_deg": 158.22079725088588,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -9025,9 +9025,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.8605593,
-        "source_lat": 14.8614045,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
+        "source_lon": 120.8602255,
+        "source_lat": 14.8617736,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "NB Exit Ramp",
@@ -9043,8 +9043,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.85904911506871,
-          14.862359671620121
+          120.8595733,
+          14.8623138
         ]
       },
       "properties": {
@@ -9057,11 +9057,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_santa_rita_051",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:67",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Entry Ramp",
-        "bearing_deg": 291.8121143184601,
+        "bearing_deg": 230.04911593476578,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -9069,9 +9069,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.85904911506871,
-        "source_lat": 14.862359671620121,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
+        "source_lon": 120.8595733,
+        "source_lat": 14.8623138,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "NB Entry Ramp",
@@ -9321,12 +9321,12 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_santa_rita_221",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:231",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Entry Ramp",
         "bearing_deg": 105.23931056152276,
-        "enabled": 1,
+        "enabled": 0,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
         "maintenance": "UNKNOWN",
@@ -9335,8 +9335,8 @@
         "engineering_approval": 0,
         "source_lon": 120.85846799486441,
         "source_lat": 14.862347229369902,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
-        "verification": "NOT_FIELD_VERIFIED",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
+        "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "SB Entry Ramp",
           "seg_type": "entry_ramp",
@@ -9351,8 +9351,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.8571543,
-          14.8631757
+          120.8573519,
+          14.8629277
         ]
       },
       "properties": {
@@ -9365,11 +9365,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_santa_rita_222",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:232",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Exit Ramp",
-        "bearing_deg": 322.39959124107185,
+        "bearing_deg": 332.67165448819947,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -9377,9 +9377,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.8571543,
-        "source_lat": 14.8631757,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
+        "source_lon": 120.8573519,
+        "source_lat": 14.8629277,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "SB Exit Ramp",
@@ -9577,7 +9577,7 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_sctex_spur_nle_002",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:940",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Entry Ramp",
@@ -9591,7 +9591,7 @@
         "engineering_approval": 0,
         "source_lon": 120.595005837123,
         "source_lat": 15.1974645442702,
-        "edit_note": "",
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "SB Entry Ramp",
@@ -9607,8 +9607,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.596820780479,
-          15.1969583418304
+          120.596461992936,
+          15.1973616507609
         ]
       },
       "properties": {
@@ -9621,11 +9621,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_sctex_spur_nle_002",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:940",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Entry Ramp",
-        "bearing_deg": 151.8329130587423,
+        "bearing_deg": 113.1124541010916,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -9633,9 +9633,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.596820780479,
-        "source_lat": 15.1969583418304,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
+        "source_lon": 120.596461992936,
+        "source_lat": 15.1973616507609,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "SB Entry Ramp",
@@ -9921,12 +9921,12 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_sindalan_mexico_064",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:76",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Entry Ramp",
         "bearing_deg": 302.63397908122425,
-        "enabled": 1,
+        "enabled": 0,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
         "maintenance": "UNKNOWN",
@@ -9935,8 +9935,8 @@
         "engineering_approval": 0,
         "source_lon": 120.6632012,
         "source_lat": 15.1060281,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
-        "verification": "NOT_FIELD_VERIFIED",
+        "edit_note": "Disabled: saved QGIS source geometry is NULL; historical marker retained only.",
+        "verification": "SOURCE_GEOMETRY_REMOVED_BY_USER",
         "source_attributes": {
           "ramp": "NB Entry Ramp",
           "seg_type": "entry_ramp",
@@ -10127,8 +10127,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.6634262,
-          15.1051513
+          120.6629613,
+          15.1056712
         ]
       },
       "properties": {
@@ -10141,11 +10141,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_sindalan_mexico_514",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:524",
-        "source_hash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Entry Ramp",
-        "bearing_deg": 137.8050220914779,
+        "bearing_deg": 112.62311754077484,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -10153,9 +10153,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.6634262,
-        "source_lat": 15.1051513,
-        "edit_note": "",
+        "source_lon": 120.6629613,
+        "source_lat": 15.1056712,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "SB Entry Ramp",
@@ -10789,7 +10789,7 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_tambubong_604",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:611",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "nlex_tambubong_nb_entry",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Entry Ramp",
@@ -10803,7 +10803,7 @@
         "engineering_approval": 0,
         "source_lon": 120.9359631,
         "source_lat": 14.8146337,
-        "edit_note": "",
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "NB Entry Ramp",
@@ -10819,8 +10819,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.9346891,
-          14.8158278
+          120.9350306,
+          14.8155969
         ]
       },
       "properties": {
@@ -10833,11 +10833,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_tambubong_604",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:611",
-        "source_hash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "nlex_tambubong_nb_entry",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "NB Entry Ramp",
-        "bearing_deg": 303.4880941371768,
+        "bearing_deg": 308.308762902774,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -10845,9 +10845,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.9346891,
-        "source_lat": 14.8158278,
-        "edit_note": "Endpoint gate follows exact user-edited source endpoint; provisional only.",
+        "source_lon": 120.9350306,
+        "source_lat": 14.8155969,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "NB Entry Ramp",
@@ -10863,8 +10863,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          120.9348161,
-          14.815234
+          120.9340802,
+          14.8157344
         ]
       },
       "properties": {
@@ -10877,11 +10877,11 @@
         "kind": "RAMP_TERMINAL_DEPARTURE",
         "source_id": "nlex_tambubong_605",
         "source_ref": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:612",
-        "source_hash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+        "source_hash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
         "review_refs": "nlex_tambubong_sb_entry",
         "direction_basis": "OUTWARD_SOURCE_TANGENT_NOT_LEGAL_TRAVEL",
         "role_basis": "SB Entry Ramp",
-        "bearing_deg": 130.0302396735824,
+        "bearing_deg": 86.20568635745985,
         "enabled": 1,
         "status": "PROVISIONAL_GEOMETRY_ONLY",
         "confidence": "LOW_UNVERIFIED",
@@ -10889,9 +10889,9 @@
         "connectivity": "UNKNOWN",
         "physical_carriageway": "UNKNOWN",
         "engineering_approval": 0,
-        "source_lon": 120.9348161,
-        "source_lat": 14.815234,
-        "edit_note": "",
+        "source_lon": 120.9340802,
+        "source_lat": 14.8157344,
+        "edit_note": "Endpoint and outward tangent follow saved QGIS geometry; provisional only.",
         "verification": "NOT_FIELD_VERIFIED",
         "source_attributes": {
           "ramp": "SB Entry Ramp",

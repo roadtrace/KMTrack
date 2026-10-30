@@ -18,8 +18,11 @@ html:root #settings-view .more-screen .tool-card, html:root #settings-view .more
 #settings-view .more-screen h3 { font-family:'Space Grotesk',sans-serif; }
 #settings-view .more-screen p { color:var(--ds-fg-muted); font:400 13px/1.6 'Inter',sans-serif; overflow-wrap:anywhere; }
 #settings-view .more-screen .ds-btn { min-height:44px; }
-html:root #settings-view #theme-toggle { height:44px; }
-html:root #settings-view #theme-toggle .switch-knob { top:12px; }
+html:root #settings-view #theme-toggle { width:64px; height:44px; min-height:44px; flex:0 0 64px; background:transparent; border-radius:999px; }
+html:root #settings-view #theme-toggle::before { content:""; position:absolute; inset:6px 0; border-radius:999px; background:color-mix(in srgb,var(--ds-fg-muted) 35%,transparent); }
+html:root #settings-view #theme-toggle[aria-checked="true"]::before { background:var(--ds-secondary); }
+html:root #settings-view #theme-toggle .switch-knob { top:10px; left:4px; width:24px; height:24px; }
+html:root #settings-view #theme-toggle[aria-checked="true"] .switch-knob { transform:translateX(32px); }
 html:root #settings-view .setting-field { min-height:44px; }
 #settings-view .more-values { margin:14px 0; border:1px solid var(--ds-border); border-radius:14px; background:var(--ds-card); padding:0 14px; }
 #settings-view .more-values > div { display:grid; gap:6px; padding:12px 0; }

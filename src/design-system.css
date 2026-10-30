@@ -3119,3 +3119,16 @@ html:root #map-view .map-history-filter small { flex-basis: 100%; color: var(--d
 #team-view #team-sync-title { padding-right: 70px; }
 #team-view #team-sync-badge { position: absolute; right: 0; top: 0; margin: 0; }
 #team-view [hidden] { display: none; }
+
+/* Manual location mode is an explicit opt-in within Direction status. */
+#capture-location-modes[hidden] { display: none; }
+#instrument-panel .instrument-metrics { display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap:10px; align-items:start; border-top:1px solid var(--ds-border); }
+#instrument-panel .instrument-metrics .metric-wide { grid-column:auto; border-top:0; }
+#instrument-panel .manual-location-setting { display:flex; flex-direction:column; align-items:flex-end; gap:6px; padding-block:12px; }
+#instrument-panel #manual-location-label { text-align:right; font:700 9px/1.4 var(--font-ui); letter-spacing:.015em; color:var(--ds-fg-muted); text-transform:uppercase; }
+#manual-location-toggle { width:64px; height:44px; min-height:44px; flex:none; background:transparent; }
+#manual-location-toggle::before { content:""; position:absolute; inset:6px 0; border-radius:999px; border:1px solid var(--ds-border); background:var(--ds-muted); }
+#manual-location-toggle[aria-checked="true"]::before { background:var(--ds-primary); border-color:var(--ds-primary); }
+#manual-location-toggle .switch-knob { top:10px; left:4px; width:24px; height:24px; background:var(--ds-primary-fg); }
+#manual-location-toggle[aria-checked="true"] .switch-knob { transform:translateX(32px); }
+@media(prefers-reduced-motion:reduce) { #manual-location-toggle .switch-knob, #theme-toggle .switch-knob { transition:none; } }

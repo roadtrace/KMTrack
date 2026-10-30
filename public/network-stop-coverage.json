@@ -3,7 +3,7 @@
   "sourceSegments": 448,
   "applicableGeometryTerminalApproaches": 215,
   "generatedGates": 252,
-  "usableGeometryGates": 234,
+  "usableGeometryGates": 213,
   "physicallyVerifiedGates": 0,
   "reviewedDirectionalApproaches": 15,
   "unresolvedDirectionalSlots": 13,
@@ -52,7 +52,7 @@
       "sourceSegments": 12,
       "terminalApproaches": 24,
       "gates": 26,
-      "usableGeometryGates": 26,
+      "usableGeometryGates": 24,
       "reviewedApproaches": [],
       "directionalSlots": [
         {
@@ -73,15 +73,18 @@
         }
       ],
       "gaps": [
-        "Physical entry/exit completeness and maintenance not established"
+        "Physical entry/exit completeness and maintenance not established",
+        "USER_REMOVED_GEOMETRY: nlex_balagtas_plaridel_by_pass_636"
       ],
       "sourceAttributeCounts": {
         "ramp": 4,
         "bound": 4,
         "seg_type": 12
       },
-      "availableSourceSegments": 12,
-      "unavailableSourceSegments": []
+      "availableSourceSegments": 11,
+      "unavailableSourceSegments": [
+        "nlex_balagtas_plaridel_by_pass_636"
+      ]
     },
     {
       "site": "nlex_balintawak",
@@ -148,16 +151,17 @@
       ],
       "gaps": [
         "Physical entry/exit completeness and maintenance not established",
-        "USER_REMOVED_GEOMETRY: nlex_bocaue_169;nlex_bocaue_815;nlex_bocaue_816"
+        "USER_REMOVED_GEOMETRY: nlex_bocaue_169;nlex_bocaue_664;nlex_bocaue_815;nlex_bocaue_816"
       ],
       "sourceAttributeCounts": {
         "ramp": 25,
         "bound": 25,
         "seg_type": 30
       },
-      "availableSourceSegments": 27,
+      "availableSourceSegments": 26,
       "unavailableSourceSegments": [
         "nlex_bocaue_169",
+        "nlex_bocaue_664",
         "nlex_bocaue_815",
         "nlex_bocaue_816"
       ]
@@ -227,17 +231,21 @@
       ],
       "gaps": [
         "Physical entry/exit completeness and maintenance not established",
-        "USER_REMOVED_GEOMETRY: nlex_dau_388;nlex_dau_396"
+        "USER_REMOVED_GEOMETRY: nlex_dau_387;nlex_dau_388;nlex_dau_395;nlex_dau_396;nlex_dau_673;nlex_dau_675"
       ],
       "sourceAttributeCounts": {
         "ramp": 25,
         "bound": 25,
         "seg_type": 32
       },
-      "availableSourceSegments": 30,
+      "availableSourceSegments": 26,
       "unavailableSourceSegments": [
+        "nlex_dau_387",
         "nlex_dau_388",
-        "nlex_dau_396"
+        "nlex_dau_395",
+        "nlex_dau_396",
+        "nlex_dau_673",
+        "nlex_dau_675"
       ]
     },
     {
@@ -246,7 +254,7 @@
       "sourceSegments": 34,
       "terminalApproaches": 9,
       "gates": 10,
-      "usableGeometryGates": 9,
+      "usableGeometryGates": 4,
       "reviewedApproaches": [
         {
           "id": "nlex_harbor_link_smart_connect_nb_entry",
@@ -285,15 +293,20 @@
       ],
       "gaps": [
         "Physical entry/exit completeness and maintenance not established",
-        "USER_REMOVED_GEOMETRY: nlex_harbor_link_smart_connect_303"
+        "USER_REMOVED_GEOMETRY: nlex_harbor_link_smart_connect_073;nlex_harbor_link_smart_connect_177;nlex_harbor_link_smart_connect_195;nlex_harbor_link_smart_connect_247;nlex_harbor_link_smart_connect_264;nlex_harbor_link_smart_connect_303"
       ],
       "sourceAttributeCounts": {
         "ramp": 17,
         "bound": 34,
         "seg_type": 34
       },
-      "availableSourceSegments": 33,
+      "availableSourceSegments": 28,
       "unavailableSourceSegments": [
+        "nlex_harbor_link_smart_connect_073",
+        "nlex_harbor_link_smart_connect_177",
+        "nlex_harbor_link_smart_connect_195",
+        "nlex_harbor_link_smart_connect_247",
+        "nlex_harbor_link_smart_connect_264",
         "nlex_harbor_link_smart_connect_303"
       ]
     },
@@ -377,7 +390,7 @@
       "sourceSegments": 23,
       "terminalApproaches": 15,
       "gates": 17,
-      "usableGeometryGates": 17,
+      "usableGeometryGates": 16,
       "reviewedApproaches": [
         {
           "id": "nlex_marilao_nb_entry",
@@ -423,15 +436,18 @@
         }
       ],
       "gaps": [
-        "Physical entry/exit completeness and maintenance not established"
+        "Physical entry/exit completeness and maintenance not established",
+        "USER_REMOVED_GEOMETRY: nlex_marilao_167"
       ],
       "sourceAttributeCounts": {
         "ramp": 20,
         "bound": 20,
         "seg_type": 23
       },
-      "availableSourceSegments": 23,
-      "unavailableSourceSegments": []
+      "availableSourceSegments": 22,
+      "unavailableSourceSegments": [
+        "nlex_marilao_167"
+      ]
     },
     {
       "site": "nlex_meycauayan",
@@ -486,17 +502,19 @@
       ],
       "gaps": [
         "Physical entry/exit completeness and maintenance not established",
-        "USER_REMOVED_GEOMETRY: nlex_meycauayan_597;nlex_meycauayan_788"
+        "USER_REMOVED_GEOMETRY: nlex_meycauayan_597;nlex_meycauayan_600;nlex_meycauayan_788;nlex_meycauayan_913"
       ],
       "sourceAttributeCounts": {
         "ramp": 32,
         "bound": 32,
         "seg_type": 33
       },
-      "availableSourceSegments": 31,
+      "availableSourceSegments": 29,
       "unavailableSourceSegments": [
         "nlex_meycauayan_597",
-        "nlex_meycauayan_788"
+        "nlex_meycauayan_600",
+        "nlex_meycauayan_788",
+        "nlex_meycauayan_913"
       ]
     },
     {
@@ -505,7 +523,7 @@
       "sourceSegments": 17,
       "terminalApproaches": 10,
       "gates": 12,
-      "usableGeometryGates": 11,
+      "usableGeometryGates": 9,
       "reviewedApproaches": [
         {
           "id": "nlex_paso_de_blas_valenzuela_nb_entry",
@@ -560,16 +578,19 @@
       ],
       "gaps": [
         "Physical entry/exit completeness and maintenance not established",
-        "USER_REMOVED_GEOMETRY: nlex_paso_de_blas_valenzuela_068"
+        "USER_REMOVED_GEOMETRY: nlex_paso_de_blas_valenzuela_068;nlex_paso_de_blas_valenzuela_616;nlex_paso_de_blas_valenzuela_617;nlex_paso_de_blas_valenzuela_683"
       ],
       "sourceAttributeCounts": {
         "ramp": 16,
         "bound": 16,
         "seg_type": 17
       },
-      "availableSourceSegments": 16,
+      "availableSourceSegments": 13,
       "unavailableSourceSegments": [
-        "nlex_paso_de_blas_valenzuela_068"
+        "nlex_paso_de_blas_valenzuela_068",
+        "nlex_paso_de_blas_valenzuela_616",
+        "nlex_paso_de_blas_valenzuela_617",
+        "nlex_paso_de_blas_valenzuela_683"
       ]
     },
     {
@@ -578,7 +599,7 @@
       "sourceSegments": 12,
       "terminalApproaches": 6,
       "gates": 8,
-      "usableGeometryGates": 8,
+      "usableGeometryGates": 7,
       "reviewedApproaches": [],
       "directionalSlots": [
         {
@@ -599,15 +620,18 @@
         }
       ],
       "gaps": [
-        "Physical entry/exit completeness and maintenance not established"
+        "Physical entry/exit completeness and maintenance not established",
+        "USER_REMOVED_GEOMETRY: nlex_philippine_arena_600"
       ],
       "sourceAttributeCounts": {
         "ramp": 12,
         "bound": 12,
         "seg_type": 12
       },
-      "availableSourceSegments": 12,
-      "unavailableSourceSegments": []
+      "availableSourceSegments": 11,
+      "unavailableSourceSegments": [
+        "nlex_philippine_arena_600"
+      ]
     },
     {
       "site": "nlex_pulilan",
@@ -615,6 +639,92 @@
       "sourceSegments": 35,
       "terminalApproaches": 10,
       "gates": 12,
+      "usableGeometryGates": 5,
+      "reviewedApproaches": [],
+      "directionalSlots": [
+        {
+          "slot": "NB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "NB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        }
+      ],
+      "gaps": [
+        "Physical entry/exit completeness and maintenance not established",
+        "USER_REMOVED_GEOMETRY: nlex_pulilan_021;nlex_pulilan_023;nlex_pulilan_311;nlex_pulilan_315;nlex_pulilan_416"
+      ],
+      "sourceAttributeCounts": {
+        "ramp": 34,
+        "bound": 34,
+        "seg_type": 35
+      },
+      "availableSourceSegments": 30,
+      "unavailableSourceSegments": [
+        "nlex_pulilan_021",
+        "nlex_pulilan_023",
+        "nlex_pulilan_311",
+        "nlex_pulilan_315",
+        "nlex_pulilan_416"
+      ]
+    },
+    {
+      "site": "nlex_san_fernando",
+      "name": "San Fernando Interchange",
+      "sourceSegments": 49,
+      "terminalApproaches": 15,
+      "gates": 17,
+      "usableGeometryGates": 14,
+      "reviewedApproaches": [],
+      "directionalSlots": [
+        {
+          "slot": "NB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "NB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_ENTRY",
+          "status": "SOURCE_LABEL_ONLY"
+        },
+        {
+          "slot": "SB_EXIT",
+          "status": "SOURCE_LABEL_ONLY"
+        }
+      ],
+      "gaps": [
+        "Physical entry/exit completeness and maintenance not established",
+        "USER_REMOVED_GEOMETRY: nlex_san_fernando_052;nlex_san_fernando_533;nlex_san_fernando_551"
+      ],
+      "sourceAttributeCounts": {
+        "ramp": 48,
+        "bound": 48,
+        "seg_type": 49
+      },
+      "availableSourceSegments": 46,
+      "unavailableSourceSegments": [
+        "nlex_san_fernando_052",
+        "nlex_san_fernando_533",
+        "nlex_san_fernando_551"
+      ]
+    },
+    {
+      "site": "nlex_san_simon",
+      "name": "San Simon Interchange",
+      "sourceSegments": 27,
+      "terminalApproaches": 9,
+      "gates": 11,
       "usableGeometryGates": 8,
       "reviewedApproaches": [],
       "directionalSlots": [
@@ -637,91 +747,22 @@
       ],
       "gaps": [
         "Physical entry/exit completeness and maintenance not established",
-        "USER_REMOVED_GEOMETRY: nlex_pulilan_021"
-      ],
-      "sourceAttributeCounts": {
-        "ramp": 34,
-        "bound": 34,
-        "seg_type": 35
-      },
-      "availableSourceSegments": 34,
-      "unavailableSourceSegments": [
-        "nlex_pulilan_021"
-      ]
-    },
-    {
-      "site": "nlex_san_fernando",
-      "name": "San Fernando Interchange",
-      "sourceSegments": 49,
-      "terminalApproaches": 15,
-      "gates": 17,
-      "usableGeometryGates": 16,
-      "reviewedApproaches": [],
-      "directionalSlots": [
-        {
-          "slot": "NB_ENTRY",
-          "status": "SOURCE_LABEL_ONLY"
-        },
-        {
-          "slot": "NB_EXIT",
-          "status": "SOURCE_LABEL_ONLY"
-        },
-        {
-          "slot": "SB_ENTRY",
-          "status": "SOURCE_LABEL_ONLY"
-        },
-        {
-          "slot": "SB_EXIT",
-          "status": "SOURCE_LABEL_ONLY"
-        }
-      ],
-      "gaps": [
-        "Physical entry/exit completeness and maintenance not established"
-      ],
-      "sourceAttributeCounts": {
-        "ramp": 48,
-        "bound": 48,
-        "seg_type": 49
-      },
-      "availableSourceSegments": 49,
-      "unavailableSourceSegments": []
-    },
-    {
-      "site": "nlex_san_simon",
-      "name": "San Simon Interchange",
-      "sourceSegments": 27,
-      "terminalApproaches": 9,
-      "gates": 11,
-      "usableGeometryGates": 11,
-      "reviewedApproaches": [],
-      "directionalSlots": [
-        {
-          "slot": "NB_ENTRY",
-          "status": "SOURCE_LABEL_ONLY"
-        },
-        {
-          "slot": "NB_EXIT",
-          "status": "SOURCE_LABEL_ONLY"
-        },
-        {
-          "slot": "SB_ENTRY",
-          "status": "SOURCE_LABEL_ONLY"
-        },
-        {
-          "slot": "SB_EXIT",
-          "status": "SOURCE_LABEL_ONLY"
-        }
-      ],
-      "gaps": [
-        "Physical entry/exit completeness and maintenance not established"
+        "USER_REMOVED_GEOMETRY: nlex_san_simon_047;nlex_san_simon_058;nlex_san_simon_741;nlex_san_simon_745;nlex_san_simon_749;nlex_san_simon_805"
       ],
       "sourceAttributeCounts": {
         "ramp": 26,
         "bound": 26,
         "seg_type": 27
       },
-      "availableSourceSegments": 27,
-      "unavailableSourceSegments": []
+      "availableSourceSegments": 21,
+      "unavailableSourceSegments": [
+        "nlex_san_simon_047",
+        "nlex_san_simon_058",
+        "nlex_san_simon_741",
+        "nlex_san_simon_745",
+        "nlex_san_simon_749",
+        "nlex_san_simon_805"
+      ]
     },
     {
       "site": "nlex_santa_rita",
@@ -729,7 +770,7 @@
       "sourceSegments": 43,
       "terminalApproaches": 13,
       "gates": 15,
-      "usableGeometryGates": 15,
+      "usableGeometryGates": 14,
       "reviewedApproaches": [],
       "directionalSlots": [
         {
@@ -750,15 +791,18 @@
         }
       ],
       "gaps": [
-        "Physical entry/exit completeness and maintenance not established"
+        "Physical entry/exit completeness and maintenance not established",
+        "USER_REMOVED_GEOMETRY: nlex_santa_rita_221"
       ],
       "sourceAttributeCounts": {
         "ramp": 42,
         "bound": 42,
         "seg_type": 43
       },
-      "availableSourceSegments": 43,
-      "unavailableSourceSegments": []
+      "availableSourceSegments": 42,
+      "unavailableSourceSegments": [
+        "nlex_santa_rita_221"
+      ]
     },
     {
       "site": "nlex_sctex_spur_nle",
@@ -803,7 +847,7 @@
       "sourceSegments": 36,
       "terminalApproaches": 10,
       "gates": 12,
-      "usableGeometryGates": 11,
+      "usableGeometryGates": 10,
       "reviewedApproaches": [],
       "directionalSlots": [
         {
@@ -824,15 +868,18 @@
         }
       ],
       "gaps": [
-        "Physical entry/exit completeness and maintenance not established"
+        "Physical entry/exit completeness and maintenance not established",
+        "USER_REMOVED_GEOMETRY: nlex_sindalan_mexico_064"
       ],
       "sourceAttributeCounts": {
         "ramp": 7,
         "bound": 7,
         "seg_type": 36
       },
-      "availableSourceSegments": 36,
-      "unavailableSourceSegments": []
+      "availableSourceSegments": 35,
+      "unavailableSourceSegments": [
+        "nlex_sindalan_mexico_064"
+      ]
     },
     {
       "site": "nlex_sta_ines",
@@ -861,15 +908,18 @@
         }
       ],
       "gaps": [
-        "Physical entry/exit completeness and maintenance not established"
+        "Physical entry/exit completeness and maintenance not established",
+        "USER_REMOVED_GEOMETRY: nlex_sta_ines_937"
       ],
       "sourceAttributeCounts": {
         "ramp": 5,
         "bound": 5,
         "seg_type": 9
       },
-      "availableSourceSegments": 9,
-      "unavailableSourceSegments": []
+      "availableSourceSegments": 8,
+      "unavailableSourceSegments": [
+        "nlex_sta_ines_937"
+      ]
     },
     {
       "site": "nlex_tambubong",
@@ -2420,8 +2470,43 @@
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
     },
     {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_023",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_047",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_052",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_058",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_sindalan_mexico",
+      "source": "nlex_sindalan_mexico_064",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
       "site": "nlex_paso_de_blas_valenzuela",
       "source": "nlex_paso_de_blas_valenzuela_068",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_073",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_marilao",
+      "source": "nlex_marilao_167",
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
     },
     {
@@ -2431,7 +2516,47 @@
     },
     {
       "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_177",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_195",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_santa_rita",
+      "source": "nlex_santa_rita_221",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_247",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
+      "source": "nlex_harbor_link_smart_connect_264",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_harbor_link_smart_connect",
       "source": "nlex_harbor_link_smart_connect_303",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_311",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_315",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_387",
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
     },
     {
@@ -2441,7 +2566,27 @@
     },
     {
       "site": "nlex_dau",
+      "source": "nlex_dau_395",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_dau",
       "source": "nlex_dau_396",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_pulilan",
+      "source": "nlex_pulilan_416",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_533",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_san_fernando",
+      "source": "nlex_san_fernando_551",
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
     },
     {
@@ -2451,7 +2596,72 @@
     },
     {
       "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_600",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_philippine_arena",
+      "source": "nlex_philippine_arena_600",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_paso_de_blas_valenzuela",
+      "source": "nlex_paso_de_blas_valenzuela_616",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_paso_de_blas_valenzuela",
+      "source": "nlex_paso_de_blas_valenzuela_617",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_balagtas_plaridel_by_pass",
+      "source": "nlex_balagtas_plaridel_by_pass_636",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_bocaue",
+      "source": "nlex_bocaue_664",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_673",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_dau",
+      "source": "nlex_dau_675",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_paso_de_blas_valenzuela",
+      "source": "nlex_paso_de_blas_valenzuela_683",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_741",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_745",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_749",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_meycauayan",
       "source": "nlex_meycauayan_788",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_san_simon",
+      "source": "nlex_san_simon_805",
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
     },
     {
@@ -2462,6 +2672,16 @@
     {
       "site": "nlex_bocaue",
       "source": "nlex_bocaue_816",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_meycauayan",
+      "source": "nlex_meycauayan_913",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "site": "nlex_sta_ines",
+      "source": "nlex_sta_ines_937",
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
     }
   ],
@@ -2492,14 +2712,14 @@
   },
   "geometryRevision": {
     "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges",
-    "sourceFileSHA256": "911c1f3addb477826fd444a5dc9b5702cf39463c160df7002a039c7567b2c1af",
-    "sourceWALSHA256": "f4f5de4cc23a30650d6842301b3002e5df9b6aab715116b291b81cda8a6bf2cb",
-    "snapshotSHA256": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
-    "date": "2026-10-20",
-    "scope": "All saved manual edits; ten NULL geometries intentionally excluded per user confirmation",
+    "sourceFileSHA256": "6198246b0b831b2a4eea0b3c35667a13e949dea535238a638e5d0fdca8a309c0",
+    "sourceWALSHA256": "3bb76fd28e8748ac2ba11d6c031c171302333366268297b63aecb6bc27207ac1",
+    "snapshotSHA256": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
+    "date": "2026-10-30",
+    "scope": "All saved QGIS interchange edits, including intentionally NULL geometry",
     "sourceRecords": 448,
-    "availableGeometry": 438,
-    "removedGeometry": 10,
+    "availableGeometry": 404,
+    "removedGeometry": 44,
     "coordinatePolicy": "Exact EPSG:4326 source doubles; no rounding, simplification or inferred connections",
     "provisional": true,
     "engineeringApproval": false
@@ -2537,11 +2757,36 @@
     "EB_WB": "Preserved exactly in source attributes; unsupported gate direction remains UNKNOWN",
     "travel": "Only existing explicit forward restriction used; missing travel is not inferred from bound"
   },
-  "availableSourceSegments": 438,
+  "availableSourceSegments": 404,
   "unavailableSourceSegments": [
     {
       "id": "nlex_pulilan_021",
       "site": "nlex_pulilan",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_pulilan_023",
+      "site": "nlex_pulilan",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_san_simon_047",
+      "site": "nlex_san_simon",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_san_fernando_052",
+      "site": "nlex_san_fernando",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_san_simon_058",
+      "site": "nlex_san_simon",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_sindalan_mexico_064",
+      "site": "nlex_sindalan_mexico",
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
     },
     {
@@ -2550,8 +2795,43 @@
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
     },
     {
+      "id": "nlex_harbor_link_smart_connect_073",
+      "site": "nlex_harbor_link_smart_connect",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_marilao_167",
+      "site": "nlex_marilao",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
       "id": "nlex_bocaue_169",
       "site": "nlex_bocaue",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_harbor_link_smart_connect_177",
+      "site": "nlex_harbor_link_smart_connect",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_harbor_link_smart_connect_195",
+      "site": "nlex_harbor_link_smart_connect",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_santa_rita_221",
+      "site": "nlex_santa_rita",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_harbor_link_smart_connect_247",
+      "site": "nlex_harbor_link_smart_connect",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_harbor_link_smart_connect_264",
+      "site": "nlex_harbor_link_smart_connect",
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
     },
     {
@@ -2560,7 +2840,27 @@
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
     },
     {
+      "id": "nlex_pulilan_311",
+      "site": "nlex_pulilan",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_pulilan_315",
+      "site": "nlex_pulilan",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_dau_387",
+      "site": "nlex_dau",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
       "id": "nlex_dau_388",
+      "site": "nlex_dau",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_dau_395",
       "site": "nlex_dau",
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
     },
@@ -2570,13 +2870,93 @@
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
     },
     {
+      "id": "nlex_pulilan_416",
+      "site": "nlex_pulilan",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_san_fernando_533",
+      "site": "nlex_san_fernando",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_san_fernando_551",
+      "site": "nlex_san_fernando",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
       "id": "nlex_meycauayan_597",
       "site": "nlex_meycauayan",
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
     },
     {
+      "id": "nlex_meycauayan_600",
+      "site": "nlex_meycauayan",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_philippine_arena_600",
+      "site": "nlex_philippine_arena",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_paso_de_blas_valenzuela_616",
+      "site": "nlex_paso_de_blas_valenzuela",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_paso_de_blas_valenzuela_617",
+      "site": "nlex_paso_de_blas_valenzuela",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_balagtas_plaridel_by_pass_636",
+      "site": "nlex_balagtas_plaridel_by_pass",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_bocaue_664",
+      "site": "nlex_bocaue",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_dau_673",
+      "site": "nlex_dau",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_dau_675",
+      "site": "nlex_dau",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_paso_de_blas_valenzuela_683",
+      "site": "nlex_paso_de_blas_valenzuela",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_san_simon_741",
+      "site": "nlex_san_simon",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_san_simon_745",
+      "site": "nlex_san_simon",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_san_simon_749",
+      "site": "nlex_san_simon",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
       "id": "nlex_meycauayan_788",
       "site": "nlex_meycauayan",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_san_simon_805",
+      "site": "nlex_san_simon",
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
     },
     {
@@ -2588,67 +2968,84 @@
       "id": "nlex_bocaue_816",
       "site": "nlex_bocaue",
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_meycauayan_913",
+      "site": "nlex_meycauayan",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
+    },
+    {
+      "id": "nlex_sta_ines_937",
+      "site": "nlex_sta_ines",
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER"
     }
   ],
   "gateUpdate": {
     "movedEndpoints": [
-      "NSG:nlex_angeles_040:A",
-      "NSG:nlex_angeles_048:A",
       "NSG:nlex_angeles_064:B",
       "NSG:nlex_angeles_152:B",
       "NSG:nlex_balagtas_plaridel_by_pass_006:B",
       "NSG:nlex_balagtas_plaridel_by_pass_005:B",
-      "NSG:nlex_balagtas_plaridel_by_pass_636:A",
+      "NSG:nlex_balintawak_004:B",
+      "NSG:nlex_balintawak_003:B",
+      "NSG:nlex_balintawak_001:A",
       "NSG:nlex_bocaue_007:A",
+      "NSG:nlex_bocaue_008:A",
+      "NSG:nlex_burol_tabang_spur_overpass_008:A",
       "NSG:nlex_burol_tabang_spur_overpass_007:B",
-      "NSG:nlex_dau_394:A",
-      "NSG:nlex_dau_940:A",
+      "NSG:nlex_harbor_link_smart_connect_071:A",
+      "NSG:nlex_harbor_link_smart_connect_074:B",
       "NSG:nlex_harbor_link_smart_connect_078:B",
-      "NSG:nlex_harbor_link_smart_connect_195:B",
-      "NSG:nlex_harbor_link_smart_connect_247:B",
-      "NSG:nlex_lawang_bato_097:A",
-      "NSG:nlex_lingunan_240:A",
       "NSG:nlex_lingunan_894:B",
-      "NSG:nlex_marilao_167:B",
+      "NSG:nlex_marilao_036:A",
+      "NSG:nlex_marilao_085:A",
       "NSG:nlex_marilao_687:B",
       "NSG:nlex_meycauayan_581:A",
-      "NSG:nlex_paso_de_blas_valenzuela_616:B",
+      "NSG:nlex_paso_de_blas_valenzuela_067:A",
       "NSG:nlex_philippine_arena_188:B",
-      "NSG:nlex_philippine_arena_600:B",
+      "NSG:nlex_philippine_arena_598:A",
       "NSG:nlex_philippine_arena_608:A",
-      "NSG:nlex_pulilan_023:A",
-      "NSG:nlex_pulilan_311:B",
-      "NSG:nlex_pulilan_315:B",
       "NSG:nlex_san_fernando_040:A",
       "NSG:nlex_san_fernando_041:A",
-      "NSG:nlex_san_fernando_052:B",
-      "NSG:nlex_san_fernando_533:B",
-      "NSG:nlex_san_simon_047:B",
-      "NSG:nlex_san_simon_048:A",
-      "NSG:nlex_san_simon_058:A",
-      "NSG:nlex_san_simon_749:B",
       "NSG:nlex_santa_rita_050:A",
       "NSG:nlex_santa_rita_051:B",
-      "NSG:nlex_santa_rita_221:B",
       "NSG:nlex_santa_rita_222:A",
       "NSG:nlex_sctex_spur_nle_002:B",
-      "NSG:nlex_sctex_spur_nle_001:A",
-      "NSG:nlex_sindalan_mexico_064:B",
-      "NSG:nlex_sindalan_mexico_104:A",
-      "NSG:nlex_sindalan_mexico_509:A",
-      "NSG:nlex_tambubong_603:A",
-      "NSG:nlex_tambubong_604:B"
+      "NSG:nlex_sindalan_mexico_514:B",
+      "NSG:nlex_tambubong_604:B",
+      "NSG:nlex_tambubong_605:B"
     ],
     "disabledMissingSource": [
+      "NSG:nlex_balagtas_plaridel_by_pass_636:A",
+      "NSG:nlex_balagtas_plaridel_by_pass_636:B",
       "NSG:nlex_bocaue_815:B",
       "NSG:nlex_bocaue_816:B",
       "NSG:nlex_dau_388:B",
       "NSG:nlex_dau_396:B",
+      "NSG:nlex_harbor_link_smart_connect_073:A",
+      "NSG:nlex_harbor_link_smart_connect_177:A",
+      "NSG:nlex_harbor_link_smart_connect_195:B",
+      "NSG:nlex_harbor_link_smart_connect_247:B",
+      "NSG:nlex_harbor_link_smart_connect_264:A",
       "NSG:nlex_harbor_link_smart_connect_303:B",
+      "NSG:nlex_marilao_167:B",
       "NSG:nlex_meycauayan_597:B",
       "NSG:nlex_meycauayan_788:B",
       "NSG:nlex_paso_de_blas_valenzuela_068:B",
-      "NSG:nlex_pulilan_021:A"
+      "NSG:nlex_paso_de_blas_valenzuela_616:B",
+      "NSG:nlex_paso_de_blas_valenzuela_617:A",
+      "NSG:nlex_philippine_arena_600:B",
+      "NSG:nlex_pulilan_021:A",
+      "NSG:nlex_pulilan_023:A",
+      "NSG:nlex_pulilan_311:B",
+      "NSG:nlex_pulilan_315:B",
+      "NSG:nlex_san_fernando_052:B",
+      "NSG:nlex_san_fernando_533:B",
+      "NSG:nlex_san_simon_047:B",
+      "NSG:nlex_san_simon_058:A",
+      "NSG:nlex_san_simon_749:B",
+      "NSG:nlex_santa_rita_221:B",
+      "NSG:nlex_sindalan_mexico_064:B"
     ],
     "extraWithheld": []
   }

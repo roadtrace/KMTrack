@@ -24,5 +24,5 @@ for(const folder of ['src','public/vendor']){
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'manifest.json')));
 if(manifest.start_url!=='./index.html'||manifest.scope!=='./')throw Error('PWA identity changed');
 for(const icon of manifest.icons)check(icon.src,'manifest.json');
-for(const [file,expected]of [['network-stop-context.json','7d89e8937a3819f8d57579166ec88864f664c8c4d285c556fcb93ed16cb5c7d2'],['stationing-reconstruction-evidence-user-edits-20261020.json','3ea1ed73ba99667c08c8605be06f12506d0e9cd4f138682209d5541a4876799f']])if(crypto.createHash('sha256').update(fs.readFileSync(path.join(root,'public',file))).digest('hex')!==expected)throw Error('GIS bytes changed');
+for(const [file,expected]of [['network-stop-context.json','c72fe1cd763ed1b20337a7f22921f851827d32d0b2f8ae87956ab8ddf58b2789'],['stationing-reconstruction-evidence-user-edits-20261020.json','ba47b87ae058cca413bb7db2f6ddedeefbb4779893e990158e6f290fe99bb9fd']])if(crypto.createHash('sha256').update(fs.readFileSync(path.join(root,'public',file))).digest('hex')!==expected)throw Error('GIS bytes changed');
 console.log('Layout, offline shell, CSS/worker URLs, PWA scope and GIS hashes verified.');

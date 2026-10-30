@@ -1,0 +1,934 @@
+{
+  "provenance": "Synthetic worker replay after exact saved QGIS edits on 2026-10-30; prior geometry fixture retained separately",
+  "modelSHA256": "ba47b87ae058cca413bb7db2f6ddedeefbb4779893e990158e6f290fe99bb9fd",
+  "routes": {
+    "short": [
+      {
+        "status": "UNCERTAIN_APPROACH_REFERENCE_WITHHELD",
+        "stationRange": null,
+        "travelDirection": {
+          "value": null,
+          "status": "WITHHELD_APPROACH_AMBIGUITY",
+          "source": null
+        },
+        "referenceIdentification": {
+          "status": "WITHHELD_APPROACH_AMBIGUITY",
+          "corridor": null,
+          "continuity": "UNKNOWN",
+          "observations": 1,
+          "elapsedMs": 0,
+          "movementM": 0
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": "Balintawak Interchange",
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "UNCERTAIN_APPROACH_REFERENCE_WITHHELD",
+        "stationRange": null,
+        "travelDirection": {
+          "value": null,
+          "status": "WITHHELD_APPROACH_AMBIGUITY",
+          "source": null
+        },
+        "referenceIdentification": {
+          "status": "WITHHELD_APPROACH_AMBIGUITY",
+          "corridor": null,
+          "continuity": "UNKNOWN",
+          "observations": 2,
+          "elapsedMs": 2000,
+          "movementM": 36.19925318581267
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": "Balintawak Interchange",
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "UNCERTAIN_APPROACH_REFERENCE_WITHHELD",
+        "stationRange": null,
+        "travelDirection": {
+          "value": null,
+          "status": "WITHHELD_APPROACH_AMBIGUITY",
+          "source": null
+        },
+        "referenceIdentification": {
+          "status": "WITHHELD_APPROACH_AMBIGUITY",
+          "corridor": null,
+          "continuity": "UNKNOWN",
+          "observations": 3,
+          "elapsedMs": 4000,
+          "movementM": 76.39927432484801
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": "Balintawak Interchange",
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "UNCERTAIN_APPROACH_REFERENCE_WITHHELD",
+        "stationRange": null,
+        "travelDirection": {
+          "value": null,
+          "status": "WITHHELD_APPROACH_AMBIGUITY",
+          "source": null
+        },
+        "referenceIdentification": {
+          "status": "WITHHELD_APPROACH_AMBIGUITY",
+          "corridor": null,
+          "continuity": "UNKNOWN",
+          "observations": 4,
+          "elapsedMs": 6000,
+          "movementM": 116.6048356990084
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": "Balintawak Interchange",
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "AMBIGUOUS_REFERENCE_BOUND",
+        "stationRange": {
+          "minKm": 9.82,
+          "maxKm": 9.82,
+          "provenance": "CURRENT_REFERENCE_PROVISIONAL"
+        },
+        "travelDirection": {
+          "value": "NB",
+          "status": "PROVISIONAL_MOVEMENT_HINT",
+          "source": "OBSERVED_MOVEMENT_AND_EXISTING_APP_CONVENTION"
+        },
+        "referenceIdentification": {
+          "status": "INDEPENDENT_REFERENCE_CANDIDATE",
+          "corridor": "NLEX",
+          "continuity": "UNKNOWN",
+          "observations": 5,
+          "elapsedMs": 8000,
+          "movementM": 158.61870719697123
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": "Balintawak Interchange",
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "AMBIGUOUS_REFERENCE_BOUND",
+        "stationRange": {
+          "minKm": 9.86,
+          "maxKm": 9.86,
+          "provenance": "CURRENT_REFERENCE_PROVISIONAL"
+        },
+        "travelDirection": {
+          "value": "NB",
+          "status": "PROVISIONAL_MOVEMENT_HINT",
+          "source": "OBSERVED_MOVEMENT_AND_EXISTING_APP_CONVENTION"
+        },
+        "referenceIdentification": {
+          "status": "INDEPENDENT_REFERENCE_CANDIDATE",
+          "corridor": "NLEX",
+          "continuity": "UNKNOWN",
+          "observations": 6,
+          "elapsedMs": 10000,
+          "movementM": 197.76189522004302
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": "Balintawak Interchange",
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "AMBIGUOUS_REFERENCE_BOUND",
+        "stationRange": {
+          "minKm": 9.9,
+          "maxKm": 9.9,
+          "provenance": "CURRENT_REFERENCE_PROVISIONAL"
+        },
+        "travelDirection": {
+          "value": "NB",
+          "status": "PROVISIONAL_MOVEMENT_HINT",
+          "source": "OBSERVED_MOVEMENT_AND_EXISTING_APP_CONVENTION"
+        },
+        "referenceIdentification": {
+          "status": "INDEPENDENT_REFERENCE_CANDIDATE",
+          "corridor": "NLEX",
+          "continuity": "UNKNOWN",
+          "observations": 7,
+          "elapsedMs": 12000,
+          "movementM": 237.03388557477746
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": "Balintawak Interchange",
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "AMBIGUOUS_REFERENCE_BOUND",
+        "stationRange": {
+          "minKm": 9.94,
+          "maxKm": 9.94,
+          "provenance": "CURRENT_REFERENCE_PROVISIONAL"
+        },
+        "travelDirection": {
+          "value": "NB",
+          "status": "PROVISIONAL_MOVEMENT_HINT",
+          "source": "OBSERVED_MOVEMENT_AND_EXISTING_APP_CONVENTION"
+        },
+        "referenceIdentification": {
+          "status": "INDEPENDENT_REFERENCE_CANDIDATE",
+          "corridor": "NLEX",
+          "continuity": "UNKNOWN",
+          "observations": 8,
+          "elapsedMs": 14000,
+          "movementM": 277.78707040846086
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": null,
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "AMBIGUOUS_REFERENCE_BOUND",
+        "stationRange": {
+          "minKm": 9.98,
+          "maxKm": 9.98,
+          "provenance": "CURRENT_REFERENCE_PROVISIONAL"
+        },
+        "travelDirection": {
+          "value": "NB",
+          "status": "PROVISIONAL_MOVEMENT_HINT",
+          "source": "OBSERVED_MOVEMENT_AND_EXISTING_APP_CONVENTION"
+        },
+        "referenceIdentification": {
+          "status": "INDEPENDENT_REFERENCE_CANDIDATE",
+          "corridor": "NLEX",
+          "continuity": "UNKNOWN",
+          "observations": 9,
+          "elapsedMs": 16000,
+          "movementM": 318.5563375900687
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": null,
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "AMBIGUOUS_REFERENCE_BOUND",
+        "stationRange": {
+          "minKm": 10.02,
+          "maxKm": 10.02,
+          "provenance": "CURRENT_REFERENCE_PROVISIONAL"
+        },
+        "travelDirection": {
+          "value": "NB",
+          "status": "PROVISIONAL_MOVEMENT_HINT",
+          "source": "OBSERVED_MOVEMENT_AND_EXISTING_APP_CONVENTION"
+        },
+        "referenceIdentification": {
+          "status": "INDEPENDENT_REFERENCE_CANDIDATE",
+          "corridor": "NLEX",
+          "continuity": "UNKNOWN",
+          "observations": 10,
+          "elapsedMs": 18000,
+          "movementM": 356.5022622780649
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": null,
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "AMBIGUOUS_REFERENCE_BOUND",
+        "stationRange": {
+          "minKm": 10.06,
+          "maxKm": 10.06,
+          "provenance": "CURRENT_REFERENCE_PROVISIONAL"
+        },
+        "travelDirection": {
+          "value": "NB",
+          "status": "PROVISIONAL_MOVEMENT_HINT",
+          "source": "OBSERVED_MOVEMENT_AND_EXISTING_APP_CONVENTION"
+        },
+        "referenceIdentification": {
+          "status": "INDEPENDENT_REFERENCE_CANDIDATE",
+          "corridor": "NLEX",
+          "continuity": "UNKNOWN",
+          "observations": 11,
+          "elapsedMs": 20000,
+          "movementM": 391.6608172657865
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": null,
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "AMBIGUOUS_REFERENCE_BOUND",
+        "stationRange": {
+          "minKm": 10.1,
+          "maxKm": 10.1,
+          "provenance": "CURRENT_REFERENCE_PROVISIONAL"
+        },
+        "travelDirection": {
+          "value": "NB",
+          "status": "PROVISIONAL_MOVEMENT_HINT",
+          "source": "OBSERVED_MOVEMENT_AND_EXISTING_APP_CONVENTION"
+        },
+        "referenceIdentification": {
+          "status": "INDEPENDENT_REFERENCE_CANDIDATE",
+          "corridor": "NLEX",
+          "continuity": "UNKNOWN",
+          "observations": 12,
+          "elapsedMs": 22000,
+          "movementM": 426.8647761276604
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": null,
+          "releaseSites": []
+        }
+      }
+    ],
+    "long": [
+      {
+        "status": "INTERCHANGE_REVIEW_REQUIRED",
+        "stationRange": null,
+        "travelDirection": {
+          "value": null,
+          "status": "UNKNOWN",
+          "source": null
+        },
+        "referenceIdentification": {
+          "status": "WITHHELD",
+          "corridor": null,
+          "continuity": "UNKNOWN",
+          "observations": 0,
+          "elapsedMs": 0,
+          "movementM": 0
+        },
+        "network": {
+          "status": "INTERCHANGE_CONTEXT_HELD",
+          "holdRequired": true,
+          "activeInterchange": "Balintawak Interchange",
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "INTERCHANGE_REVIEW_REQUIRED",
+        "stationRange": null,
+        "travelDirection": {
+          "value": null,
+          "status": "UNKNOWN",
+          "source": null
+        },
+        "referenceIdentification": {
+          "status": "WITHHELD",
+          "corridor": null,
+          "continuity": "UNKNOWN",
+          "observations": 0,
+          "elapsedMs": 0,
+          "movementM": 0
+        },
+        "network": {
+          "status": "INTERCHANGE_CONTEXT_HELD",
+          "holdRequired": true,
+          "activeInterchange": "Balintawak Interchange",
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "INTERCHANGE_REVIEW_REQUIRED",
+        "stationRange": null,
+        "travelDirection": {
+          "value": null,
+          "status": "UNKNOWN",
+          "source": null
+        },
+        "referenceIdentification": {
+          "status": "WITHHELD",
+          "corridor": null,
+          "continuity": "UNKNOWN",
+          "observations": 0,
+          "elapsedMs": 0,
+          "movementM": 0
+        },
+        "network": {
+          "status": "INTERCHANGE_CONTEXT_HELD",
+          "holdRequired": true,
+          "activeInterchange": "Balintawak Interchange",
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "INTERCHANGE_REVIEW_REQUIRED",
+        "stationRange": null,
+        "travelDirection": {
+          "value": null,
+          "status": "UNKNOWN",
+          "source": null
+        },
+        "referenceIdentification": {
+          "status": "WITHHELD",
+          "corridor": null,
+          "continuity": "UNKNOWN",
+          "observations": 0,
+          "elapsedMs": 0,
+          "movementM": 0
+        },
+        "network": {
+          "status": "INTERCHANGE_CONTEXT_HELD",
+          "holdRequired": true,
+          "activeInterchange": "Balintawak Interchange",
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "INTERCHANGE_REVIEW_REQUIRED",
+        "stationRange": null,
+        "travelDirection": {
+          "value": null,
+          "status": "UNKNOWN",
+          "source": null
+        },
+        "referenceIdentification": {
+          "status": "WITHHELD",
+          "corridor": null,
+          "continuity": "UNKNOWN",
+          "observations": 0,
+          "elapsedMs": 0,
+          "movementM": 0
+        },
+        "network": {
+          "status": "INTERCHANGE_CONTEXT_HELD",
+          "holdRequired": true,
+          "activeInterchange": "Balintawak Interchange",
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "INTERCHANGE_REVIEW_REQUIRED",
+        "stationRange": null,
+        "travelDirection": {
+          "value": null,
+          "status": "UNKNOWN",
+          "source": null
+        },
+        "referenceIdentification": {
+          "status": "WITHHELD",
+          "corridor": null,
+          "continuity": "UNKNOWN",
+          "observations": 0,
+          "elapsedMs": 0,
+          "movementM": 0
+        },
+        "network": {
+          "status": "INTERCHANGE_CONTEXT_HELD",
+          "holdRequired": true,
+          "activeInterchange": "Balintawak Interchange",
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "INTERCHANGE_REVIEW_REQUIRED",
+        "stationRange": null,
+        "travelDirection": {
+          "value": null,
+          "status": "UNKNOWN",
+          "source": null
+        },
+        "referenceIdentification": {
+          "status": "WITHHELD",
+          "corridor": null,
+          "continuity": "UNKNOWN",
+          "observations": 0,
+          "elapsedMs": 0,
+          "movementM": 0
+        },
+        "network": {
+          "status": "INTERCHANGE_CONTEXT_HELD",
+          "holdRequired": true,
+          "activeInterchange": "Balintawak Interchange",
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "INTERCHANGE_REVIEW_REQUIRED",
+        "stationRange": null,
+        "travelDirection": {
+          "value": null,
+          "status": "UNKNOWN",
+          "source": null
+        },
+        "referenceIdentification": {
+          "status": "WITHHELD",
+          "corridor": null,
+          "continuity": "UNKNOWN",
+          "observations": 0,
+          "elapsedMs": 0,
+          "movementM": 0
+        },
+        "network": {
+          "status": "INTERCHANGE_CONTEXT_HELD",
+          "holdRequired": true,
+          "activeInterchange": "Balintawak Interchange",
+          "releaseSites": []
+        }
+      }
+    ],
+    "ambiguous": [
+      {
+        "status": "UNCERTAIN_APPROACH_REFERENCE_WITHHELD",
+        "stationRange": null,
+        "travelDirection": {
+          "value": null,
+          "status": "WITHHELD_APPROACH_AMBIGUITY",
+          "source": null
+        },
+        "referenceIdentification": {
+          "status": "WITHHELD_APPROACH_AMBIGUITY",
+          "corridor": null,
+          "continuity": "UNKNOWN",
+          "observations": 1,
+          "elapsedMs": 0,
+          "movementM": 0
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": "Balintawak Interchange",
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "AMBIGUOUS_REFERENCE_BOUND",
+        "stationRange": {
+          "minKm": 9.82,
+          "maxKm": 9.82,
+          "provenance": "CURRENT_REFERENCE_PROVISIONAL"
+        },
+        "travelDirection": {
+          "value": null,
+          "status": "UNKNOWN",
+          "source": null
+        },
+        "referenceIdentification": {
+          "status": "ACQUIRING_REFERENCE_CANDIDATE",
+          "corridor": null,
+          "continuity": "UNKNOWN",
+          "observations": 2,
+          "elapsedMs": 2000,
+          "movementM": 39.86868164572734
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": "Balintawak Interchange",
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "AMBIGUOUS_REFERENCE_BOUND",
+        "stationRange": {
+          "minKm": 9.86,
+          "maxKm": 9.86,
+          "provenance": "CURRENT_REFERENCE_PROVISIONAL"
+        },
+        "travelDirection": {
+          "value": null,
+          "status": "UNKNOWN",
+          "source": null
+        },
+        "referenceIdentification": {
+          "status": "ACQUIRING_REFERENCE_CANDIDATE",
+          "corridor": null,
+          "continuity": "UNKNOWN",
+          "observations": 3,
+          "elapsedMs": 4000,
+          "movementM": 79.3991477160763
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": "Balintawak Interchange",
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "AMBIGUOUS_REFERENCE_BOUND",
+        "stationRange": {
+          "minKm": 9.9,
+          "maxKm": 9.9,
+          "provenance": "CURRENT_REFERENCE_PROVISIONAL"
+        },
+        "travelDirection": {
+          "value": "NB",
+          "status": "PROVISIONAL_MOVEMENT_HINT",
+          "source": "OBSERVED_MOVEMENT_AND_EXISTING_APP_CONVENTION"
+        },
+        "referenceIdentification": {
+          "status": "INDEPENDENT_REFERENCE_CANDIDATE",
+          "corridor": "NLEX",
+          "continuity": "UNKNOWN",
+          "observations": 4,
+          "elapsedMs": 6000,
+          "movementM": 118.93006513538644
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": "Balintawak Interchange",
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "AMBIGUOUS_REFERENCE_BOUND",
+        "stationRange": {
+          "minKm": 9.94,
+          "maxKm": 9.94,
+          "provenance": "CURRENT_REFERENCE_PROVISIONAL"
+        },
+        "travelDirection": {
+          "value": "NB",
+          "status": "PROVISIONAL_MOVEMENT_HINT",
+          "source": "OBSERVED_MOVEMENT_AND_EXISTING_APP_CONVENTION"
+        },
+        "referenceIdentification": {
+          "status": "INDEPENDENT_REFERENCE_CANDIDATE",
+          "corridor": "NLEX",
+          "continuity": "UNKNOWN",
+          "observations": 5,
+          "elapsedMs": 8000,
+          "movementM": 159.71973772912725
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": null,
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "AMBIGUOUS_REFERENCE_BOUND",
+        "stationRange": {
+          "minKm": 9.98,
+          "maxKm": 9.98,
+          "provenance": "CURRENT_REFERENCE_PROVISIONAL"
+        },
+        "travelDirection": {
+          "value": "NB",
+          "status": "PROVISIONAL_MOVEMENT_HINT",
+          "source": "OBSERVED_MOVEMENT_AND_EXISTING_APP_CONVENTION"
+        },
+        "referenceIdentification": {
+          "status": "INDEPENDENT_REFERENCE_CANDIDATE",
+          "corridor": "NLEX",
+          "continuity": "UNKNOWN",
+          "observations": 6,
+          "elapsedMs": 10000,
+          "movementM": 200.51938834347933
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": null,
+          "releaseSites": []
+        }
+      }
+    ],
+    "mainline": [
+      {
+        "status": "AMBIGUOUS_REFERENCE_BOUND",
+        "stationRange": {
+          "minKm": 10.04,
+          "maxKm": 10.04,
+          "provenance": "CURRENT_REFERENCE_PROVISIONAL"
+        },
+        "travelDirection": {
+          "value": null,
+          "status": "UNKNOWN",
+          "source": null
+        },
+        "referenceIdentification": {
+          "status": "ACQUIRING_REFERENCE_CANDIDATE",
+          "corridor": null,
+          "continuity": "UNKNOWN",
+          "observations": 1,
+          "elapsedMs": 0,
+          "movementM": 0
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": null,
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "AMBIGUOUS_REFERENCE_BOUND",
+        "stationRange": {
+          "minKm": 10.08,
+          "maxKm": 10.08,
+          "provenance": "CURRENT_REFERENCE_PROVISIONAL"
+        },
+        "travelDirection": {
+          "value": null,
+          "status": "UNKNOWN",
+          "source": null
+        },
+        "referenceIdentification": {
+          "status": "ACQUIRING_REFERENCE_CANDIDATE",
+          "corridor": null,
+          "continuity": "UNKNOWN",
+          "observations": 2,
+          "elapsedMs": 2000,
+          "movementM": 35.42859194972426
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": null,
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "AMBIGUOUS_REFERENCE_BOUND",
+        "stationRange": {
+          "minKm": 10.12,
+          "maxKm": 10.12,
+          "provenance": "CURRENT_REFERENCE_PROVISIONAL"
+        },
+        "travelDirection": {
+          "value": "NB",
+          "status": "PROVISIONAL_MOVEMENT_HINT",
+          "source": "OBSERVED_MOVEMENT_AND_EXISTING_APP_CONVENTION"
+        },
+        "referenceIdentification": {
+          "status": "INDEPENDENT_REFERENCE_CANDIDATE",
+          "corridor": "NLEX",
+          "continuity": "UNKNOWN",
+          "observations": 3,
+          "elapsedMs": 4000,
+          "movementM": 72.31209812557404
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": null,
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "AMBIGUOUS_REFERENCE_BOUND",
+        "stationRange": {
+          "minKm": 10.16,
+          "maxKm": 10.16,
+          "provenance": "CURRENT_REFERENCE_PROVISIONAL"
+        },
+        "travelDirection": {
+          "value": "NB",
+          "status": "PROVISIONAL_MOVEMENT_HINT",
+          "source": "OBSERVED_MOVEMENT_AND_EXISTING_APP_CONVENTION"
+        },
+        "referenceIdentification": {
+          "status": "INDEPENDENT_REFERENCE_CANDIDATE",
+          "corridor": "NLEX",
+          "continuity": "UNKNOWN",
+          "observations": 4,
+          "elapsedMs": 6000,
+          "movementM": 110.67069486712235
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": null,
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "AMBIGUOUS_REFERENCE_BOUND",
+        "stationRange": {
+          "minKm": 10.2,
+          "maxKm": 10.2,
+          "provenance": "CURRENT_REFERENCE_PROVISIONAL"
+        },
+        "travelDirection": {
+          "value": "NB",
+          "status": "PROVISIONAL_MOVEMENT_HINT",
+          "source": "OBSERVED_MOVEMENT_AND_EXISTING_APP_CONVENTION"
+        },
+        "referenceIdentification": {
+          "status": "INDEPENDENT_REFERENCE_CANDIDATE",
+          "corridor": "NLEX",
+          "continuity": "UNKNOWN",
+          "observations": 5,
+          "elapsedMs": 8000,
+          "movementM": 149.03868639864655
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": null,
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "AMBIGUOUS_REFERENCE_BOUND",
+        "stationRange": {
+          "minKm": 10.24,
+          "maxKm": 10.24,
+          "provenance": "CURRENT_REFERENCE_PROVISIONAL"
+        },
+        "travelDirection": {
+          "value": "NB",
+          "status": "PROVISIONAL_MOVEMENT_HINT",
+          "source": "OBSERVED_MOVEMENT_AND_EXISTING_APP_CONVENTION"
+        },
+        "referenceIdentification": {
+          "status": "INDEPENDENT_REFERENCE_CANDIDATE",
+          "corridor": "NLEX",
+          "continuity": "UNKNOWN",
+          "observations": 6,
+          "elapsedMs": 10000,
+          "movementM": 192.2420074403409
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": null,
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "AMBIGUOUS_REFERENCE_BOUND",
+        "stationRange": {
+          "minKm": 10.28,
+          "maxKm": 10.28,
+          "provenance": "CURRENT_REFERENCE_PROVISIONAL"
+        },
+        "travelDirection": {
+          "value": "NB",
+          "status": "PROVISIONAL_MOVEMENT_HINT",
+          "source": "OBSERVED_MOVEMENT_AND_EXISTING_APP_CONVENTION"
+        },
+        "referenceIdentification": {
+          "status": "INDEPENDENT_REFERENCE_CANDIDATE",
+          "corridor": "NLEX",
+          "continuity": "UNKNOWN",
+          "observations": 7,
+          "elapsedMs": 12000,
+          "movementM": 235.44637361729883
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": null,
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "AMBIGUOUS_REFERENCE_BOUND",
+        "stationRange": {
+          "minKm": 10.32,
+          "maxKm": 10.32,
+          "provenance": "CURRENT_REFERENCE_PROVISIONAL"
+        },
+        "travelDirection": {
+          "value": "NB",
+          "status": "PROVISIONAL_MOVEMENT_HINT",
+          "source": "OBSERVED_MOVEMENT_AND_EXISTING_APP_CONVENTION"
+        },
+        "referenceIdentification": {
+          "status": "INDEPENDENT_REFERENCE_CANDIDATE",
+          "corridor": "NLEX",
+          "continuity": "UNKNOWN",
+          "observations": 8,
+          "elapsedMs": 14000,
+          "movementM": 276.57716427537576
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": null,
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "AMBIGUOUS_REFERENCE_BOUND",
+        "stationRange": {
+          "minKm": 10.36,
+          "maxKm": 10.36,
+          "provenance": "CURRENT_REFERENCE_PROVISIONAL"
+        },
+        "travelDirection": {
+          "value": "NB",
+          "status": "PROVISIONAL_MOVEMENT_HINT",
+          "source": "OBSERVED_MOVEMENT_AND_EXISTING_APP_CONVENTION"
+        },
+        "referenceIdentification": {
+          "status": "INDEPENDENT_REFERENCE_CANDIDATE",
+          "corridor": "NLEX",
+          "continuity": "UNKNOWN",
+          "observations": 9,
+          "elapsedMs": 16000,
+          "movementM": 315.6408326658282
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": null,
+          "releaseSites": []
+        }
+      },
+      {
+        "status": "AMBIGUOUS_REFERENCE_BOUND",
+        "stationRange": {
+          "minKm": 10.4,
+          "maxKm": 10.4,
+          "provenance": "CURRENT_REFERENCE_PROVISIONAL"
+        },
+        "travelDirection": {
+          "value": "NB",
+          "status": "PROVISIONAL_MOVEMENT_HINT",
+          "source": "OBSERVED_MOVEMENT_AND_EXISTING_APP_CONVENTION"
+        },
+        "referenceIdentification": {
+          "status": "INDEPENDENT_REFERENCE_CANDIDATE",
+          "corridor": "NLEX",
+          "continuity": "UNKNOWN",
+          "observations": 10,
+          "elapsedMs": 18000,
+          "movementM": 354.70908544816194
+        },
+        "network": {
+          "status": "NO_CURRENT_INTERCHANGE",
+          "holdRequired": false,
+          "activeInterchange": null,
+          "releaseSites": []
+        }
+      }
+    ]
+  }
+}

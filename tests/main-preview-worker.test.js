@@ -15,7 +15,7 @@ async function replay(fixes,root='.'){
  return results;
 }
 for(const bound of ['NB','SB'])test('main worker releases Smart Connect '+bound+' using current hash-verified Preview data',async()=>{
- const gate=gates.features.find(g=>g.properties.site==='nlex_harbor_link_smart_connect'&&g.properties.bound===bound&&g.properties.enabled&&context.sources.some(s=>s.id===g.properties.source_id));assert(gate);
+ const gate=gates.features.find(g=>g.properties.site==='nlex_harbor_link_smart_connect'&&g.properties.bound===bound&&(bound!=='SB'||g.id==='NSG:nlex_harbor_link_smart_connect_078:B')&&g.properties.enabled&&context.sources.some(s=>s.id===g.properties.source_id));assert(gate);
  const fixes=require('./fixtures/network-stop-routes.cjs').route(gate,context),results=await replay(fixes);
  assert(results.some(r=>r.reconstruction.networkStop.holdRequired));
  assert(results.some(r=>r.reconstruction.networkStop.status==='PROVISIONAL_HOLD_RELEASED'));
@@ -23,11 +23,11 @@ for(const bound of ['NB','SB'])test('main worker releases Smart Connect '+bound+
  const capture=require('../src/capture-location.js').create(),fix=fixes[released];capture.beginFix(fix);const resolved=capture.accept(results[released],fix.timestamp,fix.timestamp);assert.equal(resolved.interchangeLocked,false);
 
 });
-for(const approach of ['short','long','ambiguous','mainline'])test('main worker preserves tested Balintawak '+approach+' behavior',async()=>{
+for(const approach of ['short','long','ambiguous','mainline'])test('main worker matches saved-QGIS Balintawak '+approach+' behavior',async()=>{
  const fixes=require('./fixtures/balintawak-entry.cjs').approaches()[approach];
  const results=await replay(fixes);
  const signatures=r=>({status:r.status,stationRange:r.stationRange,travelDirection:r.travelDirection,referenceIdentification:r.referenceIdentification,network:{status:r.reconstruction.networkStop.status,holdRequired:r.reconstruction.networkStop.holdRequired,activeInterchange:r.reconstruction.networkStop.activeInterchange,releaseSites:r.reconstruction.networkStop.releaseSites}});
- assert.deepEqual(JSON.parse(JSON.stringify(results.map(signatures))),require('./fixtures/preview-capture-expected.json').routes[approach]);
+ assert.deepEqual(JSON.parse(JSON.stringify(results.map(signatures))),require('./fixtures/preview-capture-expected-20261030.json').routes[approach]);
  if(approach==='mainline')assert.equal(results.at(-1).referenceIdentification.corridor,'NLEX');
 });
 test('all 21 Preview interchange sites flow through the real worker into Capture snapshots',async()=>{
@@ -41,4 +41,12 @@ test('all 21 Preview interchange sites flow through the real worker into Capture
   const snapshot=capture.snapshot({position:{...fix,fresh:true},now:fix.timestamp});assert(snapshot,sites[i]);
   assert.equal(snapshot.interchange,result.captureInterchange.name);assert.equal(snapshot.km,null);assert.equal(snapshot.lat,fix.lat);
  }
+});
+
+test('trimmed Smart Connect auxiliary-lane route keeps ambiguous attribution held',async()=>{
+ const gate=gates.features.find(g=>g.id==='NSG:nlex_harbor_link_smart_connect_074:B');assert(gate?.properties.enabled);
+ const results=await replay(require('./fixtures/network-stop-routes.cjs').route(gate,context));
+ assert(results.every(r=>r.reconstruction.networkStop.holdRequired));
+ assert(results.some(r=>r.reconstruction.networkStop.reasons.includes('APPROACH_ATTRIBUTION_AMBIGUOUS')));
+ assert(!results.some(r=>r.reconstruction.networkStop.status==='PROVISIONAL_HOLD_RELEASED'));
 });

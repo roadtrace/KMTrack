@@ -9369,10 +9369,6 @@
       "name": "Burol (Tabang Spur Overpass) Interchange",
       "coordinates": [
         [
-          120.90429257364846,
-          14.832662744518476
-        ],
-        [
           120.9037814944035,
           14.833036293335905
         ],
@@ -9826,7 +9822,7 @@
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:4",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "NB Exit Ramp",
       "bound": "NB",
       "travel": null,
@@ -9976,26 +9972,10 @@
         [
           120.90304258240053,
           14.832846653748097
-        ],
-        [
-          120.90315293544305,
-          14.832810461455885
-        ],
-        [
-          120.90326263332294,
-          14.832772453517121
-        ],
-        [
-          120.903371644075,
-          14.832732641006084
-        ],
-        [
-          120.90347993593431,
-          14.832691035522869
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:5",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "SB Entry Ramp",
       "bound": "SB",
       "travel": null,
@@ -11535,74 +11515,10 @@
         [
           120.89933880043266,
           14.8348422110925
-        ],
-        [
-          120.89936675453181,
-          14.83483507807018
-        ],
-        [
-          120.89939457833064,
-          14.834827483897664
-        ],
-        [
-          120.8994222636887,
-          14.834819430796742
-        ],
-        [
-          120.89944980250597,
-          14.834810921123474
-        ],
-        [
-          120.89947718672535,
-          14.83480195736752
-        ],
-        [
-          120.899504408335,
-          14.834792542151357
-        ],
-        [
-          120.8995314593706,
-          14.834782678229578
-        ],
-        [
-          120.89955833191777,
-          14.834772368488018
-        ],
-        [
-          120.89958501811432,
-          14.834761615942968
-        ],
-        [
-          120.89961151015262,
-          14.834750423740266
-        ],
-        [
-          120.89963780028181,
-          14.834738795154372
-        ],
-        [
-          120.89966388081011,
-          14.834726733587422
-        ],
-        [
-          120.8996897441071,
-          14.834714242568236
-        ],
-        [
-          120.89982641644795,
-          14.83465931035296
-        ],
-        [
-          120.89996217096925,
-          14.834602291074235
-        ],
-        [
-          120.90009697356767,
-          14.834543199054423
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:8",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "SB Entry Ramp",
       "bound": "SB",
       "travel": null,
@@ -11680,134 +11596,10 @@
         [
           120.89800208497411,
           14.836630938204909
-        ],
-        [
-          120.89796698087164,
-          14.836602714101558
-        ],
-        [
-          120.89793137263271,
-          14.836575086416687
-        ],
-        [
-          120.89789527110028,
-          14.836548063563345
-        ],
-        [
-          120.8978586872675,
-          14.836521653770383
-        ],
-        [
-          120.89782163227439,
-          14.836495865079982
-        ],
-        [
-          120.89778411740443,
-          14.836470705345187
-        ],
-        [
-          120.8977461540811,
-          14.836446182227519
-        ],
-        [
-          120.89770775386454,
-          14.836422303194643
-        ],
-        [
-          120.89770095204378,
-          14.836418720654853
-        ],
-        [
-          120.89769408715541,
-          14.83641525234411
-        ],
-        [
-          120.89768716125224,
-          14.836411899299545
-        ],
-        [
-          120.89768017640529,
-          14.836408662523786
-        ],
-        [
-          120.89767313470315,
-          14.83640554298472
-        ],
-        [
-          120.89766603825146,
-          14.836402541615161
-        ],
-        [
-          120.89765888917223,
-          14.836399659312592
-        ],
-        [
-          120.89765168960322,
-          14.8363968969389
-        ],
-        [
-          120.89764444169722,
-          14.836394255320098
-        ],
-        [
-          120.89763714762161,
-          14.836391735246098
-        ],
-        [
-          120.8976298095574,
-          14.836389337470466
-        ],
-        [
-          120.89762242969886,
-          14.836387062710193
-        ],
-        [
-          120.89761501025278,
-          14.836384911645494
-        ],
-        [
-          120.89760755343772,
-          14.836382884919594
-        ],
-        [
-          120.89760006148342,
-          14.836380983138524
-        ],
-        [
-          120.89759253663019,
-          14.836379206870971
-        ],
-        [
-          120.89758498112812,
-          14.836377556648081
-        ],
-        [
-          120.89757739723646,
-          14.836376032963312
-        ],
-        [
-          120.89756978722302,
-          14.83637463627229
-        ],
-        [
-          120.89756215336334,
-          14.836373366992651
-        ],
-        [
-          120.89755449794009,
-          14.836372225503949
-        ],
-        [
-          120.89754682324246,
-          14.836371212147512
-        ],
-        [
-          120.89753913156537,
-          14.836370327226366
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:9",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "NB Entry Ramp",
       "bound": "NB",
       "travel": null,
@@ -15207,14 +14999,6 @@
       "name": "Bocaue Interchange",
       "coordinates": [
         [
-          120.9415112,
-          14.8047117
-        ],
-        [
-          120.9411147,
-          14.8050507
-        ],
-        [
           120.9407908,
           14.8053791
         ],
@@ -15228,7 +15012,7 @@
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:34",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "NB Exit Ramp",
       "bound": "NB",
       "travel": null,
@@ -15264,18 +15048,6 @@
       "name": "Bocaue Interchange",
       "coordinates": [
         [
-          120.9381341,
-          14.8095412
-        ],
-        [
-          120.9381927,
-          14.8092381
-        ],
-        [
-          120.9383621,
-          14.8088969
-        ],
-        [
           120.9384372,
           14.8087646
         ],
@@ -15289,7 +15061,7 @@
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:35",
-      "sourceHash": "25935e4f774ea3d3a9cd37f92aab74a124657dc3f85260a149e70b057c165c4d",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "SB Exit Ramp",
       "bound": "SB",
       "travel": null,
@@ -15383,51 +15155,6 @@
         "ramp": "NB Entry Ramp",
         "seg_type": "entry_ramp",
         "bound": "NB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
-      "id": "nlex_pulilan_023",
-      "site": "nlex_pulilan",
-      "name": "Pulilan Interchange",
-      "coordinates": [
-        [
-          120.8153209,
-          14.9100201
-        ],
-        [
-          120.8154351,
-          14.909833
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:38",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
-      "ramp": "SB Exit Ramp",
-      "bound": "SB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "exit_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 38,
-        "seg_id": "nlex_pulilan_023",
-        "site_id": "nlex_pulilan",
-        "name": "Pulilan Interchange",
-        "ramp": "SB Exit Ramp",
-        "seg_type": "exit_ramp",
-        "bound": "SB",
         "travel": null,
         "level": null,
         "from_node": null,
@@ -15587,14 +15314,10 @@
         [
           120.973108,
           14.7445368
-        ],
-        [
-          120.9733423,
-          14.744124
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:41",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "SB Entry Ramp",
       "bound": "SB",
       "travel": null,
@@ -16223,18 +15946,10 @@
         [
           120.5866785,
           15.2239136
-        ],
-        [
-          120.586772,
-          15.2237452
-        ],
-        [
-          120.5869851,
-          15.2234002
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:48",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "SB Entry Ramp",
       "bound": "SB",
       "travel": null,
@@ -16509,8 +16224,8 @@
       "name": "San Fernando Interchange",
       "coordinates": [
         [
-          120.69222508982675,
-          15.052393886057805
+          120.69265196491365,
+          15.051839141695215
         ],
         [
           120.6931225,
@@ -16538,7 +16253,7 @@
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:53",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "SB Exit Ramp",
       "bound": "SB",
       "travel": null,
@@ -16573,10 +16288,6 @@
       "site": "nlex_san_fernando",
       "name": "San Fernando Interchange",
       "coordinates": [
-        [
-          120.6943203,
-          15.0504351
-        ],
         [
           120.6942299,
           15.050575
@@ -16635,7 +16346,7 @@
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:54",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "NB Exit Ramp",
       "bound": "NB",
       "travel": null,
@@ -16784,51 +16495,6 @@
       }
     },
     {
-      "id": "nlex_san_simon_047",
-      "site": "nlex_san_simon",
-      "name": "San Simon Interchange",
-      "coordinates": [
-        [
-          120.7493495,
-          14.9917932
-        ],
-        [
-          120.7489701,
-          14.9922993
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:61",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
-      "ramp": "NB Entry Ramp",
-      "bound": "NB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 61,
-        "seg_id": "nlex_san_simon_047",
-        "site_id": "nlex_san_simon",
-        "name": "San Simon Interchange",
-        "ramp": "NB Entry Ramp",
-        "seg_type": "entry_ramp",
-        "bound": "NB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
       "id": "nlex_san_simon_048",
       "site": "nlex_san_simon",
       "name": "San Simon Interchange",
@@ -16878,10 +16544,6 @@
       "site": "nlex_marilao",
       "name": "Marilao Interchange",
       "coordinates": [
-        [
-          120.9567511,
-          14.7754834
-        ],
         [
           120.9565926,
           14.7759291
@@ -16936,7 +16598,7 @@
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:63",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "NB Exit Ramp",
       "bound": "NB",
       "travel": null,
@@ -17026,79 +16688,10 @@
       }
     },
     {
-      "id": "nlex_san_fernando_052",
-      "site": "nlex_san_fernando",
-      "name": "San Fernando Interchange",
-      "coordinates": [
-        [
-          120.695939,
-          15.0478738
-        ],
-        [
-          120.6960459,
-          15.0478092
-        ],
-        [
-          120.696128,
-          15.0477638
-        ],
-        [
-          120.6962346,
-          15.0476976
-        ],
-        [
-          120.6963528,
-          15.0476137
-        ],
-        [
-          120.6965878,
-          15.0474262
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:65",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
-      "ramp": "SB Entry Ramp",
-      "bound": "SB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 65,
-        "seg_id": "nlex_san_fernando_052",
-        "site_id": "nlex_san_fernando",
-        "name": "San Fernando Interchange",
-        "ramp": "SB Entry Ramp",
-        "seg_type": "entry_ramp",
-        "bound": "SB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
       "id": "nlex_santa_rita_050",
       "site": "nlex_santa_rita",
       "name": "Santa Rita Interchange",
       "coordinates": [
-        [
-          120.8605593,
-          14.8614045
-        ],
-        [
-          120.8603894,
-          14.8615553
-        ],
         [
           120.8602255,
           14.8617736
@@ -17109,7 +16702,7 @@
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:66",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "NB Exit Ramp",
       "bound": "NB",
       "travel": null,
@@ -17199,46 +16792,10 @@
         [
           120.8595733,
           14.8623138
-        ],
-        [
-          120.8595316,
-          14.8622959
-        ],
-        [
-          120.8594832,
-          14.8622807
-        ],
-        [
-          120.8594392,
-          14.862272
-        ],
-        [
-          120.8593841,
-          14.8622683
-        ],
-        [
-          120.8593337,
-          14.8622701
-        ],
-        [
-          120.8592857,
-          14.8622757
-        ],
-        [
-          120.8592406,
-          14.8622856
-        ],
-        [
-          120.8591768,
-          14.8623048
-        ],
-        [
-          120.85904911506871,
-          14.862359671620121
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:67",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "NB Entry Ramp",
       "bound": "NB",
       "travel": null,
@@ -17336,38 +16893,10 @@
         [
           120.6132193,
           15.1626579
-        ],
-        [
-          120.613311,
-          15.1626211
-        ],
-        [
-          120.6133994,
-          15.1625801
-        ],
-        [
-          120.6134862,
-          15.1625295
-        ],
-        [
-          120.6135688,
-          15.1624726
-        ],
-        [
-          120.6136464,
-          15.162408
-        ],
-        [
-          120.6137159,
-          15.1623453
-        ],
-        [
-          120.6137811,
-          15.1622786
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:68",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "SB Entry Ramp",
       "bound": "SB",
       "travel": null,
@@ -17531,128 +17060,6 @@
         "ramp": null,
         "seg_type": "connector_road",
         "bound": null,
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
-      "id": "nlex_san_simon_058",
-      "site": "nlex_san_simon",
-      "name": "San Simon Interchange",
-      "coordinates": [
-        [
-          120.748202,
-          14.9929754
-        ],
-        [
-          120.7483386,
-          14.9927084
-        ],
-        [
-          120.7484404,
-          14.9924943
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:72",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
-      "ramp": "SB Exit Ramp",
-      "bound": "SB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "exit_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 72,
-        "seg_id": "nlex_san_simon_058",
-        "site_id": "nlex_san_simon",
-        "name": "San Simon Interchange",
-        "ramp": "SB Exit Ramp",
-        "seg_type": "exit_ramp",
-        "bound": "SB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
-      "id": "nlex_sindalan_mexico_064",
-      "site": "nlex_sindalan_mexico",
-      "name": "Sindalan/Mexico Interchange",
-      "coordinates": [
-        [
-          120.6637937,
-          15.1059045
-        ],
-        [
-          120.6637105,
-          15.1058889
-        ],
-        [
-          120.6636273,
-          15.1058776
-        ],
-        [
-          120.6635538,
-          15.1058765
-        ],
-        [
-          120.6634738,
-          15.1058857
-        ],
-        [
-          120.6634063,
-          15.1059013
-        ],
-        [
-          120.663343,
-          15.1059251
-        ],
-        [
-          120.6632718,
-          15.1059678
-        ],
-        [
-          120.6632012,
-          15.1060281
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:76",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
-      "ramp": "NB Entry Ramp",
-      "bound": "NB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 76,
-        "seg_id": "nlex_sindalan_mexico_064",
-        "site_id": "nlex_sindalan_mexico",
-        "name": "Sindalan/Mexico Interchange",
-        "ramp": "NB Entry Ramp",
-        "seg_type": "entry_ramp",
-        "bound": "NB",
         "travel": null,
         "level": null,
         "from_node": null,
@@ -17847,14 +17254,6 @@
       "name": "Paso de Blas (Valenzuela) Interchange",
       "coordinates": [
         [
-          120.991425,
-          14.7107918
-        ],
-        [
-          120.9916773,
-          14.7102326
-        ],
-        [
           120.9919769,
           14.7096574
         ],
@@ -17888,7 +17287,7 @@
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:96",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "SB Exit Ramp",
       "bound": "SB",
       "travel": null,
@@ -18026,10 +17425,6 @@
       "name": "Harbor Link (Smart Connect) Interchange",
       "coordinates": [
         [
-          121.0050248,
-          14.6934718
-        ],
-        [
           121.0044946,
           14.6935421
         ],
@@ -18043,7 +17438,7 @@
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:100",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "NB Entry Ramp",
       "bound": "NB",
       "travel": null,
@@ -18079,14 +17474,6 @@
       "name": "Harbor Link (Smart Connect) Interchange",
       "coordinates": [
         [
-          120.9994423,
-          14.6957358
-        ],
-        [
-          120.9995502,
-          14.6954388
-        ],
-        [
           120.9996909,
           14.6950457
         ],
@@ -18100,7 +17487,7 @@
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:101",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": null,
       "bound": "SB",
       "travel": null,
@@ -18131,61 +17518,6 @@
       }
     },
     {
-      "id": "nlex_harbor_link_smart_connect_073",
-      "site": "nlex_harbor_link_smart_connect",
-      "name": "Harbor Link (Smart Connect) Interchange",
-      "coordinates": [
-        [
-          121.0009437,
-          14.6899924
-        ],
-        [
-          121.0010064,
-          14.6905076
-        ],
-        [
-          121.0010074,
-          14.6907784
-        ],
-        [
-          121.0009925,
-          14.6911134
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:102",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
-      "ramp": "NB Exit Ramp",
-      "bound": "NB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [
-        "nlex_harbor_link_smart_connect_nb_exit"
-      ],
-      "kind": "RAMP",
-      "seg_type": "exit_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 102,
-        "seg_id": "nlex_harbor_link_smart_connect_073",
-        "site_id": "nlex_harbor_link_smart_connect",
-        "name": "Harbor Link (Smart Connect) Interchange",
-        "ramp": "NB Exit Ramp",
-        "seg_type": "exit_ramp",
-        "bound": "NB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
       "id": "nlex_harbor_link_smart_connect_074",
       "site": "nlex_harbor_link_smart_connect",
       "name": "Harbor Link (Smart Connect) Interchange",
@@ -18197,22 +17529,10 @@
         [
           121.000381,
           14.6926947
-        ],
-        [
-          121.000448,
-          14.6923243
-        ],
-        [
-          121.0005215,
-          14.6919929
-        ],
-        [
-          121.0006478,
-          14.691508
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:103",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": null,
       "bound": "SB",
       "travel": null,
@@ -18318,18 +17638,10 @@
         [
           120.9980216,
           14.6937088
-        ],
-        [
-          120.997831,
-          14.6936639
-        ],
-        [
-          120.9975531,
-          14.6936167
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:106",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "SB Exit Ramp",
       "bound": "SB",
       "travel": null,
@@ -18399,22 +17711,10 @@
         [
           121.0003098,
           14.6911572
-        ],
-        [
-          121.0004056,
-          14.6910432
-        ],
-        [
-          121.000489,
-          14.6909101
-        ],
-        [
-          121.0005485,
-          14.690802
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:107",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "SB Entry Ramp",
       "bound": "SB",
       "travel": null,
@@ -18450,10 +17750,6 @@
       "name": "Harbor Link (Smart Connect) Interchange",
       "coordinates": [
         [
-          121.0009925,
-          14.6911134
-        ],
-        [
           121.0009007,
           14.6918571
         ],
@@ -18471,7 +17767,7 @@
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:108",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": null,
       "bound": "NB",
       "travel": null,
@@ -18761,10 +18057,6 @@
       "name": "Marilao Interchange",
       "coordinates": [
         [
-          120.9559656,
-          14.7765682
-        ],
-        [
           120.956144,
           14.7760884
         ],
@@ -18830,7 +18122,7 @@
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:111",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "SB Exit Ramp",
       "bound": "SB",
       "travel": null,
@@ -19390,42 +18682,10 @@
         [
           120.6140518,
           15.1628663
-        ],
-        [
-          120.614003,
-          15.1628701
-        ],
-        [
-          120.6139587,
-          15.1628773
-        ],
-        [
-          120.61391,
-          15.1628909
-        ],
-        [
-          120.6138645,
-          15.1629077
-        ],
-        [
-          120.6138197,
-          15.1629297
-        ],
-        [
-          120.6137773,
-          15.1629564
-        ],
-        [
-          120.6137276,
-          15.162995
-        ],
-        [
-          120.6136815,
-          15.1630387
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:156",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "NB Entry Ramp",
       "bound": "NB",
       "travel": null,
@@ -19699,22 +18959,10 @@
         [
           121.000226,
           14.6946304
-        ],
-        [
-          121.0000832,
-          14.6950393
-        ],
-        [
-          120.9999537,
-          14.6953587
-        ],
-        [
-          120.9998363,
-          14.6956322
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:164",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": null,
       "bound": "NB",
       "travel": null,
@@ -20010,77 +19258,6 @@
       }
     },
     {
-      "id": "nlex_marilao_167",
-      "site": "nlex_marilao",
-      "name": "Marilao Interchange",
-      "coordinates": [
-        [
-          120.9566422,
-          14.7765326
-        ],
-        [
-          120.9565732,
-          14.7765268
-        ],
-        [
-          120.9564981,
-          14.7765346
-        ],
-        [
-          120.9564202,
-          14.7765552
-        ],
-        [
-          120.9563667,
-          14.7765787
-        ],
-        [
-          120.9563103,
-          14.7766097
-        ],
-        [
-          120.9562567,
-          14.7766487
-        ],
-        [
-          120.9562138,
-          14.7766876
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:181",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
-      "ramp": "NB Entry Ramp",
-      "bound": "NB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [
-        "nlex_marilao_nb_entry"
-      ],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 181,
-        "seg_id": "nlex_marilao_167",
-        "site_id": "nlex_marilao",
-        "name": "Marilao Interchange",
-        "ramp": "NB Entry Ramp",
-        "seg_type": "entry_ramp",
-        "bound": "NB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
       "id": "nlex_marilao_168",
       "site": "nlex_marilao",
       "name": "Marilao Interchange",
@@ -20139,18 +19316,6 @@
       "name": "Harbor Link (Smart Connect) Interchange",
       "coordinates": [
         [
-          121.0009925,
-          14.6911134
-        ],
-        [
-          121.0010188,
-          14.6913058
-        ],
-        [
-          121.0010763,
-          14.6914948
-        ],
-        [
           121.0011443,
           14.6916491
         ],
@@ -20189,18 +19354,10 @@
         [
           121.0032059,
           14.6932435
-        ],
-        [
-          121.0033848,
-          14.693259
-        ],
-        [
-          121.0038195,
-          14.6932857
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:184",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "NB Exit Ramp",
       "bound": "NB",
       "travel": null,
@@ -20266,26 +19423,10 @@
         [
           121.0004044,
           14.6950583
-        ],
-        [
-          121.000234,
-          14.6951832
-        ],
-        [
-          121.0001187,
-          14.6952869
-        ],
-        [
-          121.0000184,
-          14.6953889
-        ],
-        [
-          120.9998363,
-          14.6956322
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:185",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "NB Entry Ramp",
       "bound": "NB",
       "travel": null,
@@ -20649,55 +19790,6 @@
       }
     },
     {
-      "id": "nlex_harbor_link_smart_connect_177",
-      "site": "nlex_harbor_link_smart_connect",
-      "name": "Harbor Link (Smart Connect) Interchange",
-      "coordinates": [
-        [
-          120.9956404,
-          14.6934459
-        ],
-        [
-          120.9963825,
-          14.6933814
-        ],
-        [
-          120.9967647,
-          14.6933554
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:191",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
-      "ramp": "SB Entry Ramp",
-      "bound": "SB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 191,
-        "seg_id": "nlex_harbor_link_smart_connect_177",
-        "site_id": "nlex_harbor_link_smart_connect",
-        "name": "Harbor Link (Smart Connect) Interchange",
-        "ramp": "SB Entry Ramp",
-        "seg_type": "entry_ramp",
-        "bound": "SB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
       "id": "nlex_harbor_link_smart_connect_178",
       "site": "nlex_harbor_link_smart_connect",
       "name": "Harbor Link (Smart Connect) Interchange",
@@ -20711,12 +19803,12 @@
           14.6935915
         ],
         [
-          120.9975531,
-          14.6936167
+          120.99805315989566,
+          14.693609532961132
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:192",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": null,
       "bound": "WB",
       "travel": null,
@@ -21256,22 +20348,10 @@
         [
           120.9478703,
           14.793363
-        ],
-        [
-          120.9476367,
-          14.7933586
-        ],
-        [
-          120.9474708,
-          14.7933894
-        ],
-        [
-          120.9472992,
-          14.7934805
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:202",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "NB Entry Ramp",
       "bound": "NB",
       "travel": null,
@@ -21494,22 +20574,10 @@
         [
           120.6934248,
           15.0518069
-        ],
-        [
-          120.6932972,
-          15.0518742
-        ],
-        [
-          120.6931593,
-          15.0519504
-        ],
-        [
-          120.6930542,
-          15.0520246
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:208",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "NB Entry Ramp",
       "bound": "NB",
       "travel": null,
@@ -21529,51 +20597,6 @@
         "name": "San Fernando Interchange",
         "ramp": "NB Entry Ramp",
         "seg_type": "entry_ramp",
-        "bound": "NB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
-      "id": "nlex_harbor_link_smart_connect_195",
-      "site": "nlex_harbor_link_smart_connect",
-      "name": "Harbor Link (Smart Connect) Interchange",
-      "coordinates": [
-        [
-          121.0038195,
-          14.6932857
-        ],
-        [
-          121.0047557,
-          14.6932832
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:209",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
-      "ramp": "NB Exit Ramp",
-      "bound": "NB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "exit_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 209,
-        "seg_id": "nlex_harbor_link_smart_connect_195",
-        "site_id": "nlex_harbor_link_smart_connect",
-        "name": "Harbor Link (Smart Connect) Interchange",
-        "ramp": "NB Exit Ramp",
-        "seg_type": "exit_ramp",
         "bound": "NB",
         "travel": null,
         "level": null,
@@ -22291,79 +21314,10 @@
       }
     },
     {
-      "id": "nlex_santa_rita_221",
-      "site": "nlex_santa_rita",
-      "name": "Santa Rita Interchange",
-      "coordinates": [
-        [
-          120.8577386,
-          14.8622177
-        ],
-        [
-          120.857882,
-          14.8623369
-        ],
-        [
-          120.8580014,
-          14.8624099
-        ],
-        [
-          120.8581472,
-          14.8624317
-        ],
-        [
-          120.85830432493343,
-          14.862396998366467
-        ],
-        [
-          120.85846799486441,
-          14.862347229369902
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:231",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
-      "ramp": "SB Entry Ramp",
-      "bound": "SB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 231,
-        "seg_id": "nlex_santa_rita_221",
-        "site_id": "nlex_santa_rita",
-        "name": "Santa Rita Interchange",
-        "ramp": "SB Entry Ramp",
-        "seg_type": "entry_ramp",
-        "bound": "SB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
       "id": "nlex_santa_rita_222",
       "site": "nlex_santa_rita",
       "name": "Santa Rita Interchange",
       "coordinates": [
-        [
-          120.8571543,
-          14.8631757
-        ],
-        [
-          120.857214,
-          14.86311
-        ],
         [
           120.8573519,
           14.8629277
@@ -22382,7 +21336,7 @@
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:232",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "SB Exit Ramp",
       "bound": "SB",
       "travel": null,
@@ -22815,51 +21769,6 @@
       }
     },
     {
-      "id": "nlex_harbor_link_smart_connect_247",
-      "site": "nlex_harbor_link_smart_connect",
-      "name": "Harbor Link (Smart Connect) Interchange",
-      "coordinates": [
-        [
-          120.9975531,
-          14.6936167
-        ],
-        [
-          120.9973562,
-          14.6936071
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:256",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
-      "ramp": "SB Exit Ramp",
-      "bound": "SB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "exit_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 256,
-        "seg_id": "nlex_harbor_link_smart_connect_247",
-        "site_id": "nlex_harbor_link_smart_connect",
-        "name": "Harbor Link (Smart Connect) Interchange",
-        "ramp": "SB Exit Ramp",
-        "seg_type": "exit_ramp",
-        "bound": "SB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
       "id": "nlex_harbor_link_smart_connect_248",
       "site": "nlex_harbor_link_smart_connect",
       "name": "Harbor Link (Smart Connect) Interchange",
@@ -22869,16 +21778,12 @@
           14.6932829
         ],
         [
-          121.003133,
-          14.6932866
-        ],
-        [
-          121.0038195,
-          14.6932857
+          121.00275637167597,
+          14.693289340479566
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:257",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": null,
       "bound": "EB",
       "travel": null,
@@ -22899,55 +21804,6 @@
         "ramp": null,
         "seg_type": "auxiliary_lane",
         "bound": "EB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
-      "id": "nlex_harbor_link_smart_connect_264",
-      "site": "nlex_harbor_link_smart_connect",
-      "name": "Harbor Link (Smart Connect) Interchange",
-      "coordinates": [
-        [
-          120.9992875,
-          14.6962294
-        ],
-        [
-          120.9993838,
-          14.6958824
-        ],
-        [
-          120.9994423,
-          14.6957358
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:273",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
-      "ramp": "SB Exit Ramp",
-      "bound": "SB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "exit_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 273,
-        "seg_id": "nlex_harbor_link_smart_connect_264",
-        "site_id": "nlex_harbor_link_smart_connect",
-        "name": "Harbor Link (Smart Connect) Interchange",
-        "ramp": "SB Exit Ramp",
-        "seg_type": "exit_ramp",
-        "bound": "SB",
         "travel": null,
         "level": null,
         "from_node": null,
@@ -23256,63 +22112,6 @@
       }
     },
     {
-      "id": "nlex_pulilan_311",
-      "site": "nlex_pulilan",
-      "name": "Pulilan Interchange",
-      "coordinates": [
-        [
-          120.8167282,
-          14.9093615
-        ],
-        [
-          120.8165627,
-          14.909409
-        ],
-        [
-          120.816401,
-          14.9094705
-        ],
-        [
-          120.8162568,
-          14.9095486
-        ],
-        [
-          120.8160824,
-          14.9096748
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:319",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
-      "ramp": "NB Entry Ramp",
-      "bound": "NB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 319,
-        "seg_id": "nlex_pulilan_311",
-        "site_id": "nlex_pulilan",
-        "name": "Pulilan Interchange",
-        "ramp": "NB Entry Ramp",
-        "seg_type": "entry_ramp",
-        "bound": "NB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
       "id": "nlex_pulilan_312",
       "site": "nlex_pulilan",
       "name": "Pulilan Interchange",
@@ -23433,63 +22232,6 @@
       "attributes": {
         "fid": 322,
         "seg_id": "nlex_pulilan_314",
-        "site_id": "nlex_pulilan",
-        "name": "Pulilan Interchange",
-        "ramp": "SB Entry Ramp",
-        "seg_type": "entry_ramp",
-        "bound": "SB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
-      "id": "nlex_pulilan_315",
-      "site": "nlex_pulilan",
-      "name": "Pulilan Interchange",
-      "coordinates": [
-        [
-          120.8176608,
-          14.9071121
-        ],
-        [
-          120.8177641,
-          14.9070722
-        ],
-        [
-          120.8178929,
-          14.907001
-        ],
-        [
-          120.8180091,
-          14.9069002
-        ],
-        [
-          120.8182132374186,
-          14.906716396690483
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:323",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
-      "ramp": "SB Entry Ramp",
-      "bound": "SB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 323,
-        "seg_id": "nlex_pulilan_315",
         "site_id": "nlex_pulilan",
         "name": "Pulilan Interchange",
         "ramp": "SB Entry Ramp",
@@ -24239,51 +22981,6 @@
       }
     },
     {
-      "id": "nlex_dau_387",
-      "site": "nlex_dau",
-      "name": "Dau Interchange",
-      "coordinates": [
-        [
-          120.6040112,
-          15.1788895
-        ],
-        [
-          120.6042208,
-          15.1786079
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:388",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
-      "ramp": "SB Entry Ramp",
-      "bound": "SB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 388,
-        "seg_id": "nlex_dau_387",
-        "site_id": "nlex_dau",
-        "name": "Dau Interchange",
-        "ramp": "SB Entry Ramp",
-        "seg_type": "entry_ramp",
-        "bound": "SB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
       "id": "nlex_dau_389",
       "site": "nlex_dau",
       "name": "Dau Interchange",
@@ -24647,51 +23344,6 @@
         "name": "Dau Interchange",
         "ramp": "NB Exit Ramp",
         "seg_type": "exit_ramp",
-        "bound": "NB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
-      "id": "nlex_dau_395",
-      "site": "nlex_dau",
-      "name": "Dau Interchange",
-      "coordinates": [
-        [
-          120.6048044,
-          15.1783839
-        ],
-        [
-          120.6047682,
-          15.1784579
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:396",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
-      "ramp": "NB Entry Ramp",
-      "bound": "NB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 396,
-        "seg_id": "nlex_dau_395",
-        "site_id": "nlex_dau",
-        "name": "Dau Interchange",
-        "ramp": "NB Entry Ramp",
-        "seg_type": "entry_ramp",
         "bound": "NB",
         "travel": null,
         "level": null,
@@ -25185,51 +23837,6 @@
       }
     },
     {
-      "id": "nlex_pulilan_416",
-      "site": "nlex_pulilan",
-      "name": "Pulilan Interchange",
-      "coordinates": [
-        [
-          120.8175071,
-          14.9071591
-        ],
-        [
-          120.8176608,
-          14.9071121
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:424",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
-      "ramp": "SB Entry Ramp",
-      "bound": "SB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 424,
-        "seg_id": "nlex_pulilan_416",
-        "site_id": "nlex_pulilan",
-        "name": "Pulilan Interchange",
-        "ramp": "SB Entry Ramp",
-        "seg_type": "entry_ramp",
-        "bound": "SB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
       "id": "nlex_pulilan_417",
       "site": "nlex_pulilan",
       "name": "Pulilan Interchange",
@@ -25329,10 +23936,6 @@
       "name": "Pulilan Interchange",
       "coordinates": [
         [
-          120.8154351,
-          14.909833
-        ],
-        [
           120.8154716,
           14.9097588
         ],
@@ -25342,7 +23945,7 @@
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:427",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "SB Exit Ramp",
       "bound": "SB",
       "travel": null,
@@ -26003,38 +24606,10 @@
         [
           120.6629613,
           15.1056712
-        ],
-        [
-          120.6630072,
-          15.105636
-        ],
-        [
-          120.663042,
-          15.1056042
-        ],
-        [
-          120.6630751,
-          15.1055673
-        ],
-        [
-          120.6631031,
-          15.1055304
-        ],
-        [
-          120.6631437,
-          15.1054722
-        ],
-        [
-          120.6631844,
-          15.1054088
-        ],
-        [
-          120.6634262,
-          15.1051513
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:524",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "SB Entry Ramp",
       "bound": "SB",
       "travel": null,
@@ -27017,59 +25592,6 @@
       }
     },
     {
-      "id": "nlex_san_fernando_533",
-      "site": "nlex_san_fernando",
-      "name": "San Fernando Interchange",
-      "coordinates": [
-        [
-          120.6930542,
-          15.0520246
-        ],
-        [
-          120.6929455,
-          15.0521152
-        ],
-        [
-          120.6928449,
-          15.0522046
-        ],
-        [
-          120.6927873,
-          15.0522552
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:541",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
-      "ramp": "NB Entry Ramp",
-      "bound": "NB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 541,
-        "seg_id": "nlex_san_fernando_533",
-        "site_id": "nlex_san_fernando",
-        "name": "San Fernando Interchange",
-        "ramp": "NB Entry Ramp",
-        "seg_type": "entry_ramp",
-        "bound": "NB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
       "id": "nlex_san_fernando_534",
       "site": "nlex_san_fernando",
       "name": "San Fernando Interchange",
@@ -27904,51 +26426,6 @@
         "name": "San Fernando Interchange",
         "ramp": "SB Exit Ramp",
         "seg_type": "exit_ramp",
-        "bound": "SB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
-      "id": "nlex_san_fernando_551",
-      "site": "nlex_san_fernando",
-      "name": "San Fernando Interchange",
-      "coordinates": [
-        [
-          120.69582,
-          15.0479379
-        ],
-        [
-          120.695939,
-          15.0478738
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:559",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
-      "ramp": "SB Entry Ramp",
-      "bound": "SB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 559,
-        "seg_id": "nlex_san_fernando_551",
-        "site_id": "nlex_san_fernando",
-        "name": "San Fernando Interchange",
-        "ramp": "SB Entry Ramp",
-        "seg_type": "entry_ramp",
         "bound": "SB",
         "travel": null,
         "level": null,
@@ -29348,10 +27825,6 @@
       "name": "Meycauayan Interchange",
       "coordinates": [
         [
-          120.9725535,
-          14.7457505
-        ],
-        [
           120.9725665,
           14.7456892
         ],
@@ -29377,7 +27850,7 @@
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:587",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "SB Exit Ramp",
       "bound": "SB",
       "travel": null,
@@ -30174,16 +28647,12 @@
           14.7476302
         ],
         [
-          120.9720911,
-          14.7476527
-        ],
-        [
-          120.9720509,
-          14.7476605
+          120.9721882535857,
+          14.747657960987606
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:602",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "NB Entry Ramp",
       "bound": "NB",
       "travel": null,
@@ -30199,63 +28668,6 @@
       "attributes": {
         "fid": 602,
         "seg_id": "nlex_meycauayan_599",
-        "site_id": "nlex_meycauayan",
-        "name": "Meycauayan Interchange",
-        "ramp": "NB Entry Ramp",
-        "seg_type": "entry_ramp",
-        "bound": "NB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
-      "id": "nlex_meycauayan_600",
-      "site": "nlex_meycauayan",
-      "name": "Meycauayan Interchange",
-      "coordinates": [
-        [
-          120.9720509,
-          14.7476605
-        ],
-        [
-          120.9719583,
-          14.7476903
-        ],
-        [
-          120.9719117,
-          14.7477106
-        ],
-        [
-          120.9718604,
-          14.7477396
-        ],
-        [
-          120.9718175,
-          14.7477655
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:603",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
-      "ramp": "NB Entry Ramp",
-      "bound": "NB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 603,
-        "seg_id": "nlex_meycauayan_600",
         "site_id": "nlex_meycauayan",
         "name": "Meycauayan Interchange",
         "ramp": "NB Entry Ramp",
@@ -30321,14 +28733,6 @@
       "name": "Philippine Arena Interchange",
       "coordinates": [
         [
-          120.9450704,
-          14.7967253
-        ],
-        [
-          120.9451693,
-          14.7963884
-        ],
-        [
           120.9454054,
           14.7959071
         ],
@@ -30370,7 +28774,7 @@
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:605",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "SB Exit Ramp",
       "bound": "SB",
       "travel": null,
@@ -30455,55 +28859,6 @@
       "attributes": {
         "fid": 606,
         "seg_id": "nlex_philippine_arena_599",
-        "site_id": "nlex_philippine_arena",
-        "name": "Philippine Arena Interchange",
-        "ramp": "SB Entry Ramp",
-        "seg_type": "entry_ramp",
-        "bound": "SB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
-      "id": "nlex_philippine_arena_600",
-      "site": "nlex_philippine_arena",
-      "name": "Philippine Arena Interchange",
-      "coordinates": [
-        [
-          120.9472476,
-          14.7920749
-        ],
-        [
-          120.9475144,
-          14.7919501
-        ],
-        [
-          120.947618,
-          14.791848
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:607",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
-      "ramp": "SB Entry Ramp",
-      "bound": "SB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 607,
-        "seg_id": "nlex_philippine_arena_600",
         "site_id": "nlex_philippine_arena",
         "name": "Philippine Arena Interchange",
         "ramp": "SB Entry Ramp",
@@ -30751,18 +29106,10 @@
         [
           120.9350306,
           14.8155969
-        ],
-        [
-          120.9348553,
-          14.8157215
-        ],
-        [
-          120.9346891,
-          14.8158278
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:611",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "NB Entry Ramp",
       "bound": "NB",
       "travel": null,
@@ -30858,30 +29205,10 @@
         [
           120.9340802,
           14.8157344
-        ],
-        [
-          120.9341621,
-          14.81571
-        ],
-        [
-          120.934225,
-          14.8156774
-        ],
-        [
-          120.9343243,
-          14.8156126
-        ],
-        [
-          120.934508,
-          14.8154842
-        ],
-        [
-          120.9348161,
-          14.815234
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:612",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "SB Entry Ramp",
       "bound": "SB",
       "travel": null,
@@ -30968,14 +29295,6 @@
       "name": "Philippine Arena Interchange",
       "coordinates": [
         [
-          120.94856737236849,
-          14.790946253910308
-        ],
-        [
-          120.9482473884585,
-          14.791511673330275
-        ],
-        [
           120.94792740454852,
           14.792082425401437
         ],
@@ -31013,7 +29332,7 @@
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:615",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "NB Exit Ramp",
       "bound": "NB",
       "travel": null,
@@ -31083,98 +29402,6 @@
         "ramp": "SB Entry Ramp",
         "seg_type": "entry_ramp",
         "bound": "SB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
-      "id": "nlex_paso_de_blas_valenzuela_616",
-      "site": "nlex_paso_de_blas_valenzuela",
-      "name": "Paso de Blas (Valenzuela) Interchange",
-      "coordinates": [
-        [
-          120.9933163,
-          14.7070857
-        ],
-        [
-          120.9934498,
-          14.7069012
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:618",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
-      "ramp": "SB Entry Ramp",
-      "bound": "SB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [
-        "nlex_paso_de_blas_valenzuela_sb_entry"
-      ],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 618,
-        "seg_id": "nlex_paso_de_blas_valenzuela_616",
-        "site_id": "nlex_paso_de_blas_valenzuela",
-        "name": "Paso de Blas (Valenzuela) Interchange",
-        "ramp": "SB Entry Ramp",
-        "seg_type": "entry_ramp",
-        "bound": "SB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
-      "id": "nlex_paso_de_blas_valenzuela_617",
-      "site": "nlex_paso_de_blas_valenzuela",
-      "name": "Paso de Blas (Valenzuela) Interchange",
-      "coordinates": [
-        [
-          120.9939273,
-          14.7065512
-        ],
-        [
-          120.9938037,
-          14.7068818
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:619",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
-      "ramp": "NB Exit Ramp",
-      "bound": "NB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "exit_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 619,
-        "seg_id": "nlex_paso_de_blas_valenzuela_617",
-        "site_id": "nlex_paso_de_blas_valenzuela",
-        "name": "Paso de Blas (Valenzuela) Interchange",
-        "ramp": "NB Exit Ramp",
-        "seg_type": "exit_ramp",
-        "bound": "NB",
         "travel": null,
         "level": null,
         "from_node": null,
@@ -31707,51 +29934,6 @@
       }
     },
     {
-      "id": "nlex_balagtas_plaridel_by_pass_636",
-      "site": "nlex_balagtas_plaridel_by_pass",
-      "name": "Balagtas Interchange (Plaridel By-pass)",
-      "coordinates": [
-        [
-          120.9005593,
-          14.8346602
-        ],
-        [
-          120.8996975,
-          14.8351893
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:641",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
-      "ramp": "NB Exit Ramp",
-      "bound": "NB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "exit_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 641,
-        "seg_id": "nlex_balagtas_plaridel_by_pass_636",
-        "site_id": "nlex_balagtas_plaridel_by_pass",
-        "name": "Balagtas Interchange (Plaridel By-pass)",
-        "ramp": "NB Exit Ramp",
-        "seg_type": "exit_ramp",
-        "bound": "NB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
       "id": "nlex_marilao_648",
       "site": "nlex_marilao",
       "name": "Marilao Interchange",
@@ -31940,51 +30122,6 @@
       }
     },
     {
-      "id": "nlex_bocaue_664",
-      "site": "nlex_bocaue",
-      "name": "Bocaue Interchange",
-      "coordinates": [
-        [
-          120.9393135,
-          14.8081738
-        ],
-        [
-          120.93902026622749,
-          14.808535797326199
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:670",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
-      "ramp": "NB Entry Ramp",
-      "bound": "NB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 670,
-        "seg_id": "nlex_bocaue_664",
-        "site_id": "nlex_bocaue",
-        "name": "Bocaue Interchange",
-        "ramp": "NB Entry Ramp",
-        "seg_type": "entry_ramp",
-        "bound": "NB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
       "id": "nlex_bocaue_665",
       "site": "nlex_bocaue",
       "name": "Bocaue Interchange",
@@ -32124,51 +30261,6 @@
       }
     },
     {
-      "id": "nlex_dau_673",
-      "site": "nlex_dau",
-      "name": "Dau Interchange",
-      "coordinates": [
-        [
-          120.6047682,
-          15.1784579
-        ],
-        [
-          120.6045605324194,
-          15.178821823388985
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:674",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
-      "ramp": "NB Entry Ramp",
-      "bound": "NB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 674,
-        "seg_id": "nlex_dau_673",
-        "site_id": "nlex_dau",
-        "name": "Dau Interchange",
-        "ramp": "NB Entry Ramp",
-        "seg_type": "entry_ramp",
-        "bound": "NB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
       "id": "nlex_dau_674",
       "site": "nlex_dau",
       "name": "Dau Interchange",
@@ -32204,51 +30296,6 @@
         "ramp": "NB Entry Ramp",
         "seg_type": "entry_ramp",
         "bound": "NB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
-      "id": "nlex_dau_675",
-      "site": "nlex_dau",
-      "name": "Dau Interchange",
-      "coordinates": [
-        [
-          120.6039073,
-          15.1790194
-        ],
-        [
-          120.6040112,
-          15.1788895
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:676",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
-      "ramp": "SB Entry Ramp",
-      "bound": "SB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 676,
-        "seg_id": "nlex_dau_675",
-        "site_id": "nlex_dau",
-        "name": "Dau Interchange",
-        "ramp": "SB Entry Ramp",
-        "seg_type": "entry_ramp",
-        "bound": "SB",
         "travel": null,
         "level": null,
         "from_node": null,
@@ -32509,12 +30556,12 @@
           14.707441
         ],
         [
-          120.9933163,
-          14.7070857
+          120.99321340325714,
+          14.707238624393815
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:682",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "SB Entry Ramp",
       "bound": "SB",
       "travel": null,
@@ -32580,55 +30627,6 @@
         "ramp": "SB Entry Ramp",
         "seg_type": "entry_ramp",
         "bound": "SB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
-      "id": "nlex_paso_de_blas_valenzuela_683",
-      "site": "nlex_paso_de_blas_valenzuela",
-      "name": "Paso de Blas (Valenzuela) Interchange",
-      "coordinates": [
-        [
-          120.9926727,
-          14.7093855
-        ],
-        [
-          120.9924109,
-          14.709629
-        ],
-        [
-          120.99230923416475,
-          14.70973165521572
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:684",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
-      "ramp": "NB Entry Ramp",
-      "bound": "NB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 684,
-        "seg_id": "nlex_paso_de_blas_valenzuela_683",
-        "site_id": "nlex_paso_de_blas_valenzuela",
-        "name": "Paso de Blas (Valenzuela) Interchange",
-        "ramp": "NB Entry Ramp",
-        "seg_type": "entry_ramp",
-        "bound": "NB",
         "travel": null,
         "level": null,
         "from_node": null,
@@ -32795,26 +30793,10 @@
         [
           120.9569646,
           14.7742134
-        ],
-        [
-          120.9570803,
-          14.7740984
-        ],
-        [
-          120.9571955,
-          14.7739644
-        ],
-        [
-          120.9573348,
-          14.7737855
-        ],
-        [
-          120.9574609,
-          14.7736066
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:693",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "SB Entry Ramp",
       "bound": "SB",
       "travel": null,
@@ -33494,12 +31476,12 @@
           14.9888668
         ],
         [
-          120.7503072,
-          14.9887962
+          120.75049733208907,
+          14.988568843528157
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:746",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "SB Entry Ramp",
       "bound": "SB",
       "travel": null,
@@ -33564,51 +31546,6 @@
         "name": "San Simon Interchange",
         "ramp": "NB Exit Ramp",
         "seg_type": "exit_ramp",
-        "bound": "NB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
-      "id": "nlex_san_simon_741",
-      "site": "nlex_san_simon",
-      "name": "San Simon Interchange",
-      "coordinates": [
-        [
-          120.7493909,
-          14.9917422
-        ],
-        [
-          120.7493495,
-          14.9917932
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:748",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
-      "ramp": "NB Entry Ramp",
-      "bound": "NB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 748,
-        "seg_id": "nlex_san_simon_741",
-        "site_id": "nlex_san_simon",
-        "name": "San Simon Interchange",
-        "ramp": "NB Entry Ramp",
-        "seg_type": "entry_ramp",
         "bound": "NB",
         "travel": null,
         "level": null,
@@ -33744,51 +31681,6 @@
         "name": "San Simon Interchange",
         "ramp": "NB Exit Ramp",
         "seg_type": "exit_ramp",
-        "bound": "NB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
-      "id": "nlex_san_simon_745",
-      "site": "nlex_san_simon",
-      "name": "San Simon Interchange",
-      "coordinates": [
-        [
-          120.7494435,
-          14.9916746
-        ],
-        [
-          120.7493909,
-          14.9917422
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:752",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
-      "ramp": "NB Entry Ramp",
-      "bound": "NB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 752,
-        "seg_id": "nlex_san_simon_745",
-        "site_id": "nlex_san_simon",
-        "name": "San Simon Interchange",
-        "ramp": "NB Entry Ramp",
-        "seg_type": "entry_ramp",
         "bound": "NB",
         "travel": null,
         "level": null,
@@ -33944,51 +31836,6 @@
         "name": "San Simon Interchange",
         "ramp": "SB Exit Ramp",
         "seg_type": "exit_ramp",
-        "bound": "SB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
-      "id": "nlex_san_simon_749",
-      "site": "nlex_san_simon",
-      "name": "San Simon Interchange",
-      "coordinates": [
-        [
-          120.7506641,
-          14.9883791
-        ],
-        [
-          120.7509953,
-          14.9879235
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:756",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
-      "ramp": "SB Entry Ramp",
-      "bound": "SB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 756,
-        "seg_id": "nlex_san_simon_749",
-        "site_id": "nlex_san_simon",
-        "name": "San Simon Interchange",
-        "ramp": "SB Entry Ramp",
-        "seg_type": "entry_ramp",
         "bound": "SB",
         "travel": null,
         "level": null,
@@ -34917,51 +32764,6 @@
         "ramp": "NB Exit Ramp",
         "seg_type": "exit_ramp",
         "bound": "NB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
-      "id": "nlex_san_simon_805",
-      "site": "nlex_san_simon",
-      "name": "San Simon Interchange",
-      "coordinates": [
-        [
-          120.7503072,
-          14.9887962
-        ],
-        [
-          120.7506641,
-          14.9883791
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:812",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
-      "ramp": "SB Entry Ramp",
-      "bound": "SB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 812,
-        "seg_id": "nlex_san_simon_805",
-        "site_id": "nlex_san_simon",
-        "name": "San Simon Interchange",
-        "ramp": "SB Entry Ramp",
-        "seg_type": "entry_ramp",
-        "bound": "SB",
         "travel": null,
         "level": null,
         "from_node": null,
@@ -36718,18 +34520,10 @@
         [
           120.9850924,
           14.7223513
-        ],
-        [
-          120.9851883,
-          14.7222471
-        ],
-        [
-          120.9852578,
-          14.7221314
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:893",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "SB Entry Ramp",
       "bound": "SB",
       "travel": null,
@@ -37210,51 +35004,6 @@
         "name": "Pulilan Interchange",
         "ramp": "SB Exit Ramp",
         "seg_type": "exit_ramp",
-        "bound": "SB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
-      "id": "nlex_meycauayan_913",
-      "site": "nlex_meycauayan",
-      "name": "Meycauayan Interchange",
-      "coordinates": [
-        [
-          120.9733423,
-          14.744124
-        ],
-        [
-          120.9735344,
-          14.7437857
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:912",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
-      "ramp": "SB Entry Ramp",
-      "bound": "SB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 912,
-        "seg_id": "nlex_meycauayan_913",
-        "site_id": "nlex_meycauayan",
-        "name": "Meycauayan Interchange",
-        "ramp": "SB Entry Ramp",
-        "seg_type": "entry_ramp",
         "bound": "SB",
         "travel": null,
         "level": null,
@@ -37882,83 +35631,6 @@
       }
     },
     {
-      "id": "nlex_sta_ines_937",
-      "site": "nlex_sta_ines",
-      "name": "Sta. Ines Interchange",
-      "coordinates": [
-        [
-          120.5863539,
-          15.2237651
-        ],
-        [
-          120.5864338,
-          15.2237422
-        ],
-        [
-          120.5865365,
-          15.2237039
-        ],
-        [
-          120.5866429,
-          15.2236496
-        ],
-        [
-          120.5867407,
-          15.2235877
-        ],
-        [
-          120.5868197,
-          15.2235218
-        ],
-        [
-          120.5868655,
-          15.2234811
-        ],
-        [
-          120.5869099,
-          15.2234337
-        ],
-        [
-          120.5869404,
-          15.2233978
-        ],
-        [
-          120.5869753,
-          15.2233525
-        ]
-      ],
-      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:937",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
-      "ramp": "SB Entry Ramp",
-      "bound": "SB",
-      "travel": null,
-      "maintenance": "UNKNOWN",
-      "reviewIds": [],
-      "kind": "RAMP",
-      "seg_type": "entry_ramp",
-      "level": null,
-      "from_node": null,
-      "to_node": null,
-      "status": null,
-      "notes": null,
-      "attributes": {
-        "fid": 937,
-        "seg_id": "nlex_sta_ines_937",
-        "site_id": "nlex_sta_ines",
-        "name": "Sta. Ines Interchange",
-        "ramp": "SB Entry Ramp",
-        "seg_type": "entry_ramp",
-        "bound": "SB",
-        "travel": null,
-        "level": null,
-        "from_node": null,
-        "to_node": null,
-        "source": null,
-        "status": null,
-        "notes": null
-      }
-    },
-    {
       "id": "nlex_san_simon_933",
       "site": "nlex_san_simon",
       "name": "San Simon Interchange",
@@ -38228,146 +35900,10 @@
         [
           120.596461992936,
           15.1973616507609
-        ],
-        [
-          120.596478645419,
-          15.1973529348461
-        ],
-        [
-          120.596495141835,
-          15.1973439467912
-        ],
-        [
-          120.596511477408,
-          15.1973346891979
-        ],
-        [
-          120.596527647409,
-          15.1973251647458
-        ],
-        [
-          120.596543647158,
-          15.1973153761919
-        ],
-        [
-          120.596559472024,
-          15.1973053263697
-        ],
-        [
-          120.59657161141,
-          15.1972952282063
-        ],
-        [
-          120.596583570034,
-          15.1972849311398
-        ],
-        [
-          120.596595344396,
-          15.1972744381829
-        ],
-        [
-          120.596606931053,
-          15.1972637524058
-        ],
-        [
-          120.596618326613,
-          15.1972528769351
-        ],
-        [
-          120.596629527742,
-          15.1972418149528
-        ],
-        [
-          120.596640531162,
-          15.1972305696956
-        ],
-        [
-          120.596651333655,
-          15.1972191444537
-        ],
-        [
-          120.59666193206,
-          15.1972075425702
-        ],
-        [
-          120.596672323275,
-          15.1971957674396
-        ],
-        [
-          120.59668250426,
-          15.1971838225072
-        ],
-        [
-          120.596692472037,
-          15.1971717112681
-        ],
-        [
-          120.596702223687,
-          15.1971594372658
-        ],
-        [
-          120.59671175636,
-          15.1971470040918
-        ],
-        [
-          120.596721067264,
-          15.1971344153837
-        ],
-        [
-          120.596730153677,
-          15.1971216748251
-        ],
-        [
-          120.596739012938,
-          15.1971087861437
-        ],
-        [
-          120.596747642456,
-          15.1970957531106
-        ],
-        [
-          120.596756039707,
-          15.1970825795391
-        ],
-        [
-          120.596764202233,
-          15.1970692692839
-        ],
-        [
-          120.596772127645,
-          15.1970558262394
-        ],
-        [
-          120.596779813625,
-          15.1970422543388
-        ],
-        [
-          120.596787257924,
-          15.1970285575534
-        ],
-        [
-          120.596794458364,
-          15.1970147398905
-        ],
-        [
-          120.596801412838,
-          15.1970008053933
-        ],
-        [
-          120.596808119311,
-          15.1969867581388
-        ],
-        [
-          120.596814575821,
-          15.1969726022372
-        ],
-        [
-          120.596820780479,
-          15.1969583418304
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:940",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "SB Entry Ramp",
       "bound": "SB",
       "travel": null,
@@ -40683,162 +38219,10 @@
         [
           121.00062111190557,
           14.658372119130018
-        ],
-        [
-          121.0006106760674,
-          14.65837661561071
-        ],
-        [
-          121.00060032191988,
-          14.65838128550661
-        ],
-        [
-          121.00059005254151,
-          14.658386127429225
-        ],
-        [
-          121.00057987098577,
-          14.6583911399389
-        ],
-        [
-          121.00056978027982,
-          14.658396321545265
-        ],
-        [
-          121.00055978342398,
-          14.658401670707669
-        ],
-        [
-          121.00054988339052,
-          14.658407185835655
-        ],
-        [
-          121.00054008312308,
-          14.658412865289405
-        ],
-        [
-          121.00053038553548,
-          14.658418707380244
-        ],
-        [
-          121.00052079351114,
-          14.65842471037115
-        ],
-        [
-          121.00051130990197,
-          14.658430872477245
-        ],
-        [
-          121.00050193752776,
-          14.65843719186636
-        ],
-        [
-          121.00049267917518,
-          14.658443666659545
-        ],
-        [
-          121.00048353759695,
-          14.658450294931647
-        ],
-        [
-          121.00047451551117,
-          14.658457074711894
-        ],
-        [
-          121.00046561560029,
-          14.658464003984452
-        ],
-        [
-          121.00045684051058,
-          14.658471080689033
-        ],
-        [
-          121.00044819285107,
-          14.65847830272153
-        ],
-        [
-          121.00043967519296,
-          14.658485667934618
-        ],
-        [
-          121.00043129006878,
-          14.658493174138393
-        ],
-        [
-          121.00042303997164,
-          14.658500819101047
-        ],
-        [
-          121.00041492735457,
-          14.6585086005495
-        ],
-        [
-          121.00040695462965,
-          14.658516516170096
-        ],
-        [
-          121.0003991241674,
-          14.658524563609296
-        ],
-        [
-          121.00039143829603,
-          14.658532740474351
-        ],
-        [
-          121.00038389930076,
-          14.658541044334033
-        ],
-        [
-          121.00037650942315,
-          14.65854947271937
-        ],
-        [
-          121.0003692708604,
-          14.658558023124352
-        ],
-        [
-          121.00036218576476,
-          14.658566693006687
-        ],
-        [
-          121.00035550669797,
-          14.65859439637895
-        ],
-        [
-          121.00034932248467,
-          14.658622207068333
-        ],
-        [
-          121.00034363496445,
-          14.658650116802136
-        ],
-        [
-          121.00033844582913,
-          14.658678117278221
-        ],
-        [
-          121.00033375662228,
-          14.658706200167451
-        ],
-        [
-          121.00032956873878,
-          14.65873435711617
-        ],
-        [
-          121.00032588342434,
-          14.658762579748712
-        ],
-        [
-          121.00032270177527,
-          14.658790859669864
-        ],
-        [
-          121.00032002473792,
-          14.65881918846737
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:943",
-      "sourceHash": "25935e4f774ea3d3a9cd37f92aab74a124657dc3f85260a149e70b057c165c4d",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "NB Entry Ramp",
       "bound": "NB",
       "travel": null,
@@ -41660,110 +39044,10 @@
         [
           121.00034930967082,
           14.658139354553452
-        ],
-        [
-          121.00034480755569,
-          14.658135117513957
-        ],
-        [
-          121.00034038220214,
-          14.65813080544851
-        ],
-        [
-          121.00033603494573,
-          14.658126419658531
-        ],
-        [
-          121.0003317670985,
-          14.658121961467696
-        ],
-        [
-          121.00032757994855,
-          14.658117432221518
-        ],
-        [
-          121.0003234747596,
-          14.658112833286959
-        ],
-        [
-          121.0003194527706,
-          14.658108166052028
-        ],
-        [
-          121.00031551519548,
-          14.658103431925325
-        ],
-        [
-          121.00031166322258,
-          14.658098632335655
-        ],
-        [
-          121.00030789801453,
-          14.658093768731574
-        ],
-        [
-          121.00030422070763,
-          14.658088842580963
-        ],
-        [
-          121.00030063241176,
-          14.658083855370574
-        ],
-        [
-          121.00029713420993,
-          14.65807880860559
-        ],
-        [
-          121.0002937271579,
-          14.658073703809169
-        ],
-        [
-          121.00029041228393,
-          14.658068542521987
-        ],
-        [
-          121.00028719058852,
-          14.65806332630176
-        ],
-        [
-          121.00028406304399,
-          14.658058056722798
-        ],
-        [
-          121.00028103059428,
-          14.65805273537549
-        ],
-        [
-          121.00027809415458,
-          14.658047363865883
-        ],
-        [
-          121.00027525461115,
-          14.658041943815126
-        ],
-        [
-          121.00027251282101,
-          14.658036476859062
-        ],
-        [
-          121.00026986961164,
-          14.658030964647649
-        ],
-        [
-          121.0002673257808,
-          14.658025408844528
-        ],
-        [
-          121.0002648820962,
-          14.658019811126493
-        ],
-        [
-          121.00026253929543,
-          14.65801417318298
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:944",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "NB Exit Ramp",
       "bound": "NB",
       "travel": null,
@@ -42764,102 +40048,6 @@
       "name": "Balintawak Interchange",
       "coordinates": [
         [
-          120.99996508714818,
-          14.659152304944287
-        ],
-        [
-          120.99996412716459,
-          14.65914188166527
-        ],
-        [
-          120.99996298075293,
-          14.659131476031522
-        ],
-        [
-          120.99996164825691,
-          14.659121091163671
-        ],
-        [
-          120.99996013007622,
-          14.659110730176097
-        ],
-        [
-          120.99995842666611,
-          14.65910039617605
-        ],
-        [
-          120.99995653853746,
-          14.659090092262678
-        ],
-        [
-          120.99995446625651,
-          14.659079821526092
-        ],
-        [
-          120.99995221044472,
-          14.659069587046469
-        ],
-        [
-          120.99994977177862,
-          14.65905939189311
-        ],
-        [
-          120.99994715098953,
-          14.659049239123519
-        ],
-        [
-          120.99994434886345,
-          14.65903913178249
-        ],
-        [
-          120.99994136624069,
-          14.659029072901195
-        ],
-        [
-          120.99993820401578,
-          14.659019065496281
-        ],
-        [
-          120.99993486313701,
-          14.65900911256894
-        ],
-        [
-          120.9999313446064,
-          14.65899921710404
-        ],
-        [
-          120.999927649479,
-          14.658989382069215
-        ],
-        [
-          120.99992377886309,
-          14.658979610413972
-        ],
-        [
-          120.9999197339194,
-          14.658969905068822
-        ],
-        [
-          120.999915515861,
-          14.658960268944368
-        ],
-        [
-          120.99991112595292,
-          14.658950704930483
-        ],
-        [
-          120.99990656551164,
-          14.65894121589539
-        ],
-        [
-          120.99990183590482,
-          14.658931804684835
-        ],
-        [
-          120.9998969385509,
-          14.658922474121235
-        ],
-        [
           120.99989187491856,
           14.658913227002806
         ],
@@ -43397,7 +40585,7 @@
         ]
       ],
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:946",
-      "sourceHash": "e1f6611e4507f5ba765afcddd94b910cc77824c68aa4348341053030ab21c318",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
       "ramp": "SB Exit Ramp",
       "bound": "SB",
       "travel": null,
@@ -47978,7 +45166,7 @@
   ],
   "sourceHashes": {
     "NLEX Road Network Interchanges_KMTrack_Gates_Working.qgz": "a9d0270f520eb87899c4a459c94d0610d6693b319cc8ada9c581131062de1edf",
-    "Final NLEX Mainline Interchange.gpkg": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
+    "Final NLEX Mainline Interchange.gpkg": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
     "NLEX_KMTrack_Transition_Gates_REVIEW.gpkg": "6d79615485fe406ccfbcb11b70e763227640c3d239d213407086c8daab4efaa0",
     "NLEX Interchanges backup.kml": "b1b6c7bb1678af01ee7a4bd16150ab682a06f1f03e3bf63e730f81f210d2d6b1",
     "NLEX Mainline Interchange.gpkg": "54f6d94af1886135388ac64397a36ff9505689afec3e4e107d0635330da25f62",
@@ -47990,14 +45178,14 @@
   "excludedMainline": [],
   "geometryRevision": {
     "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges",
-    "sourceFileSHA256": "911c1f3addb477826fd444a5dc9b5702cf39463c160df7002a039c7567b2c1af",
-    "sourceWALSHA256": "f4f5de4cc23a30650d6842301b3002e5df9b6aab715116b291b81cda8a6bf2cb",
-    "snapshotSHA256": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9",
-    "date": "2026-10-20",
-    "scope": "All saved manual edits; ten NULL geometries intentionally excluded per user confirmation",
+    "sourceFileSHA256": "6198246b0b831b2a4eea0b3c35667a13e949dea535238a638e5d0fdca8a309c0",
+    "sourceWALSHA256": "3bb76fd28e8748ac2ba11d6c031c171302333366268297b63aecb6bc27207ac1",
+    "snapshotSHA256": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8",
+    "date": "2026-10-30",
+    "scope": "All saved QGIS interchange edits, including intentionally NULL geometry",
     "sourceRecords": 448,
-    "availableGeometry": 438,
-    "removedGeometry": 10,
+    "availableGeometry": 404,
+    "removedGeometry": 44,
     "coordinatePolicy": "Exact EPSG:4326 source doubles; no rounding, simplification or inferred connections",
     "provisional": true,
     "engineeringApproval": false
@@ -48027,7 +45215,137 @@
       "geometry": null,
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:36",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9"
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_pulilan_023",
+      "site": "nlex_pulilan",
+      "name": "Pulilan Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 38,
+        "seg_id": "nlex_pulilan_023",
+        "site_id": "nlex_pulilan",
+        "name": "Pulilan Interchange",
+        "ramp": "SB Exit Ramp",
+        "seg_type": "exit_ramp",
+        "bound": "SB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:38",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_san_simon_047",
+      "site": "nlex_san_simon",
+      "name": "San Simon Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 61,
+        "seg_id": "nlex_san_simon_047",
+        "site_id": "nlex_san_simon",
+        "name": "San Simon Interchange",
+        "ramp": "NB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "NB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:61",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_san_fernando_052",
+      "site": "nlex_san_fernando",
+      "name": "San Fernando Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 65,
+        "seg_id": "nlex_san_fernando_052",
+        "site_id": "nlex_san_fernando",
+        "name": "San Fernando Interchange",
+        "ramp": "SB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "SB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:65",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_san_simon_058",
+      "site": "nlex_san_simon",
+      "name": "San Simon Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 72,
+        "seg_id": "nlex_san_simon_058",
+        "site_id": "nlex_san_simon",
+        "name": "San Simon Interchange",
+        "ramp": "SB Exit Ramp",
+        "seg_type": "exit_ramp",
+        "bound": "SB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:72",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_sindalan_mexico_064",
+      "site": "nlex_sindalan_mexico",
+      "name": "Sindalan/Mexico Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 76,
+        "seg_id": "nlex_sindalan_mexico_064",
+        "site_id": "nlex_sindalan_mexico",
+        "name": "Sindalan/Mexico Interchange",
+        "ramp": "NB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "NB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:76",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
     },
     {
       "id": "nlex_paso_de_blas_valenzuela_068",
@@ -48053,7 +45371,59 @@
       "geometry": null,
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:97",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9"
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_harbor_link_smart_connect_073",
+      "site": "nlex_harbor_link_smart_connect",
+      "name": "Harbor Link (Smart Connect) Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 102,
+        "seg_id": "nlex_harbor_link_smart_connect_073",
+        "site_id": "nlex_harbor_link_smart_connect",
+        "name": "Harbor Link (Smart Connect) Interchange",
+        "ramp": "NB Exit Ramp",
+        "seg_type": "exit_ramp",
+        "bound": "NB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:102",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_marilao_167",
+      "site": "nlex_marilao",
+      "name": "Marilao Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 181,
+        "seg_id": "nlex_marilao_167",
+        "site_id": "nlex_marilao",
+        "name": "Marilao Interchange",
+        "ramp": "NB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "NB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:181",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
     },
     {
       "id": "nlex_bocaue_169",
@@ -48079,7 +45449,137 @@
       "geometry": null,
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:183",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9"
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_harbor_link_smart_connect_177",
+      "site": "nlex_harbor_link_smart_connect",
+      "name": "Harbor Link (Smart Connect) Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 191,
+        "seg_id": "nlex_harbor_link_smart_connect_177",
+        "site_id": "nlex_harbor_link_smart_connect",
+        "name": "Harbor Link (Smart Connect) Interchange",
+        "ramp": "SB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "SB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:191",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_harbor_link_smart_connect_195",
+      "site": "nlex_harbor_link_smart_connect",
+      "name": "Harbor Link (Smart Connect) Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 209,
+        "seg_id": "nlex_harbor_link_smart_connect_195",
+        "site_id": "nlex_harbor_link_smart_connect",
+        "name": "Harbor Link (Smart Connect) Interchange",
+        "ramp": "NB Exit Ramp",
+        "seg_type": "exit_ramp",
+        "bound": "NB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:209",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_santa_rita_221",
+      "site": "nlex_santa_rita",
+      "name": "Santa Rita Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 231,
+        "seg_id": "nlex_santa_rita_221",
+        "site_id": "nlex_santa_rita",
+        "name": "Santa Rita Interchange",
+        "ramp": "SB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "SB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:231",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_harbor_link_smart_connect_247",
+      "site": "nlex_harbor_link_smart_connect",
+      "name": "Harbor Link (Smart Connect) Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 256,
+        "seg_id": "nlex_harbor_link_smart_connect_247",
+        "site_id": "nlex_harbor_link_smart_connect",
+        "name": "Harbor Link (Smart Connect) Interchange",
+        "ramp": "SB Exit Ramp",
+        "seg_type": "exit_ramp",
+        "bound": "SB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:256",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_harbor_link_smart_connect_264",
+      "site": "nlex_harbor_link_smart_connect",
+      "name": "Harbor Link (Smart Connect) Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 273,
+        "seg_id": "nlex_harbor_link_smart_connect_264",
+        "site_id": "nlex_harbor_link_smart_connect",
+        "name": "Harbor Link (Smart Connect) Interchange",
+        "ramp": "SB Exit Ramp",
+        "seg_type": "exit_ramp",
+        "bound": "SB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:273",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
     },
     {
       "id": "nlex_harbor_link_smart_connect_303",
@@ -48105,7 +45605,85 @@
       "geometry": null,
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:310",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9"
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_pulilan_311",
+      "site": "nlex_pulilan",
+      "name": "Pulilan Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 319,
+        "seg_id": "nlex_pulilan_311",
+        "site_id": "nlex_pulilan",
+        "name": "Pulilan Interchange",
+        "ramp": "NB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "NB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:319",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_pulilan_315",
+      "site": "nlex_pulilan",
+      "name": "Pulilan Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 323,
+        "seg_id": "nlex_pulilan_315",
+        "site_id": "nlex_pulilan",
+        "name": "Pulilan Interchange",
+        "ramp": "SB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "SB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:323",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_dau_387",
+      "site": "nlex_dau",
+      "name": "Dau Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 388,
+        "seg_id": "nlex_dau_387",
+        "site_id": "nlex_dau",
+        "name": "Dau Interchange",
+        "ramp": "SB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "SB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:388",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
     },
     {
       "id": "nlex_dau_388",
@@ -48131,7 +45709,33 @@
       "geometry": null,
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:389",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9"
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_dau_395",
+      "site": "nlex_dau",
+      "name": "Dau Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 396,
+        "seg_id": "nlex_dau_395",
+        "site_id": "nlex_dau",
+        "name": "Dau Interchange",
+        "ramp": "NB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "NB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:396",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
     },
     {
       "id": "nlex_dau_396",
@@ -48157,7 +45761,85 @@
       "geometry": null,
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:397",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9"
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_pulilan_416",
+      "site": "nlex_pulilan",
+      "name": "Pulilan Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 424,
+        "seg_id": "nlex_pulilan_416",
+        "site_id": "nlex_pulilan",
+        "name": "Pulilan Interchange",
+        "ramp": "SB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "SB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:424",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_san_fernando_533",
+      "site": "nlex_san_fernando",
+      "name": "San Fernando Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 541,
+        "seg_id": "nlex_san_fernando_533",
+        "site_id": "nlex_san_fernando",
+        "name": "San Fernando Interchange",
+        "ramp": "NB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "NB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:541",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_san_fernando_551",
+      "site": "nlex_san_fernando",
+      "name": "San Fernando Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 559,
+        "seg_id": "nlex_san_fernando_551",
+        "site_id": "nlex_san_fernando",
+        "name": "San Fernando Interchange",
+        "ramp": "SB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "SB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:559",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
     },
     {
       "id": "nlex_meycauayan_597",
@@ -48183,7 +45865,319 @@
       "geometry": null,
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:600",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9"
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_meycauayan_600",
+      "site": "nlex_meycauayan",
+      "name": "Meycauayan Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 603,
+        "seg_id": "nlex_meycauayan_600",
+        "site_id": "nlex_meycauayan",
+        "name": "Meycauayan Interchange",
+        "ramp": "NB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "NB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:603",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_philippine_arena_600",
+      "site": "nlex_philippine_arena",
+      "name": "Philippine Arena Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 607,
+        "seg_id": "nlex_philippine_arena_600",
+        "site_id": "nlex_philippine_arena",
+        "name": "Philippine Arena Interchange",
+        "ramp": "SB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "SB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:607",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_paso_de_blas_valenzuela_616",
+      "site": "nlex_paso_de_blas_valenzuela",
+      "name": "Paso de Blas (Valenzuela) Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 618,
+        "seg_id": "nlex_paso_de_blas_valenzuela_616",
+        "site_id": "nlex_paso_de_blas_valenzuela",
+        "name": "Paso de Blas (Valenzuela) Interchange",
+        "ramp": "SB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "SB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:618",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_paso_de_blas_valenzuela_617",
+      "site": "nlex_paso_de_blas_valenzuela",
+      "name": "Paso de Blas (Valenzuela) Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 619,
+        "seg_id": "nlex_paso_de_blas_valenzuela_617",
+        "site_id": "nlex_paso_de_blas_valenzuela",
+        "name": "Paso de Blas (Valenzuela) Interchange",
+        "ramp": "NB Exit Ramp",
+        "seg_type": "exit_ramp",
+        "bound": "NB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:619",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_balagtas_plaridel_by_pass_636",
+      "site": "nlex_balagtas_plaridel_by_pass",
+      "name": "Balagtas Interchange (Plaridel By-pass)",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 641,
+        "seg_id": "nlex_balagtas_plaridel_by_pass_636",
+        "site_id": "nlex_balagtas_plaridel_by_pass",
+        "name": "Balagtas Interchange (Plaridel By-pass)",
+        "ramp": "NB Exit Ramp",
+        "seg_type": "exit_ramp",
+        "bound": "NB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:641",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_bocaue_664",
+      "site": "nlex_bocaue",
+      "name": "Bocaue Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 670,
+        "seg_id": "nlex_bocaue_664",
+        "site_id": "nlex_bocaue",
+        "name": "Bocaue Interchange",
+        "ramp": "NB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "NB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:670",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_dau_673",
+      "site": "nlex_dau",
+      "name": "Dau Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 674,
+        "seg_id": "nlex_dau_673",
+        "site_id": "nlex_dau",
+        "name": "Dau Interchange",
+        "ramp": "NB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "NB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:674",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_dau_675",
+      "site": "nlex_dau",
+      "name": "Dau Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 676,
+        "seg_id": "nlex_dau_675",
+        "site_id": "nlex_dau",
+        "name": "Dau Interchange",
+        "ramp": "SB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "SB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:676",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_paso_de_blas_valenzuela_683",
+      "site": "nlex_paso_de_blas_valenzuela",
+      "name": "Paso de Blas (Valenzuela) Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 684,
+        "seg_id": "nlex_paso_de_blas_valenzuela_683",
+        "site_id": "nlex_paso_de_blas_valenzuela",
+        "name": "Paso de Blas (Valenzuela) Interchange",
+        "ramp": "NB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "NB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:684",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_san_simon_741",
+      "site": "nlex_san_simon",
+      "name": "San Simon Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 748,
+        "seg_id": "nlex_san_simon_741",
+        "site_id": "nlex_san_simon",
+        "name": "San Simon Interchange",
+        "ramp": "NB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "NB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:748",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_san_simon_745",
+      "site": "nlex_san_simon",
+      "name": "San Simon Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 752,
+        "seg_id": "nlex_san_simon_745",
+        "site_id": "nlex_san_simon",
+        "name": "San Simon Interchange",
+        "ramp": "NB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "NB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:752",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_san_simon_749",
+      "site": "nlex_san_simon",
+      "name": "San Simon Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 756,
+        "seg_id": "nlex_san_simon_749",
+        "site_id": "nlex_san_simon",
+        "name": "San Simon Interchange",
+        "ramp": "SB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "SB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:756",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
     },
     {
       "id": "nlex_meycauayan_788",
@@ -48209,7 +46203,33 @@
       "geometry": null,
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:789",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9"
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_san_simon_805",
+      "site": "nlex_san_simon",
+      "name": "San Simon Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 812,
+        "seg_id": "nlex_san_simon_805",
+        "site_id": "nlex_san_simon",
+        "name": "San Simon Interchange",
+        "ramp": "SB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "SB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:812",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
     },
     {
       "id": "nlex_bocaue_815",
@@ -48235,7 +46255,7 @@
       "geometry": null,
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:820",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9"
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
     },
     {
       "id": "nlex_bocaue_816",
@@ -48261,7 +46281,59 @@
       "geometry": null,
       "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
       "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:821",
-      "sourceHash": "0396dd8b7d170f418742d19e8b8e1c1252a2822044711aaef33d6787d715b6c9"
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_meycauayan_913",
+      "site": "nlex_meycauayan",
+      "name": "Meycauayan Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 912,
+        "seg_id": "nlex_meycauayan_913",
+        "site_id": "nlex_meycauayan",
+        "name": "Meycauayan Interchange",
+        "ramp": "SB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "SB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:912",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
+    },
+    {
+      "id": "nlex_sta_ines_937",
+      "site": "nlex_sta_ines",
+      "name": "Sta. Ines Interchange",
+      "kind": "RAMP",
+      "attributes": {
+        "fid": 937,
+        "seg_id": "nlex_sta_ines_937",
+        "site_id": "nlex_sta_ines",
+        "name": "Sta. Ines Interchange",
+        "ramp": "SB Entry Ramp",
+        "seg_type": "entry_ramp",
+        "bound": "SB",
+        "travel": null,
+        "level": null,
+        "from_node": null,
+        "to_node": null,
+        "source": null,
+        "status": null,
+        "notes": null
+      },
+      "geometry": null,
+      "reason": "SOURCE_GEOMETRY_REMOVED_BY_USER",
+      "source": "Final NLEX Mainline Interchange.gpkg:nlex_interchanges:937",
+      "sourceHash": "dfa2e418c4513095d0df8d87478c82a2b861aa558ad519e3316ea33add10f8c8"
     }
   ]
 }

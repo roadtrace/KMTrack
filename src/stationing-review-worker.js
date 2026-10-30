@@ -2,7 +2,7 @@
 // Enabled review worker only: one local hash-verified evidence read, no operational outputs.
 importScripts('./legacy-matcher.js','./stationing-review.js','./stationing-reconstruction-review.js','./network-stop-gates.js');
 let engine=null,reconstruction=null,evidenceModel=null,epoch=0,loadReason='RECONSTRUCTION_NOT_LOADED';
-const EVIDENCE_SHA256='3ea1ed73ba99667c08c8605be06f12506d0e9cd4f138682209d5541a4876799f';
+const EVIDENCE_SHA256='ba47b87ae058cca413bb7db2f6ddedeefbb4779893e990158e6f290fe99bb9fd';
 self.onmessage=async event=>{
  const m=event.data;
  try{
@@ -10,7 +10,7 @@ self.onmessage=async event=>{
    const own=m.epoch;epoch=own;engine=SPOTITStationingReview.create(m.reference);reconstruction=null;
    try{const response=await fetch('../public/stationing-reconstruction-evidence-user-edits-20261020.json',{cache:'no-store'});if(!response.ok)throw Error('UNAVAILABLE');const bytes=await response.arrayBuffer();const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),v=>v.toString(16).padStart(2,'0')).join('');if(digest!==EVIDENCE_SHA256)throw Error('HASH_MISMATCH');const data=JSON.parse(new TextDecoder().decode(bytes));if(epoch!==own)return;let stopEngine,gateLoadReason=null;
     try{
-     const contextResponse=await fetch('../public/network-stop-context.json',{cache:'no-store'});if(!contextResponse.ok)throw Error('CONTEXT_UNAVAILABLE');const contextBytes=await contextResponse.arrayBuffer();const contextDigest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',contextBytes)),v=>v.toString(16).padStart(2,'0')).join('');if(contextDigest!=='7d89e8937a3819f8d57579166ec88864f664c8c4d285c556fcb93ed16cb5c7d2')throw Error('STOP_CONTEXT_HASH_MISMATCH');
+     const contextResponse=await fetch('../public/network-stop-context.json',{cache:'no-store'});if(!contextResponse.ok)throw Error('CONTEXT_UNAVAILABLE');const contextBytes=await contextResponse.arrayBuffer();const contextDigest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',contextBytes)),v=>v.toString(16).padStart(2,'0')).join('');if(contextDigest!=='c72fe1cd763ed1b20337a7f22921f851827d32d0b2f8ae87956ab8ddf58b2789')throw Error('STOP_CONTEXT_HASH_MISMATCH');
      const gateResponse=await fetch('../public/network-stop-gates.geojson',{cache:'no-store'});if(!gateResponse.ok)throw Error('GATES_UNAVAILABLE');
      stopEngine=SPOTITNetworkStopGates.create(await gateResponse.json(),JSON.parse(new TextDecoder().decode(contextBytes)));
     }catch(error){gateLoadReason='NETWORK_GATES_UNAVAILABLE_'+error.message;stopEngine=SPOTITNetworkStopGates.create({schema:'KMTRACK_NETWORK_STOP_GATES_V1',type:'FeatureCollection',provisional:true,operationalUsePermitted:false,features:[]},{schema:'KMTRACK_NETWORK_STOP_CONTEXT_V1',provisional:true,operationalUsePermitted:false,sources:[...data.interchanges.map(r=>({...r,kind:'RAMP'})),...data.alignments.map(a=>({...a,kind:'ALIGNMENT'}))],restrictions:['B02.3 STOP','B01 UNRESOLVED']});}
