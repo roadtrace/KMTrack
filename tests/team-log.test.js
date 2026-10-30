@@ -11,6 +11,25 @@ function fixture(){let c=context(),online=true;const calls=[],removed=[];let rpc
  return {o,calls,removed,setRpc:f=>rpc=f,setContext:value=>c=value,setOnline:value=>online=value};}
 test('unfiltered Team reads exact summary only, includes zero-count active inspectors',async()=>{const f=fixture(),c=team.createController(f.o);c.activate();await settle();const s=c.snapshot();assert.equal(s.summary[0].inspection_count,592);assert.equal(s.summary[1].inspection_count,0);assert.equal(s.rows.length,0);assert.equal(s.filtered,false);assert.deepEqual(f.calls.map(c=>c[0]),['team_inspection_summary']);assert.equal(f.calls[0][2].get,true);});
 test('filters are sent to server, not applied to the first loaded 50 entries',async()=>{const f=fixture(),c=team.createController(f.o);c.activate({inspector:other,from:'2026-10-01',to:'2026-10-30',search:'KM 12+004'});await settle();const call=f.calls.find(c=>c[0]==='team_inspection_page');assert.equal(call[1].filters.inspector,other);assert.equal(call[1].filters.from,'2026-10-01');assert.equal(call[1].filters.to,'2026-10-30');assert.equal(call[1].filters.search,'KM 12+004');assert.equal(c.items().length,3);assert.equal(c.snapshot().total,3);});
+test('bundled Supabase SDK sends inspector filters as JSON and preserves null and next-page cursors',async()=>{
+ const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+ const sdk=vm.runInThisContext('(function(){'+fs.readFileSync(path.join(__dirname,'../public/vendor/supabase/supabase-js-2.117.1.umd.js'),'utf8')+';return supabase;})()');
+ const requests=[];
+ const client=sdk.createClient('https://example.invalid','synthetic-public-key',{auth:{persistSession:false,autoRefreshToken:false},global:{fetch:async(url,options)=>{
+  assert.equal(new URL(url).pathname,'/rest/v1/rpc/team_inspection_page');
+  assert.equal(options.method,'POST','GET corrupts the nested JSON filter object');
+  const args=JSON.parse(options.body);requests.push(args);
+  assert.equal(args.filters.inspector,other);assert.equal(args.filters.search,'KM 12+004');
+  assert.equal(typeof args.filters,'object');
+  return new Response(JSON.stringify({authorized:true,total:2,has_more:!args.after_id,records:[row(args.after_id?1:2)]}),{status:200,headers:{'content-type':'application/json'}});
+ }}});
+ const f=fixture();f.o.client={auth:f.o.client.auth,rpc:(name,...args)=>name==='team_inspection_summary'?Promise.resolve({data:[]}):client.rpc(name,...args)};
+ const controller=team.createController(f.o);controller.activate({inspector:other,search:'KM 12+004'});await settle();
+ assert.equal(controller.snapshot().error,false);assert.equal(controller.items().length,1);
+ assert.equal(requests[0].after_id,null);assert.equal(requests[0].after_time,null);
+ await controller.more();assert.equal(controller.items().length,2);assert.equal(controller.snapshot().error,false);
+ assert.equal(requests[1].after_id,id(2));assert.equal(requests[1].after_time,'2026-10-30T04:00:00.123456Z');
+});
 test('next page preserves microsecond timestamp cursor and appends without dropping earlier records',async()=>{const f=fixture(),c=team.createController(f.o);f.setRpc(async(name,args)=>name==='team_inspection_summary'?{data:[]}:{data:{authorized:true,total:52,has_more:!args.after_id,records:args.after_id?[row(2),row(1)]:Array.from({length:50},(_,i)=>row(52-i))}});c.activate({inspector:other});await settle();await c.more();assert.equal(c.snapshot().rows.length,52);assert.equal(f.calls.at(-1)[1].after_id,id(3));assert.equal(f.calls.at(-1)[1].after_time,'2026-10-30T04:00:00.123456Z');assert.equal(c.snapshot().hasMore,false);});
 test('filter changes discard late pages instead of leaking earlier results',async()=>{const f=fixture(),c=team.createController(f.o),pending=deferred();f.setRpc(async(name,args)=>name==='team_inspection_summary'?{data:[]}:args.filters.inspector===other?pending.promise:{data:{authorized:true,total:0,has_more:false,records:[]}});c.activate({inspector:other});await settle();c.activate({inspector:user});await settle();pending.resolve({data:{authorized:true,total:1,records:[row(1)]}});await settle();assert.equal(c.snapshot().rows.length,0);assert.equal(c.snapshot().filters.inspector,user);});
 test('returning to summary does not download unfiltered record pages',async()=>{const f=fixture(),c=team.createController(f.o);c.activate({inspector:other});await settle();f.calls.length=0;c.activate({});await settle();assert.equal(c.snapshot().rows.length,0);assert.equal(c.snapshot().filtered,false);assert.equal(f.calls.length,0);});

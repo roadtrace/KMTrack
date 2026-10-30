@@ -33,7 +33,9 @@
       const token=current.token,generation=epoch,run=++pageRun,signature=state.signature,cursor=refresh?null:state.cursor;
       const valid=()=>{guard(token,generation);if(run!==pageRun||signature!==state.signature)throw Error('Team filters changed');};
       state.loading=true;state.error=false;o.changed();
-      try{await verified(token,generation);valid();const result=await o.client.rpc('team_inspection_page',{filters:state.filters,after_time:cursor?.inspected_at||null,after_id:cursor?.id||null},{get:true});valid();
+      // JSON filters and null cursors must travel in the body. The SDK's GET RPC
+      // encoding turns objects into "[object Object]" and null into "null".
+      try{await verified(token,generation);valid();const result=await o.client.rpc('team_inspection_page',{filters:state.filters,after_time:cursor?.inspected_at||null,after_id:cursor?.id||null});valid();
         const data=result.data;if(result.error||data?.authorized!==true||!Array.isArray(data.records)||data.records.length>50||!Number.isSafeInteger(Number(data.total))||Number(data.total)<0)throw Error('Page unavailable');
         let previous=cursor;const rows=data.records.map(raw=>{if(!cloud.rowInScope(raw,current,'team')||raw.inspector_display_name!=null&&typeof raw.inspector_display_name!=='string')throw Error('Invalid Team row');const position=cloud.position(raw);if(previous&&cloud.compare(previous,position)>=0)throw Error('Invalid page order');previous=position;return Object.freeze({...raw,id:position.id,user_id:raw.user_id?.toLowerCase()||null,cloud_source:true});});
         state.rows=refresh?rows:[...state.rows,...rows];state.total=Number(data.total);state.hasMore=data.has_more===true&&rows.length>0;state.cursor=rows.length?cloud.position(rows.at(-1)):cursor;
