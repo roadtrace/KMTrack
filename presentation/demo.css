@@ -1,0 +1,25 @@
+.demo-banner { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:5px 14px; background:var(--ds-warning-bg); color:var(--ds-warning); font:600 11px/1.4 var(--font-ui); }
+.demo-banner button { background:transparent; color:inherit; border:1px solid currentColor; border-radius:7px; min-height:32px; padding:4px 9px; font:inherit; }
+.demo-dialog { box-sizing:border-box; width:min(94vw,520px); max-height:88dvh; margin:auto; padding:20px; border:1px solid var(--ds-border); border-radius:18px; background:var(--ds-card); color:var(--ds-fg); font:400 13px/1.5 var(--font-ui); overflow:auto; }
+.demo-dialog::backdrop { background:#0009; }
+.demo-dialog h2 { color:var(--ds-fg); font:700 23px/1.2 var(--font-ui); letter-spacing:-.03em; margin:0 0 6px; text-transform:none; }
+.demo-dialog h3 { font:700 15px/1.4 var(--font-ui); margin:12px 0 5px; }
+.demo-dialog p { color:var(--ds-fg-muted); margin:7px 0 12px; }
+.demo-dialog label { display:block; margin:10px 0; }
+.demo-dialog select { width:100%; min-height:44px; font:400 16px var(--font-ui); background:var(--ds-muted); color:var(--ds-fg); border:1px solid var(--ds-border); border-radius:8px; padding:7px; }
+.demo-dialog button,.demo-sample-team button { min-height:44px; padding:8px 12px; border:1px solid var(--ds-border); border-radius:9px; color:var(--ds-fg); background:var(--ds-muted); font:600 13px var(--font-ui); touch-action:manipulation; }
+.demo-dialog button:disabled { opacity:.5; }
+.demo-dialog .demo-primary { background:var(--ds-primary); color:var(--ds-primary-fg); border-color:var(--ds-primary); }
+.demo-actions { display:flex; flex-wrap:wrap; gap:7px; margin:10px 0; }
+.demo-actions button { flex:1; }
+.demo-dialog .demo-close { float:right; margin:-6px -6px 4px 8px; }
+.demo-guide { border-left:3px solid var(--ds-primary); padding:2px 12px; margin:14px 0; }
+.demo-dialog img { width:100%; max-height:38dvh; object-fit:contain; border-radius:9px; }
+.demo-qr { display:block; width:min(230px,100%); height:auto; background:white; margin:10px auto; image-rendering:pixelated; }
+.demo-share-url { overflow-wrap:anywhere; user-select:all; }
+.demo-sample-team { border:1px dashed var(--ds-primary); padding:14px; margin-bottom:14px; border-radius:14px; }
+.demo-sample-team h3 { font:700 16px var(--font-ui); }
+.demo-sample-team p,.demo-sample-team small { font:400 12px/1.5 var(--font-ui); color:var(--ds-fg-muted); }
+.demo-sample-team button { display:block; width:100%; text-align:left; margin-top:8px; }
+html.demo-build #auth-guest-signin-btn,html.demo-build #auth-signout-btn,html.demo-build #auth-verify-btn,html.demo-build #import-btn { display:none; }
+.demo-dialog button:focus-visible,.demo-banner button:focus-visible { outline:2px solid var(--ds-ring); outline-offset:2px; }
