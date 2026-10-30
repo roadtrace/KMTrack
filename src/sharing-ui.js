@@ -8,6 +8,8 @@ function syncSharingFilters(){
   }
   for(const prefix of ['entry-filter','map-entry']){
     for(const field of ['source','inspector']){
+      // Team Map options come from approved/historical database owners, not device identities.
+      if(prefix==='map-entry'&&field==='inspector'&&typeof mapRecordScope!=='undefined'&&mapRecordScope==='team')continue;
       const select=document.getElementById(`${prefix}-${field}`);
       if(!select) continue;
       const previous=!canViewTeamRecords()&&field==='source'&&select.value&&!['mine'].includes(select.value)?'mine':select.value;

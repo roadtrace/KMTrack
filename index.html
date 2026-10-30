@@ -4662,6 +4662,7 @@
   <script src="./src/log-register.js"></script>
   <script src="./src/log-controls.js"></script>
   <script src="./src/team-log.js"></script>
+  <script src="./src/team-map.js"></script>
   <script src="./src/submitted-delete.js"></script>
   <script src="./src/more.js"></script>
   <script src="./src/presentation-config.js"></script>
@@ -4724,6 +4725,7 @@
     const scheduleMapRender = SPOTITMapRecords.coalescer(() => updateMapEntries());
     let teamRecords = null, teamPhotoViewer = null, logRecordScope = 'my';
     let teamLogBrowser = null, submittedDeletion = null, teamPageObserver = null;
+    let teamMapBrowser = null;
     let myRenderPending = false, lastMyCloudRender = '';
     let expresswayBounds = {}; // { "NLEX": ["NB","SB"], "C3-R10 RAMP": ["EB","WB"], ... }
     let userBound = null;      // selected direction, e.g. "NB"
@@ -4969,6 +4971,7 @@
       globalThis.window?.closeLogRegisterSheets?.();
       cloudRecordStore?.invalidate(); cloudPhotoViewer?.close(); teamPhotoViewer?.close(); submittedDialog?.close();
       teamLogBrowser?.invalidate(); teamPageObserver?.disconnect();
+      teamMapBrowser?.invalidate();
       document.querySelector('#log-list .team-inspector-grid')?.remove();
       submittedMapScope = null; mapRecordScope = 'my'; mapProjection = []; mapProjectionSignature = ''; mapProjectionDirty = true;
       if (osmEntryLayer) { SPOTITMap.clearEntries(osmEntryLayer); SPOTITMap.legend([], false); updateMapWorkspaceCounts([]); }
@@ -6393,7 +6396,7 @@
 
     function freshMapItems(scope = mapRecordScope) {
       if (!authWorkspaceUnlocked) return [];
-      if (scope === 'team') return teamRecords?.records(entries, {}).records || [];
+      if (scope === 'team') return teamMapBrowser?.items() || [];
       if (authDisplayState?.mode === 'guest') return SPOTITMapRecords.deviceItems(accessibleEntries());
       const own = myRecords?.records(entries, {}).records || SPOTITMapRecords.deviceItems(entries.filter(e => !e.importBatchId));
       return own.concat(SPOTITMapRecords.deviceItems(accessibleEntries().filter(e => e.importBatchId)));
@@ -6403,12 +6406,22 @@
       const select = document.getElementById('map-record-scope');
       select.value = mapRecordScope; select.hidden = guest;
       select.querySelector('option[value="team"]').disabled = !scope;
-      const controller = mapRecordScope === 'team' ? teamRecords : myRecords, page = controller?.snapshot();
+      const controller = mapRecordScope === 'team' ? teamMapBrowser : myRecords, page = controller?.snapshot();
       document.getElementById('map-history-refresh').disabled = !scope || !!page?.loading;
       document.getElementById('map-history-more').disabled = !scope || !page?.loaded || !page?.hasMore || !!page?.loading;
-      document.getElementById('map-history-coverage').textContent = guest ? 'Device records only' : SPOTITMapRecords.coverage(page || {}, mapRecordScope, !!scope);
+      document.getElementById('map-history-more').hidden = mapRecordScope === 'team';
+      document.getElementById('map-history-coverage').textContent = guest ? 'Device records only' : mapRecordScope === 'team' ? teamMapBrowser?.coverage() || 'Team map unavailable.' : SPOTITMapRecords.coverage(page || {}, mapRecordScope, !!scope);
       document.getElementById('map-entry-source').disabled = mapRecordScope === 'team';
-      document.getElementById('map-entry-inspector').disabled = mapRecordScope === 'team';
+      const inspector = document.getElementById('map-entry-inspector'), previous = inspector.value;
+      inspector.disabled = mapRecordScope === 'team' && !scope;
+      const options = mapRecordScope === 'team' ? (page?.summary || []).map(row => [row.owner_id || '__unassigned',row.display_name+(row.active_inspector?'':' (historical records)')])
+        : [...new Set(accessibleEntries().map(entry=>String(entry.inspector||'').trim()).filter(Boolean))].sort().map(name=>[name,name]);
+      const signature=JSON.stringify([mapRecordScope,options]);
+      if(inspector.dataset.options!==signature){
+        inspector.replaceChildren(new Option('All inspectors',''),...options.map(([value,label])=>new Option(label,value)));
+        if(previous&&!options.some(([value])=>value===previous))inspector.add(new Option('Selected inspector',previous));
+        inspector.value=previous;inspector.dataset.options=signature;
+      }
     }
     function switchMapScope(scope) {
       if (scope === 'team' && !cloudRecordStore?.syncScope()) return;
@@ -6417,7 +6430,7 @@
       mapRecordScope = scope === 'team' ? 'team' : 'my';
       document.getElementById('map-entry-source').value = '';
       document.getElementById('map-entry-inspector').value = '';
-      if (mapRecordScope === 'team') teamRecords?.activate();
+      teamMapBrowser?.pause();
       mapProjectionDirty = true; updateMapEntries();
     }
     function openMapEntry(id, direct = false) {
@@ -6460,6 +6473,8 @@
     }
 
     function updateMapEntries() {
+      const teamMapActive = mapRecordScope === 'team' && !document.getElementById('map-view').hidden && document.getElementById('map-show-entries').checked;
+      if(teamMapActive) teamMapBrowser?.activate(getTeamMapFilters()); else teamMapBrowser?.pause();
       renderMapHistoryControls();
       const show = document.getElementById('map-show-entries').checked;
       const from = document.getElementById('map-entry-from');
@@ -6484,13 +6499,14 @@
       if (!show) { SPOTITMap.clearEntries(osmEntryLayer); osmEntryLayer.remove(); SPOTITMap.legend([], false); updateMapWorkspaceCounts([]); return; }
       osmEntryLayer.addTo(osmMap);
       const filter = {from:from.value,to:to.value,type:type.value,source:mapRecordScope === 'team' ? '' : document.getElementById('map-entry-source').value,
-        inspector:mapRecordScope === 'team' ? '' : document.getElementById('map-entry-inspector').value,bound:document.getElementById('map-entry-bound').value};
-      const page = (mapRecordScope === 'team' ? teamRecords : myRecords)?.snapshot();
-      const inputSignature = JSON.stringify([mapRecordScope,page?.scope?.token,page?.revision,filter,authWorkspaceUnlocked,authDisplayState?.mode]);
+        inspector:document.getElementById('map-entry-inspector').value,bound:document.getElementById('map-entry-bound').value};
+      const page = (mapRecordScope === 'team' ? teamMapBrowser : myRecords)?.snapshot();
+      const inputSignature = JSON.stringify([mapRecordScope,page?.scope?.token,page?.revision,page?.signature,page?.rows.length,page?.total,filter,authWorkspaceUnlocked,authDisplayState?.mode]);
       if (mapProjectionDirty || mapProjectionSignature !== inputSignature) {
         const firstProjection = !mapProjectionSignature;
         const items = freshMapItems().filter(item => filter.source === 'imported' ? !!item.local?.importBatchId : filter.source === 'mine' ? !item.local?.importBatchId : true);
-        const next = SPOTITMapRecords.project(items, mapRecordScope, {...filter,source:''}).rows;
+        // Team filters are applied by the server (Philippine calendar dates and owner UUIDs).
+        const next = SPOTITMapRecords.project(items, mapRecordScope, mapRecordScope === 'team' ? {bound:filter.bound==='Other'?'Other':''} : {...filter,source:''}).rows;
         const diff = SPOTITMapRecords.diff(new Map(mapProjection.map(row => [row.id,row])),next);
         mapProjection = next; mapProjectionSignature = inputSignature; mapProjectionDirty = false;
         if (firstProjection || diff.added.length || diff.removed.length || diff.changed.length) {
@@ -6498,9 +6514,11 @@
         }
       }
       SPOTITMap.renderEntries(osmMap, osmEntryLayer, mapProjection, openMapEntry, formatKmStation);
+      if(mapRecordScope==='team') updateMapWorkspaceCounts(mapProjection);
     }
     function updateMapWorkspaceCounts(visible) {
-      document.getElementById('map-visible-count').textContent = `${visible.length} visible`;
+      const teamPage=mapRecordScope==='team'?teamMapBrowser?.snapshot():null;
+      document.getElementById('map-visible-count').textContent = `${visible.length} visible`+(teamPage?.error?' · Load incomplete':teamPage?.loading||teamPage?.hasMore?` · Loading ${teamPage.rows.length}${teamPage.pageLoaded?' / '+teamPage.total:''}`:'');
       const types = new Map();
       visible.forEach(entry => types.set(entry.type || 'Other', (types.get(entry.type || 'Other') || 0) + 1));
       const host = document.getElementById('map-type-legend');
@@ -6533,8 +6551,12 @@
     document.getElementById('map-record-scope').addEventListener('change', event => {
       switchMapScope(event.target.value);
     });
-    document.getElementById('map-history-refresh').addEventListener('click', () => (mapRecordScope === 'team' ? teamRecords : myRecords)?.load(true));
-    document.getElementById('map-history-more').addEventListener('click', () => (mapRecordScope === 'team' ? teamRecords : myRecords)?.load(false));
+    function getTeamMapFilters() {
+      const value=id=>document.getElementById(id).value;
+      return {from:value('map-entry-from'),to:value('map-entry-to'),type:value('map-entry-type'),inspector:value('map-entry-inspector'),bound:value('map-entry-bound')==='Other'?'':value('map-entry-bound')};
+    }
+    document.getElementById('map-history-refresh').addEventListener('click', () => { if(mapRecordScope==='team')teamMapBrowser?.activate(getTeamMapFilters(),true);else void myRecords?.load(true); });
+    document.getElementById('map-history-more').addEventListener('click', () => {if(mapRecordScope!=='team')void myRecords?.load(false);});
     document.getElementById('map-light-show-entries').addEventListener('change', event => {
       document.getElementById('map-show-entries').checked = event.target.checked;
       updateMapEntries();
@@ -6556,7 +6578,7 @@
       }
     });
     document.getElementById('map-entry-clear').addEventListener('click', () => {
-      const days = accessibleEntries().map(entry => SPOTITEntryFilters.entryDay(entry)).filter(day => /^\d{4}-\d{2}-\d{2}$/.test(day)).sort();
+      const days = mapRecordScope === 'team' ? [] : accessibleEntries().map(entry => SPOTITEntryFilters.entryDay(entry)).filter(day => /^\d{4}-\d{2}-\d{2}$/.test(day)).sort();
       document.getElementById('map-entry-from').value = days[0] || '';
       document.getElementById('map-entry-to').value = days.at(-1) || '';
       document.getElementById('map-entry-clear').classList.toggle('active', Boolean(days.length));
@@ -6640,6 +6662,7 @@
     function showAppView(viewName) {
       viewName = SPOTITMore.route(SPOTITTeamRecords.route(viewName));
       if (!APP_VIEW_IDS[viewName]) viewName = 'settings';
+      if(viewName!=='map')teamMapBrowser?.pause();
       if (viewName === 'team') renderTeamWorkspace();
       if (viewName === 'settings') window.moreController?.home();
       // Remembered so a page reload — the header refresh — comes back to this view.
@@ -6664,6 +6687,7 @@
           // Now that the pane has a size, re-assert the remembered view exactly.
           applySavedMapView();
           updateOsmLocation();
+          updateMapEntries();
         });
       }
     }
@@ -8928,6 +8952,8 @@
       teamRecords = SPOTITTeamRecords.createController({ store: cloudRecordStore, context: inspectionContext, key: activeEntriesStorageKey, online: () => navigator.onLine !== false, changed: immediate => { if (immediate) invalidateMyRecords(); else scheduleMyRender(); } });
       teamLogBrowser=SPOTITTeamLog.createController({client,context:inspectionContext,key:activeEntriesStorageKey,online:()=>navigator.onLine!==false,
         verify:()=>authController.verifyOnline(),changed:()=>scheduleMyRender()});
+      teamMapBrowser=SPOTITTeamMap.createController({client,context:inspectionContext,key:activeEntriesStorageKey,online:()=>navigator.onLine!==false,
+        verify:()=>authController.verifyOnline(),changed:()=>{mapProjectionDirty=true;scheduleMapRender();}});
       submittedDeletion=SPOTITSubmittedDelete.createController({client,context:inspectionContext,key:activeEntriesStorageKey,online:()=>navigator.onLine!==false,
         verify:()=>authController.verifyOnline(),removeLocal:(row,scope)=>{
           const next=entries.filter(entry=>!(entry.id===row.id&&entry.user_id?.toLowerCase()===scope.userId&&!entry.importBatchId));
@@ -8936,7 +8962,7 @@
             catch(_){throw Error('Deleted from the database, but this device copy could not be removed. Reopen the app and remove the device copy. The deleted inspection cannot be submitted again.');}
           }
         },changed:()=>{
-          cloudRecordStore.invalidate();teamLogBrowser.invalidate();cloudPhotoViewer?.close();teamPhotoViewer?.close();
+          cloudRecordStore.invalidate();teamLogBrowser.invalidate();teamMapBrowser.invalidate();cloudPhotoViewer?.close();teamPhotoViewer?.close();
           lastMyCloudRender='';mapProjectionDirty=true;mapProjection=[];mapProjectionSignature='';
           if(osmEntryLayer)SPOTITMap.clearEntries(osmEntryLayer);
           void myRecords.load(true);

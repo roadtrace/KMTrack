@@ -161,7 +161,7 @@ test('app lifecycle invalidates read store; My consumer stays separate from Map/
   assert.match(html,/onInvalidate:.*invalidateMyRecords/);
   assert.match(html,/window.addEventListener\('offline', \(\) => myRecords.invalidate\(\)\)/);
   assert.doesNotMatch(html,/cloudRecordStore\.load\(/);assert.doesNotMatch(html,/SPOTITRecordPresentation\.mergeMy\(/);
-  assert.match(sw,/'v268'/);for(const name of ['src/cloud-records.js','src/record-presentation.js'])assert.ok(sw.includes(`./${name}`)&&html.includes(`./${name}`));
+  assert.match(sw,/'v269'/);for(const name of ['src/cloud-records.js','src/record-presentation.js'])assert.ok(sw.includes(`./${name}`)&&html.includes(`./${name}`));
   assert.match(html,/PHOTO_CLOUD_TRANSPORT_ENABLED = false/);
 });
 

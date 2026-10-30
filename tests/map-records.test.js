@@ -57,14 +57,14 @@ test('UUID selection survives reorder and distinguishes local from read-only Tea
  const locals=[local(1),local(2)],opened=[],details=[];const c={entries:locals,mapProjection:map.project(map.deviceItems(locals)).rows,mapRecordScope:'my',SPOTITMap:{selectEntry(){}},updateMapEntries(){},osmMap:{latLngToContainerPoint:()=>({y:10}),getSize:()=>({y:800})},openEditModal:i=>opened.push(i),openSubmittedDetail:(...a)=>details.push(a)};
  vm.createContext(c);vm.runInContext(fn('openMapEntry'),c);c.entries.reverse();c.openMapEntry(id(1),true);assert.deepEqual(opened,[1]);c.mapProjection=[{...c.mapProjection[0],localAction:false}];c.mapRecordScope='team';c.openMapEntry(id(1),true);assert.deepEqual(details,[[id(1),'team']]);c.openMapEntry(id(8));assert.equal(details.length,1);
 });
-test('Map scope stays independent of Log, clears selection, and activates bounded Team controller',()=>{
- let closed=0,activated=0,selected;const c={mapRecordScope:'my',logRecordScope:'my',cloudRecordStore:{syncScope:()=>scope},cloudPhotoViewer:{close:()=>closed++},teamPhotoViewer:{close:()=>closed++},submittedDialog:{close:()=>closed++},SPOTITMap:{selectEntry:id=>selected=id},teamRecords:{activate:()=>activated++},document:{getElementById:()=>({value:'filter'})},updateMapEntries(){}};
- vm.createContext(c);vm.runInContext(fn('switchMapScope'),c);c.switchMapScope('team');assert.equal(c.mapRecordScope,'team');assert.equal(c.logRecordScope,'my');assert.equal(selected,null);assert.equal(closed,3);assert.equal(activated,1);
+test('Map scope stays independent of Log and clears selection and its prior automatic loader',()=>{
+ let closed=0,paused=0,selected;const c={mapRecordScope:'my',logRecordScope:'my',cloudRecordStore:{syncScope:()=>scope},cloudPhotoViewer:{close:()=>closed++},teamPhotoViewer:{close:()=>closed++},submittedDialog:{close:()=>closed++},SPOTITMap:{selectEntry:id=>selected=id},teamMapBrowser:{pause:()=>paused++},document:{getElementById:()=>({value:'filter'})},updateMapEntries(){}};
+ vm.createContext(c);vm.runInContext(fn('switchMapScope'),c);c.switchMapScope('team');assert.equal(c.mapRecordScope,'team');assert.equal(c.logRecordScope,'my');assert.equal(selected,null);assert.equal(closed,3);assert.equal(paused,1);
 });
 test('Map has no transport/persistence/export or eager photo download and landmarks stay separate',()=>{
  assert.doesNotMatch(fs.readFileSync('src/map-records.js','utf8'),/localStorage|\.from\(|\.insert\(|\.upload\(/);
  assert.doesNotMatch(fn('updateMapEntries'),/download|\.storage|export|renderLandmarks/);assert.match(fn('updateMapLandmarks'),/osmLandmarkLayer/);
- assert.match(html,/PHOTO_CLOUD_TRANSPORT_ENABLED = false/);assert.match(fs.readFileSync('sw.js','utf8'),/'v268'/);
+ assert.match(html,/PHOTO_CLOUD_TRANSPORT_ENABLED = false/);assert.match(fs.readFileSync('sw.js','utf8'),/'v269'/);
 });
 function rendererFixture(zoom=15){
  const elements=[],node=(tag)=>{const n={tag,children:[],style:{setProperty(){}},dataset:{},classList:{toggle(){},add(){}},setAttribute(){},append(...items){this.children.push(...items);}};elements.push(n);return n;};
