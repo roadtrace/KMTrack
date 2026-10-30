@@ -74,9 +74,18 @@ html:root .register-sheet .register-filter-row { display:grid; grid-template-col
 html:root .register-sheet :is(select,input) { box-sizing:border-box; width:100%; min-width:0; min-height:44px; margin:0; padding:9px; background:var(--ds-card); color:var(--ds-fg); border:1px solid var(--ds-border); border-radius:11px; font:400 13px/1.4 var(--font-ui); }
 html:root .register-sheet .register-date-field { margin:6px 0 5px; padding:0; border:0; min-width:0; }
 .register-sheet .register-date-field legend { padding:0; margin-bottom:8px; font:500 12px/1.4 var(--font-ui); }
-.register-date-range { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.register-date-range { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:8px; width:100%; }
 .register-date-control { display:grid; gap:7px; min-width:0; padding:10px; border:1px solid var(--ds-border); border-radius:14px; background:var(--ds-card-2); color:var(--ds-fg); font:600 12px/1.4 var(--font-ui); }
-html:root .register-sheet .register-date-control input { padding:9px 5px; font-size:14px; }
+html:root .register-sheet .register-date-control input { display:block; box-sizing:border-box; width:100%; max-width:100%; min-width:0; padding:9px 5px; font-size:16px; -webkit-appearance:none; appearance:none; }
+html:root .register-sheet input[type="date"]::-webkit-date-and-time-value { min-width:0; text-align:left; }
+html:root .register-sheet .register-date-control { overflow:hidden; }
+.team-inspector-grid { display:grid; gap:10px; }
+html:root #log-view .team-inspector-card { display:flex; gap:14px; align-items:center; text-align:left; width:100%; min-height:80px; padding:16px; border:1px solid var(--ds-border); border-radius:16px; background:var(--ds-card); color:var(--ds-fg); font:600 15px/1.4 var(--font-ui); }
+.team-inspector-card .inspector-copy { min-width:0; flex:1; overflow-wrap:anywhere; }
+.team-inspector-card small { display:block; margin-top:4px; color:var(--ds-fg-muted); font:400 12px/1.4 var(--font-ui); }
+.team-inspector-card strong { font:700 24px/1 var(--font-ui); }
+.team-page-sentinel { padding:16px; text-align:center; color:var(--ds-fg-muted); font:400 13px/1.4 var(--font-ui); }
+html:root .submitted-record-dialog .submitted-delete { color:var(--ds-destructive); border-color:var(--ds-destructive); }
 html:root #log-view .register-date-chip { display:inline-flex; align-items:center; gap:7px; max-width:100%; white-space:normal; text-align:left; }
 #log-view .register-date-chip svg { width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.7; flex:none; }
 

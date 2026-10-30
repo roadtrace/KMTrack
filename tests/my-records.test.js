@@ -26,7 +26,7 @@ test('clean combined retains local reference and divergent data is indicated',as
  local.type='Others';item=my.project({...f.options(),localEntries:[local]}).records[0];assert.equal(item.primary,'local');assert.equal(my.differs(item),true);
 });
 test('imported archive is excluded and cloud filters use Manila inspection date',async()=>{
- const f=fixture();f.setRows([{...f.row(1),inspected_at:'2026-10-04T18:00:00Z'}]);await f.store.load('my');const result=my.project({...f.options(),localEntries:[{...f.local(2),importBatchId:'archive'}]},{from:'2026-10-05',to:'2026-10-05',inspector:'unknown'});assert.equal(result.records.length,1);assert.equal(result.excluded.imported,1);assert.equal(my.project(f.options(),{type:'Others'}).records.length,0);
+ const f=fixture();f.setRows([{...f.row(1),inspected_at:'2026-10-04T18:00:00Z'}]);await f.store.load('my');const result=my.project({...f.options(),localEntries:[{...f.local(2),importBatchId:'archive'}]},{from:'2026-10-05',to:'2026-10-05'});assert.equal(result.records.length,1);assert.equal(result.excluded.imported,1);assert.equal(my.project(f.options(),{type:'Others'}).records.length,0);
 });
 test('first page autoload is bounded despite recursive verification notifications',async()=>{
  const f=fixture(true);f.setRows([f.row(1)]);f.controller.verified();await new Promise(r=>setTimeout(r,15));f.controller.verified();assert.deepEqual(f.counts(),{reads:1,verifies:1});assert.equal(f.controller.snapshot().rows.length,1);
@@ -52,7 +52,7 @@ function fn(name){const start=html.indexOf('    function '+name+'('),end=html.in
 function render(items){
  const element=()=>({dataset:{},classList:{},children:[],appendChild(e){this.children.push(e);},append(e){this.children.push(e);},setAttribute(){},addEventListener(){},querySelectorAll(){return [];}});
  const controls=new Map(),control=id=>{if(!controls.has(id))controls.set(id,element());return controls.get(id);};const locals=items.filter(r=>r.local).map(r=>r.local);
- const c={entries:locals,visibleEntries:()=>locals,accessibleEntries:()=>locals,document:{getElementById:control,createElement:element},authWorkspaceUnlocked:true,
+ const c={teamPageObserver:null,teamLogBrowser:null,entries:locals,visibleEntries:()=>locals,accessibleEntries:()=>locals,document:{getElementById:control,createElement:element},authWorkspaceUnlocked:true,
  SPOTITLocalStore:{snapshotContains:()=>()=>true},localStorage:{},activeEntriesStorageKey:()=> 'account',myLogEnabled:()=>true,myRecords:{records:()=>({records:items}),snapshot:()=>({scope:{},loaded:true})},SPOTITMyRecords:my,SPOTITLogRegister:require('../src/log-register.js'),
  SPOTITPhotoPilot:require('../src/photo-pilot.js'),SPOTITPhotoUpload:require('../src/photo-upload-state.js'),SPOTITPreapprovalReview:{reviewable:()=>false},authDisplayState:null,authController:null,
  PHOTO_CLOUD_TRANSPORT_ENABLED:false,photoCloudController:null,selectedEntryIds:new Set(),selectMode:false,logRegisterView:'log',CAPTURE_RECENT_LIMIT:10,

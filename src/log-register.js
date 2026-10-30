@@ -39,6 +39,7 @@
     // Deliberately exclude IDs, owner IDs, photo/storage paths and email fields.
     const fields = [e.type, e.km == null ? '' : e.km, e.km == null ? '' : `KM ${km(e.km)}`, e.expressway, e.bound, e.lane, e.inspector, e.interchange, e.interchangeSegment, e.notes];
     if (query && !fields.some(value => normalized(value).includes(query))) return false;
+    if (f.inspector && e.inspector !== f.inspector) return false;
     if (f.corridor && e.expressway !== f.corridor) return false;
     if (f.bound && normalized(e.bound).replace(/[\s_-]/g,'') !== normalized(f.bound).replace(/[\s_-]/g,'')) return false;
     if (f.lane && String(e.lane ?? '') !== f.lane) return false;
@@ -94,11 +95,10 @@
     card.innerHTML = cardHTML(e, options);
     const checkbox = buttons.find(b => b.classList.contains('entry-checkbox'));
     if (checkbox) card.prepend(checkbox);
-    const actions = buttons.filter(b => b !== checkbox);
+    const actions = buttons.filter(b => b !== checkbox && !b.classList.contains('submitted-detail'));
     if (actions.length) {
-      const details = card.ownerDocument.createElement('details'); details.className = 'register-device-actions';
-      const summary = card.ownerDocument.createElement('summary'); summary.textContent = 'Device actions';
-      details.append(summary, ...actions); card.append(details);
+      const actionsRow = card.ownerDocument.createElement('div'); actionsRow.className = 'register-device-actions';
+      actionsRow.append(...actions); card.append(actionsRow);
     }
   }
   return {matches, inspectionState, cardHTML, decorate, km, historyUnavailable, emptyMessage, dateRange, todayRecords, evidence};

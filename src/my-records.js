@@ -20,8 +20,8 @@
   }
   function project(options,filter={}){
     const result=presentation.projectMy(options);
-    // Inspector names exist only on device imports. Never filter cloud by them.
-    const common={...filter,source:'',inspector:''};
+    // Cloud owner display names and saved device inspector names are display filters.
+    const common={...filter,source:''};
     const records=result.records.filter(item=>filters.filterEntries([
       item.local||cloudDisplay(item.cloud)
     ],common).length);

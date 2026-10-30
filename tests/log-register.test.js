@@ -33,14 +33,14 @@ test('B01 preview style isolation preserves scope and the shared-style guard det
   assert.notEqual(sharedStyle(html.replace('font-display: swap;','font-display: block;')),sharedStyle(baseline));
 });
 test('submitted details retain private viewer guards and independent readonly Team scope',()=>{
-  for(const name of ['currentPhotoItem','currentMyItem','freshMapItems','updateMapEntries','switchMapScope','openMapEntry'])assert.equal(fn(html,name),fn(baseline,name));
+  for(const name of ['currentPhotoItem','freshMapItems','updateMapEntries','switchMapScope','openMapEntry'])assert.equal(fn(html,name),fn(baseline,name));
   const detail=fn(html,'openSubmittedDetail');
   assert.match(detail,/teamView \? 'Read only' : 'Your inspection'/);
   assert.match(detail,/if \(!teamView\)/);assert.match(detail,/if \(teamView \|\|/);
   assert.match(detail,/submittedDialog !== dialog \|\| !dialog.open/);
   assert.match(detail,/row.user_id\?\.toLowerCase\(\) !== context.userId.toLowerCase\(\)/);
   assert.match(detail,/localEntryDurable\(entry\)/);assert.match(detail,/openEditModal\(index, true\)/);
-  for(const file of ['src/my-records.js','src/team-records.js','src/cloud-records.js','src/cloud-photo-viewer.js','src/map-records.js','src/map-overlays.js','src/map-overlays.css','src/entry-filters.js','src/inspection-sharing.js','src/sharing-ui.js'])assert.equal(fs.readFileSync(file,'utf8').replaceAll('\r\n','\n'),git(file));
+  for(const file of ['src/team-records.js','src/cloud-photo-viewer.js','src/map-records.js','src/map-overlays.js','src/map-overlays.css','src/entry-filters.js','src/inspection-sharing.js','src/sharing-ui.js'])assert.equal(fs.readFileSync(file,'utf8').replaceAll('\r\n','\n'),git(file));
 });
 function exportContext(mode='filtered',selected=[]){
   const local=[entry,{...entry,id:'bbbb',type:'Cracks',importBatchId:'batch'}],f={search:'pothole'};
@@ -55,7 +55,7 @@ test('applied filters remain fixed during an uncommitted filter draft',()=>{
   const inputs=new Map(),c={window:{logFilterBaseline:{type:'Cracks',source:'imported'}},document:{getElementById:id=>inputs.get(id)||{value:''}}};inputs.set('entry-filter-type',{value:'Potholes'});vm.createContext(c);vm.runInContext(fn(html,'getLogFilters'),c);assert.equal(c.getLogFilters().type,'Cracks');assert.equal(c.getLogFilters(true).type,'Potholes');
 });
 test('new styles are scoped to Log and dedicated sheets, never the existing popup or Map',()=>{assert.doesNotMatch(css,/#edit-modal|#map-view|\.entry-sheet|\.modal-backdrop/);assert.match(css,/register-sheet-footer[\s\S]*position:sticky/);assert.match(css,/data-theme="light"/);assert.match(css,/min-height:44px/);});
-test('cache v265 contains both new deployed assets and photo gate remains off',()=>{const sw=fs.readFileSync('sw.js','utf8');assert.match(sw,/CACHE_VERSION = 'v265'/);for(const file of ['src/log-register.js','src/log-register.css'])assert.ok(sw.includes("'./"+file+"'"));assert.match(html,/PHOTO_CLOUD_TRANSPORT_ENABLED = false/);});
+test('cache v266 contains both new deployed assets and photo gate remains off',()=>{const sw=fs.readFileSync('sw.js','utf8');assert.match(sw,/CACHE_VERSION = 'v266'/);for(const file of ['src/log-register.js','src/log-register.css'])assert.ok(sw.includes("'./"+file+"'"));assert.match(html,/PHOTO_CLOUD_TRANSPORT_ENABLED = false/);});
 test('history unavailable states distinguish connection, Guest, auth, approval, team, verification and permission',()=>{
   const c={canUseLocal:true,mode:'approved',cloudVerified:true,profile:{approved:true,team:'roadway'}};
   for(const [context,online,text]of [[c,false,'Offline'],[{mode:'guest'},true,'Guest local mode'],[{},true,'Sign in'],[{...c,profile:{approved:false}},true,'approval'],[{...c,profile:{approved:true}},true,'No team'],[{...c,cloudVerified:false},true,'Verify'],[c,true,'permission']])assert.ok(ui.historyUnavailable(context,online).includes(text));

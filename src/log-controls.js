@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const sheet=document.createElement('dialog'); sheet.id='log-filter-sheet'; sheet.className='register-sheet'; sheet.setAttribute('aria-labelledby','log-filter-title');
   sheet.innerHTML='<div class="register-sheet-head"><h2 id="log-filter-title">Filters</h2><button type="button" class="register-close" aria-label="Close filters">×</button></div><div class="register-sheet-fields"></div><p class="register-sheet-note">Filters apply to available records, including bounded loaded history.</p><div class="register-sheet-footer"><button type="button" id="log-filter-reset">Reset</button><button type="button" id="log-filter-apply">Apply Filters</button></div>';
   document.body.append(sheet); const fields=sheet.querySelector('.register-sheet-fields');
-  sheet.querySelector('.register-sheet-note').append(' Device-photo filters show device records only; submitted photo availability is checked in details.');
+  const filterNote=sheet.querySelector('.register-sheet-note');
   const field=(label,input)=>{const row=document.createElement('label');row.className='register-filter-row';const title=document.createElement('span');title.textContent=label;row.append(title,input);fields.append(row);return row;};
   const dates=document.createElement('div'); dates.className='register-date-range';
   const from=$('entry-filter-from'),to=$('entry-filter-to');
@@ -55,15 +55,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const inspectorRow=field('Inspector',$('entry-filter-inspector'));
   const sourceRow=field('Source / import batch',$('entry-filter-source'));
   const photoRow=select('photo','Photo on device',[['','Any device photo'],['with','With device photo'],['without','Without device photo']]);
-  select('status','Inspection status',[['','All inspection states'],['device','Saved on device'],['waiting','Waiting to submit'],['submitting','Submitting inspection'],['submitted','Inspection submitted'],['review','Needs review'],['imported','Imported']]);
+  const statusRow=select('status','Inspection status',[['','All inspection states']]);statusRow.hidden=true;
   const filterIDs=['entry-filter-from','entry-filter-to','entry-filter-type','entry-filter-source','entry-filter-inspector','log-search','log-corridor','log-bound','log-lane','log-photo','log-status'];
   const keyOf=id=>id.startsWith('entry-filter-')?id.slice(13):id.slice(4);
   let filterApplied=false;
   const restoreFilters=f=>{for(const id of filterIDs) $(id).value=f[keyOf(id)]||'';};
   const draftCount=()=>{
     const f=getLogFilters(true),archive=Boolean(f.source&&!['mine'].includes(f.source));
-    inspectorRow.hidden=myLogEnabled()&&!archive;$('entry-filter-inspector').disabled=myLogEnabled()&&!archive;
-    from.max=to.value;to.min=from.value;$('log-filter-apply').textContent=`Apply Filters (${logRegisterItems(f).length})`;
+    inspectorRow.hidden=false;$('entry-filter-inspector').disabled=false;
+    from.max=to.value;to.min=from.value;$('log-filter-apply').textContent=logRecordScope==='team'?'Apply Filters':`Apply Filters (${logRegisterItems(f).length})`;
   };
   sheet.addEventListener('change',event=>{event.stopImmediatePropagation();if(event.target.id==='entry-filter-source')syncFilterOptions(getLogFilters(true));draftCount();},true);
   filterButton.addEventListener('click',()=>{
@@ -80,9 +80,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const team=myLogEnabled()&&logRecordScope==='team',archive=Boolean(f.source&&!['mine'].includes(f.source));
     const rows=logRegisterItems({source:f.source||''}).map(item=>item.local||SPOTITMyRecords.cloudDisplay(item.cloud));
     optionSet('log-corridor','All corridors',rows.map(e=>e.expressway));optionSet('log-bound','All bounds',rows.map(e=>e.bound));optionSet('log-lane','All lanes',rows.map(e=>e.lane));
-    inspectorRow.hidden=myLogEnabled()&&!archive;sourceRow.hidden=team;photoRow.hidden=team;
+    inspectorRow.hidden=false;sourceRow.hidden=team;photoRow.hidden=team;
+    if(team){optionSet('log-corridor','All corridors',['NLEX','SCTEX','TPLEX',...rows.map(e=>e.expressway)]);optionSet('log-bound','All bounds',['NB','SB','EB','WB']);optionSet('log-lane','All lanes',['1','2','3','4','Entry Ramp','Exit Ramp','Acce','Dece','Others']);}
     $('log-photo').disabled=team;
     if(team) $('log-photo').value='';
+    filterNote.textContent=team?'Team filters search submitted records online. Select an inspector or any other filter to view matching inspections.':'Filters apply to records on this device and loaded submitted history. Device-photo filters apply only to this device.';
   }
 
   const data=document.createElement('dialog');data.id='log-data-actions';data.className='register-sheet register-data-sheet';data.setAttribute('aria-labelledby','log-data-title');
@@ -117,7 +119,9 @@ document.addEventListener('DOMContentLoaded', () => {
     $('log-records-chip').textContent=selectMode?`${n} of ${visible.length} selected`:`${shownCount} ${shownCount===1?'inspection':'inspections'}`;
     badge.textContent=(logRegisterView==='inspection'?visible.length:shownCount).toLocaleString('en-US');bulkMount.hidden=!selectMode;selectAll.hidden=!selectMode;deleteSelected.hidden=!selectMode;deleteSelected.textContent=`Delete (${n})`;deleteSelected.disabled=!n;
     const total=logRegisterItems({source:f.source||''}).length;
-    coverage.textContent=team?`Filtered from ${total} loaded team records`:myLogEnabled()&&!archive?`From ${total} device and loaded records`:`From ${total} records on this device`;
+    const teamState=team?teamLogBrowser?.snapshot():null;
+    coverage.textContent=teamState?(teamState.filtered?`${teamState.rows.length} of ${teamState.total} matching inspections loaded`:'All submitted inspections · grouped by inspector'):team?`Filtered from ${total} loaded team records`:myLogEnabled()&&!archive?`From ${total} device and loaded records`:`From ${total} records on this device`;
+    if(teamState){$('log-records-chip').textContent=teamState.filtered?`${teamState.total} matching inspections`:`${teamState.summary.reduce((n,r)=>n+r.inspection_count,0)} submitted inspections`;badge.textContent='';}
     if(archive) $('my-record-status').textContent='Imported archive · Records and photos on this device.';
     else if(!myLogEnabled()) $('my-record-status').textContent=SPOTITLogRegister.historyUnavailable(inspectionContext(),navigator.onLine!==false);
     chips.replaceChildren();

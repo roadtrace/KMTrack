@@ -4660,6 +4660,8 @@
   <script src="./src/sharing-ui.js"></script>
   <script src="./src/log-register.js"></script>
   <script src="./src/log-controls.js"></script>
+  <script src="./src/team-log.js"></script>
+  <script src="./src/submitted-delete.js"></script>
   <script src="./src/more.js"></script>
   <script src="./src/presentation-config.js"></script>
   <script src="./src/presentation-launcher.js"></script>
@@ -4720,6 +4722,7 @@
     let mapProjectionSignature = '', mapProjectionDirty = true;
     const scheduleMapRender = SPOTITMapRecords.coalescer(() => updateMapEntries());
     let teamRecords = null, teamPhotoViewer = null, logRecordScope = 'my';
+    let teamLogBrowser = null, submittedDeletion = null, teamPageObserver = null;
     let myRenderPending = false, lastMyCloudRender = '';
     let expresswayBounds = {}; // { "NLEX": ["NB","SB"], "C3-R10 RAMP": ["EB","WB"], ... }
     let userBound = null;      // selected direction, e.g. "NB"
@@ -4964,6 +4967,8 @@
     function invalidateMyRecords() {
       globalThis.window?.closeLogRegisterSheets?.();
       cloudRecordStore?.invalidate(); cloudPhotoViewer?.close(); teamPhotoViewer?.close(); submittedDialog?.close();
+      teamLogBrowser?.invalidate(); teamPageObserver?.disconnect();
+      document.querySelector('#log-list .team-inspector-grid')?.remove();
       submittedMapScope = null; mapRecordScope = 'my'; mapProjection = []; mapProjectionSignature = ''; mapProjectionDirty = true;
       if (osmEntryLayer) { SPOTITMap.clearEntries(osmEntryLayer); SPOTITMap.legend([], false); updateMapWorkspaceCounts([]); }
       scheduleMapRender();
@@ -4982,7 +4987,7 @@
     }
     function myLogEnabled() { return !!myRecords && authDisplayState?.mode !== 'guest' && authWorkspaceUnlocked && logRegisterView !== 'inspection'; }
     function activeRecordController() { return logRecordScope === 'team' ? teamRecords : myRecords; }
-    function currentMyItem(id) { return activeRecordController()?.records(entries, {}).records.find(item => item.id === id); }
+    function currentMyItem(id) { return (logRecordScope === 'team' && teamLogBrowser ? teamLogBrowser.items() : activeRecordController()?.records(entries, {}).records || []).find(item => item.id === id); }
     function switchLogScope(scope) {
       if (scope === 'team' && !cloudRecordStore?.syncScope()) return;
       cloudPhotoViewer?.close(); teamPhotoViewer?.close(); submittedDialog?.close();
@@ -4991,9 +4996,16 @@
       document.getElementById('entry-filter-source').value = '';
       document.getElementById('entry-filter-inspector').value = '';
       if (scope === 'team') { const photo = document.getElementById('log-photo'); if (photo) photo.value = ''; }
-      if (logRecordScope === 'team') teamRecords?.activate();
+      if (logRecordScope === 'team') teamLogBrowser?.activate(getLogFilters(),true);
       showAppView('log'); renderLog({ cloudOnly: true });
     }
+    function refreshVisibleTeamLog() {
+      if(document.hidden||logRecordScope!=='team'||document.getElementById('log-view').hidden||!teamLogBrowser)return;
+      const state=teamLogBrowser.snapshot();
+      if(!state.loading&&!state.summaryLoading&&Date.now()-state.summaryTime>60000)teamLogBrowser.activate(getLogFilters(),true);
+    }
+    window.addEventListener('focus',refreshVisibleTeamLog);
+    document.addEventListener('visibilitychange',refreshVisibleTeamLog);
     function renderTeamWorkspace() {
       if (!teamRecords) return;
       const set = (id,value) => { const el=document.getElementById(id); if(el && el.textContent!==String(value)) el.textContent=String(value); };
@@ -5047,10 +5059,10 @@
         const option = source.querySelector(`option[value="${value}"]`); if (option) option.textContent = label;
       }
       const inspector = document.getElementById('entry-filter-inspector');
-      inspector.disabled = enabled && !importedView;
-      if (inspector.disabled) inspector.value = '';
+      inspector.disabled = false;
       document.getElementById('select-toggle-btn').disabled = enabled && logRecordScope === 'team';
       if (!enabled) { source.disabled=false; return; }
+      if (logRecordScope === 'team' && teamLogBrowser) { panel.hidden=true; source.disabled=true; return; }
       const page = activeRecordController().snapshot();
       const team = logRecordScope === 'team';
       document.getElementById('log-scope-my').setAttribute('aria-pressed', String(!team));
@@ -5083,6 +5095,17 @@
 
     function currentPhotoItem(id) {
       return submittedMapScope ? freshMapItems(submittedMapScope).find(item => item.id.toLowerCase() === id.toLowerCase()) : currentMyItem(id);
+    }
+    function appendSubmittedDelete(actions,row,e,closeView) {
+      if(!submittedDeletion||!SPOTITSubmittedDelete.allowed(row,inspectionContext(),activeEntriesStorageKey(),navigator.onLine!==false))return;
+      const remove=document.createElement('button');remove.type='button';remove.className='ds-btn ds-btn-quiet submitted-delete';remove.textContent='Delete submitted inspection';
+      remove.onclick=async()=>{
+        const label=[e.type,e.timestamp,e.expressway,e.km==null?'':formatKmStation(e.km),e.bound,e.lane?'Lane '+e.lane:''].filter(Boolean).join(' ? ');
+        if(!confirm('Permanently delete this submitted inspection from the database and its copy on this device?\n\n'+label+'\n\nThis cannot be undone.'))return;
+        remove.disabled=true;const message=document.createElement('p');message.setAttribute('role','status');actions.before(message);message.textContent='Deleting submitted inspection...';
+        try{await submittedDeletion.remove(row,true);closeView();renderLog();}
+        catch(error){message.textContent=error.message;remove.disabled=false;}
+      };actions.append(remove);
     }
     function openSubmittedDetail(id, mapScope = null) {
       const item = mapScope ? freshMapItems(mapScope).find(item => item.id.toLowerCase() === id.toLowerCase()) : currentMyItem(id); if (!item?.cloud) return;
@@ -5148,6 +5171,7 @@
         }; photoSection.append(view);
       }
       const close = document.createElement('button'); close.type = 'button'; close.textContent = 'Close'; close.className = 'ds-btn ds-btn-quiet'; close.onclick = () => dialog.close(); actions.append(close);
+      appendSubmittedDelete(actions,row,e,()=>dialog.close());
       if (!teamView) {
         const edit = document.createElement('button'); edit.type = 'button'; edit.textContent = 'Edit'; edit.className = 'submitted-edit';
         edit.disabled = editableIndex() < 0;
@@ -8245,7 +8269,8 @@
         const select = document.getElementById(id);
         const previous = select.value;
         const cloudTypes = id === 'entry-filter-type' && myRecords ? activeRecordController().snapshot().rows.map(row => row.defect_type).filter(Boolean) : [];
-        const types = [...new Set(accessibleEntries().map(entry => entry.type).concat(cloudTypes, previous || []))].sort();
+        const knownTypes=Array.from(document.querySelectorAll('#defect-focus-select option')).map(option=>option.value).filter(Boolean);
+        const types = [...new Set(accessibleEntries().map(entry => entry.type).concat(cloudTypes,knownTypes, previous || []))].sort();
         select.replaceChildren(new Option('All defects', ''), ...types.map(type => new Option(type, type)));
         select.value = previous;
       }
@@ -8256,6 +8281,7 @@
       from.max = to.value;
       to.min = from.value;
       selectedEntryIds.clear();
+      if (myLogEnabled() && logRecordScope === 'team') teamLogBrowser?.activate(getLogFilters());
       renderLog();
     }
     document.getElementById('entry-filter-from').addEventListener('change', applyEntryFilters);
@@ -8273,6 +8299,7 @@
 
     let logExportMode = null;
     function logRegisterItems(filters = getLogFilters()) {
+      if (myLogEnabled() && logRecordScope === 'team' && teamLogBrowser) return teamLogBrowser.items();
       const myView = myLogEnabled() && ['', 'mine'].includes(filters.source || '');
       if (myView) return activeRecordController().records(entries, filters).records.filter(item => SPOTITLogRegister.matches(item.local || SPOTITMyRecords.cloudDisplay(item.cloud), filters, !item.local));
       return SPOTITEntryFilters.filterEntries(accessibleEntries(), filters).filter(entry => SPOTITLogRegister.matches(entry, filters)).map(local => ({local}));
@@ -8369,8 +8396,14 @@
       const select = document.getElementById('entry-filter-inspector');
       if (!select) return;
       const previous = select.value;
+      if (myLogEnabled() && logRecordScope === 'team' && teamLogBrowser) {
+        const summary=teamLogBrowser.snapshot().summary;
+        select.replaceChildren(new Option('All inspectors',''),...summary.map(row=>new Option(row.display_name+(row.active_inspector?'':' (historical records)'),row.owner_id||'__unassigned')));
+        if(previous&&!Array.from(select.options).some(option=>option.value===previous))select.add(new Option('Selected inspector',previous));
+        select.value=previous;return;
+      }
       const names = [...new Set(
-        accessibleEntries().map(entry => String(entry.inspector || '').trim()).filter(Boolean)
+        accessibleEntries().map(entry => String(entry.inspector || '').trim()).concat(myRecords?.snapshot().rows.map(row=>row.inspector_display_name||'')||[]).filter(Boolean)
           .concat(inspectorName ? [inspectorName] : [])
       )].sort();
       select.replaceChildren(new Option('All inspectors', ''), ...names.map(name => new Option(name, name)));
@@ -8555,8 +8588,49 @@
       updateBulkBar();
     }
 
+    function renderTeamLog() {
+      const state=teamLogBrowser.snapshot(),list=document.getElementById('log-list');
+      syncEntryFilterOptions();syncInspectorFilterOptions();renderMyControls();
+      document.getElementById('my-record-controls').hidden=true;
+      document.getElementById('select-toggle-btn').hidden=true;
+      document.getElementById('log-records-chip').textContent=state.filtered?state.total+' matching inspections':state.summary.reduce((n,r)=>n+r.inspection_count,0)+' submitted inspections';
+      list.replaceChildren();
+      const message=text=>{const el=document.createElement('div');el.className='log-empty';el.textContent=text;list.append(el);return el;};
+      if(!state.scope){message('Connect and verify an approved account to view Team records.');setCloudStatus('Team access unavailable.');window.syncLogRegisterControls?.();return;}
+      if(!state.filtered){
+        setCloudStatus(state.summaryLoading?'Loading inspector totals...':state.summaryError?'Inspector totals are unavailable.': 'Select an inspector or apply filters to view submitted inspections.');
+        if(state.summaryError){const box=message('Could not load inspector totals.');const retry=document.createElement('button');retry.type='button';retry.className='ds-btn ds-btn-quiet';retry.textContent='Try again';retry.onclick=()=>teamLogBrowser.activate(getLogFilters(),true);box.append(retry);}
+        const grid=document.createElement('div');grid.className='team-inspector-grid';list.append(grid);
+        const summary=state.summary.slice().sort((a,b)=>Number(b.active_inspector)-Number(a.active_inspector)||a.display_name.localeCompare(b.display_name));
+        for(const inspector of summary){
+          const button=document.createElement('button');button.type='button';button.className='team-inspector-card';button.disabled=!inspector.inspection_count;
+          const copy=document.createElement('span');copy.className='inspector-copy';copy.textContent=inspector.display_name;
+          const detail=document.createElement('small');detail.textContent=inspector.active_inspector?'Submitted inspections':'Historical submitted inspections';copy.append(detail);
+          const count=document.createElement('strong');count.textContent=inspector.inspection_count.toLocaleString('en-US');
+          button.append(copy,count);button.setAttribute('aria-label',inspector.display_name+': '+inspector.inspection_count+' submitted inspections');
+          button.onclick=()=>{document.getElementById('entry-filter-inspector').value=inspector.owner_id||'__unassigned';applyEntryFilters();};grid.append(button);
+        }
+        if(!summary.length&&!state.summaryLoading&&!state.summaryError)message('No inspectors or submitted inspections are available for this team.');
+      }else{
+        setCloudStatus(state.loading?'Loading matching Team inspections...':state.error?'Matching inspections could not be loaded.':state.rows.length+' of '+state.total+' matching inspections shown.');
+        for(const item of teamLogBrowser.items())list.append(cloudCard(item));
+        if(!state.rows.length&&!state.loading&&!state.error)message('No inspections match these filters.');
+        if(state.error){const box=message('Could not load matching inspections.');const retry=document.createElement('button');retry.type='button';retry.className='ds-btn ds-btn-quiet';retry.textContent='Try again';retry.onclick=()=>teamLogBrowser.retry();box.append(retry);}
+        if(state.hasMore||state.loading){
+          const sentinel=document.createElement('div');sentinel.className='team-page-sentinel';sentinel.textContent=state.loading?'Loading inspections...':'Scroll for more inspections';list.append(sentinel);
+          if(state.hasMore&&!state.loading&&!state.error){
+            if(typeof IntersectionObserver==='function'){teamPageObserver=new IntersectionObserver(items=>{if(items.some(item=>item.isIntersecting)){teamPageObserver.disconnect();void teamLogBrowser.more();}},{rootMargin:'200px'});teamPageObserver.observe(sentinel);}
+            else {const more=document.createElement('button');more.type='button';more.textContent='Show next inspections';more.onclick=()=>teamLogBrowser.more();sentinel.append(more);}
+          }
+        }
+      }
+      window.syncLogRegisterControls?.();
+    }
     function renderLog({ cloudOnly = false } = {}) {
       renderTeamWorkspace();
+      teamPageObserver?.disconnect();
+      if (myLogEnabled() && logRecordScope === 'team' && teamLogBrowser) { renderTeamLog(); return; }
+      document.getElementById('select-toggle-btn').hidden=false;
       if (cloudOnly) {
         renderMyControls();
         const page = activeRecordController()?.snapshot();
@@ -8851,6 +8925,23 @@
         key: activeEntriesStorageKey, online: () => navigator.onLine !== false,
         changed: immediate => { if (immediate) invalidateMyRecords(); else scheduleMyRender(); } });
       teamRecords = SPOTITTeamRecords.createController({ store: cloudRecordStore, context: inspectionContext, key: activeEntriesStorageKey, online: () => navigator.onLine !== false, changed: immediate => { if (immediate) invalidateMyRecords(); else scheduleMyRender(); } });
+      teamLogBrowser=SPOTITTeamLog.createController({client,context:inspectionContext,key:activeEntriesStorageKey,online:()=>navigator.onLine!==false,
+        verify:()=>authController.verifyOnline(),changed:()=>scheduleMyRender()});
+      submittedDeletion=SPOTITSubmittedDelete.createController({client,context:inspectionContext,key:activeEntriesStorageKey,online:()=>navigator.onLine!==false,
+        verify:()=>authController.verifyOnline(),removeLocal:(row,scope)=>{
+          const next=entries.filter(entry=>!(entry.id===row.id&&entry.user_id?.toLowerCase()===scope.userId&&!entry.importBatchId));
+          if(next.length!==entries.length){
+            try{SPOTITLocalStore.saveClaim(localStorage,scope.workspaceKey,entries,next);entries=next;}
+            catch(_){throw Error('Deleted from the database, but this device copy could not be removed. Reopen the app and remove the device copy. The deleted inspection cannot be submitted again.');}
+          }
+        },changed:()=>{
+          cloudRecordStore.invalidate();teamLogBrowser.invalidate();cloudPhotoViewer?.close();teamPhotoViewer?.close();
+          lastMyCloudRender='';mapProjectionDirty=true;mapProjection=[];mapProjectionSignature='';
+          if(osmEntryLayer)SPOTITMap.clearEntries(osmEntryLayer);
+          void myRecords.load(true);
+          if(logRecordScope==='team')teamLogBrowser.activate(getLogFilters());
+          scheduleMyRender();
+        }});
       teamPhotoViewer = SPOTITCloudPhotoViewer.createTeamViewer({ client, context: inspectionContext, key: activeEntriesStorageKey, online: () => navigator.onLine !== false, urls: URL, verify: () => authController.verifyOnline(), read: getPhoto, current: item => { const current=(submittedMapScope || logRecordScope) === 'team' && currentPhotoItem(item.id); return !!current && current.cloud===item.cloud; } });
       cloudPhotoViewer = SPOTITCloudPhotoViewer.createViewer({ client, context: inspectionContext,
         key: activeEntriesStorageKey, online: () => navigator.onLine !== false, urls: URL,
@@ -9451,6 +9542,7 @@
         const edit = document.createElement('button'); edit.type = 'button'; edit.textContent = 'Edit'; edit.className = 'lane-save';
         edit.onclick = () => setEditing(true);
         actions.append(close, edit); modal.querySelector('.entry-sheet-actions').append(actions);
+        if(!entry.importBatchId&&entry.sync_status==='synced'&&entry.remote_id===entry.id)appendSubmittedDelete(actions,entry,entry,closeEditModal);
       }
       setEditing(activateEdit);
       const fromMap = document.querySelector('.app-tab-btn.active')?.dataset.appView === 'map';
