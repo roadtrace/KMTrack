@@ -5153,6 +5153,7 @@
       sheet.querySelector('.entry-loading-feedback')?.remove();sheet.querySelector('.inspection-recovery-actions')?.remove();
       sheet.querySelector('.entry-view-label')?.remove();sheet.querySelector('.entry-edit-status')?.remove();
       sheet.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
+      sheet.querySelectorAll('[hidden]').forEach(node=>node.removeAttribute('hidden'));
       sheet.querySelectorAll('label[for]').forEach(node => node.removeAttribute('for'));
       sheet.removeAttribute('role'); sheet.removeAttribute('aria-modal'); sheet.removeAttribute('aria-labelledby');
       nodes['edit-modal-title'].textContent = e.type;
@@ -9662,10 +9663,10 @@
     async function openEditModal(index, activateEdit = false) {
       const entry=entries[index];if(!entry)return;
       if(editingOriginal)closeEditModal();
-      const generation=++editOpenGeneration,modal=document.getElementById('edit-modal');
-      modal.classList.remove('from-map','map-compact');modal.classList.add('open','entry-loading');modal.setAttribute('aria-hidden','false');modal.setAttribute('aria-busy','true');
-      let loading=modal.querySelector('.entry-loading-feedback');
-      if(!loading){loading=document.createElement('div');loading.className='entry-loading-feedback';loading.setAttribute('role','status');loading.innerHTML='<span>Loading inspection…</span><i></i><i></i><i></i>';modal.querySelector('.entry-sheet').append(loading);}
+      const modal=document.getElementById('edit-modal');
+      await populateInspectionSheet(index,false);
+      const generation=editOpenGeneration;
+      modal.classList.add('entry-loading');modal.setAttribute('aria-busy','true');
       document.getElementById('edit-close').focus();
       await new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));
       if(generation!==editOpenGeneration)return;

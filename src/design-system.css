@@ -3173,14 +3173,6 @@ html:root #map-view .map-history-filter small { flex-basis: 100%; color: var(--d
 #edit-modal .entry-sheet-actions svg { fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
 #map-km-station { min-width:0; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .map-header, .map-header > div, .global-header > div { min-width:0; }
-#edit-modal .entry-loading-feedback { display:none; padding:30px 20px; color:var(--ds-fg-muted); }
-#edit-modal.entry-loading .entry-loading-feedback { display:grid; gap:18px; }
-#edit-modal.entry-loading .entry-sheet-actions { display:none; }
-#edit-modal.entry-loading .entry-sheet-scroll > :not(.entry-sheet-header) { display:none; }
-#edit-modal.entry-loading .entry-sheet-header > div { visibility:hidden; }
-#edit-modal.entry-loading .entry-sheet-scroll { overflow:hidden; }
-.entry-loading-feedback i { display:block; height:42px; border-radius:8px; background:var(--ds-muted); animation:inspection-loading 1s ease-in-out infinite alternate; }
-@keyframes inspection-loading { to { opacity:.4; } }
 .inspection-detail-sheet.from-map .entry-map-summary { display:flex; flex-wrap:wrap; gap:8px; }
 .inspection-detail-sheet.from-map.map-compact :is(.entry-sheet-grid,.entry-sheet-meta,.entry-sheet-photo,.entry-sheet-actions) { display:none; }
 .inspection-detail-sheet .entry-map-summary strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%; }
@@ -3194,3 +3186,26 @@ button.action-working::after { content:''; display:inline-block; flex:none; widt
 .header-brand { min-width:0; flex:1; overflow:hidden; }
 .header-context { min-width:0; overflow:hidden; }
 .header-actions { flex:none; }
+
+:is(#edit-modal, .inspection-detail-sheet).from-map .entry-map-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 9px; margin-top: 11px; color: var(--ds-fg-muted); font: 500 12px/1.3 var(--font-ui); }
+:is(#edit-modal, .inspection-detail-sheet).from-map .entry-map-summary strong { width: 100%; color: var(--ds-fg); font: 700 13px/1.2 var(--font-readout); }
+:is(#edit-modal, .inspection-detail-sheet).from-map .entry-map-summary span + span::before { content: "·"; margin-right: 9px; }
+:is(#edit-modal, .inspection-detail-sheet).from-map .entry-map-summary button { display: inline-flex; align-items: center; gap: 4px; margin-left: auto; padding: 3px 0; border: 0; background: transparent; color: var(--ds-secondary); font: 700 12px/1 var(--font-ui); cursor: pointer; }
+:is(#edit-modal, .inspection-detail-sheet).from-map .entry-map-summary button svg { width: 14px; height: 14px; }
+:is(#edit-modal, .inspection-detail-sheet).from-map.map-compact :is(.entry-sheet-grid, .entry-sheet-meta, .entry-sheet-photo, .entry-sheet-actions) { display: none; }
+:is(#edit-modal, .inspection-detail-sheet).from-map.map-compact .entry-map-summary button svg { transform: rotate(180deg); }
+
+/* Skeletons occupy the actual fields: the loading and loaded sheet keep the same geometry. */
+#edit-modal .entry-loading-feedback { display:none !important; }
+#edit-modal.entry-loading :is(.entry-sheet-field .entry-editable,.entry-sheet-meta strong,.entry-sheet-header h3,.entry-view-label,.edit-photo-row,.entry-map-summary strong,.entry-map-summary span) {
+ color:transparent !important; border-radius:6px; background:var(--ds-muted); position:relative; overflow:hidden;
+}
+#edit-modal.entry-loading :is(select,input) { opacity:0 !important; }
+#edit-modal.entry-loading :is(.entry-sheet-field .entry-editable,.entry-sheet-meta strong,.entry-sheet-header h3,.edit-photo-row)::after {
+ content:''; position:absolute; inset:0; background:linear-gradient(100deg,transparent,rgba(255,255,255,.14),transparent); transform:translateX(-100%); animation:sheet-skeleton 1.2s linear infinite;
+}
+#edit-modal.entry-loading :is(.entry-sheet-scroll button,.entry-sheet-actions button) { pointer-events:none; }
+#edit-modal.entry-loading :is(.edit-photo-row > *, .entry-sheet-field .entry-edit-pencil) { visibility:hidden; }
+html:root .inspection-detail-sheet.from-map.map-compact :is(.entry-sheet-grid,.entry-sheet-meta,.entry-sheet-photo,.entry-sheet-actions) { display:none !important; }
+@keyframes sheet-skeleton { to { transform:translateX(100%); } }
+@media(prefers-reduced-motion:reduce) { #edit-modal.entry-loading ::after { animation:none !important; } }

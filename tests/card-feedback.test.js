@@ -8,7 +8,7 @@ test('cards convey sync with an accessible icon and contain no actions or status
 });
 test('inspection loading appears before network refresh and is invalidated on close',()=>{
  const start=html.indexOf('async function openEditModal('),end=html.indexOf('async function populateInspectionSheet(',start),source=html.slice(start,end);
- assert.ok(source.indexOf("classList.add('open','entry-loading')")<source.indexOf('await refreshOwnSnapshot'));
+ assert.ok(source.indexOf("classList.add('entry-loading')")>=0 && source.indexOf("classList.add('entry-loading')")<source.indexOf('await refreshOwnSnapshot'));
  assert.match(source,/generation!==editOpenGeneration/);assert.match(source,/aria-busy/);
 });
 test('Team map details have a read-only expandable compact summary',()=>{
