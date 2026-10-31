@@ -4703,6 +4703,7 @@
     }
     const gpsFilter = new GeoKalmanFilter();
     const captureLocation = SPOTITCaptureLocation.create();
+    const locationResolver = SPOTITLocation.createResolver();
     const manualLocation = SPOTITManualLocation.create();
     const captureLanes = SPOTITCaptureLanes.create();
     let captureLanePressed = false;
@@ -6759,7 +6760,15 @@
         if (!currentPos?.fresh || !r?.saveAllowed || r.fixTimestamp !== currentPos.timestamp || Date.now()-r.fixTimestamp > GPS_FRESH_MS) return null;
         return {lat:currentPos.rawLat,lon:currentPos.rawLon,km:r.interchange ? null : r.result.km,expressway:r.result.expressway,bound:userBound || '',interchange:r.interchange?.name || '',interchangeSegment:r.interchange?.segment || ''};
       }
-      return captureLocation.snapshot({position:currentPos,now:Date.now(),bound:userBound || ''});
+      const r = currentResolvedLocation;
+      if (!currentPos?.fresh || !r?.saveAllowed || r.fixTimestamp !== currentPos.timestamp
+        || Date.now() < r.fixTimestamp || Date.now()-r.fixTimestamp > GPS_FRESH_MS) return null;
+      const interchangeMode = isInterchangeLocationMode(r,currentPos);
+      if (!r.result || (!interchangeMode && r.result.distance > offNetworkThresholdKm(currentPos.acc))) return null;
+      return {lat:currentPos.lat,lon:currentPos.lon,km:interchangeMode?null:r.result.km,
+        expressway:r.result.expressway,bound:userBound || '',
+        interchange:interchangeMode?r.interchange.name:'',
+        interchangeSegment:interchangeMode?interchangeSegmentLabel(r):''};
     }
 
     function setGpsCaptureReady(ready) {
@@ -6781,16 +6790,19 @@
         setGpsCaptureReady(resolvedLocationCanSave());
         return currentResolvedLocation;
       }
-      currentResolvedLocation = captureLocation.beginFix({
-        lat:currentPos.rawLat,lon:currentPos.rawLon,accuracy:currentPos.acc,timestamp:currentPos.timestamp
-      });
+      currentResolvedLocation = {...locationResolver.resolve({
+        lat:currentPos.lat,lon:currentPos.lon,accuracy:currentPos.acc,timestamp:currentPos.timestamp,
+        speed:speedMs,candidates:computeCorridorCandidates(currentPos.lat,currentPos.lon),
+        interchange:nearestRamp(currentPos.lat,currentPos.lon,locationResolver.state().interchange?.siteId)
+      }),fixTimestamp:currentPos.timestamp};
+      applyLegacyBoundTrend(currentResolvedLocation);
       setGpsCaptureReady(resolvedLocationCanSave());
       return currentResolvedLocation;
     }
 
     function markGpsUncertain(message) {
       if (currentPos) currentPos.fresh = false;
-      currentResolvedLocation = manualLocation.mode() && currentResolvedLocation ? {...currentResolvedLocation,fresh:false,saveAllowed:false,uncertain:true,reason:message} : captureLocation.invalidate(message);
+      currentResolvedLocation = manualLocation.mode() && currentResolvedLocation ? {...currentResolvedLocation,fresh:false,saveAllowed:false,uncertain:true,reason:message} : locationResolver.markStale(message);
       gpsStatus.textContent = message;
       gpsStatus.className = 'status warn';
       setGpsCaptureReady(false);
@@ -6976,10 +6988,11 @@
 
     // One network calculation supplies the main readout and every new capture.
     function stationingReviewAllowed() {
-      return typeof Worker === 'function' && typeof SPOTITStationingReviewController !== 'undefined';
+      // Preview GIS is retained for isolated diagnostics, never operational matching.
+      return false;
     }
     function renderStationingReview(result) {
-      if (manualLocation.mode()) return;
+      if (!stationingReviewAllowed() || manualLocation.mode()) return;
       const resolved = captureLocation.accept(result,result.reviewFixTimestamp,Date.now());
       if (!resolved) return;
       currentResolvedLocation = resolved;

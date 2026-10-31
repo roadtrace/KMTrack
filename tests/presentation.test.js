@@ -19,7 +19,8 @@ test('separate build excludes production auth, server tools, account config and 
  assert.match(fs.readFileSync(root+'_headers','utf8'),/Permissions-Policy: geolocation=\(\), camera=\(\), microphone=\(\)/);
  assert.match(fs.readFileSync(root+'src/map-config.js','utf8'),/apiKey:""/);
  const original=cp.execFileSync('git',['show','HEAD:index.html'],{encoding:'utf8'}).replaceAll('\r\n','\n'),current=fs.readFileSync('index.html','utf8').replaceAll('\r\n','\n');
- for(const name of ['resolvedEntrySnapshot','resolveFreshLocation','logDefect','captureInspectionPhoto','syncNow']){const fn=s=>{const start=s.indexOf('    '+(name==='captureInspectionPhoto'||name==='syncNow'?'async ':'')+'function '+name+'(');assert(start>=0,name);return s.slice(start,s.indexOf('\n    }',start)+6);};assert.equal(fn(current),fn(original),name);}
+ for(const name of ['logDefect','captureInspectionPhoto','syncNow']){const fn=s=>{const start=s.indexOf('    '+(name==='captureInspectionPhoto'||name==='syncNow'?'async ':'')+'function '+name+'(');assert(start>=0,name);return s.slice(start,s.indexOf('\n    }',start)+6);};assert.equal(fn(current),fn(original),name);}
+ assert.match(html,/locationResolver\.resolve/);assert.match(html,/Preview GIS is retained for isolated diagnostics/);
 });
 test('vendored QR encoder is local and retains its MIT license',()=>{
  const source=fs.readFileSync('presentation/vendor/qrcodegen.js','utf8');assert.match(source,/MIT License/);const c={};vm.createContext(c);vm.runInContext(source,c);const qr=c.qrcodegen.QrCode.encodeText('https://demo.example.invalid/',c.qrcodegen.QrCode.Ecc.MEDIUM);assert(qr.size>=21);assert.equal(qr.getModule(0,0),true);assert.equal(qr.getModule(-1,-1),false);
