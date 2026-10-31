@@ -4952,11 +4952,15 @@
       button.disabled=true;
       try {
         const result=await photoCloudController.dispatch(entry);
-        if(result.status!=='synced') alert(result.reason || ({busy:'Another photo upload is running. Keep the app open and try again when it finishes.',backoff:'The previous upload failed. Wait for the retry delay, then try Upload photo again.',disabled:'Photo upload is currently unavailable.'}[result.status]) || 'Photo upload held. Saved photos remain on this device.');
+        if(result.status!=='synced') {result.reason=result.reason || ({busy:'Another photo upload is running. Keep the app open and try again when it finishes.',backoff:'The previous upload failed. Wait for the retry delay, then try Upload photo again.',disabled:'Photo upload is currently unavailable.'}[result.status]) || 'Photo upload held. Saved photos remain on this device.';alert(result.reason);}
         else if(entries.includes(entry) && localEntryDurable(entry)) {
           persistEntryChanges(entry,{photo_auto_sync:false,record_photo_known:true,
             record_photo:{current_id:entry.r2_photo.manifest.upload_id,legacy_path:entry.photo_path||null,legacy_filename:entry.record_photo?.legacy_filename||null}});
         }
+        return result;
+      } catch(error) {
+        const message=error?.message || 'Photo upload could not start. Reopen the app online and try again.';
+        alert(message);return {status:'held',reason:message};
       } finally { button.disabled=false; renderLog(); }
     }
     async function retryPhotoNow(id, button) {
@@ -9775,9 +9779,16 @@
         const uploaded=entry.r2_photo?.status==='synced' && entry.r2_photo.source_id===entry.photoId && entry.record_photo?.current_id===entry.r2_photo.manifest?.upload_id;
         upload.textContent=uploaded?'Photo uploaded':'Upload photo';upload.disabled=uploaded;
         upload.onclick=async()=>{
-          upload.textContent='Uploading…';
-          try { await uploadR2Photo(entry.id,upload); }
-          finally { if(editingEntryIndex!==null && entries[editingEntryIndex]===entry && !editingMode){closeEditModal();void openEditModal(entries.indexOf(entry));} }
+          const source=entry.photoId;
+          const stillOpen=()=>editingEntryIndex!==null && entries[editingEntryIndex]===entry && entry.photoId===source && !editingMode && upload.isConnected;
+          upload.disabled=true;upload.textContent='Uploading…';state.textContent='Uploading photo. Keep the app open.';
+          try {
+            const result=await uploadR2Photo(entry.id,upload);
+            if(!stillOpen())return;
+            if(result?.status==='synced') {upload.textContent='Photo uploaded';upload.disabled=true;state.textContent='Photo uploaded and confirmed.';}
+            else {upload.textContent='Retry upload';state.textContent=result?.reason || 'Upload cancelled. Your photo remains on this device.';}
+          }catch(error){if(stillOpen()){upload.textContent='Retry upload';state.textContent='Upload failed. Your device photo is safe. '+(error?.message || 'Reopen online and try again.');}}
+          finally{if(stillOpen() && upload.textContent!=='Photo uploaded')upload.disabled=false;}
         };
         modal.querySelector('.edit-photo-actions').append(upload);
         const previousEdit=edit.onclick;edit.onclick=()=>{upload.hidden=true;previousEdit();};

@@ -119,7 +119,7 @@
             save({...state,status:retry?'failed':'review',retry_at:retry?clock()+Math.min(1800000,30000*2**Math.max(0,state.attempts-1)):null,error:error.message});}}
           catch{}return {status:'held',reason:error.message};
         }
-      });}finally{busy=false;}
+      });}catch(error){return {status:'held',reason:error?.message || 'Could not acquire the photo upload lock.'};}finally{busy=false;}
     }
     return {dispatch,retryNow:dispatch,isBusy:()=>busy};
   }
