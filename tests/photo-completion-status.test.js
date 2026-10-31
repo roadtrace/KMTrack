@@ -1,0 +1,5 @@
+const test=require('node:test'),assert=require('node:assert/strict'),ui=require('../src/log-register');
+const base={id:'a',remote_id:'a',sync_status:'synced',photoId:'device-photo'};
+test('submitted inspection with only a device photo never shows cloud completion',()=>{assert.ok(ui.cardHTML(base).includes('photo upload required'));assert.ok(ui.reviewMessage(base).includes('not confirmed'));});
+test('R2 success requires acknowledgement for the current device source and current server association',()=>{const e={...base,record_photo_known:true,record_photo:{current_id:'upload'},r2_photo:{status:'synced',source_id:'device-photo',manifest:{upload_id:'upload'},ack:{upload_id:'upload',state:'ready',finalized_at:'2026-10-31'}}};assert.equal(ui.photoUploadRequired(e),false);assert.equal(ui.photoUploadRequired({...e,record_photo:{current_id:null}}),true);assert.equal(ui.photoUploadRequired({...e,photoId:'replacement'}),true);assert.equal(ui.photoUploadRequired({...e,r2_photo:{...e.r2_photo,ack:null}}),true);});
+test('inspection without a device photo retains inspection-only submitted state',()=>{assert.equal(ui.photoUploadRequired({...base,photoId:''}),false);});

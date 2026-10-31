@@ -5,6 +5,11 @@ const fields=['defect_type','expressway','direction','lane_number','lane_other',
 const copy=x=>JSON.parse(JSON.stringify(x));
 function content(row){return Object.fromEntries(fields.map(k=>[k,row[k]??null]));}
 function editable(e,c){return !!e&&!e.importBatchId&&!e.cloud_source&&c.canUseLocal===true&&c.userId===c.workspaceUserId&&c.profile?.approved===true&&['inspector','supervisor'].includes(c.profile.role)&&e.user_id?.toLowerCase()===c.userId?.toLowerCase()&&e.team===c.profile.team&&e.remote_id===e.id&&e.sync_status==='synced';}
+function snapshotCandidate(e,c){return !!e&&!e.importBatchId&&!e.cloud_source&&!e.guest_claim_required&&!e.preapproval_review_required&&c.canUseLocal===true&&!!c.userId&&c.userId===c.workspaceUserId&&c.profile?.approved===true&&!!c.profile.team&&['inspector','supervisor'].includes(c.profile.role)&&(e.remote_id===e.id||e.sync_status==='synced');}
+function snapshotOwnership(e,row,c){
+ if(!snapshotCandidate(e,c)||row?.id?.toLowerCase()!==e.id?.toLowerCase()||row?.user_id?.toLowerCase()!==c.userId.toLowerCase()||row.team!==c.profile.team)throw Error('This inspection is not owned by the current account.');
+ return {user_id:row.user_id,team:row.team,remote_id:e.id,sync_status:'synced'};
+}
 function append(entry,kind,payload,uuid=()=>crypto.randomUUID()){
  if(entry.record_deleted)throw Error('This inspection was deleted.');
  if((entry.record_actions||[]).some(a=>a.error))throw Error('Resolve the pending change before editing again.');
@@ -50,5 +55,5 @@ function createController(o){
  }
  return {wake,retryNow(){for(const e of o.entries())if(editable(e,o.context())&&e.record_actions?.some(a=>!a.error&&a.retry_at))o.save(e,{record_actions:e.record_actions.map(a=>a.error?a:{...a,retry_at:0})});return wake();},stop(){clearTimeout(timer);},isBusy:()=>!!running};
 }
-return {content,editable,append,clearedPhoto,createController};
+return {content,editable,snapshotCandidate,snapshotOwnership,append,clearedPhoto,createController};
 });

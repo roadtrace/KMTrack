@@ -130,12 +130,12 @@ html:root .register-sheet .export-format-options button { width:100%; background
 #edit-modal .edit-photo-actions button:disabled { opacity:.4; cursor:not-allowed; }
 #edit-modal #edit-photo-upload-btn[hidden] { display:none; }
 
-html:root #map-view .map-filter-options { width:min(360px,calc(100dvw - 28px)); box-sizing:border-box; max-width:calc(100dvw - 28px); display:flex; flex-direction:column; align-items:stretch; gap:16px; padding:18px; max-height:calc(100dvh - var(--app-header-h,80px) - var(--app-nav-h,72px) - 100px); overscroll-behavior:contain; }
+html:root #map-view .map-filter-options { width:min(360px,calc(100dvw - 28px)); box-sizing:border-box; max-width:calc(100dvw - 28px); display:flex; flex-direction:column; align-items:stretch; gap:10px; padding:14px; max-height:calc(100dvh - var(--app-header-h,80px) - var(--app-nav-h,72px) - 100px); overscroll-behavior:contain; }
 html:root #map-view .map-filter-heading { font-size:16px; font-weight:700; color:var(--ds-fg); }
 html:root #map-view #map-scope-buttons { width:100%; }
 html:root #map-view #map-scope-buttons button { padding:10px 8px; border-radius:var(--radius-sm); }
 html:root #map-view #map-scope-buttons button[aria-pressed="true"] { background:var(--ds-accent); color:var(--ds-accent-fg); border-color:var(--ds-secondary); }
-html:root #map-view .map-filter-group { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; min-width:0; }
+html:root #map-view .map-filter-group { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; min-width:0; }
 html:root #map-view .map-filter-people { grid-template-columns:minmax(0,1fr); }
 html:root #map-view .map-filter-section-label { grid-column:1/-1; font-size:12px; color:var(--ds-fg-muted); }
 html:root #map-view .map-filter-options label { font-size:12px; gap:6px; color:var(--ds-fg-muted); }
@@ -143,9 +143,18 @@ html:root #map-view .map-filter-options :is(select,input[type="date"]) { min-wid
 html:root #map-view .map-filter-options input[type="date"]::-webkit-date-and-time-value { min-width:0; text-align:left; }
 html:root #map-view .map-filter-options .map-source-filter { grid-column:1/-1; }
 html:root #map-view #map-entry-clear { grid-column:1/-1; justify-self:end; padding:0; border:0; background:transparent; color:var(--ds-secondary); min-height:32px; }
-html:root #map-view .map-filter-footer { border-top:1px solid var(--ds-border); padding-top:14px; display:grid; gap:12px; }
+html:root #map-view .map-filter-footer { border-top:1px solid var(--ds-border); padding-top:10px; display:grid; gap:8px; }
 html:root #map-view .map-filter-footer .map-light-filter-field { flex-direction:row; align-items:center; gap:8px; color:var(--ds-fg); }
 html:root #map-view .map-history-filter { display:flex; flex-wrap:wrap; gap:8px; }
 html:root #map-view .map-history-filter small { order:-1; width:100%; font-size:12px; line-height:1.5; }
 html:root #map-view .map-history-filter button { border:1px solid var(--ds-border); background:var(--ds-card); color:var(--ds-fg); border-radius:var(--radius-sm); }
 html:root #map-view .map-filter-options :is(button,select,input):focus-visible { outline:2px solid var(--ds-secondary); outline-offset:2px; }
+
+html:root #map-view .map-date-heading { grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+html:root #map-view #map-entry-clear { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:36px; padding:6px 10px; border:1px solid var(--ds-border); border-radius:var(--radius-sm); background:var(--ds-card); color:var(--ds-fg-muted); font-size:12px; cursor:pointer; }
+html:root #map-view #map-entry-clear::before { content:'○'; }
+html:root #map-view #map-entry-clear[aria-pressed="true"] { color:var(--ds-accent-fg); background:var(--ds-accent); border-color:var(--ds-secondary); }
+html:root #map-view #map-entry-clear[aria-pressed="true"]::before { content:'✓'; }
+html:root #map-view .map-filter-options label { gap:4px; }
+html:root #map-view .map-filter-options .map-filter-dates { row-gap:6px; }
+html:root #map-view .map-history-filter small { line-height:1.35; }

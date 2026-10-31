@@ -4276,7 +4276,7 @@
           <div class="map-filter-group map-filter-people"><label>Inspector<select id="map-entry-inspector">
               <option value="">All inspectors</option>
             </select></label></div>
-          <div class="map-filter-group map-filter-dates"><span class="map-filter-section-label">Inspection dates</span><label class="map-light-filter-field">From<input type="date" id="map-light-entry-from" aria-label="Map from date"></label><label class="map-light-filter-field">To<input type="date" id="map-light-entry-to" aria-label="Map to date"></label><button type="button" id="map-entry-clear">All dates</button></div>
+          <div class="map-filter-group map-filter-dates"><div class="map-date-heading"><span class="map-filter-section-label">Inspection dates</span><button type="button" id="map-entry-clear" aria-pressed="true">All dates: On</button></div><label class="map-light-filter-field">From<input type="date" id="map-light-entry-from" aria-label="Map from date"></label><label class="map-light-filter-field">To<input type="date" id="map-light-entry-to" aria-label="Map to date"></label></div>
           <div class="map-filter-group map-filter-details"><label>Defect type<select id="map-entry-type" aria-label="Defect type">
               <option value="">All defects</option>
             </select></label><label>Bound<select id="map-entry-bound">
@@ -4952,7 +4952,7 @@
       button.disabled=true;
       try {
         const result=await photoCloudController.dispatch(entry);
-        if(result.status!=='synced') alert(result.reason || 'Photo upload held. Saved photos remain on this device.');
+        if(result.status!=='synced') alert(result.reason || ({busy:'Another photo upload is running. Keep the app open and try again when it finishes.',backoff:'The previous upload failed. Wait for the retry delay, then try Upload photo again.',disabled:'Photo upload is currently unavailable.'}[result.status]) || 'Photo upload held. Saved photos remain on this device.');
         else if(entries.includes(entry) && localEntryDurable(entry)) {
           persistEntryChanges(entry,{photo_auto_sync:false,record_photo_known:true,
             record_photo:{current_id:entry.r2_photo.manifest.upload_id,legacy_path:entry.photo_path||null,legacy_filename:entry.record_photo?.legacy_filename||null}});
@@ -6522,6 +6522,8 @@
       to.disabled = !show;
       document.getElementById('map-light-entry-from').disabled = !show;
       document.getElementById('map-light-entry-to').disabled = !show;
+      const allDates=!from.value&&!to.value;
+      const dateToggle=document.getElementById('map-entry-clear');dateToggle.setAttribute('aria-pressed',String(allDates));dateToggle.textContent=allDates?'All dates: On':'All dates: Off';
       from.max = to.value;
       to.min = from.value;
       if (!osmMap) return;
@@ -6608,11 +6610,11 @@
         event.currentTarget.querySelector('summary').focus();
       }
     });
+    const mapDateRanges={};
     document.getElementById('map-entry-clear').addEventListener('click', () => {
-      const days = mapRecordScope === 'team' ? [] : accessibleEntries().map(entry => SPOTITEntryFilters.entryDay(entry)).filter(day => /^\d{4}-\d{2}-\d{2}$/.test(day)).sort();
-      document.getElementById('map-entry-from').value = days[0] || '';
-      document.getElementById('map-entry-to').value = days.at(-1) || '';
-      document.getElementById('map-entry-clear').classList.toggle('active', Boolean(days.length));
+      const from=document.getElementById('map-entry-from'),to=document.getElementById('map-entry-to');
+      if(from.value||to.value){mapDateRanges[mapRecordScope]={from:from.value,to:to.value};from.value='';to.value='';}
+      else {const saved=mapDateRanges[mapRecordScope],today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Manila'}).format(new Date());from.value=saved?.from??today;to.value=saved?.to??today;}
       updateMapEntries();
     });
     for (const id of ['map-entry-from', 'map-entry-to']) document.getElementById(id).addEventListener('input', () => document.getElementById('map-entry-clear').classList.remove('active'));
@@ -9578,16 +9580,16 @@
       Object.assign(entry,changes);
     }
     async function refreshOwnSnapshot(entry, force=false) {
-      if (!photoApiClient || navigator.onLine===false || (!force && entry.record_actions?.length) || !SPOTITInspectionActions.editable(entry,inspectionContext())) return;
+      if (!photoApiClient || navigator.onLine===false || (!force && entry.record_actions?.length) || !SPOTITInspectionActions.snapshotCandidate(entry,inspectionContext())) return;
       const key=activeEntriesStorageKey(),owner=inspectionContext().userId;
       await authController.verifyOnline();
       const result=await photoApiClient.rpc('own_inspection_snapshot',{inspection_id:entry.id});
       if(key!==activeEntriesStorageKey()||owner!==inspectionContext().userId||!entries.includes(entry)||(!force&&entry.record_actions?.length)||editingOriginal) return;
       if(result.error||!result.data?.record) throw Error('Could not load the latest inspection. Try again online.');
-      const row=result.data.record,display=SPOTITMyRecords.cloudDisplay(row);
+      const row=result.data.record,ownership=SPOTITInspectionActions.snapshotOwnership(entry,row,inspectionContext()),display=SPOTITMyRecords.cloudDisplay(row);
       const remotePhotoChanged=!entry.photo_auto_sync && ((entry.r2_photo?.status==='synced' && entry.r2_photo.manifest?.upload_id!==result.data.photo.current_id)
         || (entry.photo_sync_status==='photo_synced' && entry.photo_path!==row.photo_path));
-      persistEntryChanges(entry,{...display,inspector:row.inspector_display_name||entry.inspector||authDisplayState?.profile?.full_name||'',
+      persistEntryChanges(entry,{...display,...ownership,inspector:row.inspector_display_name||entry.inspector||authDisplayState?.profile?.full_name||'',
         ...(remotePhotoChanged?{photoId:'',photoFilename:'',photoTimestamp:'',r2_photo:{status:'removed'}}:{}),
         record_base:SPOTITInspectionActions.content(row),record_remote:row,record_photo:result.data.photo,record_photo_known:true,
         ...(force?{record_actions:[],record_action_error:'',record_deleted:false,photoId:'',photo_auto_sync:false}:{}),
@@ -9750,7 +9752,7 @@
       edit.onclick=()=>setEditing(true);
       const own=entry.remote_id!==entry.id || SPOTITInspectionActions.editable(entry,inspectionContext());
       edit.disabled=remove.disabled=!own || !!entry.record_action_error;
-      if(!own && !state.textContent)state.textContent='Read only';
+      if(!own && !state.textContent)state.textContent='Editing unavailable. Connect online and verify your account, then reopen this inspection to confirm ownership.';
       modal.querySelector('.inspection-recovery-actions')?.remove();
       const recovery=document.createElement('div');recovery.className='inspection-recovery-actions';
       if(SPOTITPreapprovalReview.reviewable(entry,inspectionContext())){

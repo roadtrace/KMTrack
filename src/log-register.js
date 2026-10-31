@@ -35,6 +35,13 @@
     if (!e.guest_claim_required && ['pending','failed'].includes(e.sync_status)) return {key:'waiting', label:'Waiting to submit'};
     return {key:'device', label:'Saved on device'};
   }
+  function photoUploadRequired(e) {
+    if(!e.photoId || e.importBatchId || e.record_remove_photo)return false;
+    const r=e.r2_photo,m=r?.manifest;
+    const r2=r?.status==='synced' && r.source_id===e.photoId && !!m?.upload_id && r.ack?.upload_id===m.upload_id && r.ack?.state==='ready' && !!r.ack?.finalized_at && e.record_photo_known===true && e.record_photo?.current_id===m.upload_id;
+    const legacy=e.photo_sync_status==='photo_synced' && e.photo_upload_manifest?.source_photo_id===e.photoId && !!e.photo_path && e.photo_cloud_ack?.object_path===e.photo_path;
+    return !r2&&!legacy;
+  }
   function reviewMessage(e, durable = true) {
     if (!durable) return 'This inspection is not confirmed saved on this device. Export a backup before closing the app, then check available device storage.';
     if (e.record_actions?.some(a=>a.error)) return 'Your saved changes could not be applied because the inspection changed or access was removed. Connect online and choose Reload saved inspection below to review the current version. Pending local changes will be discarded only after confirmation.';
@@ -42,6 +49,7 @@
     if (e.guest_claim_required) return 'This inspection was captured in Guest mode and has not been assigned to an account. Sign in and open Guest inspections require claim in the Log before syncing.';
     if (e.preapproval_review_required) return 'This inspection was captured before account approval. Verify your approved account online, then choose Review inspection below to confirm whether it should be submitted.';
     if (e.submission_review_required || e.sync_status === 'needs_review' || e.sync_outcome_unknown) return 'Submission could not be confirmed safely. Connect online and choose Check sync below to check the saved submission. If the warning remains, keep this record and contact your administrator; do not create a duplicate inspection.';
+    if (photoUploadRequired(e) && inspectionState(e).key==='submitted') return 'Inspection details are submitted, but upload of this device photo is not confirmed. Choose Upload photo in Photo evidence while online. Keep this device photo until upload completes.';
     return '';
   }
   function matches(e, f = {}, cloud = false) {
@@ -94,6 +102,7 @@
     let state = inspectionState(e, cloud);
     if(!durable || e.record_actions?.some(a=>a.error) || e.r2_photo?.status==='review' || e.preapproval_review_required || e.guest_claim_required)state={key:'review',label:'Needs review'};
     else if(e.photo_auto_sync || e.record_actions?.length)state={key:'waiting',label:'Waiting to sync'};
+    else if(state.key==='submitted' && photoUploadRequired(e))state={key:'waiting',label:'Inspection submitted; photo upload required'};
     // Lucide cloud-check, cloud-alert and cloud-sync (ISC; public/vendor/lucide/LICENSE).
     const icon=state.key==='submitted'?'<path d="m17 15-5.5 5.5L9 18"/><path d="M5.516 16.07A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 3.501 7.327"/>':state.key==='review'?'<path d="M12 12v4M12 20h.01"/><path d="M8.128 16.949A7 7 0 1 1 15.71 8h1.79a1 1 0 0 1 0 9h-1.642"/>':'<path d="m17 18-1.535 1.605a5 5 0 0 1-8-1.5M17 22v-4h-4M20.996 15.251A4.5 4.5 0 0 0 17.495 8h-1.79a7 7 0 1 0-12.709 5.607M7 10v4h4m-4 0 1.535-1.605a5 5 0 0 1 8 1.5"/>';
     const statusIcon=`<span class="register-sync-icon state-${state.key}" role="img" aria-label="${escape(state.label)}" title="${escape(state.label)}"><svg viewBox="0 0 24 24" aria-hidden="true">${icon}</svg></span>`;
@@ -113,5 +122,5 @@
     if (checkbox) card.prepend(checkbox);
 
   }
-  return {reviewMessage, matches, inspectionState, cardHTML, decorate, km, historyUnavailable, emptyMessage, dateRange, todayRecords, evidence};
+  return {photoUploadRequired, reviewMessage, matches, inspectionState, cardHTML, decorate, km, historyUnavailable, emptyMessage, dateRange, todayRecords, evidence};
 });
