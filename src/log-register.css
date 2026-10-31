@@ -152,9 +152,7 @@ html:root #map-view .map-filter-options :is(button,select,input):focus-visible {
 
 html:root #map-view .map-date-heading { grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; gap:8px; }
 html:root #map-view #map-entry-clear { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:36px; padding:6px 10px; border:1px solid var(--ds-border); border-radius:var(--radius-sm); background:var(--ds-card); color:var(--ds-fg-muted); font-size:12px; cursor:pointer; }
-html:root #map-view #map-entry-clear::before { content:'○'; }
 html:root #map-view #map-entry-clear[aria-pressed="true"] { color:var(--ds-accent-fg); background:var(--ds-accent); border-color:var(--ds-secondary); }
-html:root #map-view #map-entry-clear[aria-pressed="true"]::before { content:'✓'; }
 html:root #map-view .map-filter-options label { gap:4px; }
 html:root #map-view .map-filter-options .map-filter-dates { row-gap:6px; }
 html:root #map-view .map-history-filter small { line-height:1.35; }

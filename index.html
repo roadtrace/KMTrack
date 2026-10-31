@@ -4276,7 +4276,7 @@
           <div class="map-filter-group map-filter-people"><label>Inspector<select id="map-entry-inspector">
               <option value="">All inspectors</option>
             </select></label></div>
-          <div class="map-filter-group map-filter-dates"><div class="map-date-heading"><span class="map-filter-section-label">Inspection dates</span><button type="button" id="map-entry-clear" aria-pressed="true">All dates: On</button></div><label class="map-light-filter-field">From<input type="date" id="map-light-entry-from" aria-label="Map from date"></label><label class="map-light-filter-field">To<input type="date" id="map-light-entry-to" aria-label="Map to date"></label></div>
+          <div class="map-filter-group map-filter-dates"><div class="map-date-heading"><span class="map-filter-section-label">Inspection dates</span><button type="button" id="map-entry-clear" aria-pressed="true">All dates</button></div><label class="map-light-filter-field">From<input type="date" id="map-light-entry-from" aria-label="Map from date"></label><label class="map-light-filter-field">To<input type="date" id="map-light-entry-to" aria-label="Map to date"></label></div>
           <div class="map-filter-group map-filter-details"><label>Defect type<select id="map-entry-type" aria-label="Defect type">
               <option value="">All defects</option>
             </select></label><label>Bound<select id="map-entry-bound">
@@ -6523,7 +6523,7 @@
       document.getElementById('map-light-entry-from').disabled = !show;
       document.getElementById('map-light-entry-to').disabled = !show;
       const allDates=!from.value&&!to.value;
-      const dateToggle=document.getElementById('map-entry-clear');dateToggle.setAttribute('aria-pressed',String(allDates));dateToggle.textContent=allDates?'All dates: On':'All dates: Off';
+      const dateToggle=document.getElementById('map-entry-clear');dateToggle.setAttribute('aria-pressed',String(allDates));dateToggle.textContent='All dates';
       from.max = to.value;
       to.min = from.value;
       if (!osmMap) return;
