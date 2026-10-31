@@ -4661,6 +4661,7 @@
   <script src="./src/inspection-sharing.js"></script>
   <script src="./src/sharing-ui.js"></script>
   <script src="./src/log-register.js"></script>
+  <script src="./src/action-feedback.js"></script>
   <script src="./src/log-controls.js"></script>
   <script src="./src/team-log.js"></script>
   <script src="./src/team-map.js"></script>
@@ -5149,6 +5150,7 @@
       const teamView = (mapScope || logRecordScope) === 'team';
       const sheet = document.querySelector('#edit-modal .entry-sheet').cloneNode(true);
       const nodes = Object.fromEntries([...sheet.querySelectorAll('[id]')].map(node => [node.id, node]));
+      sheet.querySelector('.entry-loading-feedback')?.remove();sheet.querySelector('.inspection-recovery-actions')?.remove();
       sheet.querySelector('.entry-view-label')?.remove();sheet.querySelector('.entry-edit-status')?.remove();
       sheet.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
       sheet.querySelectorAll('label[for]').forEach(node => node.removeAttribute('for'));
@@ -5160,7 +5162,13 @@
       const badge = document.createElement('p'); badge.className = 'submitted-mode';
       badge.textContent = teamView ? 'Read only' : 'Your inspection';
       sheet.querySelector('.entry-sheet-header > div').append(badge);
-      sheet.querySelector('.entry-map-summary')?.remove();
+      const summary=sheet.querySelector('.entry-map-summary');
+      if(mapScope){
+        dialog.classList.add('from-map','map-compact');
+        nodes['edit-map-station'].textContent=`${e.km==null?(row.interchange_exit||'KM unavailable'):'KM '+formatKmStation(e.km)} · ${e.bound||''}`;
+        nodes['edit-map-lane'].textContent='Lane '+(e.lane||'unset');nodes['edit-map-inspector'].textContent=row.inspector_display_name||'Name unavailable';nodes['edit-map-photo'].textContent='Photo evidence';
+        const expand=nodes['edit-sheet-expand'];expand.setAttribute('aria-expanded','false');expand.onclick=()=>{const compact=dialog.classList.toggle('map-compact');expand.setAttribute('aria-expanded',String(!compact));};
+      }else summary?.remove();
       const fields = [e.expressway, e.km == null ? 'Unavailable' : formatKmStation(e.km), e.bound, e.lane];
       sheet.querySelectorAll('.entry-sheet-field').forEach((field, index) => {
         field.querySelectorAll('.entry-editable').forEach(node => node.remove());
@@ -9652,12 +9660,27 @@
 
     let editOpenGeneration=0;
     async function openEditModal(index, activateEdit = false) {
+      const entry=entries[index];if(!entry)return;
+      if(editingOriginal)closeEditModal();
+      const generation=++editOpenGeneration,modal=document.getElementById('edit-modal');
+      modal.classList.remove('from-map','map-compact');modal.classList.add('open','entry-loading');modal.setAttribute('aria-hidden','false');modal.setAttribute('aria-busy','true');
+      let loading=modal.querySelector('.entry-loading-feedback');
+      if(!loading){loading=document.createElement('div');loading.className='entry-loading-feedback';loading.setAttribute('role','status');loading.innerHTML='<span>Loading inspection…</span><i></i><i></i><i></i>';modal.querySelector('.entry-sheet').append(loading);}
+      document.getElementById('edit-close').focus();
+      await new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));
+      if(generation!==editOpenGeneration)return;
+      try{await refreshOwnSnapshot(entry);}catch(_){}
+      if(generation!==editOpenGeneration||!entries.includes(entry))return;
+      modal.classList.remove('entry-loading');modal.removeAttribute('aria-busy');
+      return populateInspectionSheet(entries.indexOf(entry),activateEdit);
+    }
+    async function populateInspectionSheet(index, activateEdit = false) {
       const entry = entries[index];
       if (!entry) return;
       if(entry.record_deleted&&!entry.record_actions?.some(a=>a.error))return;
       const generation=++editOpenGeneration;
       if(editingOriginal)closeEditModal();
-      try { await refreshOwnSnapshot(entry); } catch (_) { /* Cached own records remain usable offline. */ }
+
       if(generation!==editOpenGeneration||!entries.includes(entry))return;
       editingEntryIndex = entries.indexOf(entry);
       populateDefectSelect(entry.type);
@@ -9704,6 +9727,20 @@
       const own=entry.remote_id!==entry.id || SPOTITInspectionActions.editable(entry,inspectionContext());
       edit.disabled=remove.disabled=!own || !!entry.record_action_error;
       if(!own)state.textContent='Read only';
+      modal.querySelector('.inspection-recovery-actions')?.remove();
+      const recovery=document.createElement('div');recovery.className='inspection-recovery-actions';
+      if(SPOTITPreapprovalReview.reviewable(entry,inspectionContext())){
+        const button=document.createElement('button');button.type='button';button.textContent='Review inspection';button.onclick=()=>{closeEditModal();openPreapprovalReview(entry.id);};recovery.append(button);
+      }
+      if(entry.guest_claim_required){const note=document.createElement('p');note.textContent='Guest inspection — sign in and claim this record from your account before syncing.';recovery.append(note);}
+      if(entry.record_actions?.length || entry.sync_status==='failed'){
+        const retry=document.createElement('button');retry.type='button';retry.textContent='Retry sync';retry.onclick=async()=>{retry.disabled=true;retry.textContent='Retrying…';try{await syncNow();}finally{retry.disabled=false;retry.textContent='Retry sync';}};recovery.append(retry);
+      }
+      if(!entry.remote_id && ['pending','failed'].includes(entry.sync_status) && !entry.guest_claim_required && !entry.preapproval_review_required && !entry.submission_review_required){
+        const submit=document.createElement('button');submit.type='button';submit.textContent='Sync inspection';submit.onclick=()=>submitLocalInspection(entry.id,submit);recovery.append(submit);
+      }
+      modal.querySelector('.entry-sheet-scroll').append(recovery);
+
       if(entry.record_actions?.some(a=>a.error)) {
         const review=document.createElement('button');review.type='button';review.className='inspection-cancel';review.textContent='Reload saved inspection';
         review.onclick=async()=>{
@@ -9735,7 +9772,7 @@
       if(inspectionActions)foregroundSync.saved();
       if(editPhotoObjectUrl){URL.revokeObjectURL(editPhotoObjectUrl);editPhotoObjectUrl=null;}
       const modal = document.getElementById('edit-modal');
-      modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true');
+      modal.classList.remove('open','entry-loading');modal.removeAttribute('aria-busy'); modal.setAttribute('aria-hidden', 'true');
       if (modal.classList.contains('from-map')) SPOTITMap.selectEntry(null);
       modal.classList.remove('map-compact');
       editingEntryIndex = null;

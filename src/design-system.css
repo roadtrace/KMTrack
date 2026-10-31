@@ -3171,3 +3171,26 @@ html:root #map-view .map-history-filter small { flex-basis: 100%; color: var(--d
 #edit-modal:not(.entry-is-editing) .entry-edit-pencil { display:none; }
 #edit-modal:not(.entry-is-editing) :is(select,input):disabled { opacity:1; -webkit-text-fill-color:var(--ds-fg); }
 #edit-modal .entry-sheet-actions svg { fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+#map-km-station { min-width:0; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.map-header, .map-header > div, .global-header > div { min-width:0; }
+#edit-modal .entry-loading-feedback { display:none; padding:30px 20px; color:var(--ds-fg-muted); }
+#edit-modal.entry-loading .entry-loading-feedback { display:grid; gap:18px; }
+#edit-modal.entry-loading .entry-sheet-actions { display:none; }
+#edit-modal.entry-loading .entry-sheet-scroll > :not(.entry-sheet-header) { display:none; }
+#edit-modal.entry-loading .entry-sheet-header > div { visibility:hidden; }
+#edit-modal.entry-loading .entry-sheet-scroll { overflow:hidden; }
+.entry-loading-feedback i { display:block; height:42px; border-radius:8px; background:var(--ds-muted); animation:inspection-loading 1s ease-in-out infinite alternate; }
+@keyframes inspection-loading { to { opacity:.4; } }
+.inspection-detail-sheet.from-map .entry-map-summary { display:flex; flex-wrap:wrap; gap:8px; }
+.inspection-detail-sheet.from-map.map-compact :is(.entry-sheet-grid,.entry-sheet-meta,.entry-sheet-photo,.entry-sheet-actions) { display:none; }
+.inspection-detail-sheet .entry-map-summary strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%; }
+.inspection-recovery-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.inspection-recovery-actions button { min-height:44px; padding:10px 14px; border:1px solid var(--ds-border); border-radius:10px; color:var(--ds-fg); background:var(--ds-muted); }
+button:active, [role="button"]:active { filter:brightness(.88); }
+button.action-working::after { content:''; display:inline-block; flex:none; width:13px; height:13px; margin-left:7px; border:2px solid currentColor; border-right-color:transparent; border-radius:50%; animation:action-working .7s linear infinite; }
+@keyframes action-working { to { transform:rotate(360deg); } }
+@media(prefers-reduced-motion:reduce) { .entry-loading-feedback i,button.action-working::after { animation:none; } }
+
+.header-brand { min-width:0; flex:1; overflow:hidden; }
+.header-context { min-width:0; overflow:hidden; }
+.header-actions { flex:none; }

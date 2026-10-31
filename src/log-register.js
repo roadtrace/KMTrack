@@ -82,14 +82,18 @@
     return String(e.photoId || '').trim() ? 'Photo' : 'No photo';
   }
   function cardHTML(e, {cloud = false, team = false, durable = true, photoLabel = '', notice = '', differs = false} = {}) {
-    const state = inspectionState(e, cloud);
+    let state = inspectionState(e, cloud);
+    if(!durable || e.record_actions?.some(a=>a.error) || e.r2_photo?.status==='review' || e.preapproval_review_required || e.guest_claim_required)state={key:'review',label:'Needs review'};
+    else if(e.photo_auto_sync || e.record_actions?.length)state={key:'waiting',label:'Waiting to sync'};
+    const icon=state.key==='submitted'?'<path d="m5 12 4 4L19 6"/>':state.key==='review'?'<path d="M12 8v5m0 3h.01M12 3 2 21h20z"/>':'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>';
+    const statusIcon=`<span class="register-sync-icon state-${state.key}" role="img" aria-label="${escape(state.label)}" title="${escape(state.label)}"><svg viewBox="0 0 24 24" aria-hidden="true">${icon}</svg></span>`;
     const date = e.timestamp ? new Date(String(e.timestamp).replace(' ','T') + '+08:00') : null;
     const time = date && Number.isFinite(+date) ? registerTime.format(date) : String(e.timestamp || 'Date unavailable');
     const lane = e.lane == null || e.lane === '' ? 'Lane unset' : /^\d+$/.test(String(e.lane)) ? `Lane ${e.lane}` : String(e.lane);
     const station = e.km == null ? (e.interchange || 'KM unavailable') : `KM ${km(e.km)}`;
     const secondary = [lane, e.inspector || '', time].filter(Boolean).join(' · ');
     const source = [team ? 'Team record · Read only' : cloud ? 'Your inspection' : e.importBatchId ? e.importLabel || 'Device archive' : e.expressway || 'Corridor unset', notice].filter(Boolean).join(' · ');
-    return `<div class="register-card-main"><span class="register-evidence"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.5"/><path d="m3 17 5-5 4 4 4-6 5 7"/></svg><span>${evidence(e, {cloud, team, durable})}</span></span><div class="register-card-copy"><div class="register-primary"><strong>${escape(e.type || 'Inspection')}</strong><span> · </span><span class="register-km">${escape(station)}</span>${e.bound ? ` <span>${escape(e.bound)}</span>` : ''}</div><div class="register-secondary">${escape(secondary)}</div><div class="register-source">${escape(source)}</div></div><span class="register-chevron" aria-hidden="true">›</span></div><div class="register-statuses"><span class="register-status state-${state.key}">${escape(state.label)}</span>${photoLabel ? `<span class="register-photo-status">${escape(photoLabel)}</span>` : ''}${!durable ? '<span class="register-alert">Not saved · export before closing</span>' : ''}${differs ? '<span class="register-alert">Device and submitted details differ</span>' : ''}</div>`;
+    return `<div class="register-card-main"><span class="register-evidence"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.5"/><path d="m3 17 5-5 4 4 4-6 5 7"/></svg><span>${evidence(e, {cloud, team, durable})}</span></span><div class="register-card-copy"><div class="register-primary"><strong>${escape(e.type || 'Inspection')}</strong><span> · </span><span class="register-km">${escape(station)}</span>${e.bound ? ` <span class="register-bound">${escape(e.bound)}</span>` : ''}</div><div class="register-secondary">${escape(secondary)}</div><div class="register-source">${escape(source)}</div></div>${statusIcon}</div>`;
   }
   function decorate(card, e, options) {
     // Move the existing controls; retain their IDs, guards and event wiring.
@@ -97,11 +101,7 @@
     card.innerHTML = cardHTML(e, options);
     const checkbox = buttons.find(b => b.classList.contains('entry-checkbox'));
     if (checkbox) card.prepend(checkbox);
-    const actions = buttons.filter(b => b !== checkbox && (b.classList.contains('preapproval-review') || b.classList.contains('cloud-submit')));
-    if (actions.length) {
-      const actionsRow = card.ownerDocument.createElement('div'); actionsRow.className = 'register-device-actions';
-      actionsRow.append(...actions); card.append(actionsRow);
-    }
+
   }
   return {matches, inspectionState, cardHTML, decorate, km, historyUnavailable, emptyMessage, dateRange, todayRecords, evidence};
 });
