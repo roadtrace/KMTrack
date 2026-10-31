@@ -94,8 +94,8 @@ test('actual Log markup exposes compact states, review, disabled retry and local
   assert.match(html,/Inspection rows are submitted\. Check each record for its separate photo status/);assert.match(html,/<dt>Submitted<\/dt>/);
 });
 test('production gate, independent runner and cached pilot asset remain explicit',()=>{
-  const sw=fs.readFileSync('sw.js','utf8');assert.match(html,/const PHOTO_CLOUD_TRANSPORT_ENABLED = false/);assert.doesNotMatch(html,/\.dispatch\(/);
-  assert.match(html,/enabled: PHOTO_CLOUD_TRANSPORT_ENABLED/);assert.match(sw,/'v273'/);assert.ok(sw.includes('./src/photo-pilot.js')&&html.includes('./src/photo-pilot.js'));
+  const sw=fs.readFileSync('sw.js','utf8');assert.match(html,/const PHOTO_CLOUD_TRANSPORT_ENABLED = false/);assert.match(fn('async function uploadR2Photo'),/if \(!R2_PHOTO_PILOT_ENABLED/);
+  assert.match(html,/R2_PHOTO_PILOT_ENABLED = true/);assert.match(html,/enabled: R2_PHOTO_PILOT_ENABLED \|\| PHOTO_CLOUD_TRANSPORT_ENABLED/);assert.match(sw,/'v274'/);assert.ok(sw.includes('./src/photo-pilot.js')&&html.includes('./src/photo-pilot.js'));
   assert.doesNotMatch(fs.readFileSync('src/sync-runner.js','utf8'),/SPOTITPhoto|photo-pilot|photo-sync/);
   assert.doesNotMatch(fs.readFileSync('src/photo-pilot.js','utf8'),/\.upload\(|\.update\(|\.remove\(|getPublicUrl|createSignedUrl/);
 });
@@ -118,7 +118,7 @@ test('actual map pipeline and workspace scope retain status-bearing local rows a
   const f=await fixture();Object.assign(f.e,{lat:14.6,lon:121,type:'Potholes',timestamp:'2026-10-03 09:00:00'});
   const rows=photo.STATUSES.map((status,i)=>({...f.e,id:'dddddddd-dddd-4ddd-8ddd-'+String(i).padStart(12,'0'),photo_sync_status:status}));rows.push({...f.e,id:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',importBatchId:'batch'});
   const controls=new Map(),control=id=>{if(!controls.has(id))controls.set(id,{value:'',checked:true,classList:{toggle(){}}});return controls.get(id);};
-  let rendered,counts;const context={entries:rows,authDisplayState:{mode:'guest'},document:{getElementById:control},
+  let rendered,counts;const context={teamMapBrowser:null,entries:rows,authDisplayState:{mode:'guest'},document:{getElementById:control},
     SPOTITMapRecords:require('../src/map-records.js'),renderMapHistoryControls(){},mapRecordScope:'my',mapProjection:[],mapProjectionSignature:'',mapProjectionDirty:true,authWorkspaceUnlocked:true,myRecords:null,SPOTITEntryFilters:require('../src/entry-filters.js'),osmMap:{},osmEntryLayer:{clearLayers(){},addTo(){},remove(){}},
     SPOTITMap:{legend(){},renderEntries:(map,layer,rows)=>rendered=rows},updateMapWorkspaceCounts:rows=>counts=rows,openMapEntry(){},formatKmStation:v=>v};
   vm.createContext(context);for(const name of ['canViewTeamRecords','accessibleEntries','freshMapItems','updateMapEntries'])vm.runInContext(fn(name),context);
@@ -140,7 +140,7 @@ test('actual Log renderer retains local preview and separates row/photo state fo
       querySelectorAll(selector){return selector==='button'?[...markup.matchAll(/<button\b[^>]*>[\s\S]*?<\/button>/g)].map(m=>({outerHTML:m[0],classList:{contains:name=>m[0].includes('class="'+name)}})):[];}};
   }
   const controls=new Map(),control=id=>{if(!controls.has(id))controls.set(id,element());return controls.get(id);};
-  const context={entries:rows,visibleEntries:()=>rows,accessibleEntries:()=>rows,document:{getElementById:control,createElement:element},
+  const context={teamPageObserver:null,logRecordScope:'my',R2_PHOTO_PILOT_ENABLED:false,entries:rows,visibleEntries:()=>rows,accessibleEntries:()=>rows,document:{getElementById:control,createElement:element},
     authWorkspaceUnlocked:true,SPOTITLocalStore:require('../src/local-entry-store.js'),localStorage:{getItem:()=>JSON.stringify(rows)},activeEntriesStorageKey:()=> 'account',
     SPOTITPhotoPilot:pilot,SPOTITPhotoUpload:photo,SPOTITMyRecords:require('../src/my-records.js'),SPOTITLogRegister:require('../src/log-register.js'),SPOTITPreapprovalReview:{reviewable:()=>false},authDisplayState:null,authController:null,
     PHOTO_CLOUD_TRANSPORT_ENABLED:false,photoCloudController:null,selectedEntryIds:new Set(),selectMode:false,logRegisterView:'log',CAPTURE_RECENT_LIMIT:10,

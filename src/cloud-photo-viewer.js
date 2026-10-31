@@ -35,13 +35,21 @@
       let blob=saved&&['image/jpeg','image/png'].includes(saved.type)&&saved.size>0&&saved.size<=5*1024*1024?saved:null,source='local';
       if(!blob){
         if(!scope||!cloud.rowInScope(row,scope,view))throw unavailable();
-        const hash=identity(row),association=JSON.stringify([row.id,row.user_id,row.team,row.photo_filename,row.photo_path]);
+        if(o.r2Enabled!==true)identity(row);
+        const association=JSON.stringify([row.id,row.user_id,row.team,row.photo_filename,row.photo_path]);
         const matches=r=>r&&JSON.stringify([r.id,r.user_id,r.team,r.photo_filename,r.photo_path])===association;
         await o.verify();guard();
         const c=o.context(),now=(o.now||Date.now)();
         if(!Number.isFinite(c.verifiedAt)||now<c.verifiedAt||now-c.verifiedAt>photo.FRESH_MS)throw unavailable();
         const auth=await o.client.auth.getUser();guard();
         if(auth.error||auth.data?.user?.id?.toLowerCase()!==scope.userId)throw unavailable();
+        if(o.r2Enabled===true){
+          const r2=typeof module==='object'&&module.exports?require('./r2-photos'):globalThis.SPOTITR2Photos;
+          blob=await r2.createApi({...o,enabled:true,guard}).view(row.id);guard();
+          if(blob)source='private-r2';
+        }
+        if(!blob){
+        const hash=identity(row);
         const readRow=()=>{
           let query=o.client.from('inspections').select('id,user_id,team,photo_filename,photo_path')
             .eq('id',row.id).eq('team',scope.team);
@@ -55,6 +63,7 @@
         if(await photo.sha256(blob)!==hash)throw unavailable();guard();
         const final=await readRow();guard();if(final.error||!matches(final.data))throw unavailable();
         source='private-cloud';
+        }
       }
       if(!blob||!['image/jpeg','image/png'].includes(blob.type)||blob.size<=0||blob.size>5*1024*1024)throw unavailable();
       guard();url=o.urls.createObjectURL(blob);

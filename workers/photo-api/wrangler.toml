@@ -1,0 +1,15 @@
+name = "spotit-photo-api-test"
+main = "worker.mjs"
+compatibility_date = "2026-10-30"
+
+[[r2_buckets]]
+binding = "PHOTOS_BUCKET"
+bucket_name = "spotit-inspection-photos-test"
+
+[vars]
+PHOTO_ENVIRONMENT = "test"
+PHOTO_TRANSPORT_ENABLED = "false"
+# Set SUPABASE_SERVICE_ROLE_KEY through Cloudflare Secrets, NEVER in this file.
+
+[triggers]
+crons = ["17 * * * *"]

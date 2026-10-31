@@ -1,22 +1,35 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const viewer=require('../src/cloud-photo-viewer.js'),photo=require('../src/photo-upload-state.js');
 const user='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',id='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
-async function fixture(view='my',owner=user){
+async function fixture(view='my',owner=user,extra={}){
  const blob=new Blob(['evidence'],{type:'image/jpeg'}),hash=await photo.sha256(blob),filename=`photo-v1-${hash}.jpg`;
  const row={id,user_id:owner,team:'roadway',photo_filename:filename,photo_path:`roadway/${id}/${filename}`};
  let c={mode:'approved',canUseLocal:true,cloudVerified:true,userId:user,workspaceUserId:user,verifiedAt:Date.now(),profile:{id:user,approved:true,role:'inspector',team:'roadway'},sessionGeneration:1,scopeGeneration:1};
  let local=null,response={data:blob},rowResponse={data:row},readHook=null;const calls=[],revoked=[];let minted=0;
  const item={cloud:row,local:null};
- const client={auth:{getUser:async()=>{calls.push('auth');return {data:{user:{id:user}}};}},from:()=>{
+ const client={auth:{getSession:async()=>({data:{session:{user:{id:user},access_token:'user-token'}}}),getUser:async()=>{calls.push('auth');return {data:{user:{id:user}}};}},from:()=>{
   calls.push('row');const q={select:()=>q,eq:(field,value)=>{if(view==='team')calls.push(['eq',field,value]);return q;},maybeSingle:async()=>readHook?readHook():rowResponse};return q;
  },storage:{from:()=>({download:async(path,options,parameters)=>{assert.equal(parameters.cache,'no-store');calls.push('download');return response;}})}};
  const v=(view==='team'?viewer.createTeamViewer:viewer.createViewer)({client,context:()=>c,key:()=> 'account',online:()=>c.mode!=='offline-recent',verify:async()=>calls.push('verify'),
-  current:()=>true,read:async()=>local,urls:{createObjectURL:()=>{minted++;return 'blob:private';},revokeObjectURL:url=>revoked.push(url)}});
+  current:()=>true,read:async()=>local,urls:{createObjectURL:()=>{minted++;return 'blob:private';},revokeObjectURL:url=>revoked.push(url)},...extra});
  return {v,item,blob,row,calls,revoked,setLocal:b=>{local=b;item.local={photoId:'local-photo',photo_sync_status:'photo_pending'};},setResponse:r=>response=r,setRow:r=>rowResponse=r,
  change:x=>c={...c,...x},hook:h=>readHook=h,minted:()=>minted};
 }
 test('authorized private viewer verifies association twice/hash and revokes URL on close',async()=>{
  const f=await fixture(),before=JSON.stringify(f.item);assert.equal((await f.v.open(f.item)).source,'private-cloud');assert.deepEqual(f.calls,['verify','auth','row','download','row']);assert.equal(JSON.stringify(f.item),before);f.v.close();assert.deepEqual(f.revoked,['blob:private']);
+});
+
+test('R2 viewer works without a legacy Storage path and revokes private object URL',async()=>{
+ const f=await fixture('team',user,{r2Enabled:true,fetch:async()=>new Response(new Blob(['r2'],{type:'image/jpeg'}),{headers:{'Content-Type':'image/jpeg'}})});
+ f.row.photo_path=null;f.row.photo_filename=null;
+ assert.equal((await f.v.open(f.item)).source,'private-r2');assert.equal(f.calls.includes('download'),false);
+ f.v.close();assert.deepEqual(f.revoked,['blob:private']);
+});
+test('R2 absence falls back to legacy; R2 denial cannot be bypassed via fallback',async()=>{
+ const f=await fixture('my',user,{r2Enabled:true,fetch:async()=>Response.json(null)});
+ assert.equal((await f.v.open(f.item)).source,'private-cloud');assert.equal(f.calls.includes('download'),true);
+ const denied=await fixture('my',user,{r2Enabled:true,fetch:async()=>Response.json({error:'access_denied'},{status:403})});
+ await assert.rejects(denied.v.open(denied.item));assert.equal(denied.calls.includes('download'),false);assert.equal(denied.minted(),0);
 });
 test('explicit Team viewer privately reads teammate v1 photo with current team and no owner filter',async()=>{
  const owner='cccccccc-cccc-4ccc-8ccc-cccccccccccc',f=await fixture('team',owner),before=JSON.stringify(f.item);

@@ -4631,6 +4631,7 @@
   </section>
 
   <script src="./src/photo-upload-state.js"></script>
+  <script src="./src/r2-photos.js"></script>
   <script src="./src/entry-model.js"></script>
   <script src="./src/local-entry-store.js"></script>
   <script src="./src/sync-queue.js"></script>
@@ -4857,15 +4858,18 @@
       onError: error => console.error('Foreground sync could not continue', error)
     });
     let photoCloudController = null;
+    let photoApiClient = null;
     let pilotPhotoViewer = null;
     // Phase 13D constructs a disabled controller for explicit manual recovery.
     // Manual retry stays gated; no timer or inspection-runner hook.
     const PHOTO_CLOUD_TRANSPORT_ENABLED = false;
+    const R2_PHOTO_PILOT_ENABLED = true; // Private production R2; explicit uploads only.
     function createPhotoCloudController(client) {
-      return SPOTITPhotoSync.createController({
-        enabled: PHOTO_CLOUD_TRANSPORT_ENABLED, client,
+      photoApiClient = client;
+      return (R2_PHOTO_PILOT_ENABLED ? SPOTITR2Photos : SPOTITPhotoSync).createController({
+        enabled: R2_PHOTO_PILOT_ENABLED || PHOTO_CLOUD_TRANSPORT_ENABLED, client,
         context: inspectionContext, key: activeEntriesStorageKey,
-        verify: () => authController.verifyOnline(), read: getPhoto,
+        verify: () => authController.verifyOnline(), read: getPhoto, add: addPhotoUploadEnvelope,
         durable: localEntryDurable, isCurrent: e => authWorkspaceUnlocked && entries.includes(e),
         lock: (key, run) => {
           if (!navigator.locks?.request) throw new Error('Safe photo locking unavailable.');
@@ -4934,6 +4938,16 @@
       if (!entry) return;
       const state = SPOTITPhotoPilot.presentation(entry);
       alert([state.label, state.detail, SPOTITPhotoPilot.DISABLED].filter(Boolean).join('\n\n'));
+    }
+    async function uploadR2Photo(id, button) {
+      if (!R2_PHOTO_PILOT_ENABLED || !photoCloudController) return;
+      const entry=entries.find(e=>e.id===id); if(!entry)return;
+      if(!confirm('Upload this photo to secure photo storage? Any current submitted photo will be replaced only after the new photo is verified. Local photos will remain on this device.'))return;
+      button.disabled=true;
+      try {
+        const result=await photoCloudController.dispatch(entry);
+        if(result.status!=='synced') alert(result.reason || 'Photo upload held. Saved photos remain on this device.');
+      } finally { button.disabled=false; renderLog(); }
     }
     async function retryPhotoNow(id, button) {
       const entry = entries.find(e => e.id === id);
@@ -5155,13 +5169,13 @@
       const photoSection = sheet.querySelector('.entry-sheet-photo');
       photoSection.querySelector('.edit-photo-row').remove();
       const status = document.createElement('p'); status.className = 'photo-result'; status.setAttribute('role', 'status');
-      status.textContent = row.photo_path || item.local?.photoId ? 'Photo available to view' : 'No verified photo available';
+      status.textContent = row.photo_path || item.local?.photoId ? 'Photo available to view' : R2_PHOTO_PILOT_ENABLED ? 'Check for a submitted photo' : 'No verified photo available';
       photoSection.append(status);
       const actions = sheet.querySelector('.entry-sheet-actions'); actions.replaceChildren();
       nodes['edit-close'].onclick = () => dialog.close();
       dialog.classList.add('inspection-detail-sheet'); dialog.replaceChildren(sheet);
       let preview = null;
-      if (row.photo_path || item.local?.photoId) {
+      if (row.photo_path || item.local?.photoId || R2_PHOTO_PILOT_ENABLED) {
         const view = document.createElement('button'); view.type = 'button'; view.textContent = 'View photo'; view.className = 'ds-btn ds-btn-quiet';
         view.onclick = async () => {
           view.disabled = true; const status = dialog.querySelector('.photo-result'); status.textContent = 'Checking photo…';
@@ -5177,6 +5191,30 @@
       }
       const close = document.createElement('button'); close.type = 'button'; close.textContent = 'Close'; close.className = 'ds-btn ds-btn-quiet'; close.onclick = () => dialog.close(); actions.append(close);
       appendSubmittedDelete(actions,row,e,()=>dialog.close());
+      if(R2_PHOTO_PILOT_ENABLED && !teamView && row.user_id===inspectionContext().userId){
+        const remove=document.createElement('button');remove.type='button';remove.className='ds-btn ds-btn-quiet';remove.textContent='Remove submitted R2 photo';
+        remove.onclick=async()=>{
+          if(!confirm('Remove the submitted photo from secure photo storage? Local photos will remain on this device.'))return;
+          const scope=SPOTITInspections.scopeKey(inspectionContext()),key=activeEntriesStorageKey();
+          const guard=()=>{if(!dialog.open||submittedDialog!==dialog||key!==activeEntriesStorageKey()||scope!==SPOTITInspections.scopeKey(inspectionContext()))throw Error('Photo scope changed');};
+          remove.disabled=true;
+          try{
+            await authController.verifyOnline();guard();
+            const api=SPOTITR2Photos.createApi({enabled:true,client:photoApiClient,context:inspectionContext,guard});
+            const current=await api.current(row.id);guard();
+            if(!current){status.textContent='No current R2 photo to remove.';return;}
+            await api.remove(row.id,current.upload_id);guard();
+            viewer.close();preview?.remove();status.textContent='Submitted R2 photo removed. Local photos are unchanged.';
+            const index=editableIndex();
+            if(index>=0){
+              const local=entries[index],removed={...local.r2_photo,status:'removed',ack:null};
+              const before=entries.map(entry=>({...entry})),after=entries.map(entry=>entry===local?{...entry,r2_photo:removed}:entry);
+              SPOTITLocalStore.saveReview(localStorage,key,before,after);local.r2_photo=removed;foregroundSync.changed();
+            }
+          }catch(_){if(dialog.open)status.textContent='Could not remove the photo. Check access and whether a legacy photo is still attached.';}
+          finally{remove.disabled=false;}
+        };actions.append(remove);
+      }
       if (!teamView) {
         const edit = document.createElement('button'); edit.type = 'button'; edit.textContent = 'Edit'; edit.className = 'submitted-edit';
         edit.disabled = editableIndex() < 0;
@@ -8779,6 +8817,7 @@
       ${photoState.unavailable ? `<span class="import-label">${xmlEscape(photoState.unavailable)}</span>` : ''}
       ${!capped && !selectMode && (photoState.review || photoState.retry || photoState.reserved) ? `<button type="button" class="ds-btn ds-btn-quiet photo-issue" data-entry-id="${xmlEscape(e.id)}">Review photo issue</button>` : ''}
       ${!capped && !selectMode && photoState.retry ? `<button type="button" class="ds-btn ds-btn-quiet photo-retry" data-entry-id="${xmlEscape(e.id)}" ${!PHOTO_CLOUD_TRANSPORT_ENABLED ? 'disabled' : ''}>Retry photo</button><span class="import-label">${!PHOTO_CLOUD_TRANSPORT_ENABLED ? 'Photo uploads disabled for pilot' : ''}</span>` : ''}
+      ${R2_PHOTO_PILOT_ENABLED && !capped && !selectMode && SPOTITR2Photos.eligibility(e,inspectionContext(),entryDurable(e)).eligible ? `<button type="button" class="ds-btn ds-btn-quiet r2-photo-upload" data-entry-id="${xmlEscape(e.id)}">${e.r2_photo?.source_id===e.photoId && e.r2_photo?.status==='synced' ? 'Photo submitted' : 'Upload photo'}</button>` : ''}
       ${!capped && !selectMode && !photoCloudController?.isBusy() && authDisplayState && authController && SPOTITPhotoUpload.eligibility(e, inspectionContext(), entryDurable(e)).eligible ? `<button type="button" class="ds-btn ds-btn-quiet photo-prepare" data-entry-id="${xmlEscape(e.id)}">${e.photo_upload_manifest ? 'Check prepared photo locally' : 'Prepare photo locally'}</button>` : ''}
       ${photoState.hasPhoto ? '</div>' : ''}
       ${myView ? `<p class="record-submission-status">${xmlEscape(SPOTITMyRecords.status(item))}</p>` : ''}
@@ -8823,6 +8862,9 @@
       }));
       list.querySelectorAll('.photo-prepare').forEach(btn => btn.addEventListener('click', event => {
         event.stopPropagation(); prepareLocalPhoto(event.currentTarget.dataset.entryId, event.currentTarget);
+      }));
+      list.querySelectorAll('.r2-photo-upload').forEach(btn => btn.addEventListener('click', event => {
+        event.stopPropagation(); uploadR2Photo(event.currentTarget.dataset.entryId,event.currentTarget);
       }));
       list.querySelectorAll('.photo-issue').forEach(btn => btn.addEventListener('click', event => {
         event.stopPropagation(); reviewPhotoIssue(event.currentTarget.dataset.entryId);
@@ -8982,8 +9024,8 @@
           if(logRecordScope==='team')teamLogBrowser.activate(getLogFilters());
           scheduleMyRender();
         }});
-      teamPhotoViewer = SPOTITCloudPhotoViewer.createTeamViewer({ client, context: inspectionContext, key: activeEntriesStorageKey, online: () => navigator.onLine !== false, urls: URL, verify: () => authController.verifyOnline(), read: getPhoto, current: item => { const current=(submittedMapScope || logRecordScope) === 'team' && currentPhotoItem(item.id); return !!current && current.cloud===item.cloud; } });
-      cloudPhotoViewer = SPOTITCloudPhotoViewer.createViewer({ client, context: inspectionContext,
+      teamPhotoViewer = SPOTITCloudPhotoViewer.createTeamViewer({ client, r2Enabled:R2_PHOTO_PILOT_ENABLED, context: inspectionContext, key: activeEntriesStorageKey, online: () => navigator.onLine !== false, urls: URL, verify: () => authController.verifyOnline(), read: getPhoto, current: item => { const current=(submittedMapScope || logRecordScope) === 'team' && currentPhotoItem(item.id); return !!current && current.cloud===item.cloud; } });
+      cloudPhotoViewer = SPOTITCloudPhotoViewer.createViewer({ client, r2Enabled:R2_PHOTO_PILOT_ENABLED, context: inspectionContext,
         key: activeEntriesStorageKey, online: () => navigator.onLine !== false, urls: URL,
         verify: () => authController.verifyOnline(), read: getPhoto,
         current: item => { const current = currentPhotoItem(item.id); return !!current && current.cloud === item.cloud && current.local === item.local; } });

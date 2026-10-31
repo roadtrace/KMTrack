@@ -1,0 +1,15 @@
+name = "spotit-photo-api"
+main = "production.mjs"
+compatibility_date = "2026-10-30"
+
+[[r2_buckets]]
+binding = "PHOTOS_BUCKET"
+bucket_name = "spotit-inspection-photos"
+
+[vars]
+PHOTO_ENVIRONMENT = "production"
+PHOTO_TRANSPORT_ENABLED = "false"
+# Add SUPABASE_SERVICE_ROLE_KEY as an encrypted secret personally.
+
+[triggers]
+crons = ["17 * * * *"]

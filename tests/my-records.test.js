@@ -55,7 +55,7 @@ function render(items){
  const c={teamPageObserver:null,teamLogBrowser:null,entries:locals,visibleEntries:()=>locals,accessibleEntries:()=>locals,document:{getElementById:control,createElement:element},authWorkspaceUnlocked:true,
  SPOTITLocalStore:{snapshotContains:()=>()=>true},localStorage:{},activeEntriesStorageKey:()=> 'account',myLogEnabled:()=>true,myRecords:{records:()=>({records:items}),snapshot:()=>({scope:{},loaded:true})},SPOTITMyRecords:my,SPOTITLogRegister:require('../src/log-register.js'),
  SPOTITPhotoPilot:require('../src/photo-pilot.js'),SPOTITPhotoUpload:require('../src/photo-upload-state.js'),SPOTITPreapprovalReview:{reviewable:()=>false},authDisplayState:null,authController:null,
- PHOTO_CLOUD_TRANSPORT_ENABLED:false,photoCloudController:null,selectedEntryIds:new Set(),selectMode:false,logRegisterView:'log',CAPTURE_RECENT_LIMIT:10,
+ R2_PHOTO_PILOT_ENABLED:false,PHOTO_CLOUD_TRANSPORT_ENABLED:false,photoCloudController:null,selectedEntryIds:new Set(),selectMode:false,logRegisterView:'log',CAPTURE_RECENT_LIMIT:10,
  typeClass:()=> 'potholes',formatKmStation:v=>String(v),getLogFilters:()=>({}),cloudAccess:()=>false,openSubmittedDetail(){},renderMyControls(){},
  renderGuestClaims(){},syncEntryFilterOptions(){},syncInspectorFilterOptions(){},syncSharingFilters(){},updateMapEntries(){},wireSwipeRows(){},updateSyncStatus(){}};
  c.activeRecordController=()=>c.myRecords;c.logRecordScope='my';c.renderTeamWorkspace=()=>{};

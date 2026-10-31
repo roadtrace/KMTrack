@@ -14,7 +14,7 @@ function walk(dir){return fs.readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.
 if(fs.existsSync(out))for(const file of walk(out))if(!allowed.has(file))throw Error('Unexpected file in demo output; preserve and inspect: '+file);
 for(const file of files){const target=path.resolve(out,file),source=path.resolve(root,file);if(!target.startsWith(out+path.sep)||!source.startsWith(root+path.sep)||fs.lstatSync(source).isSymbolicLink())throw Error('Invalid app asset');fs.mkdirSync(path.dirname(target),{recursive:true});let bytes=fs.readFileSync(source);
  if(file==='index.html'){
-  let s=bytes.toString();s=s.replace('<head>','<head>\n<script src="presentation/bootstrap.js"></script>\n<link rel="stylesheet" href="presentation/demo.css">');
+  let s=bytes.toString();s=s.replace('const R2_PHOTO_PILOT_ENABLED = true;','const R2_PHOTO_PILOT_ENABLED = false;');s=s.replace('<head>','<head>\n<script src="presentation/bootstrap.js"></script>\n<link rel="stylesheet" href="presentation/demo.css">');
   s=s.replace(/<script src="(?:\.\/)?(?:src\/auth-config\.js|src\/presentation-launcher\.js|public\/vendor\/supabase\/supabase-js-2\.117\.1\.umd\.js)"><\/script>/g,'');
   s=s.replace(/<title>[^<]+<\/title>/,'<title>SPOT IT Presentation - Simulated</title>');
   s=s.replace('</body>','<script src="presentation/vendor/qrcodegen.js"></script>\n<script src="presentation/runtime.js"></script>\n</body>');bytes=Buffer.from(s);

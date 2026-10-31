@@ -72,9 +72,9 @@
     if(!e.photoId) return no('no-local-photo');
     return {eligible:true,reason:''};
   }
-  function dimensions(width,height){
+  function dimensions(width,height,maxDimension=1600){
     if(!Number.isInteger(width) || !Number.isInteger(height) || width<1 || height<1) throw Error('Invalid source dimensions.');
-    const scale=Math.min(1,1600/Math.max(width,height));
+    const scale=Math.min(1,maxDimension/Math.max(width,height));
     return {width:Math.max(1,Math.round(width*scale)),height:Math.max(1,Math.round(height*scale))};
   }
   async function sha256(blob){
@@ -82,13 +82,14 @@
     const digest=await globalThis.crypto.subtle.digest('SHA-256',bytes);
     return Array.from(new Uint8Array(digest),v=>v.toString(16).padStart(2,'0')).join('');
   }
-  async function encode(raw,env=globalThis){
+  async function encode(raw,env=globalThis,maxDimension=1600){
+    if(![400,1600].includes(maxDimension)) throw Error('Unsupported photo size.');
     // Browser image decoding applies EXIF display orientation; drawing to a
     // fresh canvas and JPEG encoding retains that appearance, not EXIF bytes.
     const image=new env.Image(),url=env.URL.createObjectURL(raw);
     try{
       await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(Error('Raw photo could not be decoded.'));image.src=url;});
-      const size=dimensions(image.naturalWidth,image.naturalHeight);
+      const size=dimensions(image.naturalWidth,image.naturalHeight,maxDimension);
       const canvas=env.document.createElement('canvas');canvas.width=size.width;canvas.height=size.height;
       const ctx=canvas.getContext('2d');if(!ctx) throw Error('Photo encoding unavailable.');
       ctx.drawImage(image,0,0,size.width,size.height);

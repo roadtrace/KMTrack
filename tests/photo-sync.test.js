@@ -152,9 +152,9 @@ test('source change while final row is in flight prevents durable acknowledgemen
 test('valid durable ack survives preparation checks without resetting transport state',async()=>{const f=await fixture();await f.run();const before=JSON.stringify(f.e);const result=await photo.createPreparer(f.options).prepare(f.e);assert.equal(result.status,'photo_synced');assert.equal(JSON.stringify(f.e),before);});
 test('production gate static false, no auto dispatch; assets cached; forbidden operations absent',()=>{
   const html=fs.readFileSync('index.html','utf8'),sw=fs.readFileSync('sw.js','utf8');
-  assert.match(html,/const PHOTO_CLOUD_TRANSPORT_ENABLED = false/);assert.doesNotMatch(html,/\.dispatch\(/);
+  assert.match(html,/const PHOTO_CLOUD_TRANSPORT_ENABLED = false/);assert.match(html,/if \(!R2_PHOTO_PILOT_ENABLED \|\| !photoCloudController\) return/);
   for(const asset of ['src/photo-cloud-api.js','src/photo-sync.js'])assert.ok(sw.includes(asset)&&html.includes(asset));
-  assert.match(sw,/v273/);
+  assert.match(sw,/v274/);
   for(const file of ['src/photo-cloud-api.js','src/photo-sync.js'])assert.doesNotMatch(fs.readFileSync(file,'utf8'),/\.remove\(|\.delete\(|\.upsert\(|getPublicUrl|\.insert\(/);
   assert.doesNotMatch(fs.readFileSync('src/sync-runner.js','utf8'),/SPOTITPhoto|photo-sync|photo-cloud/);
 });
