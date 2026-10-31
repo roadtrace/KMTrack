@@ -113,5 +113,7 @@ html:root .register-sheet .export-format-options button { width:100%; background
 #log-view .register-sync-icon { align-self:flex-start; flex:none; display:grid; place-items:center; width:24px; height:24px; color:var(--ds-fg-muted); }
 #log-view .register-sync-icon svg { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
 #log-view .register-sync-icon.state-submitted { color:var(--ds-secondary); }
-#log-view .register-sync-icon:is(.state-review,.state-waiting,.state-submitting) { color:var(--ds-warning); }
+#log-view .register-sync-icon.state-review { color:var(--ds-warning); }
 #log-view :is(.register-secondary,.register-source) { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#log-view .register-evidence { overflow:hidden; }
+#log-view .register-photo-thumbnail { width:54px; height:62px; display:block; object-fit:cover; }

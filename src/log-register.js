@@ -35,6 +35,15 @@
     if (!e.guest_claim_required && ['pending','failed'].includes(e.sync_status)) return {key:'waiting', label:'Waiting to submit'};
     return {key:'device', label:'Saved on device'};
   }
+  function reviewMessage(e, durable = true) {
+    if (!durable) return 'This inspection is not confirmed saved on this device. Export a backup before closing the app, then check available device storage.';
+    if (e.record_actions?.some(a=>a.error)) return 'Your saved changes could not be applied because the inspection changed or access was removed. Connect online and choose Reload saved inspection below to review the current version. Pending local changes will be discarded only after confirmation.';
+    if (e.r2_photo?.status === 'review') return 'The photo upload needs review. Your device photo remains saved. Use Upload photo to check again; if the original photo is unavailable, choose Edit and change the photo, then Save.';
+    if (e.guest_claim_required) return 'This inspection was captured in Guest mode and has not been assigned to an account. Sign in and open Guest inspections require claim in the Log before syncing.';
+    if (e.preapproval_review_required) return 'This inspection was captured before account approval. Verify your approved account online, then choose Review inspection below to confirm whether it should be submitted.';
+    if (e.submission_review_required || e.sync_status === 'needs_review' || e.sync_outcome_unknown) return 'Submission could not be confirmed safely. Connect online and choose Check sync below to check the saved submission. If the warning remains, keep this record and contact your administrator; do not create a duplicate inspection.';
+    return '';
+  }
   function matches(e, f = {}, cloud = false) {
     const normalized = v => String(v ?? '').trim().toLocaleLowerCase();
     const query = normalized(f.search);
@@ -85,7 +94,8 @@
     let state = inspectionState(e, cloud);
     if(!durable || e.record_actions?.some(a=>a.error) || e.r2_photo?.status==='review' || e.preapproval_review_required || e.guest_claim_required)state={key:'review',label:'Needs review'};
     else if(e.photo_auto_sync || e.record_actions?.length)state={key:'waiting',label:'Waiting to sync'};
-    const icon=state.key==='submitted'?'<path d="m5 12 4 4L19 6"/>':state.key==='review'?'<path d="M12 8v5m0 3h.01M12 3 2 21h20z"/>':'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>';
+    // Lucide cloud-check, cloud-alert and cloud-sync (ISC; public/vendor/lucide/LICENSE).
+    const icon=state.key==='submitted'?'<path d="m17 15-5.5 5.5L9 18"/><path d="M5.516 16.07A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 3.501 7.327"/>':state.key==='review'?'<path d="M12 12v4M12 20h.01"/><path d="M8.128 16.949A7 7 0 1 1 15.71 8h1.79a1 1 0 0 1 0 9h-1.642"/>':'<path d="m17 18-1.535 1.605a5 5 0 0 1-8-1.5M17 22v-4h-4M20.996 15.251A4.5 4.5 0 0 0 17.495 8h-1.79a7 7 0 1 0-12.709 5.607M7 10v4h4m-4 0 1.535-1.605a5 5 0 0 1 8 1.5"/>';
     const statusIcon=`<span class="register-sync-icon state-${state.key}" role="img" aria-label="${escape(state.label)}" title="${escape(state.label)}"><svg viewBox="0 0 24 24" aria-hidden="true">${icon}</svg></span>`;
     const date = e.timestamp ? new Date(String(e.timestamp).replace(' ','T') + '+08:00') : null;
     const time = date && Number.isFinite(+date) ? registerTime.format(date) : String(e.timestamp || 'Date unavailable');
@@ -103,5 +113,5 @@
     if (checkbox) card.prepend(checkbox);
 
   }
-  return {matches, inspectionState, cardHTML, decorate, km, historyUnavailable, emptyMessage, dateRange, todayRecords, evidence};
+  return {reviewMessage, matches, inspectionState, cardHTML, decorate, km, historyUnavailable, emptyMessage, dateRange, todayRecords, evidence};
 });

@@ -45,7 +45,7 @@
         if(auth.error||auth.data?.user?.id?.toLowerCase()!==scope.userId)throw unavailable();
         if(o.r2Enabled===true){
           const r2=typeof module==='object'&&module.exports?require('./r2-photos'):globalThis.SPOTITR2Photos;
-          blob=await r2.createApi({...o,enabled:true,guard}).view(row.id);guard();
+          blob=await r2.createApi({...o,enabled:true,guard}).view(row.id,o.thumbnail===true);guard();
           if(blob)source='private-r2';
         }
         if(!blob){

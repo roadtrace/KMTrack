@@ -4662,6 +4662,7 @@
   <script src="./src/sharing-ui.js"></script>
   <script src="./src/log-register.js"></script>
   <script src="./src/action-feedback.js"></script>
+  <script src="./src/private-thumbnails.js"></script>
   <script src="./src/log-controls.js"></script>
   <script src="./src/team-log.js"></script>
   <script src="./src/team-map.js"></script>
@@ -4865,6 +4866,7 @@
     });
     let photoCloudController = null;
     let photoApiClient = null;
+    let privateThumbnails=null;
     let pilotPhotoViewer = null;
     // Phase 13D constructs a disabled controller for explicit manual recovery.
     // Manual retry stays gated; no timer or inspection-runner hook.
@@ -4953,6 +4955,10 @@
       try {
         const result=await photoCloudController.dispatch(entry);
         if(result.status!=='synced') alert(result.reason || 'Photo upload held. Saved photos remain on this device.');
+        else if(entries.includes(entry) && localEntryDurable(entry)) {
+          persistEntryChanges(entry,{photo_auto_sync:false,record_photo_known:true,
+            record_photo:{current_id:entry.r2_photo.manifest.upload_id,legacy_path:entry.photo_path||null,legacy_filename:entry.record_photo?.legacy_filename||null}});
+        }
       } finally { button.disabled=false; renderLog(); }
     }
     async function retryPhotoNow(id, button) {
@@ -4989,6 +4995,7 @@
     }
     function setCloudStatus(message) { document.getElementById('my-record-status').textContent = message; }
     function invalidateMyRecords() {
+      privateThumbnails?.stop();privateThumbnails=null;
       globalThis.window?.closeLogRegisterSheets?.();
       cloudRecordStore?.invalidate(); cloudPhotoViewer?.close(); teamPhotoViewer?.close(); submittedDialog?.close();
       teamLogBrowser?.invalidate(); teamPageObserver?.disconnect();
@@ -5107,6 +5114,7 @@
     }
     function cloudCard(item) {
       const card = document.createElement('div'), e = SPOTITMyRecords.cloudDisplay(item.cloud);
+      card.dataset.recordId=item.id;
       card.className = 'log-entry cloud-only ' + typeClass(e.type);
       card.innerHTML = SPOTITLogRegister.cardHTML(e, {cloud:true, team:logRecordScope === 'team', photoLabel:item.cloud.photo_path ? 'Photo availability checked in details' : '', notice:''});
       card.tabIndex = 0; card.setAttribute('role','button');
@@ -8695,7 +8703,20 @@
       }
       window.syncLogRegisterControls?.();
     }
+    function ensurePrivateThumbnails(){
+      if(privateThumbnails||!photoApiClient)return;
+      privateThumbnails=SPOTITThumbnails.createController({root:document.getElementById('log-list'),
+        scope:()=>logRecordScope+SPOTITInspections.scopeKey(inspectionContext()),
+        item:card=>{const id=card.dataset.recordId||card.closest('.swipe-row')?.dataset.entryId;
+          const local=entries.find(e=>e.id===id&&!e.importBatchId);
+          const item=logRecordScope==='team'?teamLogBrowser?.items().find(e=>e.id===id):currentMyItem(id);
+          return item|| (local?{id:local.id,local,cloud:local.record_remote}:null);},
+        viewer:(item,current)=>(logRecordScope==='team'?SPOTITCloudPhotoViewer.createTeamViewer:SPOTITCloudPhotoViewer.createViewer)({client:photoApiClient,thumbnail:true,r2Enabled:R2_PHOTO_PILOT_ENABLED,
+          context:inspectionContext,key:activeEntriesStorageKey,online:()=>navigator.onLine!==false,urls:URL,
+          verify:()=>authController.verifyOnline(),read:getPhoto,current})});
+    }
     function renderLog({ cloudOnly = false } = {}) {
+      ensurePrivateThumbnails();
       renderTeamWorkspace();
       teamPageObserver?.disconnect();
       if (myLogEnabled() && logRecordScope === 'team' && teamLogBrowser) { renderTeamLog(); return; }
@@ -9708,7 +9729,7 @@
       modal.querySelector('.entry-view-label')?.remove();
       modal.querySelector('.entry-edit-status')?.remove();
       const state=document.createElement('p');state.className='entry-edit-status';state.setAttribute('role','status');
-      state.textContent=entry.record_action_error || (entry.record_actions?.length ? 'Waiting to sync' : entry.r2_photo?.status==='review' ? 'Photo could not be saved. Change or remove it to retry.' : entry.photo_auto_sync ? 'Photo waiting to sync' : '');
+      state.textContent=SPOTITLogRegister.reviewMessage(entry,localEntryDurable(entry)) || entry.record_action_error || (entry.record_actions?.length ? 'Waiting to sync' : entry.r2_photo?.status==='review' ? 'Photo could not be saved. Change or remove it to retry.' : entry.photo_auto_sync ? 'Photo waiting to sync' : '');
       modal.querySelector('.entry-sheet-scroll').append(state);
       const label = document.createElement('p'); label.className='entry-view-label';label.textContent='Your inspection';
       modal.querySelector('.entry-sheet-header > div').append(label);
@@ -9727,18 +9748,35 @@
       edit.onclick=()=>setEditing(true);
       const own=entry.remote_id!==entry.id || SPOTITInspectionActions.editable(entry,inspectionContext());
       edit.disabled=remove.disabled=!own || !!entry.record_action_error;
-      if(!own)state.textContent='Read only';
+      if(!own && !state.textContent)state.textContent='Read only';
       modal.querySelector('.inspection-recovery-actions')?.remove();
       const recovery=document.createElement('div');recovery.className='inspection-recovery-actions';
       if(SPOTITPreapprovalReview.reviewable(entry,inspectionContext())){
         const button=document.createElement('button');button.type='button';button.textContent='Review inspection';button.onclick=()=>{closeEditModal();openPreapprovalReview(entry.id);};recovery.append(button);
       }
       if(entry.guest_claim_required){const note=document.createElement('p');note.textContent='Guest inspection — sign in and claim this record from your account before syncing.';recovery.append(note);}
+      if(entry.submission_review_required || entry.sync_status==='needs_review' || entry.sync_outcome_unknown){
+        const check=document.createElement('button');check.type='button';check.textContent='Check sync';
+        check.onclick=async()=>{check.disabled=true;check.textContent='Checking…';try{if(SPOTITInspections.acknowledgementReview(entry)){await authController.verifyOnline();await syncRunner?.reconcileAcknowledgement(entry);}else await syncNow();}catch(error){state.textContent='Could not check sync. Connect online and verify your account, then try again.';}finally{if(editingEntryIndex!==null && entries[editingEntryIndex]===entry){closeEditModal();void openEditModal(entries.indexOf(entry));}}};recovery.append(check);
+      }
       if(entry.record_actions?.length || entry.sync_status==='failed'){
         const retry=document.createElement('button');retry.type='button';retry.textContent='Retry sync';retry.onclick=async()=>{retry.disabled=true;retry.textContent='Retrying…';try{await syncNow();}finally{retry.disabled=false;retry.textContent='Retry sync';}};recovery.append(retry);
       }
       if(!entry.remote_id && ['pending','failed'].includes(entry.sync_status) && !entry.guest_claim_required && !entry.preapproval_review_required && !entry.submission_review_required){
         const submit=document.createElement('button');submit.type='button';submit.textContent='Sync inspection';submit.onclick=()=>submitLocalInspection(entry.id,submit);recovery.append(submit);
+      }
+      modal.querySelector('#edit-photo-upload-btn')?.remove();
+      if(R2_PHOTO_PILOT_ENABLED && entry.photoId && own && entry.remote_id===entry.id && !entry.record_actions?.length && !entry.record_action_error && !entry.record_remove_photo) {
+        const upload=document.createElement('button');upload.id='edit-photo-upload-btn';upload.type='button';upload.className='edit-photo-add-btn';
+        const uploaded=entry.r2_photo?.status==='synced' && entry.r2_photo.source_id===entry.photoId && entry.record_photo?.current_id===entry.r2_photo.manifest?.upload_id;
+        upload.textContent=uploaded?'Photo uploaded':'Upload photo';upload.disabled=uploaded;
+        upload.onclick=async()=>{
+          upload.textContent='Uploading…';
+          try { await uploadR2Photo(entry.id,upload); }
+          finally { if(editingEntryIndex!==null && entries[editingEntryIndex]===entry && !editingMode){closeEditModal();void openEditModal(entries.indexOf(entry));} }
+        };
+        modal.querySelector('.edit-photo-actions').append(upload);
+        const previousEdit=edit.onclick;edit.onclick=()=>{upload.hidden=true;previousEdit();};
       }
       modal.querySelector('.entry-sheet-scroll').append(recovery);
 
