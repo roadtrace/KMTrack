@@ -4271,30 +4271,27 @@
             <path d="M4 5h16l-6 7v6l-4 2v-8z" />
           </svg><span id="map-filter-count" class="map-filter-count" hidden>0</span></summary>
         <div class="map-filter-options">
-          <div class="map-history-filter"><select id="map-record-scope" aria-label="Map record scope"><option value="my">My records</option><option value="team">Team records</option></select><button type="button" id="map-history-refresh">Refresh</button><button type="button" id="map-history-more">Load more</button><small id="map-history-coverage" role="status"></small></div>
-          <label class="map-light-filter-field"><input type="checkbox" id="map-light-show-entries" checked>Show records</label>
-          <label class="map-light-filter-field">From<input type="date" id="map-light-entry-from" aria-label="Map from date"></label>
-          <label class="map-light-filter-field">To<input type="date" id="map-light-entry-to" aria-label="Map to date"></label>
-          <label><select id="map-entry-type" aria-label="Defect type">
-              <option value="">All defects</option>
-            </select></label>
-          <label class="map-source-filter">Source<select id="map-entry-source">
-              <option value="">All inspections</option>
-              <option value="mine">My inspections</option>
-              <option value="imported">Imported inspections</option>
-            </select></label>
-          <label>Inspector<select id="map-entry-inspector">
+          <div class="map-filter-heading">Filter map records</div>
+          <div id="map-scope-buttons" role="group" aria-label="Map records"><button type="button" data-scope="my" aria-pressed="true">My records</button><button type="button" data-scope="team" aria-pressed="false">Team records</button></div><select hidden id="map-record-scope" aria-label="Map record scope"><option value="my">My records</option><option value="team">Team records</option></select>
+          <div class="map-filter-group map-filter-people"><label>Inspector<select id="map-entry-inspector">
               <option value="">All inspectors</option>
-            </select></label>
-          <label>Bound<select id="map-entry-bound">
+            </select></label></div>
+          <div class="map-filter-group map-filter-dates"><span class="map-filter-section-label">Inspection dates</span><label class="map-light-filter-field">From<input type="date" id="map-light-entry-from" aria-label="Map from date"></label><label class="map-light-filter-field">To<input type="date" id="map-light-entry-to" aria-label="Map to date"></label><button type="button" id="map-entry-clear">All dates</button></div>
+          <div class="map-filter-group map-filter-details"><label>Defect type<select id="map-entry-type" aria-label="Defect type">
+              <option value="">All defects</option>
+            </select></label><label>Bound<select id="map-entry-bound">
               <option value="">All bounds</option>
               <option value="NB">NB</option>
               <option value="SB">SB</option>
               <option value="EB">EB</option>
               <option value="WB">WB</option>
               <option value="Other">Other / unset</option>
-            </select></label>
-          <button type="button" id="map-entry-clear">All dates</button>
+            </select></label><label class="map-source-filter">Source<select id="map-entry-source">
+              <option value="">All inspections</option>
+              <option value="mine">My inspections</option>
+              <option value="imported">Imported inspections</option>
+            </select></label></div>
+          <div class="map-filter-footer"><label class="map-light-filter-field"><input type="checkbox" id="map-light-show-entries" checked>Show records</label><div class="map-history-filter"><button type="button" id="map-history-refresh">Refresh</button><button type="button" id="map-history-more">Load more</button><small id="map-history-coverage" role="status"></small></div></div>
         </div>
       </details>
     </div>
@@ -4949,6 +4946,7 @@
     }
     async function uploadR2Photo(id, button) {
       if (!R2_PHOTO_PILOT_ENABLED || !photoCloudController) return;
+      if(editingMode){alert('Save or cancel your edits before uploading the photo.');return;}
       const entry=entries.find(e=>e.id===id); if(!entry)return;
       if(!confirm('Upload this photo to secure photo storage? Any current submitted photo will be replaced only after the new photo is verified. Local photos will remain on this device.'))return;
       button.disabled=true;
@@ -6434,7 +6432,9 @@
     function renderMapHistoryControls() {
       const scope = cloudRecordStore?.syncScope(), guest = authDisplayState?.mode === 'guest';
       const select = document.getElementById('map-record-scope');
-      select.value = mapRecordScope; select.hidden = guest;
+      select.value = mapRecordScope; select.hidden = true;
+      const scopes=document.getElementById('map-scope-buttons');scopes.hidden=guest;
+      scopes.querySelectorAll('button').forEach(button=>{button.setAttribute('aria-pressed',String(button.dataset.scope===mapRecordScope));button.disabled=button.dataset.scope==='team'&&!scope;});
       select.querySelector('option[value="team"]').disabled = !scope;
       const controller = mapRecordScope === 'team' ? teamMapBrowser : myRecords, page = controller?.snapshot();
       document.getElementById('map-history-refresh').disabled = !scope || !!page?.loading;
@@ -6578,6 +6578,7 @@
     document.getElementById('map-entry-bound').addEventListener('change', updateMapEntries);
     document.getElementById('map-entry-source').addEventListener('change', updateMapEntries);
     document.getElementById('map-entry-inspector').addEventListener('change', updateMapEntries);
+    document.querySelectorAll('#map-scope-buttons button').forEach(button=>button.addEventListener('click',()=>switchMapScope(button.dataset.scope)));
     document.getElementById('map-record-scope').addEventListener('change', event => {
       switchMapScope(event.target.value);
     });
@@ -9741,6 +9742,7 @@
       const setEditing = editing => {
         if(editing && !editingOriginal)editingOriginal=JSON.parse(JSON.stringify(entry));
         editingMode=editing;modal.classList.toggle('entry-is-editing',editing);
+        const upload=modal.querySelector('#edit-photo-upload-btn');if(upload)upload.hidden=editing;
         modal.querySelectorAll('select, input, #edit-photo-add-btn, #edit-photo-remove-btn').forEach(control=>{control.disabled=!editing;});
         document.getElementById('edit-save').hidden=!editing;cancel.hidden=!editing;actions.hidden=editing;
         label.textContent=editing?'Editing inspection':'Your inspection';

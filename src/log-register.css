@@ -6,7 +6,7 @@ html:root #log-view .log-head-row h2 { margin:0; font:700 27px/1.2 var(--font-he
 #log-view .register-subtitle { margin:7px 0 0; color:var(--ds-fg-muted); font:400 13px/1.5 var(--font-ui); }
 html:root #log-view .register-scopes { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin-bottom:14px; }
 html:root #log-view .register-scopes button { min-height:44px; padding:9px 5px; border:1px solid var(--ds-border); border-radius:14px; background:var(--ds-card); color:var(--ds-fg); font:600 12px/1.25 var(--font-ui); white-space:normal; }
-html:root #log-view .register-scopes button[aria-pressed="true"] { background:var(--ds-primary); border-color:var(--ds-primary); color:var(--ds-primary-fg); }
+html:root #log-view .register-scopes button[aria-pressed="true"] { background:var(--ds-accent); border-color:var(--ds-accent); color:var(--ds-accent-fg); }
 html:root #log-view .register-scopes:has(#log-scope-team[hidden]) { grid-template-columns:1fr; }
 html:root #log-view [hidden], html:root .register-sheet [hidden] { display:none !important; }
 html:root #log-view .register-search { display:flex; align-items:center; gap:10px; min-height:48px; padding:0 13px; margin-bottom:12px; background:var(--ds-card); border:1px solid var(--ds-border-strong); border-radius:15px; }
@@ -22,8 +22,8 @@ html:root #log-view .register-result .ds-chip { display:block; padding:0; border
 #log-view .register-result small { display:block; margin-top:3px; color:var(--ds-fg-muted); font:400 11px/1.35 var(--font-ui); }
 html:root #log-view .register-filter-chips { display:flex; gap:7px; overflow-x:auto; padding-bottom:3px; margin:0 0 8px; }
 html:root #log-view .register-filter-chips button { flex:none; min-height:44px; max-width:270px; padding:7px 10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; border:1px solid var(--ds-border); border-radius:22px; background:var(--ds-card); color:var(--ds-fg); font:500 12px/1.2 var(--font-ui); }
-html:root #log-view #log-clear-all { color:var(--ds-primary); border:0; background:transparent; }
-html:root[data-theme="light"] #log-view #log-clear-all { color:var(--ds-primary-fg); text-decoration:underline; text-decoration-color:var(--ds-primary); text-underline-offset:5px; }
+html:root #log-view #log-clear-all { color:var(--ds-accent); border:0; background:transparent; }
+html:root[data-theme="light"] #log-view #log-clear-all { color:var(--ds-accent-fg); text-decoration:underline; text-decoration-color:var(--ds-accent); text-underline-offset:5px; }
 html:root #log-view #log-select-actions { display:flex; margin:0 0 8px; justify-content:space-between; gap:7px; }
 html:root #log-view #select-toggle-btn { min-height:44px; padding:8px 14px; }
 html:root #log-view #log-bulk-actions { margin:0 0 12px; padding:10px; display:flex; gap:8px; flex-wrap:wrap; border:1px solid var(--ds-border); border-radius:12px; background:var(--ds-card); }
@@ -38,7 +38,7 @@ html:root #log-view #my-record-controls button { min-height:44px; margin:0 5px 0
 html:root #log-view #log-list { display:grid; gap:9px; }
 html:root #log-view #log-list .swipe-row { margin:0; border-radius:16px; }
 html:root #log-view #log-list .log-entry { display:block; position:relative; padding:12px; border:1px solid var(--ds-border); border-radius:16px; background:var(--ds-card); color:var(--ds-fg); box-shadow:0 3px 10px rgba(0,0,0,.08); cursor:pointer; min-width:0; }
-html:root #log-view #log-list .log-entry.selected { outline:2px solid var(--ds-primary); outline-offset:-2px; }
+html:root #log-view #log-list .log-entry.selected { outline:2px solid var(--ds-accent); outline-offset:-2px; }
 #log-view .register-card-main { display:flex; align-items:center; gap:10px; }
 #log-view .register-evidence { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; width:54px; min-height:62px; flex:none; border:1px solid var(--ds-border); border-radius:10px; background:var(--ds-card-2); color:var(--ds-fg-muted); font:500 10px/1.3 var(--font-ui); }
 #log-view .register-evidence svg { width:23px; height:23px; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
@@ -62,7 +62,7 @@ html:root #log-view #log-list .entry-checkbox { position:absolute; top:12px; lef
 #log-view .select-mode .register-evidence { visibility:hidden; }
 html:root #log-view .log-empty { padding:28px 18px; margin:0; text-align:center; border:1px dashed var(--ds-border-strong); border-radius:16px; background:var(--ds-card); color:var(--ds-fg-muted); font:400 14px/1.6 var(--font-ui); }
 html:root #log-view button:disabled, html:root .register-sheet button:disabled { opacity:.5; cursor:not-allowed; }
-html:root #log-view :is(button,input,summary):focus-visible, html:root .register-sheet :is(button,input,select):focus-visible { outline:2px solid var(--ds-primary); outline-offset:3px; }
+html:root #log-view :is(button,input,summary):focus-visible, html:root .register-sheet :is(button,input,select):focus-visible { outline:2px solid var(--ds-accent); outline-offset:3px; }
 
 html:root .register-sheet { box-sizing:border-box; width:min(100% - 20px,460px); max-width:none; max-height:min(90dvh,780px); padding:0; border:1px solid var(--ds-border-strong); border-radius:22px; background:var(--ds-bg); color:var(--ds-fg); box-shadow:0 20px 60px rgba(0,0,0,.35); overflow:auto; }
 .register-sheet::backdrop { background:rgba(0,0,0,.55); backdrop-filter:blur(4px); }
@@ -98,12 +98,12 @@ html:root #inspection-view #log-list { margin:0; padding:0; }
 .register-sheet-note, .register-data-body p { margin:10px 16px 14px; color:var(--ds-fg-muted); font:400 12px/1.5 var(--font-ui); }
 html:root .register-sheet .register-sheet-footer { position:sticky; bottom:0; display:grid; grid-template-columns:1fr 1.8fr; gap:10px; padding:12px 16px max(14px,env(safe-area-inset-bottom)); border-top:1px solid var(--ds-border); background:var(--ds-bg); }
 html:root .register-sheet button { min-height:44px; padding:10px; border:1px solid var(--ds-border-strong); border-radius:12px; background:var(--ds-card); color:var(--ds-fg); font:600 13px/1.4 var(--font-ui); }
-html:root .register-sheet #log-filter-apply { background:var(--ds-primary); border-color:var(--ds-primary); color:var(--ds-primary-fg); }
+html:root .register-sheet #log-filter-apply { background:var(--ds-accent); border-color:var(--ds-accent); color:var(--ds-accent-fg); }
 .register-data-body { padding:4px 16px 20px; }
 .register-data-body h3 { margin:17px 0 8px; font:600 15px/1.4 var(--font-heading); }
 .register-data-body p { margin:9px 0; }
 #register-import-options, .register-sheet .export-format-options { display:grid; gap:8px; }
-html:root .register-sheet .export-format-options button { width:100%; background:var(--ds-primary); color:var(--ds-primary-fg); border-color:var(--ds-primary); }
+html:root .register-sheet .export-format-options button { width:100%; background:var(--ds-accent); color:var(--ds-accent-fg); border-color:var(--ds-accent); }
 @media (max-width:430px) {
   html:root .register-sheet { margin:auto 0 0; width:100%; max-height:90dvh; border-bottom:0; border-radius:22px 22px 0 0; }
   html:root #log-view .register-toolbar button { justify-content:center; }
@@ -117,3 +117,35 @@ html:root .register-sheet .export-format-options button { width:100%; background
 #log-view :is(.register-secondary,.register-source) { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 #log-view .register-evidence { overflow:hidden; }
 #log-view .register-photo-thumbnail { width:54px; height:62px; display:block; object-fit:cover; }
+
+/* Hallmark · scoped map filter composition, existing SPOT IT tokens.
+   Critique: scope and filtering lacked hierarchy; retain existing filter wiring. */
+#map-scope-buttons { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; grid-column:1/-1; }
+#map-scope-buttons[hidden] { display:none; }
+#map-scope-buttons button { min-height:44px; padding:10px; border:1px solid var(--ds-border); border-radius:var(--radius-sm); background:var(--ds-card); color:var(--ds-fg); font:inherit; }
+#map-scope-buttons button[aria-pressed="true"] { background:var(--ds-accent); color:var(--ds-accent-fg); }
+#map-scope-buttons button:focus-visible { outline:2px solid var(--ds-secondary); outline-offset:2px; }
+#edit-modal .edit-photo-actions { display:flex; flex-direction:column; align-items:stretch; min-width:0; }
+#edit-modal .edit-photo-actions button { width:100%; box-sizing:border-box; min-height:42px; justify-content:center; }
+#edit-modal .edit-photo-actions button:disabled { opacity:.4; cursor:not-allowed; }
+#edit-modal #edit-photo-upload-btn[hidden] { display:none; }
+
+html:root #map-view .map-filter-options { width:min(360px,calc(100dvw - 28px)); box-sizing:border-box; max-width:calc(100dvw - 28px); display:flex; flex-direction:column; align-items:stretch; gap:16px; padding:18px; max-height:calc(100dvh - var(--app-header-h,80px) - var(--app-nav-h,72px) - 100px); overscroll-behavior:contain; }
+html:root #map-view .map-filter-heading { font-size:16px; font-weight:700; color:var(--ds-fg); }
+html:root #map-view #map-scope-buttons { width:100%; }
+html:root #map-view #map-scope-buttons button { padding:10px 8px; border-radius:var(--radius-sm); }
+html:root #map-view #map-scope-buttons button[aria-pressed="true"] { background:var(--ds-accent); color:var(--ds-accent-fg); border-color:var(--ds-secondary); }
+html:root #map-view .map-filter-group { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; min-width:0; }
+html:root #map-view .map-filter-people { grid-template-columns:minmax(0,1fr); }
+html:root #map-view .map-filter-section-label { grid-column:1/-1; font-size:12px; color:var(--ds-fg-muted); }
+html:root #map-view .map-filter-options label { font-size:12px; gap:6px; color:var(--ds-fg-muted); }
+html:root #map-view .map-filter-options :is(select,input[type="date"]) { min-width:0; max-width:100%; width:100%; box-sizing:border-box; min-height:44px; padding:10px; border:1px solid var(--ds-border); border-radius:var(--radius-sm); background:var(--ds-card); color:var(--ds-fg); font-size:13px; }
+html:root #map-view .map-filter-options input[type="date"]::-webkit-date-and-time-value { min-width:0; text-align:left; }
+html:root #map-view .map-filter-options .map-source-filter { grid-column:1/-1; }
+html:root #map-view #map-entry-clear { grid-column:1/-1; justify-self:end; padding:0; border:0; background:transparent; color:var(--ds-secondary); min-height:32px; }
+html:root #map-view .map-filter-footer { border-top:1px solid var(--ds-border); padding-top:14px; display:grid; gap:12px; }
+html:root #map-view .map-filter-footer .map-light-filter-field { flex-direction:row; align-items:center; gap:8px; color:var(--ds-fg); }
+html:root #map-view .map-history-filter { display:flex; flex-wrap:wrap; gap:8px; }
+html:root #map-view .map-history-filter small { order:-1; width:100%; font-size:12px; line-height:1.5; }
+html:root #map-view .map-history-filter button { border:1px solid var(--ds-border); background:var(--ds-card); color:var(--ds-fg); border-radius:var(--radius-sm); }
+html:root #map-view .map-filter-options :is(button,select,input):focus-visible { outline:2px solid var(--ds-secondary); outline-offset:2px; }
