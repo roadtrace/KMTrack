@@ -6663,9 +6663,9 @@
     // (enough to delete a mistake on the spot), Log shows the full register and owns
     // the search. The cap is applied per-mount in renderLog(), not by a second list.
     const CAPTURE_RECENT_LIMIT = 3;
-    let logRegisterView = 'inspection';
+    let logRegisterView = 'inspection',logMountRenderPending=false;
 
-    function mountLogRegister(viewName) {
+    function mountLogRegister(viewName, deferRender = false) {
       if (viewName !== 'log' && viewName !== 'inspection') return;
       const block = document.getElementById('log-register');
       const host = document.getElementById(viewName === 'log' ? 'log-host-log' : 'log-host-inspection');
@@ -6674,8 +6674,10 @@
       if (moved || logRegisterView !== viewName) {
         logRegisterView = viewName;
         // Re-render so this mount gets the right amount of list.
+        if(deferRender){logMountRenderPending=true;return true;}
         renderLog();
       }
+      return logMountRenderPending;
     }
 
     /* The header is global. On the map it trades the "SPOT IT" wordmark for the live
@@ -6696,37 +6698,45 @@
       context.hidden = !isMap;
     }
 
+    let activeAppView=null,tabWorkGeneration=0;
+    const tabScrollPositions=new Map();
     function showAppView(viewName) {
       viewName = SPOTITMore.route(SPOTITTeamRecords.route(viewName));
       if (!APP_VIEW_IDS[viewName]) viewName = 'settings';
+      if(activeAppView===viewName)return;
+      if(activeAppView)tabScrollPositions.set(activeAppView,window.scrollY);
+      activeAppView=viewName;
+      const generation=++tabWorkGeneration;
       if(viewName!=='map')teamMapBrowser?.pause();
-      if (viewName === 'team') renderTeamWorkspace();
-      if (viewName === 'settings') window.moreController?.home();
-      // Remembered so a page reload — the header refresh — comes back to this view.
       rememberActiveView(viewName);
-      Object.keys(APP_VIEW_IDS).forEach(name => {
-        const view = document.getElementById(APP_VIEW_IDS[name]);
-        if (view) view.hidden = name !== viewName;
+      Object.keys(APP_VIEW_IDS).forEach(name=>{
+        const view=document.getElementById(APP_VIEW_IDS[name]);
+        if(view){view.hidden=name!==viewName;view.classList.remove('tab-entering');}
       });
-      mountLogRegister(viewName);
+      const needsLogRender=mountLogRegister(viewName,true);
+      const view=document.getElementById(APP_VIEW_IDS[viewName]);
+      view?.classList.add('tab-entering');
       syncHeaderContext(viewName);
-      // The footer fit is skipped while this view is hidden, so re-check it on show.
-      document.querySelectorAll('.app-tab-btn').forEach(button => {
-        const active = button.dataset.appView === viewName;
-        button.classList.toggle('active', active);
-        button.setAttribute('aria-selected', active ? 'true' : 'false');
-        button.tabIndex = active ? 0 : -1;
+      document.querySelectorAll('.app-tab-btn').forEach(button=>{
+        const active=button.dataset.appView===viewName;
+        button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;
       });
-      if (viewName === 'map') {
-        initOsmMap();
-        requestAnimationFrame(() => {
-          osmMap?.invalidateSize(false);
-          // Now that the pane has a size, re-assert the remembered view exactly.
-          applySavedMapView();
-          updateOsmLocation();
-          updateMapEntries();
-        });
-      }
+      window.scrollTo({top:tabScrollPositions.get(viewName)||0,behavior:'instant'});
+      // Yield a complete paint before list construction, map sizing or team rendering.
+      requestAnimationFrame(()=>setTimeout(()=>{
+        if(generation!==tabWorkGeneration)return;
+        if(needsLogRender){renderLog();logMountRenderPending=false;}
+        if(viewName==='team')renderTeamWorkspace();
+        if(viewName==='settings')window.moreController?.home();
+        if(viewName==='map'){
+          const firstOpen=!osmMap;
+          initOsmMap();osmMap?.invalidateSize(false);
+          if(firstOpen)applySavedMapView();
+          updateOsmLocation();updateMapEntries();
+        }
+        // A shorter Capture list can clamp the document scroll; restore after layout.
+        if(needsLogRender)window.scrollTo({top:tabScrollPositions.get(viewName)||0,behavior:'instant'});
+      },0));
     }
 
     document.querySelectorAll('.app-tab-btn').forEach(button => {

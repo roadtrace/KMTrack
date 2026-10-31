@@ -156,3 +156,13 @@ html:root #map-view #map-entry-clear[aria-pressed="true"] { color:var(--ds-accen
 html:root #map-view .map-filter-options label { gap:4px; }
 html:root #map-view .map-filter-options .map-filter-dates { row-gap:6px; }
 html:root #map-view .map-history-filter small { line-height:1.35; }
+
+/* Opacity only; rapid tab switches cancel obsolete render jobs. */
+:root { --tab-enter-duration:140ms; --tab-enter-ease:cubic-bezier(0.23,1,0.32,1); }
+.app-view.tab-entering { animation:tab-enter var(--tab-enter-duration) var(--tab-enter-ease); }
+@keyframes tab-enter { from { opacity:.72; } to { opacity:1; } }
+@media(prefers-reduced-motion:reduce) { .app-view.tab-entering { animation:none; } }
+/* Retain every row for selection/export, skip layout/paint of off-screen cards. */
+@supports(content-visibility:auto) {
+  #log-view #log-list > .swipe-row { content-visibility:auto; contain-intrinsic-block-size:auto 104px; }
+}
