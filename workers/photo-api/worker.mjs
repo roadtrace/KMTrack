@@ -94,7 +94,7 @@ export function createWorker(fetcher=fetch,deployment='test'){
     // No public cleanup HTTP route; Cloudflare Cron invokes this server-side.
     if(env.PHOTO_TRANSPORT_ENABLED==='true')ctx.waitUntil(Promise.all([cleanup(env),cleanupLegacy(env)]));
   },async fetch(request,env={}){
-    const origin=request.headers.get('Origin'),cors=origin===PUBLIC_CONFIG.origin
+    const origin=request.headers.get('Origin'),cors=origin===PUBLIC_CONFIG.origin||origin==='https://roadtrace.github.io'
       ||deployment==='test'&&env.PHOTO_ENVIRONMENT==='test'&&(origin===TEST_ORIGIN||origin===PHONE_PILOT_ORIGIN);
     const headers={'Content-Type':'application/json; charset=utf-8','Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','Vary':'Origin'};
     if(cors)headers['Access-Control-Allow-Origin']=origin;

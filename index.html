@@ -10217,12 +10217,18 @@
     // ---------- Service worker: makes the app shell load with zero network ----------
     if ('serviceWorker' in navigator && !b01LocalPreviewSession) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').then(reg => {
+        navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(reg => {
           navigator.serviceWorker.ready.then(active => inspectionWakeup?.setRegistration(active)).catch(() => {});
           // Don't wait for the browser's own update-check schedule (can be as
           // infrequent as once/day, especially for an installed iOS PWA) —
           // check the server for a newer sw.js every time the app opens.
           reg.update().catch(() => { });
+          let checking=false;
+          const checkUpdate=()=>{if(checking||document.hidden||navigator.onLine===false)return;checking=true;reg.update().catch(()=>{}).finally(()=>{checking=false;});};
+          window.addEventListener('online',checkUpdate);
+          document.addEventListener('visibilitychange',checkUpdate);
+          window.addEventListener('focus',checkUpdate);
+
         }).catch(err => console.error('Service worker registration failed', err));
 
         // skipWaiting()+clients.claim() in sw.js mean a new version takes over
@@ -10235,9 +10241,9 @@
           if (!hadController) { hadController = true; return; } // first-ever install, not an update
           if (shown) return;
           shown = true;
-          const banner = document.createElement('div');
+          const banner = document.createElement('button');banner.type='button';
           banner.textContent = '🔄 App updated — tap to reload';
-          banner.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:999;background:#148bd8;color:#fff;text-align:center;padding:12px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;';
+          banner.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:3000;background:#148bd8;color:#fff;text-align:center;padding:12px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;';
           banner.addEventListener('click', () => location.reload());
           document.body.appendChild(banner);
         });

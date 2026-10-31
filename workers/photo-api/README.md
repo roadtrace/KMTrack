@@ -24,7 +24,7 @@ shipped by the app. This file is server source, excluded from the app build.
   inspection. Approved administrators view only records returned by their existing
   SELECT policy; they cannot attach. Anonymous Auth users, unapproved profiles,
   invalid sessions and unassigned field users are rejected.
-- Exact browser origin: `https://kmtrack.pages.dev`. Demo, arbitrary previews and
+- Exact browser origins: `https://kmtrack.pages.dev` and `https://roadtrace.github.io` (the installed GitHub Pages app). Demo, arbitrary previews and
   localhost origins are rejected. Requests without Origin still require a valid
   bearer session; CORS is not authorization. Credentials never go in query strings.
 - Responses are no-store. No tokens, profile names, locations or upstream errors

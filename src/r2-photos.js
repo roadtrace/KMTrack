@@ -9,6 +9,14 @@
   const ENDPOINT='https://spotit-photo-api.mmatriano19.workers.dev';
   const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   const HASH=/^[a-f0-9]{64}$/;
+  // A restored page may have initialized this module before the inspection API.
+  // Resolve at operation time instead of retaining an undefined factory argument.
+  function scopeKey(context){
+    const api=inspection || globalThis.SPOTITInspections;
+    if(typeof api?.scopeKey!=='function')throw failure('Photo upload is not ready. Close and reopen SPOT IT while online. Your local photo is unchanged.',503);
+    return api.scopeKey(context);
+  }
+
   // Reuse inspection/account review gates while keeping legacy Storage state
   // separate. R2 replacement never mutates the legacy photo_path/manifest.
   const eligibility=(e,c,durable,now)=>photo.eligibility({...e,photo_path:'',photo_upload_manifest:null,
@@ -55,9 +63,9 @@
       if(busy)return {status:'busy'};
       busy=true;
       try{return await o.lock('spotit-r2-photo-v1',async()=>{
-        const scope=inspection.scopeKey(o.context()),key=o.key(),source=e.photoId,clock=o.now||Date.now;
+        const scope=scopeKey(o.context()),key=o.key(),source=e.photoId,clock=o.now||Date.now;
         const guard=()=>{
-          if(scope!==inspection.scopeKey(o.context())||key!==o.key()||!o.isCurrent(e)||e.photoId!==source)throw failure('Photo account or source changed');
+          if(scope!==scopeKey(o.context())||key!==o.key()||!o.isCurrent(e)||e.photoId!==source)throw failure('Photo account or source changed');
           const eligible=eligibility(e,o.context(),o.durable(e),clock());if(!eligible.eligible)throw failure(eligible.reason);
         };
         const save=state=>{guard();if(o.save(e,{r2_photo:state})!==true||!o.durable(e))throw failure('Photo state persistence unconfirmed');};
