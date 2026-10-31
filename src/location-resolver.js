@@ -193,8 +193,14 @@
       return lastOutput;
     }
 
+    function reset(){
+      confirmedCorridor='';startup=null;pendingSwitch=null;lastFix=null;lastOutput=null;
+      confirmedInterchange=null;interchangePending=null;interchangeLocked=false;exitPending=null;
+      mainlineBound='';reentryPending=null;
+    }
+
     return {
-      resolve,markStale,
+      resolve,markStale,reset,
       state:()=>({confirmedCorridor,pendingCorridor:pendingSwitch?.corridor||'',interchange:lastOutput?.interchange||null})
     };
   }

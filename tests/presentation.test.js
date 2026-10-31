@@ -25,3 +25,22 @@ test('separate build excludes production auth, server tools, account config and 
 test('vendored QR encoder is local and retains its MIT license',()=>{
  const source=fs.readFileSync('presentation/vendor/qrcodegen.js','utf8');assert.match(source,/MIT License/);const c={};vm.createContext(c);vm.runInContext(source,c);const qr=c.qrcodegen.QrCode.encodeText('https://demo.example.invalid/',c.qrcodegen.QrCode.Ecc.MEDIUM);assert(qr.size>=21);assert.equal(qr.getModule(0,0),true);assert.equal(qr.getModule(-1,-1),false);
 });
+
+
+test('scenario jumps clear resolver lock and smoothing without clearing demo records or manual mode',()=>{
+ const source=fs.readFileSync('presentation/runtime.js','utf8');
+ const start=source.indexOf('  function resetJourneyLocation()'),end=source.indexOf('  function selectRoute(',start);
+ const resolver=require('../src/location-resolver.js').createResolver();
+ const smart={site_id:'smart',name:'Smart Connect'};
+ for(let i=0;i<5;i++)resolver.resolve({lat:14.7+i*.0001,lon:121,accuracy:3,timestamp:i*1000,candidates:[{expressway:'C3-SEG 8.1',km:10,distance:.1,bound:'EB'}],interchange:smart});
+ assert.equal(resolver.state().interchange.name,'Smart Connect');
+ const records=[{id:'preserve'}],manual=require('../src/manual-location.js').create();manual.setMode('mainline');
+ const ctx={locationResolver:resolver,gpsFilter:{variance:4,lat:14.7,lon:121,timestampMs:4000},GeoKalmanFilter:class{constructor(){this.variance=-1;this.lat=0;this.lon=0;this.timestampMs=0;}},clearTimeout(){},gpsFreshnessTimer:1,currentPos:{fresh:true},currentResolvedLocation:{},captureLocation:{invalidate:()=>({saveAllowed:false,fresh:false})},userBound:'EB',boundManuallySelected:true,resetBoundTrend(){},manualLocation:manual,stationingReview:null,setGpsCaptureReady(){},records};
+ vm.createContext(ctx);vm.runInContext(source.slice(start,end),ctx);ctx.resetJourneyLocation();
+ assert.equal(resolver.state().confirmedCorridor,'');assert.equal(resolver.state().interchange,null);
+ assert.equal(ctx.gpsFilter.variance,-1);assert.equal(ctx.currentPos,null);assert.equal(ctx.currentResolvedLocation.saveAllowed,false);
+ assert.equal(ctx.userBound,null);assert.equal(manual.mode(),'mainline');assert.equal(records.length,1);
+ let result;for(let i=0;i<4;i++)result=resolver.resolve({lat:14.9+i*.0001,lon:120.9,accuracy:3,timestamp:10000+i*1000,candidates:[{expressway:'NLEX',km:33,distance:.1,bound:'NB'}],interchange:{site_id:'balagtas',name:'Balagtas'}});
+ assert.equal(result.confirmedCorridor,'NLEX');assert.equal(result.interchange.name,'Balagtas');
+ assert.match(source,/value=id;resetJourneyLocation\(\)/);assert.match(source,/state.index=0;resetJourneyLocation\(\)/);
+});

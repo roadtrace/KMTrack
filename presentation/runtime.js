@@ -47,11 +47,22 @@
   ];
   function guide(index){state.step=Math.max(0,Math.min(steps.length-1,index));const [title,copy,route,view]=steps[state.step];el('demo-step-title').textContent=(state.step+1)+' / '+steps.length+' - '+title;el('demo-step-copy').textContent=copy;el('demo-prev').disabled=!state.step;el('demo-next').disabled=state.step===steps.length-1;if(route&&state.routes.length)selectRoute(route);showAppView(view);}
   el('demo-prev').onclick=()=>guide(state.step-1);el('demo-next').onclick=()=>guide(state.step+1);
-  function selectRoute(id){const route=state.routes.find(r=>r.id===id);if(!route)return;state.route=route;state.index=0;state.gps=true;state.playing=true;el('demo-route').value=id;resetBoundTrend();stationingReview?.invalidate();el('demo-play').textContent='Pause journey';el('demo-gps-loss').textContent='Simulate GPS loss';tick(false);drawRoute();}
+  function resetJourneyLocation(){
+    locationResolver.reset();
+    Object.assign(gpsFilter,new GeoKalmanFilter());
+    clearTimeout(gpsFreshnessTimer);
+    currentPos=null;
+    currentResolvedLocation=captureLocation.invalidate('Locating simulated road');
+    userBound=null;boundManuallySelected=false;resetBoundTrend();
+    manualLocation.setMode(manualLocation.mode());
+    stationingReview?.invalidate();
+    setGpsCaptureReady(false);
+  }
+  function selectRoute(id){const route=state.routes.find(r=>r.id===id);if(!route)return;state.route=route;state.index=0;state.gps=true;state.playing=true;el('demo-route').value=id;resetJourneyLocation();el('demo-play').textContent='Pause journey';el('demo-gps-loss').textContent='Simulate GPS loss';tick(false);drawRoute();}
   function drawRoute(){if(!osmMap||!state.route)return;state.overlay?.remove();state.overlay=L.polyline(state.route.points.map(p=>[p.lat,p.lon]),{color:'#48aeb1',weight:4,dashArray:'6 5',interactive:false}).addTo(osmMap);}
-  function tick(advance=true){if(!state.route||!state.gps)return;if(advance&&state.playing)state.index=Math.min(state.route.points.length-1,state.index+state.speed);demo.emit(state.route.points[state.index],state.playing?10*state.speed:0);el('demo-position-status').textContent=state.route.label+' - '+(state.playing?'moving':'paused')+' - '+(state.index+1)+' / '+state.route.points.length+' simulated fixes';if(state.index===state.route.points.length-1){state.playing=false;el('demo-play').textContent='Restart journey';}if(osmMap&&!state.overlay)drawRoute();}
+  function tick(advance=true){if(!state.route||!state.gps)return;if(advance&&state.playing)state.index=Math.min(state.route.points.length-1,state.index+state.speed);if(state.index===state.route.points.length-1){state.playing=false;el('demo-play').textContent='Restart journey';}demo.emit(state.route.points[state.index],state.playing?10*state.speed:0);el('demo-position-status').textContent=state.route.label+' - '+(state.playing?'moving':'paused')+' - '+(state.index+1)+' / '+state.route.points.length+' simulated fixes';if(osmMap&&!state.overlay)drawRoute();}
   el('demo-route').onchange=event=>selectRoute(event.target.value);
-  el('demo-play').onclick=()=>{if(state.index===state.route.points.length-1){state.index=0;resetBoundTrend();}state.playing=!state.playing;el('demo-play').textContent=state.playing?'Pause journey':'Resume journey';tick(false);};
+  el('demo-play').onclick=()=>{if(state.index===state.route.points.length-1){state.index=0;resetJourneyLocation();}state.playing=!state.playing;el('demo-play').textContent=state.playing?'Pause journey':'Resume journey';tick(false);};
   el('demo-speed').onchange=event=>state.speed=Number(event.target.value);
   el('demo-gps-loss').onclick=()=>{state.gps=!state.gps;if(state.gps)tick(false);else{demo.unavailable();el('demo-position-status').textContent='Simulated GPS unavailable. Capture stays subject to the normal freshness checks.';}el('demo-gps-loss').textContent=state.gps?'Simulate GPS loss':'Restore simulated GPS';};
   el('demo-map').onclick=()=>{panel.close();showAppView('map');drawRoute();};el('demo-log').onclick=()=>{panel.close();showAppView('log');};
