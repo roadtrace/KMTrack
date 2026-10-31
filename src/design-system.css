@@ -3155,3 +3155,19 @@ html:root #map-view .map-history-filter small { flex-basis: 100%; color: var(--d
 .auth-gate[data-state="checking"] .auth-gate-card { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 .auth-gate[data-state="checking"] .auth-gate-card button { visibility: hidden; }
 @media (prefers-reduced-motion: reduce) { .loading-brand path, .auth-gate[data-state="checking"] .loading-brand path, .startup-ring { animation: none; } }
+/* Shared inspection actions: one layout for every own record, in both themes. */
+#edit-modal .entry-sheet-actions { display:flex; gap:10px; }
+#edit-modal .entry-sheet-actions > [hidden], #edit-modal .entry-view-actions[hidden] { display:none !important; }
+#edit-modal .entry-sheet-actions button { min-height:44px; white-space:nowrap; }
+#edit-modal .entry-sheet-actions .inspection-danger { color:var(--ds-destructive); background:transparent; border:1px solid var(--ds-destructive); min-width:92px; }
+#edit-modal .entry-sheet-actions #edit-delete.inspection-cancel,
+#edit-modal .entry-sheet-actions .inspection-cancel { color:var(--ds-fg); background:var(--ds-muted); border:1px solid var(--ds-border); flex:1; }
+#edit-modal .entry-view-actions .lane-save { flex:1; }
+#edit-modal .entry-sheet-photo button { min-height:44px; }
+#edit-modal .entry-sheet-close { outline:none; }
+#edit-modal .entry-sheet-close:focus-visible { outline:2px solid var(--ds-primary); outline-offset:2px; }
+#edit-modal .entry-edit-status { color:var(--ds-fg-muted); font-size:13px; line-height:1.5; margin:12px 0 0; }
+#edit-modal .entry-edit-status:empty { display:none; }
+#edit-modal:not(.entry-is-editing) .entry-edit-pencil { display:none; }
+#edit-modal:not(.entry-is-editing) :is(select,input):disabled { opacity:1; -webkit-text-fill-color:var(--ds-fg); }
+#edit-modal .entry-sheet-actions svg { fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }

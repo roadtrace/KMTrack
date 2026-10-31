@@ -96,7 +96,7 @@ test('app uses memory My projection while keeping Map, exports and runner device
   const source = fs.readFileSync(require.resolve('../index.html'), 'utf8');
   assert.match(source, /myRecords = SPOTITMyRecords.createController/);
   assert.match(source, /SPOTITSyncRunner\.createRunner\(/);
-  assert.match(source, /return canViewTeamRecords\(\) \? entries : entries\.filter/);
+  assert.match(source, /return entries\.filter\(entry => \(.*record_deleted/);
   assert.match(source, /activeRecordController\(\).records\(entries, getLogFilters\(\)\)/);
   assert.doesNotMatch(source, /entries\.(?:push|concat)\([^\n]*(?:cloudRows|page.rows|item.cloud)/);
 });

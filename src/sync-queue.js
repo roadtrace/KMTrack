@@ -76,13 +76,15 @@
   }
 
   function summary(entries, options){
-    const list=entries||[];
+    const list=(entries||[]).filter(e=>!e?.record_deleted || e.record_actions?.length);
     const counts={total:list.length,pending:0,syncing:0,synced:0,failed:0,needs_review:0,local_only:0,unsaved:0};
     for(const e of list){
       if(options?.durable && !options.durable(e)) counts.unsaved++;
       else if(!e) counts.needs_review++;
       else if(e.sync_status===STATUS.LOCAL_ONLY || e.importBatchId || e.cloud_source) counts.local_only++;
       else if(reviewRequired(e) || e.sync_status===STATUS.NEEDS_REVIEW) counts.needs_review++;
+      else if(e.record_actions?.some(a=>a.error) || e.photo_auto_sync && e.r2_photo?.status==='review') counts.needs_review++;
+      else if(e.record_actions?.length || e.photo_auto_sync && e.photoId) counts.pending++;
       else if(isSynced(e) && e.remote_id===e.id) counts.synced++;
       else if(isSynced(e) || e.remote_id) counts.needs_review++;
       else if(e.sync_status===STATUS.SYNCING) counts.syncing++;

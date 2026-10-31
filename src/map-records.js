@@ -10,6 +10,7 @@
   function project(items,scope='my',filter={}){
     const rows=new Map();let skipped=0;
     for(const item of items||[]){
+      if(item.local?.record_deleted&&!item.local.record_actions?.some(a=>a.error))continue;
       if(!UUID.test(item.id||'')){skipped++;continue;}
       const e=item.primary==='cloud'||!item.local?my.cloudDisplay(item.cloud):item.local;
       if(!e||!Number.isFinite(e.lat)||Math.abs(e.lat)>90||!Number.isFinite(e.lon)||Math.abs(e.lon)>180){skipped++;continue;}

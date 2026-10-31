@@ -19,7 +19,7 @@ for(const [options,entry,label] of [
 test('presentation introduces no photo reads or persistence; private viewer unchanged',()=>{
   const src=fs.readFileSync('src/log-register.js','utf8');
   assert.doesNotMatch(src,/fetch\(|download\(|indexedDB|localStorage|createObjectURL|<img/);
-  for(const f of ['src/cloud-photo-viewer.js','src/photo-cloud-api.js','src/photo-sync.js','src/photo-pilot.js','src/team-records.js','src/my-records.js','src/entry-filters.js']) assert.equal(fs.readFileSync(f,'utf8').replaceAll('\r\n','\n'),baseline(f));
+  for(const f of ['src/cloud-photo-viewer.js','src/photo-cloud-api.js','src/photo-sync.js','src/photo-pilot.js','src/team-records.js','src/entry-filters.js']) assert.equal(fs.readFileSync(f,'utf8').replaceAll('\r\n','\n'),baseline(f));
 });
 for(const [from,to,text] of [
   ['2026-10-06','2026-10-06','Oct 6, 2026'],['2026-10-04','2026-10-06','Oct 4 – 6, 2026'],

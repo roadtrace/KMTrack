@@ -63,7 +63,7 @@ function render(items){
 }
 test('production Log renders cloud-only history and supplies no device mutation controls',async()=>{
  const f=fixture();f.setRows([f.row(1)]);await f.store.load('my');const items=my.project(f.options()).records,{controls}=render(items),cards=controls.get('log-list').children;
- assert.equal(cards.length,1);assert.match(cards[0].innerHTML,/Submitted record · Read only/);assert.equal(cards[0].dataset.idx,undefined);assert.doesNotMatch(cards[0].innerHTML,/swipe-action|photo-retry|cloud-submit|preapproval-review|checkbox|Save|Delete/);assert.equal(controls.get('export-btn').disabled,true);
+ assert.equal(cards.length,1);assert.match(cards[0].innerHTML,/Your inspection/);assert.equal(cards[0].dataset.idx,undefined);assert.doesNotMatch(cards[0].innerHTML,/swipe-action|photo-retry|cloud-submit|preapproval-review|checkbox|Save|Delete/);assert.equal(controls.get('export-btn').disabled,true);
 });
 test('production Log deduplicates combined record, retains pending action and divergence detail',async()=>{
  const f=fixture(),local=f.local(1);local.type='Others';f.setRows([f.row(1)]);await f.store.load('my');const items=my.project({...f.options(),localEntries:[local]}).records,{controls}=render(items),cards=controls.get('log-list').children;assert.equal(cards.length,1);assert.match(cards[0].children[0].innerHTML,/Waiting to submit|Device and submitted details differ/);assert.match(cards[0].innerHTML,/swipe-action delete/);

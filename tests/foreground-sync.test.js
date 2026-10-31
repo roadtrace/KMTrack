@@ -5,7 +5,7 @@ function source(name){const html=fs.readFileSync('index.html','utf8'),start=html
 function app(){
  const timers=[],cloud=deferred(),photo=deferred(),data=new Map();let wakes=0,renders=0,photoCalls=0;
  const scheduler=foreground.createScheduler({wake:()=>{wakes++;return cloud.promise;},render:()=>renders++,setTimer:(fn,delay)=>{timers.push({fn,delay});return timers.length;}});
- const box=vm.createContext({entries:[],storageAvailable:true,authWorkspaceUnlocked:true,SPOTITLocalStore:store,SPOTITPhotoUpload:{sourceChanged(){}},localStorage:{setItem:(k,v)=>data.set(k,v),getItem:k=>data.get(k)||null},activeEntriesStorageKey:()=> 'account',syncRunner:{},foregroundSync:scheduler,document:{getElementById:()=>({hidden:true})},console:{error(){}},prepareLocalPhoto(){photoCalls++;return photo.promise;}});
+ const box=vm.createContext({entries:[],editingOriginal:null,storageAvailable:true,authWorkspaceUnlocked:true,SPOTITLocalStore:store,SPOTITPhotoUpload:{sourceChanged(){}},localStorage:{setItem:(k,v)=>data.set(k,v),getItem:k=>data.get(k)||null},activeEntriesStorageKey:()=> 'account',syncRunner:{},foregroundSync:scheduler,document:{getElementById:()=>({hidden:true})},console:{error(){}},prepareLocalPhoto(){photoCalls++;return photo.promise;}});
  vm.runInContext(source('saveEntries'),box);return {box,data,timers,scheduler,cloud,photo,get wakes(){return wakes},get renders(){return renders},get photoCalls(){return photoCalls}};
 }
 test('actual durable Save and second Save finish while cloud and photo work remain unresolved',async()=>{
@@ -39,5 +39,5 @@ test('actual camera Save waits for local photo durability only, not slow photo p
  await Promise.resolve().then(()=>nav++);assert.equal(nav,1);local.resolve();await saved;assert.equal(puts,2);assert.equal(closed,1);assert.equal(JSON.parse(a.data.get('account')).length,1);assert.equal(a.wakes,0);assert.equal(a.photoCalls,0);a.cloud.resolve();a.photo.resolve();
 });
 test('foreground integration is cached, keeps photo gate disabled and has no background sync',()=>{
- const html=fs.readFileSync('index.html','utf8'),sw=fs.readFileSync('sw.js','utf8');assert.match(html,/PHOTO_CLOUD_TRANSPORT_ENABLED = false/);assert.match(html,/onChange: \(\) => foregroundSync.changed\(\)/);assert.match(sw,/\.\/src\/foreground-sync.js/);assert.match(sw,/v274/);assert.doesNotMatch(fs.readFileSync('src/foreground-sync.js','utf8'),/SyncManager|serviceWorker|\.register\(/);
+ const html=fs.readFileSync('index.html','utf8'),sw=fs.readFileSync('sw.js','utf8');assert.match(html,/PHOTO_CLOUD_TRANSPORT_ENABLED = false/);assert.match(html,/onChange: \(\) => foregroundSync.changed\(\)/);assert.match(sw,/\.\/src\/foreground-sync.js/);assert.match(sw,/CACHE_VERSION = 'v\d+'/);assert.doesNotMatch(fs.readFileSync('src/foreground-sync.js','utf8'),/SyncManager|serviceWorker|\.register\(/);
 });

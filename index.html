@@ -4665,6 +4665,7 @@
   <script src="./src/team-log.js"></script>
   <script src="./src/team-map.js"></script>
   <script src="./src/submitted-delete.js"></script>
+  <script src="./src/inspection-actions.js"></script>
   <script src="./src/more.js"></script>
   <script src="./src/presentation-config.js"></script>
   <script src="./src/presentation-launcher.js"></script>
@@ -4852,8 +4853,12 @@
     // ---------- Serial inspection sync (photos remain local) ----------
     let syncRunner = null;
     let inspectionWakeup = null;
+    let inspectionActions = null;
+    let editingOriginal = null;
+    let editingMode = false;
+    let editDraftPhotoIds = new Set();
     const foregroundSync = SPOTITForegroundSync.createScheduler({
-      wake: () => { inspectionWakeup?.changed(); return syncRunner?.wake('saved'); },
+      wake: async () => { inspectionWakeup?.changed(); await syncRunner?.wake('saved'); await inspectionActions?.wake(); },
       render: () => renderLog(),
       onError: error => console.error('Foreground sync could not continue', error)
     });
@@ -4870,7 +4875,7 @@
         enabled: R2_PHOTO_PILOT_ENABLED || PHOTO_CLOUD_TRANSPORT_ENABLED, client,
         context: inspectionContext, key: activeEntriesStorageKey,
         verify: () => authController.verifyOnline(), read: getPhoto, add: addPhotoUploadEnvelope,
-        durable: localEntryDurable, isCurrent: e => authWorkspaceUnlocked && entries.includes(e),
+        durable: localEntryDurable, isCurrent: e => authWorkspaceUnlocked && entries.includes(e) && editingOriginal?.id!==e.id,
         lock: (key, run) => {
           if (!navigator.locks?.request) throw new Error('Safe photo locking unavailable.');
           return navigator.locks.request(key, run);
@@ -4974,7 +4979,7 @@
         && ['approved', 'offline-recent'].includes(authDisplayState.mode));
     }
     function accessibleEntries() {
-      return canViewTeamRecords() ? entries : entries.filter(entry => !entry.importBatchId);
+      return entries.filter(entry => (!entry.record_deleted || entry.record_actions?.some(a=>a.error)) && (canViewTeamRecords() || !entry.importBatchId));
     }
     function cloudAccess() {
       const role = authDisplayState?.profile?.role;
@@ -5102,7 +5107,7 @@
     function cloudCard(item) {
       const card = document.createElement('div'), e = SPOTITMyRecords.cloudDisplay(item.cloud);
       card.className = 'log-entry cloud-only ' + typeClass(e.type);
-      card.innerHTML = SPOTITLogRegister.cardHTML(e, {cloud:true, team:logRecordScope === 'team', photoLabel:item.cloud.photo_path ? 'Photo availability checked in details' : '', notice:item.localContext ? 'Also saved on this device. Use My Records for device actions.' : ''});
+      card.innerHTML = SPOTITLogRegister.cardHTML(e, {cloud:true, team:logRecordScope === 'team', photoLabel:item.cloud.photo_path ? 'Photo availability checked in details' : '', notice:''});
       card.tabIndex = 0; card.setAttribute('role','button');
       card.setAttribute('aria-label', 'View submitted ' + e.type + ' inspection');
       card.addEventListener('click', () => openSubmittedDetail(item.id));
@@ -5115,19 +5120,26 @@
     function currentPhotoItem(id) {
       return submittedMapScope ? freshMapItems(submittedMapScope).find(item => item.id.toLowerCase() === id.toLowerCase()) : currentMyItem(id);
     }
-    function appendSubmittedDelete(actions,row,e,closeView) {
-      if(!submittedDeletion||!SPOTITSubmittedDelete.allowed(row,inspectionContext(),activeEntriesStorageKey(),navigator.onLine!==false))return;
-      const remove=document.createElement('button');remove.type='button';remove.className='ds-btn ds-btn-quiet submitted-delete';remove.textContent='Delete submitted inspection';
-      remove.onclick=async()=>{
-        const label=[e.type,e.timestamp,e.expressway,e.km==null?'':formatKmStation(e.km),e.bound,e.lane?'Lane '+e.lane:''].filter(Boolean).join(' ? ');
-        if(!confirm('Permanently delete this submitted inspection from the database and its copy on this device?\n\n'+label+'\n\nThis cannot be undone.'))return;
-        remove.disabled=true;const message=document.createElement('p');message.setAttribute('role','status');actions.before(message);message.textContent='Deleting submitted inspection...';
-        try{await submittedDeletion.remove(row,true);closeView();renderLog();}
-        catch(error){message.textContent=error.message;remove.disabled=false;}
-      };actions.append(remove);
-    }
     function openSubmittedDetail(id, mapScope = null) {
       const item = mapScope ? freshMapItems(mapScope).find(item => item.id.toLowerCase() === id.toLowerCase()) : currentMyItem(id); if (!item?.cloud) return;
+      if ((mapScope || logRecordScope) !== 'team' && item.cloud.user_id?.toLowerCase() === inspectionContext().userId?.toLowerCase()) {
+        const c = inspectionContext();
+        if (!c.canUseLocal || c.workspaceUserId !== c.userId) return;
+        let index = entries.findIndex(e => e.id === item.id && !e.importBatchId);
+        if (index < 0) {
+          const row = item.cloud;
+          const entry = SPOTITEntry.normalizeEntry({ ...SPOTITMyRecords.cloudDisplay(row), id:row.id,
+            user_id:row.user_id,team:row.team,remote_id:row.id,sync_status:'synced',created_at:row.created_at,
+            interchange:row.interchange_exit || '',interchangeSegment:row.interchange_segment || '',
+            record_base:SPOTITInspectionActions.content(row),photo_path:row.photo_path || '' });
+          if (!entry) { alert('This inspection is missing location information and cannot be edited.'); return; }
+          const before=entries.slice(); entries.push(entry);
+          if (!saveEntries(false)) { entries=before; return; }
+          index=entries.length-1;
+        }
+        if (!entries[index].record_deleted || entries[index].record_actions?.some(a=>a.error)) void openEditModal(index);
+        return;
+      }
       const viewer = (mapScope || logRecordScope) === 'team' ? teamPhotoViewer : cloudPhotoViewer;
       submittedDialog?.close();
       submittedMapScope = mapScope;
@@ -5135,15 +5147,9 @@
       dialog.className = 'submitted-record-dialog';
       const row = item.cloud, e = SPOTITMyRecords.cloudDisplay(row);
       const teamView = (mapScope || logRecordScope) === 'team';
-      const editableIndex = () => {
-        const context = inspectionContext();
-        if (teamView || !context.canUseLocal || !context.userId || context.workspaceUserId !== context.userId || !item.local
-          || row.user_id?.toLowerCase() !== context.userId.toLowerCase()) return -1;
-        return entries.findIndex(entry => entry.id === item.local.id
-          && entry.user_id?.toLowerCase() === context.userId.toLowerCase() && localEntryDurable(entry));
-      };
       const sheet = document.querySelector('#edit-modal .entry-sheet').cloneNode(true);
       const nodes = Object.fromEntries([...sheet.querySelectorAll('[id]')].map(node => [node.id, node]));
+      sheet.querySelector('.entry-view-label')?.remove();sheet.querySelector('.entry-edit-status')?.remove();
       sheet.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
       sheet.querySelectorAll('label[for]').forEach(node => node.removeAttribute('for'));
       sheet.removeAttribute('role'); sheet.removeAttribute('aria-modal'); sheet.removeAttribute('aria-labelledby');
@@ -5169,7 +5175,7 @@
       const photoSection = sheet.querySelector('.entry-sheet-photo');
       photoSection.querySelector('.edit-photo-row').remove();
       const status = document.createElement('p'); status.className = 'photo-result'; status.setAttribute('role', 'status');
-      status.textContent = row.photo_path || item.local?.photoId ? 'Photo available to view' : R2_PHOTO_PILOT_ENABLED ? 'Check for a submitted photo' : 'No verified photo available';
+      status.textContent = 'Open photo evidence to check availability.';
       photoSection.append(status);
       const actions = sheet.querySelector('.entry-sheet-actions'); actions.replaceChildren();
       nodes['edit-close'].onclick = () => dialog.close();
@@ -5184,48 +5190,12 @@
             if (submittedDialog !== dialog || !dialog.open) { viewer.close(); return; }
             preview?.remove(); preview = document.createElement('img'); preview.src = result.url; preview.alt = 'Inspection photo';
             preview.style.maxWidth = '100%'; photoSection.append(preview);
-            status.textContent = result.source === 'local' ? 'Photo on this device' : 'Verified submitted photo';
+            status.textContent = 'Photo evidence';
           } catch (_) { if (dialog.open) status.textContent = 'Photo unavailable. The record remains available.'; }
           finally { view.disabled = false; }
         }; photoSection.append(view);
       }
       const close = document.createElement('button'); close.type = 'button'; close.textContent = 'Close'; close.className = 'ds-btn ds-btn-quiet'; close.onclick = () => dialog.close(); actions.append(close);
-      appendSubmittedDelete(actions,row,e,()=>dialog.close());
-      if(R2_PHOTO_PILOT_ENABLED && !teamView && row.user_id===inspectionContext().userId){
-        const remove=document.createElement('button');remove.type='button';remove.className='ds-btn ds-btn-quiet';remove.textContent='Remove submitted R2 photo';
-        remove.onclick=async()=>{
-          if(!confirm('Remove the submitted photo from secure photo storage? Local photos will remain on this device.'))return;
-          const scope=SPOTITInspections.scopeKey(inspectionContext()),key=activeEntriesStorageKey();
-          const guard=()=>{if(!dialog.open||submittedDialog!==dialog||key!==activeEntriesStorageKey()||scope!==SPOTITInspections.scopeKey(inspectionContext()))throw Error('Photo scope changed');};
-          remove.disabled=true;
-          try{
-            await authController.verifyOnline();guard();
-            const api=SPOTITR2Photos.createApi({enabled:true,client:photoApiClient,context:inspectionContext,guard});
-            const current=await api.current(row.id);guard();
-            if(!current){status.textContent='No current R2 photo to remove.';return;}
-            await api.remove(row.id,current.upload_id);guard();
-            viewer.close();preview?.remove();status.textContent='Submitted R2 photo removed. Local photos are unchanged.';
-            const index=editableIndex();
-            if(index>=0){
-              const local=entries[index],removed={...local.r2_photo,status:'removed',ack:null};
-              const before=entries.map(entry=>({...entry})),after=entries.map(entry=>entry===local?{...entry,r2_photo:removed}:entry);
-              SPOTITLocalStore.saveReview(localStorage,key,before,after);local.r2_photo=removed;foregroundSync.changed();
-            }
-          }catch(_){if(dialog.open)status.textContent='Could not remove the photo. Check access and whether a legacy photo is still attached.';}
-          finally{remove.disabled=false;}
-        };actions.append(remove);
-      }
-      if (!teamView) {
-        const edit = document.createElement('button'); edit.type = 'button'; edit.textContent = 'Edit'; edit.className = 'submitted-edit';
-        edit.disabled = editableIndex() < 0;
-        if (edit.disabled) {
-          const hint = document.createElement('p'); hint.className = 'submitted-edit-hint';
-          hint.textContent = 'Editing requires your saved record on its original device and an unlocked account workspace.';
-          sheet.querySelector('.entry-sheet-scroll').append(hint);
-        }
-        edit.onclick = () => { const index = editableIndex(); if (index < 0) { edit.disabled = true; return; } dialog.close(); openEditModal(index, true); };
-        actions.append(edit);
-      }
       dialog.addEventListener('close', () => { viewer?.close(); dialog.remove(); if (submittedDialog === dialog) { submittedDialog = null; submittedMapScope = null; } });
       document.body.append(dialog); dialog.showModal();
     }
@@ -5426,19 +5396,22 @@
     const SYNC_COPY = {
       unsaved: { tone: 'bad', pill: 'Not saved', title: 'Local save not confirmed', sub: 'Some records are only in memory. Export them before closing; cloud submission is blocked.' },
       review: { tone: 'warn', pill: 'Review required', title: 'Records need review', sub: 'Review or claim is required before these records can be submitted.' },
-      syncing: { tone: 'warn', pill: 'Submitting…', title: 'Submitting inspections', sub: 'One inspection operation runs at a time. Photos stay local.' },
+      syncing: { tone: 'warn', pill: 'Submitting…', title: 'Submitting inspections', sub: 'Saving inspections and photo changes.' },
       failed: { tone: 'warn', pill: 'Retrying', title: 'Retry scheduled', sub: 'Transient failures use a saved retry schedule.' },
-      pending: { tone: 'warn', pill: 'Waiting to sync', title: 'Saved on device', sub: '{n} record(s) await submission.' },
+      pending: { tone: 'warn', pill: 'Waiting to sync', title: 'Saved on device', sub: '{n} record(s) have changes waiting to sync.' },
       offline: { tone: 'warn', pill: 'Waiting for connection', title: 'Waiting for connection', sub: 'Records are safe on this device.' },
       synced: { tone: 'fresh', pill: 'Submitted', title: 'Cloud submissions recorded', sub: 'Inspection rows are submitted. Check each record for its separate photo status.' },
       local: { tone: 'neutral', pill: 'Saved on device', title: 'Saved on device', sub: 'Records are stored on this device.' }
     };
 
+    function syncWorkspaceEntries() {
+      const local=accessibleEntries();return local.concat(entries.filter(e=>e.record_deleted&&e.record_actions?.length&&!local.includes(e)));
+    }
     function updateSyncStatus() {
       const menu = document.getElementById('sync-menu');
       const text = document.getElementById('sync-status-text');
       if (!menu || !text) return;
-      const localEntries = accessibleEntries();
+      const localEntries = syncWorkspaceEntries();
       const counts = SPOTITSync.summary(localEntries, { durable: authWorkspaceUnlocked
         ? SPOTITLocalStore.snapshotContains(localStorage, activeEntriesStorageKey()) : () => false });
       const online = navigator.onLine !== false;
@@ -5478,7 +5451,7 @@
       const note = document.getElementById('sync-note');
       if (note) {
         note.textContent = state === 'unsaved' ? SYNC_COPY.unsaved.sub : (ready
-          ? (runnerState?.paused ? 'Submission is paused. Verify online or review the held inspection.' : runnerState?.waitingUntil > Date.now() ? `Retry after ${new Date(runnerState.waitingUntil).toLocaleTimeString('en-PH')}. Uncertain submissions reconcile first; photos stay local.` : 'Eligible new inspections submit automatically while this page is open. Uncertain outcomes reconcile first; photos stay local.')
+          ? (runnerState?.paused ? 'Submission is paused. Verify online or review the held inspection.' : runnerState?.waitingUntil > Date.now() ? `Retry after ${new Date(runnerState.waitingUntil).toLocaleTimeString('en-PH')}. Uncertain submissions are checked before retrying.` : 'Inspections and saved photo changes sync automatically while this page is open.')
           : 'Records stay on this device until this account and workspace are verified online. Guest and preapproval records remain held.');
       }
     }
@@ -5493,6 +5466,7 @@
         await syncRunner.whenIdle();
         if (SPOTITInspections.scopeKey(inspectionContext()) !== scope) return;
         await syncRunner.retryNow();
+        await inspectionActions?.retryNow();
       } catch (e) {
         setCloudStatus('Submission paused. Verify online before retrying.');
       }
@@ -5588,7 +5562,7 @@
         for (const entry of entries) {
           if (entry.photo_upload_manifest && entry.photo_upload_manifest.source_photo_id !== entry.photoId) SPOTITPhotoUpload.sourceChanged(entry);
         }
-        SPOTITLocalStore.save(localStorage, activeEntriesStorageKey(), entries);
+        SPOTITLocalStore.save(localStorage, activeEntriesStorageKey(), entries.map(e => typeof editingOriginal !== 'undefined' && editingOriginal?.id === e.id ? editingOriginal : e));
         const el = document.getElementById('storage-status');
         if (el) el.hidden = true;
         if (wakeSync && typeof syncRunner !== 'undefined' && syncRunner) foregroundSync.saved();
@@ -8004,6 +7978,7 @@
           timestamp: fullTimestamp(),
           inspector: inspectorName,
           photoId,
+          photo_auto_sync:true,
           photoFilename: result.filename,
           photoTimestamp: formatPhotoDate(result.stamp)
         }));
@@ -8127,6 +8102,9 @@
           if (entry) {
             SPOTITEntry.setLane(entry, cameraDraftEntry.lane || entry.lane);
             entry.photoId = photoId;
+            if(typeof editingOriginal !== 'undefined' && editingOriginal?.id===entry.id)editDraftPhotoIds.add(photoId);
+            entry.record_remove_photo=false;
+            entry.photo_auto_sync=true;
             entry.photoFilename = pendingCaptureFilename;
             entry.photoTimestamp = formatPhotoDate(pendingCaptureStamp);
             if (!saveEntries()) {
@@ -8137,8 +8115,9 @@
           playConfirmSound();
           clearCaptureReview();
           closeCamera();
+          if(typeof editingOriginal !== 'undefined' && editingOriginal?.id===entry?.id)renderEditPhotoPreview(entry);
           foregroundSync.changed();
-          if (oldPhotoId) {
+          if (oldPhotoId && (typeof editingOriginal === 'undefined' || editingOriginal?.id !== entry?.id)) {
             await deletePhoto(oldPhotoId);
             await deletePhoto(oldPhotoId + ':raw');
           }
@@ -8150,6 +8129,7 @@
             timestamp: fullTimestamp(),
             inspector: inspectorName,
             photoId,
+            photo_auto_sync:true,
             photoFilename: pendingCaptureFilename,
             photoTimestamp: formatPhotoDate(pendingCaptureStamp)
           }));
@@ -8174,10 +8154,14 @@
     // the underlying blob, so both stay in sync.
     async function removeEntryPhoto(idx, opts) {
       const entry = entries[idx];
-      if (!entry || !entry.photoId) return;
+      if (!entry || (!entry.photoId && !entry.record_photo?.current_id && !entry.photo_path)) return;
       const skipConfirm = opts && opts.skipConfirm;
       if (!skipConfirm && !confirm('Remove the photo from this inspection entry? The entry itself will stay.')) return;
       const photoId = entry.photoId;
+      if(editingOriginal?.id===entry.id) {
+        entry.photoId='';entry.photoFilename='';entry.photoTimestamp='';entry.record_remove_photo=true;
+        renderEditPhotoPreview(entry);return;
+      }
       entry.photoId = '';
       entry.photoFilename = '';
       entry.photoTimestamp = '';
@@ -8625,7 +8609,7 @@
           if (decision === 'edit') {
             openSwipeEntryId = null; row.classList.remove('swipe-open'); setSwipeOffset(row, 0); openEditModal(idx);
           } else if (decision === 'delete') {
-            openSwipeEntryId = null; deletionController.remove(idx, true);
+            openSwipeEntryId = null; void openEditModal(idx).then(()=>deleteInspectionFromSheet());
           } else if (decision === 'reveal-edit') {
             closeOpenSwipe(entryId); openSwipeEntryId = entryId; row.classList.add('swipe-open'); setSwipeOffset(row, SPOTITSwipe.REVEAL_WIDTH_PX);
           } else if (decision === 'reveal-delete') {
@@ -8815,10 +8799,6 @@
       ${photoState.hasPhoto ? '<div class="record-photo-status">' : ''}
       ${photoState.label ? `<span class="import-label" title="${xmlEscape(photoState.detail)}">${xmlEscape(myView ? SPOTITMyRecords.photoStatus(e) : photoState.label)}</span>` : ''}
       ${photoState.unavailable ? `<span class="import-label">${xmlEscape(photoState.unavailable)}</span>` : ''}
-      ${!capped && !selectMode && (photoState.review || photoState.retry || photoState.reserved) ? `<button type="button" class="ds-btn ds-btn-quiet photo-issue" data-entry-id="${xmlEscape(e.id)}">Review photo issue</button>` : ''}
-      ${!capped && !selectMode && photoState.retry ? `<button type="button" class="ds-btn ds-btn-quiet photo-retry" data-entry-id="${xmlEscape(e.id)}" ${!PHOTO_CLOUD_TRANSPORT_ENABLED ? 'disabled' : ''}>Retry photo</button><span class="import-label">${!PHOTO_CLOUD_TRANSPORT_ENABLED ? 'Photo uploads disabled for pilot' : ''}</span>` : ''}
-      ${R2_PHOTO_PILOT_ENABLED && !capped && !selectMode && SPOTITR2Photos.eligibility(e,inspectionContext(),entryDurable(e)).eligible ? `<button type="button" class="ds-btn ds-btn-quiet r2-photo-upload" data-entry-id="${xmlEscape(e.id)}">${e.r2_photo?.source_id===e.photoId && e.r2_photo?.status==='synced' ? 'Photo submitted' : 'Upload photo'}</button>` : ''}
-      ${!capped && !selectMode && !photoCloudController?.isBusy() && authDisplayState && authController && SPOTITPhotoUpload.eligibility(e, inspectionContext(), entryDurable(e)).eligible ? `<button type="button" class="ds-btn ds-btn-quiet photo-prepare" data-entry-id="${xmlEscape(e.id)}">${e.photo_upload_manifest ? 'Check prepared photo locally' : 'Prepare photo locally'}</button>` : ''}
       ${photoState.hasPhoto ? '</div>' : ''}
       ${myView ? `<p class="record-submission-status">${xmlEscape(SPOTITMyRecords.status(item))}</p>` : ''}
       ${myView && SPOTITMyRecords.differs(item) ? '<p class="record-divergence">Device and submitted details differ</p>' : ''}
@@ -8829,7 +8809,7 @@
       ${!capped && !selectMode && cloudAccess() && entryDurable(e) && !e.importBatchId && !e.guest_claim_required && !e.preapproval_review_required && !e.submission_review_required && (!e.submission_snapshot || e.submission_retry_allowed === true) && !e.sync_outcome_unknown && !e.remote_id && ['pending','failed'].includes(e.sync_status) ? `<button type="button" class="ds-btn ds-btn-quiet cloud-submit" data-entry-id="${xmlEscape(e.id)}">Submit this inspection</button>` : ''}
       ${checkboxHtml}
     `;
-        if (!capped) SPOTITLogRegister.decorate(div, e, {durable:entryDurable(e), photoLabel:photoState.hasPhoto ? SPOTITMyRecords.photoStatus(e) : photoState.unavailable || '', notice:[photoState.unavailable, photoState.retry && !PHOTO_CLOUD_TRANSPORT_ENABLED ? 'Photo uploads disabled for pilot' : '', e.guest_claim_required ? 'Guest inspection requires claim' : e.preapproval_review_required ? 'Preapproval inspection requires review' : ''].filter(Boolean).join(' · '), differs:myView && SPOTITMyRecords.differs(item)});
+        if (!capped) SPOTITLogRegister.decorate(div, e, {durable:entryDurable(e), photoLabel:photoState.hasPhoto ? SPOTITMyRecords.photoStatus(e) : photoState.unavailable || '', notice:[photoState.unavailable, e.guest_claim_required ? 'Guest inspection requires claim' : e.preapproval_review_required ? 'Preapproval inspection requires review' : ''].filter(Boolean).join(' · '), differs:false});
         row.innerHTML = `<button type="button" class="swipe-action edit" data-idx="${realIdx}" aria-label="Edit ${xmlEscape(e.type)} entry">Edit</button><button type="button" class="swipe-action delete" data-idx="${realIdx}" aria-label="Delete ${xmlEscape(e.type)} entry">Delete</button>`;
         row.appendChild(div);
         list.appendChild(row);
@@ -8876,7 +8856,7 @@
         event.stopPropagation(); openPreapprovalReview(event.currentTarget.dataset.entryId);
       }));
       list.querySelectorAll('.swipe-action.delete').forEach(btn => btn.addEventListener('click', e => {
-        e.stopPropagation(); deletionController.remove(+e.currentTarget.dataset.idx, true);
+        e.stopPropagation(); void openEditModal(+e.currentTarget.dataset.idx).then(()=>deleteInspectionFromSheet());
       }));
       list.querySelectorAll('.submitted-detail').forEach(button => button.addEventListener('click', event => {
         event.stopPropagation(); openSubmittedDetail(button.dataset.recordId);
@@ -8917,6 +8897,7 @@
     function renderAuthState(state) {
       const scope = value => JSON.stringify([value?.mode, value?.cloudVerified, value?.canUseLocal, value?.userId, value?.profile?.role, value?.profile?.team]);
       if (scope(state) !== scope(authDisplayState)) {
+        if(typeof editingEntryIndex!=='undefined' && editingEntryIndex!==null)closeEditModal();
         inspectionScopeGeneration++; syncRunner?.invalidate(); invalidateMyRecords(); activePreapprovalDialog?.close(); activeGuestClaimDialog?.close();
         // A private or local preview must not survive an account/workspace change.
         document.getElementById('photo-close')?.click();
@@ -9038,7 +9019,7 @@
       pilotPhotoViewer = SPOTITPhotoPilot.createViewer({
         client, context: inspectionContext, key: activeEntriesStorageKey,
         verify: () => authController.verifyOnline(), read: getPhoto,
-        durable: localEntryDurable, isCurrent: e => authWorkspaceUnlocked && entries.includes(e),
+        durable: localEntryDurable, isCurrent: e => authWorkspaceUnlocked && entries.includes(e) && editingOriginal?.id!==e.id,
         unavailable: (e, message) => {
           const changes = { photo_sync_status: 'photo_needs_review', photo_sync_error: message };
           const before = entries.map(row => ({ ...row }));
@@ -9063,6 +9044,16 @@
         onChange: () => foregroundSync.changed()
       });
       syncRunner.bindWakeups({ window, document, verify: () => authController.verifyOnline() });
+      inspectionActions=SPOTITInspectionActions.createController({client,context:inspectionContext,key:activeEntriesStorageKey,
+        entries:()=>entries,durable:localEntryDurable,blocked:entry=>editingOriginal?.id===entry.id,verify:()=>authController.verifyOnline(),
+        available:()=>authWorkspaceUnlocked && storageAvailable && navigator.onLine!==false && !document.hidden && !editingOriginal,
+        save:persistEntryChanges,deleted:async entry=>{const id=entry.photoId;for(const key of [id,id?id+':raw':null,entry.photo_upload_manifest?.payload_key,entry.r2_photo?.payload_key].filter(Boolean))await deletePhoto(key);if(entries.includes(entry)&&localEntryDurable(entry))persistEntryChanges(entry,{photoId:'',photoFilename:'',photoTimestamp:'',photo_auto_sync:false,...SPOTITInspectionActions.clearedPhoto()});},upload:async entry=>{const result=await photoCloudController.dispatch(entry);if(result.status==='held'&&!entry.r2_photo&&entries.includes(entry)&&localEntryDurable(entry))persistEntryChanges(entry,{r2_photo:{status:'review',source_id:entry.photoId,error:result.reason}});if(result.status==='synced'&&entries.includes(entry)&&localEntryDurable(entry))persistEntryChanges(entry,{photo_auto_sync:false,record_photo_known:true,record_photo:{current_id:entry.r2_photo.manifest.upload_id,legacy_path:entry.photo_path||null,legacy_filename:entry.record_photo?.legacy_filename||null}});},
+        changed:()=>{myRecords?.invalidate();teamLogBrowser?.invalidate();teamMapBrowser?.invalidate();void myRecords?.load(true);mapProjectionDirty=true;foregroundSync.changed();}});
+      window.addEventListener('online',()=>foregroundSync.saved());
+      window.addEventListener('focus',()=>foregroundSync.saved());
+      document.addEventListener('visibilitychange',()=>{if(!document.hidden)foregroundSync.saved();});
+      foregroundSync.saved();
+
       inspectionWakeup = SPOTITInspectionWakeup.createController({
         serviceWorker: navigator.serviceWorker,
         hasWork: () => authWorkspaceUnlocked && SPOTITSyncRunner.ordered(entries, inspectionContext(),
@@ -9184,15 +9175,22 @@
     document.getElementById('bulk-delete-btn').addEventListener('click', async () => {
       if (selectedEntryIds.size === 0) return;
       if (!confirm(`Delete ${selectedEntryIds.size} selected ${selectedEntryIds.size === 1 ? 'entry' : 'entries'}? This cannot be undone.`)) return;
-      const idxs = entries.map((entry, index) => selectedEntryIds.has(entry.id) ? index : -1).filter(index => index >= 0).reverse();
-      const photoIdsToDelete = [];
-      idxs.forEach(idx => {
-        const entry = entries[idx];
-        if (!entry) return;
-        if (entry.photoId) photoIdsToDelete.push(entry.photoId);
-        entries.splice(idx, 1);
-      });
-      saveEntries();
+      const photoIdsToDelete=[];
+      try {
+        const before=entries.map(e=>({...e})),after=[];
+        for(const entry of entries) {
+          if(!selectedEntryIds.has(entry.id)){after.push(entry);continue;}
+          if(entry.remote_id===entry.id) {
+            if(!SPOTITInspectionActions.editable(entry,inspectionContext()))throw Error('Only your own inspections can be deleted.');
+            after.push({...entry,record_actions:SPOTITInspectionActions.append(entry,'delete',{}),record_deleted:true});
+          } else {
+            if(entry.submission_snapshot)throw Error('Resolve the pending submission before deleting this inspection.');
+            if(entry.photoId)photoIdsToDelete.push(entry.photoId);
+          }
+        }
+        SPOTITLocalStore.saveReview(localStorage,activeEntriesStorageKey(),before,after);entries=after;
+      }catch(error){alert(error.message);return;}
+      mapProjectionDirty=true;foregroundSync.saved();
       exitSelectMode();
       renderLog();
       for (const photoId of photoIdsToDelete) {
@@ -9538,9 +9536,54 @@
       }
     }
 
+    function recordContent(entry) {
+      return SPOTITInspectionActions.content(SPOTITInspections.submissionContent(entry, inspectionContext()));
+    }
+    function persistEntryChanges(entry, changes) {
+      const before=entries.map(e => editingOriginal?.id===e.id ? editingOriginal : {...e});
+      const after=before.map(e => e.id===entry.id ? {...entry,...changes} : e);
+      try { SPOTITLocalStore.saveReview(localStorage,activeEntriesStorageKey(),before,after); }
+      catch(error){storageAvailable=false;const status=document.getElementById('storage-status');if(status){status.hidden=false;status.textContent='Changes could not be saved on this device. Sync is paused. Reopen the app before retrying.';}throw error;}
+      Object.assign(entry,changes);
+    }
+    async function refreshOwnSnapshot(entry, force=false) {
+      if (!photoApiClient || navigator.onLine===false || (!force && entry.record_actions?.length) || !SPOTITInspectionActions.editable(entry,inspectionContext())) return;
+      const key=activeEntriesStorageKey(),owner=inspectionContext().userId;
+      await authController.verifyOnline();
+      const result=await photoApiClient.rpc('own_inspection_snapshot',{inspection_id:entry.id});
+      if(key!==activeEntriesStorageKey()||owner!==inspectionContext().userId||!entries.includes(entry)||(!force&&entry.record_actions?.length)||editingOriginal) return;
+      if(result.error||!result.data?.record) throw Error('Could not load the latest inspection. Try again online.');
+      const row=result.data.record,display=SPOTITMyRecords.cloudDisplay(row);
+      const remotePhotoChanged=!entry.photo_auto_sync && ((entry.r2_photo?.status==='synced' && entry.r2_photo.manifest?.upload_id!==result.data.photo.current_id)
+        || (entry.photo_sync_status==='photo_synced' && entry.photo_path!==row.photo_path));
+      persistEntryChanges(entry,{...display,inspector:row.inspector_display_name||entry.inspector||authDisplayState?.profile?.full_name||'',
+        ...(remotePhotoChanged?{photoId:'',photoFilename:'',photoTimestamp:'',r2_photo:{status:'removed'}}:{}),
+        record_base:SPOTITInspectionActions.content(row),record_remote:row,record_photo:result.data.photo,record_photo_known:true,
+        ...(force?{record_actions:[],record_action_error:'',record_deleted:false,photoId:'',photo_auto_sync:false}:{}),
+        photo_path:row.photo_path||'',interchange:row.interchange_exit||'',interchangeSegment:row.interchange_segment||''});
+    }
+    async function deleteInspectionFromSheet() {
+      const entry=entries[editingEntryIndex]; if(!entry)return;
+      if(!confirm('Permanently delete this inspection and its photo? This cannot be undone.'))return;
+      try {
+        if(entry.remote_id===entry.id) {
+          if(!SPOTITInspectionActions.editable(entry,inspectionContext()))throw Error('Only your own inspections can be deleted.');
+          const actions=SPOTITInspectionActions.append(entry,'delete',{});
+          persistEntryChanges(entry,{record_actions:actions,record_deleted:true});
+          editingOriginal=null;closeEditModal();renderLog();mapProjectionDirty=true;foregroundSync.saved();
+        } else {
+          if(entry.submission_snapshot)throw Error('Resolve the pending submission before deleting this inspection.');
+          const index=editingEntryIndex;editingOriginal=null;closeEditModal();deletionController.remove(index,true);
+        }
+      } catch(error){alert(error.message);}
+    }
+    let editRemoteViewer=null;
+    let editPreviewGeneration=0;
     let editPhotoObjectUrl = null;
-    async function renderEditPhotoPreview(entry) {
-      document.getElementById('edit-map-photo').textContent = entry?.photoId ? 'Photo attached' : 'No photo';
+    async function renderEditPhotoPreview(entry, remoteOnly=false) {
+      const generation=++editPreviewGeneration;
+      editRemoteViewer?.close();
+      document.getElementById('edit-map-photo').textContent = !entry?.record_remove_photo && (entry?.photoId || entry?.record_photo?.current_id || entry?.photo_path) ? 'Photo attached' : 'No photo';
       const emptyEl = document.getElementById('edit-photo-empty');
       const imgEl = document.getElementById('edit-photo-thumb');
       const thumbWrap = document.getElementById('edit-photo-thumb-wrap');
@@ -9549,24 +9592,48 @@
 
       if (editPhotoObjectUrl) { URL.revokeObjectURL(editPhotoObjectUrl); editPhotoObjectUrl = null; }
 
-      if (!entry || !entry.photoId) {
+      const viewPhoto=()=>{
+        if(imgEl.style.display==='none'||!imgEl.src.startsWith('blob:'))return;
+        if(activePhotoObjectUrl){URL.revokeObjectURL(activePhotoObjectUrl);activePhotoObjectUrl=null;}
+        document.getElementById('photo-preview').src=imgEl.src;
+        const download=document.getElementById('photo-download');download.href=imgEl.src;download.download=entry.photoFilename||'SpotIt_inspection.jpg';
+        const modal=document.getElementById('photo-modal');modal.classList.add('show');modal.setAttribute('aria-hidden','false');
+        requestAnimationFrame(()=>document.getElementById('photo-preview').focus());
+      };
+      thumbWrap.setAttribute('role','button');thumbWrap.setAttribute('aria-label','View photo evidence');thumbWrap.onclick=viewPhoto;
+      thumbWrap.onkeydown=event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();viewPhoto();}};
+      if (!entry || !entry.photoId || remoteOnly) {
         thumbWrap.tabIndex = -1;
         thumbWrap.setAttribute('aria-disabled', 'true');
         imgEl.style.display = 'none';
         imgEl.src = '';
         emptyEl.style.display = 'flex';
         removeBtn.style.display = 'none';
-        addBtn.textContent = 'Add Photo';
+        emptyEl.textContent=entry?.remote_id===entry?.id&&!entry.record_photo_known?'Connect to check photo':'No photo attached';
+        addBtn.textContent = 'Add photo';
+        if(entry && !entry.record_remove_photo && (entry.record_photo?.current_id || entry.photo_path)) {
+          removeBtn.style.display='inline-flex';addBtn.textContent='Change photo';emptyEl.textContent='Loading photo…';
+          const item={local:entry,cloud:entry.record_remote};
+          const viewer=SPOTITCloudPhotoViewer.createViewer({client:photoApiClient,r2Enabled:R2_PHOTO_PILOT_ENABLED,
+            context:inspectionContext,key:activeEntriesStorageKey,online:()=>navigator.onLine!==false,urls:URL,
+            verify:()=>authController.verifyOnline(),read:getPhoto,current:value=>value===item&&entries.includes(entry)&&generation===editPreviewGeneration});
+          editRemoteViewer=viewer;
+          try{const result=await viewer.open(item);if(generation!==editPreviewGeneration)return;
+            imgEl.src=result.url;imgEl.style.display='block';emptyEl.style.display='none';thumbWrap.tabIndex=0;thumbWrap.removeAttribute('aria-disabled');
+          }catch(_){if(generation===editPreviewGeneration)emptyEl.textContent='Connect to view photo';}
+        }
         return;
       }
 
-      addBtn.textContent = 'Change Photo';
+      addBtn.textContent = 'Change photo';
       thumbWrap.tabIndex = 0;
       thumbWrap.removeAttribute('aria-disabled');
       removeBtn.style.display = 'block';
       try {
         const blob = await getPhoto(entry.photoId);
+        if(generation!==editPreviewGeneration)return;
         if (!blob) {
+          if(!remoteOnly&&(entry.record_photo?.current_id||entry.photo_path)){await renderEditPhotoPreview(entry,true);return;}
           emptyEl.textContent = 'Photo not found on this device';
           emptyEl.style.display = 'flex';
           imgEl.style.display = 'none';
@@ -9583,10 +9650,16 @@
       }
     }
 
-    function openEditModal(index, activateEdit = false) {
+    let editOpenGeneration=0;
+    async function openEditModal(index, activateEdit = false) {
       const entry = entries[index];
       if (!entry) return;
-      editingEntryIndex = index;
+      if(entry.record_deleted&&!entry.record_actions?.some(a=>a.error))return;
+      const generation=++editOpenGeneration;
+      if(editingOriginal)closeEditModal();
+      try { await refreshOwnSnapshot(entry); } catch (_) { /* Cached own records remain usable offline. */ }
+      if(generation!==editOpenGeneration||!entries.includes(entry))return;
+      editingEntryIndex = entries.indexOf(entry);
       populateDefectSelect(entry.type);
       const defectTitle = document.getElementById('edit-defect-select');
       defectTitle.style.width = `${Math.min(Math.max(defectTitle.value.length + 2, 10), 32)}ch`;
@@ -9609,24 +9682,38 @@
       const modal = document.getElementById('edit-modal');
       modal.querySelector('.entry-view-actions')?.remove();
       modal.querySelector('.entry-view-label')?.remove();
+      modal.querySelector('.entry-edit-status')?.remove();
+      const state=document.createElement('p');state.className='entry-edit-status';state.setAttribute('role','status');
+      state.textContent=entry.record_action_error || (entry.record_actions?.length ? 'Waiting to sync' : entry.r2_photo?.status==='review' ? 'Photo could not be saved. Change or remove it to retry.' : entry.photo_auto_sync ? 'Photo waiting to sync' : '');
+      modal.querySelector('.entry-sheet-scroll').append(state);
+      const label = document.createElement('p'); label.className='entry-view-label';label.textContent='Your inspection';
+      modal.querySelector('.entry-sheet-header > div').append(label);
+      const actions=document.createElement('div');actions.className='entry-view-actions';
+      const edit=document.createElement('button');edit.type='button';edit.className='lane-save';edit.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5 4 4M4 20l4-1 12-12-3-3L5 16z"/></svg>Edit';
+      const remove=document.createElement('button');remove.type='button';remove.className='inspection-danger';remove.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18m-2 0-.9 14H5.9L5 6m3 0V4h8v2M10 10v7m4-7v7"/></svg>Delete';remove.onclick=deleteInspectionFromSheet;
+      actions.append(edit,remove);modal.querySelector('.entry-sheet-actions').append(actions);
+      const cancel=document.getElementById('edit-delete');cancel.textContent='Cancel';cancel.className='inspection-cancel';cancel.onclick=null;
       const setEditing = editing => {
-        modal.querySelectorAll('select, input, #edit-photo-add-btn, #edit-photo-remove-btn').forEach(control => { control.disabled = !editing; });
-        document.getElementById('edit-save').hidden = !editing;
-        document.getElementById('edit-delete').hidden = !editing;
-        modal.querySelector('.entry-view-actions')?.toggleAttribute('hidden', editing);
-        modal.querySelector('.entry-view-label')?.toggleAttribute('hidden', editing);
+        if(editing && !editingOriginal)editingOriginal=JSON.parse(JSON.stringify(entry));
+        editingMode=editing;modal.classList.toggle('entry-is-editing',editing);
+        modal.querySelectorAll('select, input, #edit-photo-add-btn, #edit-photo-remove-btn').forEach(control=>{control.disabled=!editing;});
+        document.getElementById('edit-save').hidden=!editing;cancel.hidden=!editing;actions.hidden=editing;
+        label.textContent=editing?'Editing inspection':'Your inspection';
       };
-      if (!activateEdit) {
-        const label = document.createElement('p'); label.className = 'entry-view-label'; label.textContent = 'Your inspection';
-        modal.querySelector('.entry-sheet-header > div').append(label);
-        const actions = document.createElement('div'); actions.className = 'entry-view-actions';
-        const close = document.createElement('button'); close.type = 'button'; close.textContent = 'Close'; close.onclick = closeEditModal;
-        const edit = document.createElement('button'); edit.type = 'button'; edit.textContent = 'Edit'; edit.className = 'lane-save';
-        edit.onclick = () => setEditing(true);
-        actions.append(close, edit); modal.querySelector('.entry-sheet-actions').append(actions);
-        if(!entry.importBatchId&&entry.sync_status==='synced'&&entry.remote_id===entry.id)appendSubmittedDelete(actions,entry,entry,closeEditModal);
+      edit.onclick=()=>setEditing(true);
+      const own=entry.remote_id!==entry.id || SPOTITInspectionActions.editable(entry,inspectionContext());
+      edit.disabled=remove.disabled=!own || !!entry.record_action_error;
+      if(!own)state.textContent='Read only';
+      if(entry.record_actions?.some(a=>a.error)) {
+        const review=document.createElement('button');review.type='button';review.className='inspection-cancel';review.textContent='Reload saved inspection';
+        review.onclick=async()=>{
+          if(!confirm('Discard the pending changes on this device and reload the saved inspection?'))return;
+          review.disabled=true;
+          try{await refreshOwnSnapshot(entry,true);closeEditModal();void openEditModal(entries.indexOf(entry));}
+          catch(error){state.textContent=error.message;review.disabled=false;}
+        };actions.replaceChildren(review);
       }
-      setEditing(activateEdit);
+      setEditing(activateEdit && own);
       const fromMap = document.querySelector('.app-tab-btn.active')?.dataset.appView === 'map';
       modal.classList.toggle('from-map', fromMap);
       modal.classList.toggle('map-compact', fromMap);
@@ -9636,6 +9723,17 @@
       SPOTITMap.focusEditor();
     }
     function closeEditModal() {
+      editOpenGeneration++;
+      document.getElementById('photo-close')?.click();
+      if(editingOriginal && editingEntryIndex!==null && entries[editingEntryIndex]?.id===editingOriginal.id) {
+        const entry=entries[editingEntryIndex];for(const key of Object.keys(entry))delete entry[key];Object.assign(entry,editingOriginal);
+      }
+      const retained=new Set(entries.map(e=>e.photoId).filter(Boolean));
+      for(const id of editDraftPhotoIds)if(!retained.has(id)){void deletePhoto(id);void deletePhoto(id+':raw');}
+      editDraftPhotoIds.clear();
+      editingOriginal=null;editingMode=false;editPreviewGeneration++;editRemoteViewer?.close();
+      if(inspectionActions)foregroundSync.saved();
+      if(editPhotoObjectUrl){URL.revokeObjectURL(editPhotoObjectUrl);editPhotoObjectUrl=null;}
       const modal = document.getElementById('edit-modal');
       modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true');
       if (modal.classList.contains('from-map')) SPOTITMap.selectEntry(null);
@@ -9719,14 +9817,8 @@
         document.getElementById('edit-modal').classList.toggle('map-compact', compact);
         document.getElementById('edit-sheet-expand').setAttribute('aria-expanded', compact ? 'false' : 'true');
       });
-      document.getElementById('edit-delete').addEventListener('click', () => {
-        if (editingEntryIndex === null) return;
-        if (!confirm('Delete this inspection entry?')) return;
-        const index = editingEntryIndex;
-        closeEditModal();
-        deletionController.remove(index, true);
-      });
-      document.getElementById('edit-save').addEventListener('click', () => {
+      document.getElementById('edit-delete').addEventListener('click', closeEditModal);
+      document.getElementById('edit-save').addEventListener('click', async () => {
         if (editingEntryIndex === null) return;
         const kmResult = parseKmInput(document.getElementById('edit-km-input').value);
         if (!kmResult.valid) {
@@ -9746,11 +9838,31 @@
         entry.km = kmResult.km;
         entry.expressway = expresswaySelVal === 'Others' ? expresswayOthersVal : expresswaySelVal;
         entry.bound = boundSelVal === 'Others' ? boundOthersVal : boundSelVal;
-        SPOTITEntry.touch(entry);
-        saveEntries();
-        renderLog();
-        closeEditModal();
-        if (entry.photoId) regenerateStampedPhotoForEntry(entry);
+        try {
+          let actions=entry.record_actions||[];
+          if(entry.remote_id===entry.id) {
+            if(!SPOTITInspectionActions.editable(entry,inspectionContext()))throw Error('This inspection is read only.');
+            const base=entry.record_base || (entry.submission_snapshot?.row && SPOTITInspectionActions.content(entry.submission_snapshot.row));
+            if(!base)throw Error('Open this inspection online once before saving changes.');
+            const changes=recordContent(entry);
+            if(JSON.stringify(base)!==JSON.stringify(changes))actions=SPOTITInspectionActions.append({...entry,record_actions:actions},'edit',{base,changes});
+            if(entry.record_remove_photo) {
+              if(!entry.record_photo_known)throw Error('Open this inspection online before removing its photo.');
+              actions=SPOTITInspectionActions.append({...entry,record_actions:actions},'remove_photo',{photo:entry.record_photo});
+            }
+            persistEntryChanges(entry,{record_actions:actions,record_base:changes,record_remove_photo:false,
+              ...(entry.record_remove_photo?{record_photo:{current_id:null,legacy_path:null,legacy_filename:null},...SPOTITInspectionActions.clearedPhoto()}:{}),
+              photo_auto_sync:!!entry.photoId});
+          } else {
+            persistEntryChanges(entry,{photo_auto_sync:!!entry.photoId});
+          }
+          const previousPhoto=editingOriginal?.photoId;
+          const retiredPayloads=entry.photoId!==previousPhoto?[editingOriginal?.photo_upload_manifest?.payload_key,editingOriginal?.r2_photo?.payload_key].filter(Boolean):[];
+          editingOriginal=null;closeEditModal();renderLog();mapProjectionDirty=true;foregroundSync.saved();
+          if(previousPhoto && previousPhoto!==entry.photoId){void deletePhoto(previousPhoto);void deletePhoto(previousPhoto+':raw');}
+          for(const key of retiredPayloads)void deletePhoto(key);
+          if(entry.photoId && entry.remote_id!==entry.id)await regenerateStampedPhotoForEntry(entry);
+        } catch(error) { alert(error.message); }
       });
       document.getElementById('edit-modal').addEventListener('click', e => {
         if (e.target.id === 'edit-modal') closeEditModal();
@@ -10044,7 +10156,7 @@
     window.moreController = SPOTITMore.mount(document, () => {
       const local = accessibleEntries();
       const durable = authWorkspaceUnlocked ? SPOTITLocalStore.snapshotContains(localStorage, activeEntriesStorageKey()) : () => false;
-      return { entries: local.filter(durable), counts: SPOTITSync.summary(local, {durable}), auth: authDisplayState,
+      return { entries: local.filter(durable), counts: SPOTITSync.summary(syncWorkspaceEntries(), {durable}), auth: authDisplayState,
         storageAvailable, online: navigator.onLine !== false, photoTransport: PHOTO_CLOUD_TRANSPORT_ENABLED,
         alignment: document.getElementById('calib-status').textContent,
         ramps: document.getElementById('ramp-status').textContent };

@@ -154,7 +154,7 @@ test('production gate static false, no auto dispatch; assets cached; forbidden o
   const html=fs.readFileSync('index.html','utf8'),sw=fs.readFileSync('sw.js','utf8');
   assert.match(html,/const PHOTO_CLOUD_TRANSPORT_ENABLED = false/);assert.match(html,/if \(!R2_PHOTO_PILOT_ENABLED \|\| !photoCloudController\) return/);
   for(const asset of ['src/photo-cloud-api.js','src/photo-sync.js'])assert.ok(sw.includes(asset)&&html.includes(asset));
-  assert.match(sw,/v274/);
+  assert.match(sw,/v275/);
   for(const file of ['src/photo-cloud-api.js','src/photo-sync.js'])assert.doesNotMatch(fs.readFileSync(file,'utf8'),/\.remove\(|\.delete\(|\.upsert\(|getPublicUrl|\.insert\(/);
   assert.doesNotMatch(fs.readFileSync('src/sync-runner.js','utf8'),/SPOTITPhoto|photo-sync|photo-cloud/);
 });

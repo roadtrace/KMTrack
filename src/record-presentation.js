@@ -41,7 +41,7 @@
     const displayFields = mapped ? differences(mapped,remote) : null;
     const acknowledged = local.sync_status === 'synced' && local.remote_id?.toLowerCase() === local.id.toLowerCase()
       && local.user_id?.toLowerCase() === scope.userId && local.team === scope.team;
-    const clean = acknowledged && !held(local) && validBaseline && localFields?.length === 0;
+    const clean = acknowledged && !local.record_actions?.length && !local.record_base && !held(local) && validBaseline && localFields?.length === 0;
     return Object.freeze({ localChanged: localFields === null ? null : !!localFields.length,
       cloudChanged: cloudFields === null ? null : !!cloudFields.length,
       localFields: localFields && Object.freeze(localFields), cloudFields: cloudFields && Object.freeze(cloudFields),
@@ -56,8 +56,11 @@
       && page?.view === 'my' && page.scope?.token === currentScope.token;
     const remote = new Map();
     if (authorized) for (const row of page.rows) if (cloud.rowInScope(row,currentScope,'my')) remote.set(row.id.toLowerCase(),row);
+    const deleted=new Set((localEntries||[]).filter(e=>e.record_deleted&&!e.record_actions?.some(a=>a.error)).map(e=>e.id.toLowerCase()));
+    for(const id of deleted)remote.delete(id);
     const grouped = new Map(), excluded = { imported:0, invalid:0, otherOwner:0 };
     for (const row of localEntries || []) {
+      if(row.record_deleted&&!row.record_actions?.some(a=>a.error))continue;
       if (row.importBatchId || row.cloud_source) { excluded.imported++; continue; }
       if (!UUID.test(row.id || '')) { excluded.invalid++; continue; }
       // Input is the current account workspace, never Guest; explicit other owners rejected.

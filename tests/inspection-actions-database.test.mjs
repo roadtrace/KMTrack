@@ -1,0 +1,60 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {pathToFileURL} from 'node:url';
+const runtime=process.env.PGLITE_MODULE_PATH;
+test('unified actions: own access, idempotency, offline chains, conflicts, removal and deletion',{skip:!runtime},async()=>{
+ const {PGlite}=await import(pathToFileURL(runtime).href),db=new PGlite();
+ const owner='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',peer='cccccccc-cccc-4ccc-8ccc-cccccccccccc',id='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+ const sql=f=>readFile(new URL('../docs/supabase/migrations/'+f,import.meta.url),'utf8');
+ try{
+ await db.exec(`create role anon;create role authenticated;create role service_role;create schema auth;
+ create function auth.uid() returns uuid language sql as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
+ create table public.profiles(id uuid primary key,full_name text,role text,approved boolean,team text);
+ create table public.inspections(id uuid primary key,user_id uuid,team text,photo_path text,photo_filename text,
+ defect_type text,expressway text,direction text,lane_number integer,lane_other text,km_station integer,interchange_exit text,interchange_segment text);
+ grant usage on schema public,auth to authenticated;
+ insert into profiles values('${owner}','Owner','inspector',true,'roadway'),('${peer}','Peer','supervisor',true,'roadway');
+ insert into inspections(id,user_id,team,defect_type,expressway,direction,lane_number,km_station) values('${id}','${owner}','roadway','Potholes','NLEX','NB',1,12004);`);
+ const deletion=await sql('20261030_team_log_and_deletion.sql');await db.exec(deletion.split('create or replace function public.team_inspection_summary()')[0]+'commit;');
+ await db.exec(await sql('20261030_r2_photo_metadata.sql'));await db.exec(await sql('20261030_r2_photo_operations.sql'));
+ await db.exec(await sql('20261031_unified_inspection_actions.sql'));
+ const auth=async uid=>db.exec(`reset role;set request.jwt.claim.sub='${uid}';set role authenticated;`);
+ const snapshot=async()=>(await db.query('select own_inspection_snapshot($1) as data',[id])).rows[0].data;
+ let n=1;const action=(kind,payload,aid=`00000000-0000-4000-8000-${String(n++).padStart(12,'0')}`)=>db.query('select apply_inspection_action($1,$2,$3,$4) as data',[aid,id,kind,payload]);
+ await auth(peer);await assert.rejects(snapshot(),/Own inspection/);
+ await assert.rejects(action('delete',{}),/Own inspection/);
+ await auth(owner);const snap=await snapshot();
+ const keys=['defect_type','expressway','direction','lane_number','lane_other','km_station','interchange_exit','interchange_segment'];
+ const base=Object.fromEntries(keys.map(k=>[k,snap.record[k]])),changes={...base,km_station:12100};
+ const aid='99999999-9999-4999-8999-999999999999';
+ assert.equal((await action('edit',{base,changes},aid)).rows[0].data.done,true);
+ assert.equal((await action('edit',{base,changes},aid)).rows[0].data.done,true);
+ await assert.rejects(action('edit',{base,changes:{...changes,km_station:12200}}),/Inspection changed/);
+ await assert.rejects(action('edit',{base:changes,changes:{...changes,user_id:peer}}),/Invalid editable/);
+ await action('edit',{base:changes,changes:{...changes,lane_number:2}});
+ assert.equal((await snapshot()).record.lane_number,2);
+ await db.exec('reset role');const hash='a'.repeat(64),path=`roadway/${id}/photo-v1-${hash}.jpg`;
+ await db.query('update inspections set photo_path=$1,photo_filename=$2 where id=$3',[path,`photo-v1-${hash}.jpg`,id]);
+ const current='11111111-1111-4111-8111-111111111111',pending='22222222-2222-4222-8222-222222222222';
+ const args=u=>({inspection_id:id,upload_id:u,environment:'production',sha256:'a'.repeat(64),byte_size:100,width:10,height:10,
+  thumb_sha256:'b'.repeat(64),thumb_byte_size:80,thumb_width:4,thumb_height:4,expected_current_id:null});
+ const command=(op,u)=>db.query('select r2_photo_command($1,$2,$3)',[owner,op,args(u)]);
+ await command('reserve',current);await command('reserve',pending);await command('finalize',current);
+ await auth(owner);const photo=(await snapshot()).photo;assert.equal(photo.current_id,current);
+ await action('remove_photo',{photo});assert.equal((await snapshot()).record.photo_path,null);
+ await assert.rejects(action('remove_photo',{photo}),/Photo changed/);
+ await db.exec('reset role');assert.equal((await db.query('select count(*)::int as n from inspection_legacy_photo_cleanup')).rows[0].n,1);
+ assert.equal((await db.query("select count(*)::int as n from inspection_photo_uploads where state='abandoned'")).rows[0].n,2);
+ assert.equal((await db.query('select count(*)::int as n from inspection_photo_cleanup')).rows[0].n,4);
+ await assert.rejects(command('finalize',pending),/Photo changed|Upload is no longer|Cannot|Invalid/);
+ await db.exec('set role service_role');const jobs=(await db.query("select legacy_photo_cleanup('claim') as data")).rows[0].data;assert.equal(jobs.length,1);
+ await db.query("select legacy_photo_cleanup('ack',$1)",[{...jobs[0],ok:false}]);
+ await db.exec('reset role');assert.equal((await db.query('select count(*)::int as n from inspection_legacy_photo_cleanup')).rows[0].n,1);
+ await db.exec('set role authenticated');await assert.rejects(db.query('select * from inspection_action_receipts'),/permission denied/);
+ await assert.rejects(db.query("select legacy_photo_cleanup('claim')"),/permission denied/);
+ await auth(owner);const did='88888888-8888-4888-8888-888888888888';await action('delete',{},did);await action('delete',{},did);
+ await db.exec('reset role');assert.equal((await db.query('select count(*)::int as n from inspections')).rows[0].n,0);
+ await assert.rejects(db.query('insert into inspections(id) values($1)',[id]),/permanently deleted/);
+ }finally{await db.close();}
+});

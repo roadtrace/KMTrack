@@ -19,7 +19,8 @@ test('separate build excludes production auth, server tools, account config and 
  assert.match(fs.readFileSync(root+'_headers','utf8'),/Permissions-Policy: geolocation=\(\), camera=\(\), microphone=\(\)/);
  assert.match(fs.readFileSync(root+'src/map-config.js','utf8'),/apiKey:""/);
  const original=cp.execFileSync('git',['show','HEAD:index.html'],{encoding:'utf8'}).replaceAll('\r\n','\n'),current=fs.readFileSync('index.html','utf8').replaceAll('\r\n','\n');
- for(const name of ['logDefect','captureInspectionPhoto','syncNow']){const fn=s=>{const start=s.indexOf('    '+(name==='captureInspectionPhoto'||name==='syncNow'?'async ':'')+'function '+name+'(');assert(start>=0,name);return s.slice(start,s.indexOf('\n    }',start)+6);};assert.equal(fn(current),fn(original),name);}
+ for(const name of ['logDefect','captureInspectionPhoto']){const fn=s=>{const start=s.indexOf('    '+(name==='captureInspectionPhoto'||name==='syncNow'?'async ':'')+'function '+name+'(');assert(start>=0,name);return s.slice(start,s.indexOf('\n    }',start)+6);};assert.equal(fn(current),fn(original),name);}
+ assert.match(html,/authDisplayState\?\.mode === 'guest'\) return/);
  assert.match(html,/locationResolver\.resolve/);assert.match(html,/Preview GIS is retained for isolated diagnostics/);
 });
 test('vendored QR encoder is local and retains its MIT license',()=>{

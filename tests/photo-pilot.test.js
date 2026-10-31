@@ -90,12 +90,12 @@ test('actual local photo UI opens local blob even for retry, without cloud calls
 });
 test('actual Log markup exposes compact states, review, disabled retry and local/private viewer',()=>{
   assert.match(html,/const photoState = SPOTITPhotoPilot.presentation\(e\)/);assert.match(html,/xmlEscape\(myView \? SPOTITMyRecords.photoStatus\(e\) : photoState.label\)/);
-  assert.match(html,/xmlEscape\(photoState.unavailable\)/);assert.match(html,/Review photo issue/);assert.match(html,/!PHOTO_CLOUD_TRANSPORT_ENABLED \? 'disabled'/);
+  assert.match(html,/xmlEscape\(photoState.unavailable\)/);assert.match(html,/inspectionActions=SPOTITInspectionActions.createController/);assert.doesNotMatch(html,/class="ds-btn ds-btn-quiet photo-retry"/);
   assert.match(html,/Inspection rows are submitted\. Check each record for its separate photo status/);assert.match(html,/<dt>Submitted<\/dt>/);
 });
 test('production gate, independent runner and cached pilot asset remain explicit',()=>{
   const sw=fs.readFileSync('sw.js','utf8');assert.match(html,/const PHOTO_CLOUD_TRANSPORT_ENABLED = false/);assert.match(fn('async function uploadR2Photo'),/if \(!R2_PHOTO_PILOT_ENABLED/);
-  assert.match(html,/R2_PHOTO_PILOT_ENABLED = true/);assert.match(html,/enabled: R2_PHOTO_PILOT_ENABLED \|\| PHOTO_CLOUD_TRANSPORT_ENABLED/);assert.match(sw,/'v274'/);assert.ok(sw.includes('./src/photo-pilot.js')&&html.includes('./src/photo-pilot.js'));
+  assert.match(html,/R2_PHOTO_PILOT_ENABLED = true/);assert.match(html,/enabled: R2_PHOTO_PILOT_ENABLED \|\| PHOTO_CLOUD_TRANSPORT_ENABLED/);assert.match(sw,/'v275'/);assert.ok(sw.includes('./src/photo-pilot.js')&&html.includes('./src/photo-pilot.js'));
   assert.doesNotMatch(fs.readFileSync('src/sync-runner.js','utf8'),/SPOTITPhoto|photo-pilot|photo-sync/);
   assert.doesNotMatch(fs.readFileSync('src/photo-pilot.js','utf8'),/\.upload\(|\.update\(|\.remove\(|getPublicUrl|createSignedUrl/);
 });
@@ -151,5 +151,5 @@ test('actual Log renderer retains local preview and separates row/photo state fo
   for(const label of ['Inspection submitted','Photo on this device','Photo waiting to upload','Photo submitted','Photo waiting to upload · Retry needed','Photo unavailable · Review required'])assert.ok(markup.includes(label),label);
   // Existing normalization treats interrupted uploading as waiting to reconcile.
   assert.equal((markup.match(/register-photo-status">Photo waiting to upload</g)||[]).length,2);
-  assert.equal((markup.match(/>View Photo</g)||[]).length,6);assert.match(markup,/photo-retry[^>]*disabled/);assert.match(markup,/Review photo issue/);
+  assert.equal((markup.match(/>View Photo</g)||[]).length,0);assert.doesNotMatch(markup,/photo-retry|Review photo issue/);assert.match(markup,/register-chevron/);
 });

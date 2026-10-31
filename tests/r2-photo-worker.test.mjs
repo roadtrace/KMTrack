@@ -125,3 +125,22 @@ test('production upload and private read use the production metadata bucket only
  assert.equal((await f.request('current')).status,200);
  f.env.PHOTO_ENVIRONMENT='test';assert.equal((await f.request('current')).status,503);
 });
+
+test('production cron deletes exact queued legacy object through Storage API and acknowledges success only',async()=>{
+ for(const status of [200,503,302]){
+  const calls=[],jobs=[{object_key:'roadway/'+id+'/photo-v1-'+'a'.repeat(64)+'.jpg',lease_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'}];
+  const worker=createWorker(async(url,options)=>{calls.push({url,options});
+   if(url.endsWith('/r2_photo_cleanup'))return Response.json([]);
+   if(url.endsWith('/legacy_photo_cleanup'))return Response.json(JSON.parse(options.body).operation==='claim'?jobs:{});
+   assert.ok(url.endsWith('/storage/v1/object/inspection-photos'));assert.equal(options.redirect,'manual');assert.equal(options.method,'DELETE');
+   assert.deepEqual(JSON.parse(options.body),{prefixes:[jobs[0].object_key]});return new Response('',{status});
+  },'production');
+  const pending=[];await worker.scheduled({}, {PHOTO_ENVIRONMENT:'production',PHOTO_TRANSPORT_ENABLED:'true',PHOTOS_BUCKET:{},SUPABASE_SERVICE_ROLE_KEY:'test-secret'}, {waitUntil:p=>pending.push(p)});await Promise.all(pending);
+  const ack=calls.filter(c=>c.url.endsWith('/legacy_photo_cleanup')).map(c=>JSON.parse(c.options.body)).find(c=>c.operation==='ack');assert.equal(ack.args.ok,status===200);
+ }
+});
+test('test Worker cron never claims or deletes legacy production photos',async()=>{
+ const urls=[],worker=createWorker(async url=>{urls.push(url);return Response.json([]);},'test'),pending=[];
+ await worker.scheduled({}, {PHOTO_ENVIRONMENT:'test',PHOTO_TRANSPORT_ENABLED:'true',PHOTOS_BUCKET:{},SUPABASE_SERVICE_ROLE_KEY:'test-secret'}, {waitUntil:p=>pending.push(p)});await Promise.all(pending);
+ assert.equal(urls.some(url=>url.includes('legacy_photo_cleanup')||url.includes('/storage/')),false);
+});

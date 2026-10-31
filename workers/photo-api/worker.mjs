@@ -73,9 +73,26 @@ export function createWorker(fetcher=fetch,deployment='test'){
       await rpc(env,'r2_photo_cleanup',{operation:'ack',args:{...cfg,object_key:job.object_key,lease_id:job.lease_id,ok}});
     }
   }
+  async function cleanupLegacy(env){
+    // Production only; never let the phone pilot delete legacy production images.
+    if(deployment!=='production')return;
+    config(env);
+    const jobs=await rpc(env,'legacy_photo_cleanup',{operation:'claim',args:{}});
+    for(const job of jobs){
+      if(!/^[a-zA-Z0-9_-]+\/[0-9a-f-]{36}\/photo-v1-[a-f0-9]{64}\.jpg$/.test(job.object_key))continue;
+      let ok=false;
+      try{
+        const result=await fetcher(PUBLIC_CONFIG.url+'/storage/v1/object/inspection-photos',{method:'DELETE',
+          headers:{apikey:env.SUPABASE_SERVICE_ROLE_KEY,Authorization:'Bearer '+env.SUPABASE_SERVICE_ROLE_KEY,'Content-Type':'application/json'},
+          body:JSON.stringify({prefixes:[job.object_key]}),redirect:'manual',signal:AbortSignal.timeout(10000)});
+        ok=result.ok;
+      }catch{}
+      await rpc(env,'legacy_photo_cleanup',{operation:'ack',args:{object_key:job.object_key,lease_id:job.lease_id,ok}});
+    }
+  }
   return {async scheduled(_event,env,ctx){
     // No public cleanup HTTP route; Cloudflare Cron invokes this server-side.
-    if(env.PHOTO_TRANSPORT_ENABLED==='true')ctx.waitUntil(cleanup(env));
+    if(env.PHOTO_TRANSPORT_ENABLED==='true')ctx.waitUntil(Promise.all([cleanup(env),cleanupLegacy(env)]));
   },async fetch(request,env={}){
     const origin=request.headers.get('Origin'),cors=origin===PUBLIC_CONFIG.origin
       ||deployment==='test'&&env.PHOTO_ENVIRONMENT==='test'&&(origin===TEST_ORIGIN||origin===PHONE_PILOT_ORIGIN);

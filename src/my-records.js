@@ -34,8 +34,10 @@
   function status(item){
     if(!item.local)return 'Submitted record';
     const e=item.local;
+    if(e.record_action_error)return e.record_action_error;
+    if(e.record_actions?.length)return 'Waiting to sync';
     if(e.sync_status==='synced'&&e.remote_id?.toLowerCase()===e.id.toLowerCase()){
-      if(r2Submitted(e))return 'Inspection submitted · Photo in test storage';
+      if(r2Submitted(e))return 'Inspection submitted · Photo saved';
       return photo.normalize(e).photo_sync_status==='photo_synced'&&photo.validAcknowledgement(e)?'Inspection and photo submitted':'Inspection submitted';
     }
     if(e.sync_status==='syncing')return 'Submitting inspection';
@@ -52,8 +54,8 @@
   function photoStatus(e){
     if(photo.normalize(e).photo_sync_status==='photo_synced'&&photo.validAcknowledgement(e))return 'Photo submitted';
     if(e.sync_status==='local_only'||e.preapproval_review_required||e.submission_review_required||e.guest_claim_required)return 'Photo on this device';
-    if(r2Submitted(e))return 'Photo uploaded to test storage';
-    if(e.r2_photo?.source_id===e.photoId)return ({uploading:'Uploading photo to test storage',failed:'Photo upload needs retry',review:'Photo needs review',pending:'Photo waiting to upload',removed:'Submitted photo removed; device copy retained'})[e.r2_photo.status]||'Photo on this device';
+    if(r2Submitted(e))return 'Photo saved';
+    if(e.r2_photo?.source_id===e.photoId)return ({uploading:'Saving photo',failed:'Photo upload needs retry',review:'Photo needs review',pending:'Photo waiting to upload',removed:'Photo removed'})[e.r2_photo.status]||'Photo on this device';
     return ({photo_pending:'Photo waiting to upload',photo_uploading:'Uploading photo',photo_failed:'Photo waiting to upload · Retry needed',photo_needs_review:'Photo unavailable · Review required'})[photo.normalize(e).photo_sync_status]||'Photo on this device';
   }
   function createController({store,context,key,online,changed}){
